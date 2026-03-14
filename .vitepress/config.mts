@@ -35,7 +35,7 @@ export default defineConfig({
       { text: '阅读地图', link: '/reading-map' },
       { text: '版本说明', link: '/version-notes' },
       { text: '术语表', link: '/glossary' },
-      { text: 'GitHub', link: 'https://github.com/anomalyco/opencode' }
+      { text: 'GitHub', link: 'https://github.com/qqzhangyanhua/learn-opencode-agent' }
     ],
 
     sidebar: [
@@ -60,11 +60,11 @@ export default defineConfig({
     ],
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/anomalyco/opencode' }
+      { icon: 'github', link: 'https://github.com/qqzhangyanhua/learn-opencode-agent' }
     ],
 
     editLink: {
-      pattern: 'https://github.com/anomalyco/opencode/edit/dev/docs/book/:path',
+      pattern: 'https://github.com/qqzhangyanhua/learn-opencode-agent/edit/main/docs/book/:path',
       text: '在 GitHub 上编辑此页'
     },
 
