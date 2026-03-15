@@ -3,12 +3,47 @@ title: 第五篇：多模型支持
 description: 第五篇：多模型支持的详细内容
 ---
 
+<script setup>
+import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshotCard.vue'
+</script>
 
 > **对应路径**：`packages/opencode/src/provider/`
 > **前置阅读**：第四篇 会话管理
 > **学习目标**：理解 OpenCode 为什么必须把模型提供商做成独立抽象层，以及消息格式、能力差异、成本和认证是怎样被统一接入的
 
 ---
+
+<SourceSnapshotCard
+  title="第五篇源码快照"
+  description="这一篇先别把多模型支持看成多接几个 API，而要先抓住 provider 层怎样把模型能力、消息格式、认证和厂商差异统一收口。"
+  repo="anomalyco/opencode"
+  repo-url="https://github.com/anomalyco/opencode/tree/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
+  branch="dev"
+  commit="f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
+  verified-at="2026-03-15"
+  :entries="[
+    {
+      label: 'Provider 抽象',
+      path: 'packages/opencode/src/provider/provider.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/provider/provider.ts'
+    },
+    {
+      label: '模型能力表',
+      path: 'packages/opencode/src/provider/models.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/provider/models.ts'
+    },
+    {
+      label: '协议转换层',
+      path: 'packages/opencode/src/provider/transform.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/provider/transform.ts'
+    },
+    {
+      label: '认证入口',
+      path: 'packages/opencode/src/provider/auth.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/provider/auth.ts'
+    }
+  ]"
+/>
 
 ## 核心概念速览
 
@@ -898,10 +933,23 @@ async function createSDK(input: {
 2. 再看 `packages/opencode/src/provider/transform.ts`，理解不同模型参数是如何被统一转换的。
 3. 最后选两个具体 provider 目录，比如 OpenAI 和 Anthropic，比较它们 SDK 适配层的差异。
 
-### 动手练习
+### 任务
 
-1. 选两个你熟悉的模型提供商，列出它们在参数、认证和返回格式上的三个差异。
-2. 顺着一次模型解析链路，从用户选择模型开始，追到最终发送给 provider SDK 的请求位置。
+判断 OpenCode 的 Provider 层为什么不是“多接几家模型 SDK”，而是一层统一模型能力、参数转换和认证边界的协议适配层。
+
+### 操作
+
+1. 打开 `packages/opencode/src/provider/provider.ts`，整理 Provider 抽象层对外暴露的核心职责。
+2. 再读 `packages/opencode/src/provider/transform.ts` 和 `models.ts`，记录模型能力表与参数转换各自解决什么问题。
+3. 最后选两个具体 provider（例如 OpenAI 和 Anthropic），比较它们在认证、参数和返回结构上的差异，以及这些差异是怎样被统一收口的。
+
+### 验收
+
+完成后你应该能说明：
+
+- 为什么 Provider 层的关键不是 SDK 调用，而是统一能力边界。
+- 为什么模型能力表、参数转换和认证入口必须一起设计。
+- 为什么用户选择模型之后，真正稳定的不是厂商 API，而是仓库内部这层抽象协议。
 
 ### 下一篇预告
 

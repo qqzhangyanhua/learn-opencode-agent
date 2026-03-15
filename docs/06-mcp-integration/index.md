@@ -3,12 +3,47 @@ title: 第六篇：MCP 协议集成
 description: 第六篇：MCP 协议集成的详细内容
 ---
 
+<script setup>
+import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshotCard.vue'
+</script>
 
 > **对应路径**：`packages/opencode/src/mcp/`
 > **前置阅读**：第五篇 多模型支持
 > **学习目标**：理解 OpenCode 为什么把外部工具和资源接入交给 MCP，而不是继续往核心仓库里硬编码更多第三方集成
 
 ---
+
+<SourceSnapshotCard
+  title="第六篇源码快照"
+  description="这一篇先抓外部能力进入系统的边界：MCP 连接怎样建立、工具与资源怎样发现、以及认证怎样被拉回 OpenCode 自己的控制面。"
+  repo="anomalyco/opencode"
+  repo-url="https://github.com/anomalyco/opencode/tree/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
+  branch="dev"
+  commit="f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
+  verified-at="2026-03-15"
+  :entries="[
+    {
+      label: 'MCP 连接入口',
+      path: 'packages/opencode/src/mcp/index.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/mcp/index.ts'
+    },
+    {
+      label: 'MCP 认证',
+      path: 'packages/opencode/src/mcp/auth.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/mcp/auth.ts'
+    },
+    {
+      label: 'OAuth 协调',
+      path: 'packages/opencode/src/mcp/oauth-provider.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/mcp/oauth-provider.ts'
+    },
+    {
+      label: 'MCP HTTP 路由',
+      path: 'packages/opencode/src/server/routes/mcp.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/server/routes/mcp.ts'
+    }
+  ]"
+/>
 
 ## 核心概念速览
 
@@ -1035,10 +1070,23 @@ for (const { name, transport } of transports) {
 2. 再看 `packages/opencode/src/mcp/auth.ts`、`oauth-provider.ts`、`oauth-callback.ts`，串起认证链路。
 3. 最后读 `packages/opencode/src/cli/cmd/mcp.ts` 和 `server/routes/mcp.ts`，看 MCP 是怎样同时接到 CLI 和 HTTP 层的。
 
-### 动手练习
+### 任务
 
-1. 用自己的话写出“OpenCode 集成一个 MCP 服务器”最少需要经过哪三个阶段。
-2. 找出一条 OAuth 认证链路的起点和终点，分别写出它在哪个文件里开始、在哪个文件里落盘或生效。
+判断 OpenCode 的 MCP 集成为什么首先是在管理“外部能力接入边界”，而不是简单列出一批第三方工具。
+
+### 操作
+
+1. 打开 `packages/opencode/src/mcp/index.ts`，梳理 OpenCode 怎样维护 MCP 客户端、连接状态和可用能力。
+2. 再读 `auth.ts`、`oauth-provider.ts`、`oauth-callback.ts`，画出一条 OAuth 认证链路的起点、关键中转点和最终落盘或生效的位置。
+3. 最后读 `packages/opencode/src/cli/cmd/mcp.ts` 和 `packages/opencode/src/server/routes/mcp.ts`，确认 MCP 为什么会同时接到 CLI 和 HTTP 层。
+
+### 验收
+
+完成后你应该能说明：
+
+- 为什么 MCP 集成的核心不是工具数量，而是连接、认证和协议边界。
+- 为什么 StreamableHTTP、SSE、stdio 这几种传输方式不能被粗暴看成一回事。
+- 为什么同一套 MCP 状态既要能被 CLI 管理，也要能被服务端路由消费。
 
 ### 下一篇预告
 

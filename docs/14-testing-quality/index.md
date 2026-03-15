@@ -3,12 +3,47 @@ title: 第十四篇：测试与质量保证
 description: 第十四篇：测试与质量保证的详细内容
 ---
 
+<script setup>
+import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshotCard.vue'
+</script>
 
 > **对应路径**：`packages/opencode/test/`、`packages/app/src/`、`packages/app/e2e/`
 > **前置阅读**：第三篇 工具系统、第八篇 HTTP API 服务器、第十篇 多端 UI 开发
 > **学习目标**：理解 OpenCode 的质量保障不是“写几条单元测试”，而是把核心运行时、前端状态层和真实用户流程拆成不同测试面，再用类型检查和脚本约束收口
 
 ---
+
+<SourceSnapshotCard
+  title="第十四篇源码快照"
+  description="这一篇先抓测试面是怎么按系统边界拆开的：核心运行时、前端状态层和真实用户流程分别由哪套夹具和入口来兜底。"
+  repo="anomalyco/opencode"
+  repo-url="https://github.com/anomalyco/opencode/tree/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
+  branch="dev"
+  commit="f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
+  verified-at="2026-03-15"
+  :entries="[
+    {
+      label: '核心测试夹具',
+      path: 'packages/opencode/test/fixture/fixture.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/test/fixture/fixture.ts'
+    },
+    {
+      label: '核心测试入口',
+      path: 'packages/opencode/test/bun.test.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/test/bun.test.ts'
+    },
+    {
+      label: '前端单测环境',
+      path: 'packages/app/happydom.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/app/happydom.ts'
+    },
+    {
+      label: 'E2E 夹具',
+      path: 'packages/app/e2e/fixtures.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/app/e2e/fixtures.ts'
+    }
+  ]"
+/>
 
 ## 核心概念速览
 
@@ -404,10 +439,23 @@ packages/opencode/test 验证核心运行时
 2. 再看 `packages/app/happydom.ts` 和几个 `src/**/*.test.ts`，理解前端单测运行环境。
 3. 最后读 `packages/app/e2e/fixtures.ts` 与 `playwright.config.ts`，看真实用户流程测试怎样起前端、连 backend、seed 数据。
 
-### 动手练习
+### 任务
 
-1. 任选一个功能缺陷，先判断它更适合写在 `packages/opencode/test`、`packages/app/src` 还是 `packages/app/e2e`，并说明原因。
-2. 从现有测试里找一条你觉得最能代表 Agent 风险点的回归用例，写出它保护了什么行为契约。
+判断 OpenCode 的质量保障为什么必须按“核心运行时 / 前端共享层 / 真实用户流程”分层，而不是把验证压力全部扔给 E2E。
+
+### 操作
+
+1. 打开 `packages/opencode/test/fixture/fixture.ts`，整理后端测试夹具怎样创建真实临时工作区与运行环境。
+2. 再读 `packages/app/happydom.ts` 和 `packages/app/e2e/fixtures.ts`，对比前端单测环境与 E2E 场景搭建分别负责什么边界。
+3. 最后任选一个功能缺陷，判断它更应该写进 `packages/opencode/test`、`packages/app/src` 还是 `packages/app/e2e`，并给出原因。
+
+### 验收
+
+完成后你应该能说明：
+
+- 为什么 Agent 项目的测试更适合按系统边界分层，而不是全压给浏览器回归。
+- 为什么时序、恢复和资源隔离这类问题必须进入回归范围。
+- 为什么统一夹具和脚本约束，对长链路系统和单条测试用例同样重要。
 
 ### 下一篇预告
 

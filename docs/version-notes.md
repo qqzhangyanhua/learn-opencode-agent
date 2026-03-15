@@ -3,7 +3,9 @@ title: 版本说明
 description: 本书的源码基线、写作范围与阅读边界说明
 ---
 
-# 版本说明
+<script setup>
+import SourceSnapshotCard from '../.vitepress/theme/components/SourceSnapshotCard.vue'
+</script>
 
 这一页说明三件事：
 
@@ -13,13 +15,61 @@ description: 本书的源码基线、写作范围与阅读边界说明
 
 ## 源码基线
 
-本书基于当前仓库中的 OpenCode 源码整理，阅读入口统一指向官方仓库：
+本书当前拆成两类仓库语义，阅读时不要混淆：
 
-- GitHub 仓库：`anomalyco/opencode`
-- 文中源码链接分支：`dev`
-- 电子书站点位置：`docs/book/`
+- OpenCode 源码仓库：`anomalyco/opencode`
+- 文中源码链接默认分支：`dev`
+- 电子书站点目录：`docs/book/`
+- 本书维护仓库：`qqzhangyanhua/learn-opencode-agent`
 
-这意味着本书首先是一份“基于当前实现的源码带读”，而不是脱离仓库现实的 Agent 理论教材。
+这意味着本书首先是一份“基于当前实现的源码带读”，而不是脱离仓库现实的 Agent 理论教材；源码锚点和书稿维护入口不是同一个仓库。
+
+<SourceSnapshotCard
+  title="全书统一源码快照语义"
+  description="后续各章顶部都会复用同一张快照卡。它不是装饰，而是告诉读者：这一章到底基于哪一份源码、该先抓哪些入口文件。"
+  repo="anomalyco/opencode"
+  repo-url="https://github.com/anomalyco/opencode/tree/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
+  branch="dev"
+  commit="f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
+  verified-at="2026-03-15"
+  :entries="[
+    {
+      label: '全书基线仓库',
+      path: 'https://github.com/anomalyco/opencode/tree/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc',
+      href: 'https://github.com/anomalyco/opencode/tree/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc'
+    },
+    {
+      label: '电子书站点目录',
+      path: 'docs/book/'
+    },
+    {
+      label: '章节源码链接默认分支',
+      path: 'dev'
+    },
+    {
+      label: '本书维护仓库',
+      path: 'https://github.com/qqzhangyanhua/learn-opencode-agent',
+      href: 'https://github.com/qqzhangyanhua/learn-opencode-agent'
+    }
+  ]"
+/>
+
+## 为什么现在要加“源码快照卡”
+
+这本书的定位不是泛泛讲概念，而是带着读者沿真实仓库走主链路。
+
+所以每一篇都应该先说清楚四件事：
+
+- 基于哪一个仓库
+- 基于哪一个分支
+- 基于哪一个 commit 基线
+- 本章最值得先抓的入口文件是什么
+
+这样做的目的很简单：
+
+- 降低“文档看起来对，但源码已经变了”的错觉
+- 让初学者不用先通读整章，先抓住最稳定的源码锚点
+- 让后续章节都挂回同一套版本语义，而不是各写各的
 
 ## 写作范围
 

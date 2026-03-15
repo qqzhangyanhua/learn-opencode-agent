@@ -3,12 +3,47 @@ title: 第四篇：会话管理
 description: 第四篇：会话管理的详细内容
 ---
 
+<script setup>
+import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshotCard.vue'
+</script>
 
 > **对应路径**：`packages/opencode/src/session/`
 > **前置阅读**：第三篇 工具系统
 > **学习目标**：理解会话为什么是 OpenCode 的产品骨架，以及消息、流式输出、压缩、回滚和持久化为什么都必须围绕 session 建模
 
 ---
+
+<SourceSnapshotCard
+  title="第四篇源码快照"
+  description="这一篇先抓会话这根主骨架：一条输入怎样变成持续生长的消息流、怎样被落库、以及怎样在压缩和回滚后继续跑下去。"
+  repo="anomalyco/opencode"
+  repo-url="https://github.com/anomalyco/opencode/tree/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
+  branch="dev"
+  commit="f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
+  verified-at="2026-03-15"
+  :entries="[
+    {
+      label: '会话入口',
+      path: 'packages/opencode/src/session/index.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/session/index.ts'
+    },
+    {
+      label: '处理主循环',
+      path: 'packages/opencode/src/session/processor.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/session/processor.ts'
+    },
+    {
+      label: '上下文压缩',
+      path: 'packages/opencode/src/session/compaction.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/session/compaction.ts'
+    },
+    {
+      label: '会话落库模型',
+      path: 'packages/opencode/src/session/session.sql.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/session/session.sql.ts'
+    }
+  ]"
+/>
 
 ## 核心概念速览
 
@@ -866,10 +901,23 @@ JSON（备份/分享）
 2. 再读 `packages/opencode/src/session/processor.ts` 和 `prompt.ts`，理解一条用户消息怎样变成流式 assistant 输出。
 3. 最后读 `compaction.ts` 和 `revert.ts`，理解长会话和错误路径为什么也是会话系统的一部分。
 
-### 动手练习
+### 任务
 
-1. 画出 `session -> message -> part` 三层关系，并各写一句它们保存什么信息。
-2. 找一个 `SessionPrompt.prompt()` 的调用点，顺着追到最终消息落库的位置，记录中间经过了哪些模块。
+判断 OpenCode 的会话系统为什么首先是一条持续生长的消息协议，而不只是把聊天记录写进数据库。
+
+### 操作
+
+1. 打开 `packages/opencode/src/session/index.ts`，画出 `session -> message -> part` 三层关系，并各写一句它们分别保存什么。
+2. 再读 `packages/opencode/src/session/processor.ts` 和 `prompt.ts`，顺着一条用户输入追到最终 assistant 输出与消息落库的位置。
+3. 最后读 `compaction.ts` 和 `revert.ts`，确认长会话压缩和状态回退为什么也属于会话主链路的一部分。
+
+### 验收
+
+完成后你应该能说明：
+
+- 为什么会话层真正管理的是消息生命周期，而不是单纯的历史文本。
+- 为什么 `processor.ts`、`prompt.ts` 和落库结构必须一起理解。
+- 为什么压缩、回退和恢复路径不是补丁，而是长链路系统的基础能力。
 
 ### 下一篇预告
 

@@ -3,12 +3,47 @@ title: 第七篇：TUI 终端界面
 description: 第七篇：TUI 终端界面的详细内容
 ---
 
+<script setup>
+import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshotCard.vue'
+</script>
 
 > **对应路径**：`packages/opencode/src/cli/cmd/tui/`
 > **前置阅读**：第六篇 MCP 协议集成
 > **学习目标**：理解 OpenCode 为什么把终端前端做成一套高密度工作台，而不是传统一问一答 CLI，以及这套 TUI 怎样复用前面讲过的 session、tool 和 provider 能力
 
 ---
+
+<SourceSnapshotCard
+  title="第七篇源码快照"
+  description="这一篇先别陷进单个组件，而要先抓 TUI 这台终端工作台怎样靠 Provider、路由、快捷键和主题把高密度交互撑起来。"
+  repo="anomalyco/opencode"
+  repo-url="https://github.com/anomalyco/opencode/tree/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
+  branch="dev"
+  commit="f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
+  verified-at="2026-03-15"
+  :entries="[
+    {
+      label: 'TUI 根组件',
+      path: 'packages/opencode/src/cli/cmd/tui/app.tsx',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/cli/cmd/tui/app.tsx'
+    },
+    {
+      label: 'TUI 路由',
+      path: 'packages/opencode/src/cli/cmd/tui/context/route.tsx',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/cli/cmd/tui/context/route.tsx'
+    },
+    {
+      label: '快捷键上下文',
+      path: 'packages/opencode/src/cli/cmd/tui/context/keybind.tsx',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/cli/cmd/tui/context/keybind.tsx'
+    },
+    {
+      label: '主题上下文',
+      path: 'packages/opencode/src/cli/cmd/tui/context/theme.tsx',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/cli/cmd/tui/context/theme.tsx'
+    }
+  ]"
+/>
 
 ## 核心概念速览
 
@@ -989,10 +1024,23 @@ function resolveColor(c: ColorValue): RGBA {
 2. 再读 `context/` 目录里和你最关心的两项能力，比如 `theme`、`command`、`sync`、`keybind`。
 3. 最后进入 `routes/session/`，理解会话页面、侧边栏、弹窗和快捷键怎样一起工作。
 
-### 动手练习
+### 任务
 
-1. 找一个你最常用的 TUI 交互，比如切换 Agent、切换主题或打开命令面板，顺着找到它的命令注册位置。
-2. 观察 `routes/session/` 里的一个页面组件，写下它依赖了哪些 context。
+判断 OpenCode 的 TUI 为什么已经不是“终端里的一层 UI 皮肤”，而是一台围绕会话、命令和状态同步组织起来的工作台。
+
+### 操作
+
+1. 打开 `packages/opencode/src/cli/cmd/tui/app.tsx`，写出 TUI 根组件装配了哪些 provider 和全局上下文。
+2. 再读 `context/` 目录里你最关心的两项能力，例如 `theme`、`command`、`sync`、`keybind`，记录它们各自负责什么状态边界。
+3. 最后进入 `routes/session/`，任选一个真实交互，例如切换 Agent、切换主题或打开命令面板，顺着追到它的命令注册位置和页面消费位置。
+
+### 验收
+
+完成后你应该能说明：
+
+- 为什么 TUI 的复杂度来自状态协作，而不是单个组件多不多。
+- 为什么 provider、route 和快捷键上下文必须一起看，才能看懂终端工作台。
+- 为什么这一层已经接近产品前端，而不是命令行附属输出。
 
 ### 下一篇预告
 

@@ -3,45 +3,69 @@ title: 阅读地图
 description: 这本电子书的推荐阅读顺序与章节关系图
 ---
 
-# 阅读地图
+<script setup>
+import RuntimeLifecycleDiagram from '../.vitepress/theme/components/RuntimeLifecycleDiagram.vue'
+</script>
 
-如果你是第一次系统阅读一个真实 AI Coding Agent 仓库，最常见的问题不是“内容不够”，而是“信息太多，不知道先读哪一篇”。
+如果你是第一次系统阅读一个真实 AI Coding Agent 仓库，最常见的问题不是”内容不够”，而是”信息太多，不知道先读哪一篇”。
 
 这一页只做一件事：给你一张可以直接执行的阅读路线图。
+
+## 核心概念快速定位
+
+如果你想快速找到特定主题，直接跳转到对应章节：
+
+| 核心概念 | 主要章节 | 补充章节 | 说明 |
+|---------|---------|---------|------|
+| 🔄 **Agent Loop（执行循环）** | [第2篇 §2.5](/02-agent-core/index#agent-生命周期与执行循环) | [第4篇](/04-session-management/index) | Agent 的核心执行流程：输入→思考→工具调用→观察→输出 |
+| 🔧 **Tool / Function Calling** | [第3篇](/03-tool-system/index) | [第11篇](/11-code-intelligence/index) | 工具系统的注册、执行、权限控制 |
+| 📋 **Planning 与任务分解** | [第3篇 §3.5](/03-tool-system/index#任务编排与自定义工具开发) | [第15篇 §15.3](/15-advanced-topics/index#多-agent-协作的正式协议) | task 工具、子任务创建、多 Agent 协作 |
+| 🧠 **Memory 机制** | [第4篇 §4.3](/04-session-management/index#上下文压缩策略) | [第9篇](/09-data-persistence/index) | 短期记忆（会话）、工作记忆（压缩）、长期记忆（持久化） |
+| 💬 **Prompt 与上下文管理** | [第2篇 §2.4](/02-agent-core/index#prompt-工程与系统提示词) | [第4篇](/04-session-management/index) | 系统提示词、上下文窗口、Token 预算 |
+| 👥 **多 Agent 协作** | [第15篇 §15.3](/15-advanced-topics/index#多-agent-协作的正式协议) | [第2篇 §2.3](/02-agent-core/index#agent-模式切换) | primary/subagent 模式、权限继承、任务分发 |
+
+💡 **建议**：如果你是初学者，不要直接跳到某个概念，先按下面的”推荐起点”顺序建立整体认知。
 
 ## 推荐起点
 
 如果你是 Agent 开发初学者，默认按下面顺序读：
 
-1. 第一篇：建立 OpenCode 的系统总图
-2. 第二篇：理解 Agent 是如何被定义和约束的
-3. 第三篇：理解工具怎样进入 Agent 能力边界
-4. 第四篇：理解会话怎样把模型、工具和状态串起来
+1. 第一篇：先建立“系统怎样跑起来”的最小闭环
+2. 第二篇：再理解 Agent 是如何被定义和约束的
+3. 第三篇：再看工具怎样进入 Agent 能力边界
+4. 第四篇：最后把会话怎样把模型、工具和状态串起来读顺
 
 读完这四篇后，再决定往哪条路线深入，效率会高很多。
 
-## 总体结构图
+## 全书统一主链路
+
+<RuntimeLifecycleDiagram
+  :highlight-keys="['session', 'tools', 'provider']"
+  description="阅读地图不是另一套解释，它只是把同一条运行时主链路拆成更适合初学者执行的章节顺序。"
+/>
+
+## 四阶段课程分级
 
 ```text
-第一层：先建立全局认知
+阶段 1：先建立全局认知
   01 Agent 基础架构
   02 Agent 核心系统
   03 工具系统
   04 会话管理
 
-第二层：再进入运行时主链路
+阶段 2：再进入运行时主链路
   05 多模型支持
   06 MCP 协议集成
   08 HTTP API 服务器
   09 数据持久化
 
-第三层：再理解交互与扩展
+阶段 3：再理解交互与扩展
   07 TUI 终端界面
   10 多端 UI 开发
   11 代码智能
   12 插件与扩展
 
-第四层：最后看工程化闭环
+阶段 4：最后看工程化闭环
   13 部署与基础设施
   14 测试与质量保证
   15 高级主题与最佳实践

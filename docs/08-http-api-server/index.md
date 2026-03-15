@@ -3,12 +3,46 @@ title: 第八篇：HTTP API 服务器
 description: 第八篇：HTTP API 服务器的详细内容
 ---
 
+<script setup>
+import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshotCard.vue'
+</script>
 
 > **对应路径**：`packages/opencode/src/server/`、`packages/opencode/src/control-plane/`
 > **前置阅读**：第四篇 会话管理、第七篇 TUI 终端界面
 > **学习目标**：理解 OpenCode 的 HTTP 层不是一组零散接口，而是把项目上下文、会话操作、实时事件、PTY 终端和远程工作区转发统一起来的服务边界
 
----
+
+<SourceSnapshotCard
+  title="第八篇源码快照"
+  description="这一篇先抓 HTTP 层的真实职责：请求怎样进入上下文、怎样分流到不同实时通道、以及怎样在本地与 workspace 之间转发。"
+  repo="anomalyco/opencode"
+  repo-url="https://github.com/anomalyco/opencode/tree/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
+  branch="dev"
+  commit="f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
+  verified-at="2026-03-15"
+  :entries="[
+    {
+      label: '服务器入口',
+      path: 'packages/opencode/src/server/server.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/server/server.ts'
+    },
+    {
+      label: '会话路由',
+      path: 'packages/opencode/src/server/routes/session.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/server/routes/session.ts'
+    },
+    {
+      label: '全局事件路由',
+      path: 'packages/opencode/src/server/routes/global.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/server/routes/global.ts'
+    },
+    {
+      label: '工作区转发',
+      path: 'packages/opencode/src/control-plane/workspace-router-middleware.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/control-plane/workspace-router-middleware.ts'
+    }
+  ]"
+/>
 
 ## 核心概念速览
 
@@ -599,12 +633,24 @@ OpenCode 现在的路由定义基本都遵循这个模式：
 3. 然后读 `routes/global.ts`、`routes/session.ts`、`routes/pty.ts`，分别理解 SSE、HTTP 流和 WebSocket 三种实时通道。
 4. 最后读 `workspace-router-middleware.ts`，确认远程 workspace 转发是在什么阶段介入的。
 
-### 动手练习
+### 任务
 
-1. 写出 `/global/event`、`/session/:sessionID/message`、`/:ptyID/connect` 三条链路各自用的协议，以及为什么不能互相替代。
-2. 选一个业务路由，比如 `session` 或 `project`，从 `server.ts` 追到对应 `routes/*.ts` 文件，记录中间经过了哪些中间件。
-3. 分析 `auth/service.ts` 中的 Effect 错误处理模式，理解为什么使用 Effect 而不是传统 try/catch。
-4. 对比本地开发和生产部署的安全配置差异，列出至少 5 个安全最佳实践。
+判断 OpenCode 的 HTTP 层为什么不是一组零散 REST 接口，而是一条带上下文、通道分流和 workspace 转发的服务边界。
+
+### 操作
+
+1. 打开 `packages/opencode/src/server/server.ts`，按中间件顺序写出请求进入后的主链路。
+2. 再读 `routes/global.ts`、`routes/session.ts`、`routes/pty.ts`，分别记下 SSE、HTTP 流、WebSocket 对应的使用场景。
+3. 最后读 `workspace-router-middleware.ts`，确认请求在什么条件下会继续本地处理，什么条件下会被转发到远端 workspace。
+
+### 验收
+
+完成后你应该能说明：
+
+- 为什么请求上下文比“再加几个路由”更关键。
+- 为什么 `/global/event`、`/session/:sessionID/message`、`/:ptyID/connect` 不能统一成同一种协议。
+- 为什么这层已经带有 control-plane 性质，而不是单机 CLI 的附属接口。
+
 
 ### 下一篇预告
 

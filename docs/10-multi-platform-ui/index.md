@@ -3,12 +3,47 @@ title: 第十篇：多端 UI 开发
 description: 第十篇：多端 UI 开发的详细内容
 ---
 
+<script setup>
+import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshotCard.vue'
+</script>
 
 > **对应路径**：`packages/opencode/src/cli/cmd/tui/`、`packages/ui/`、`packages/app/`、`packages/desktop/`、`sdks/vscode/`
 > **前置阅读**：第七篇 TUI 终端界面、第八篇 HTTP API 服务器、第九篇 数据持久化
 > **学习目标**：理解 OpenCode 的多端架构包含 TUI、Web、Desktop、VSCode 四个主要终端，它们通过共享 UI 组件库和统一的 Platform 抽象实现代码复用
 
 ---
+
+<SourceSnapshotCard
+  title="第十篇源码快照"
+  description="这一篇先抓多端共享的真实骨架：同一套产品能力怎样分别落到 TUI、Web、Desktop 和 VSCode，而不是为每个端重写一遍。"
+  repo="anomalyco/opencode"
+  repo-url="https://github.com/anomalyco/opencode/tree/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
+  branch="dev"
+  commit="f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
+  verified-at="2026-03-15"
+  :entries="[
+    {
+      label: 'TUI 入口',
+      path: 'packages/opencode/src/cli/cmd/tui/app.tsx',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/cli/cmd/tui/app.tsx'
+    },
+    {
+      label: '共享应用壳',
+      path: 'packages/app/src/app.tsx',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/app/src/app.tsx'
+    },
+    {
+      label: 'Desktop 入口',
+      path: 'packages/desktop/src/index.tsx',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/desktop/src/index.tsx'
+    },
+    {
+      label: 'VSCode 扩展入口',
+      path: 'sdks/vscode/src/extension.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/sdks/vscode/src/extension.ts'
+    }
+  ]"
+/>
 
 ## 核心概念速览
 
@@ -660,12 +695,23 @@ await fetch(`http://localhost:${port}/tui/append-prompt`, {
 4. **看编辑器集成**：`sdks/vscode/src/extension.ts`，理解轻量化的编辑器集成方案
 5. **最后看组件库**：`packages/ui/` 看组件、主题和 `pierre` 目录，建立共享设计系统视角
 
-### 动手练习
+### 任务
 
-1. 对比 TUI、Web、Desktop、VSCode 四个端，写下它们各自的优势和适用场景
-2. 任选一个 `Platform` 能力，比如 `openLink`、`notify`、`getDefaultServer`，比较它在 Web 和 Desktop 的实现差异
-3. 找一个前端功能，例如文件树、终端或状态弹层，写下它更像属于 `ui`、`app` 还是 `desktop`，以及为什么
-4. 分析 VSCode 扩展为什么不在扩展里重写 Agent，而是驱动本地 opencode 进程
+判断 OpenCode 的多端 UI 为什么更适合被理解成“共享应用核心 + 平台外壳”，而不是 Web、Desktop、VSCode 各写一套前端。
+
+### 操作
+
+1. 先对比 `packages/app/src/app.tsx`、`packages/app/src/entry.tsx` 和 `packages/desktop/src/index.tsx`，写下共享应用骨架与平台启动入口分别放在哪一层。
+2. 再选一个 `Platform` 能力，例如 `openLink`、`notify` 或 `getDefaultServer`，比较它在 Web 和 Desktop 的实现差异。
+3. 最后读 `sdks/vscode/src/extension.ts`，说明 VSCode 扩展为什么选择驱动本地 opencode 进程，而不是在扩展内重做 Agent 运行时。
+
+### 验收
+
+完成后你应该能说明：
+
+- 为什么 `packages/app` 更像共享应用核心，而不是单纯的 Web 项目。
+- `Platform` 抽象到底隔离了哪些真实平台差异。
+- 为什么多端共享的关键不是 UI 长得像，而是后端语义和平台边界被统一控制。
 
 ### 下一篇预告
 

@@ -3,12 +3,47 @@ title: 第三篇：工具系统
 description: 第三篇：工具系统的详细内容
 ---
 
+<script setup>
+import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshotCard.vue'
+</script>
 
 > **对应路径**：`packages/opencode/src/tool/`
 > **前置阅读**：第二篇 Agent 核心系统
 > **学习目标**：理解 OpenCode 里的工具不是几个零散脚本，而是一套统一的能力注册、权限控制、结果裁剪和模型适配机制
 
 ---
+
+<SourceSnapshotCard
+  title="第三篇源码快照"
+  description="这一篇先别急着背工具清单，而要先抓住工具怎样被注册、筛选、执行和约束，真正看清 Agent 和外部世界的能力边界。"
+  repo="anomalyco/opencode"
+  repo-url="https://github.com/anomalyco/opencode/tree/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
+  branch="dev"
+  commit="f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
+  verified-at="2026-03-15"
+  :entries="[
+    {
+      label: '工具注册表',
+      path: 'packages/opencode/src/tool/registry.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/tool/registry.ts'
+    },
+    {
+      label: '统一工具壳',
+      path: 'packages/opencode/src/tool/tool.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/tool/tool.ts'
+    },
+    {
+      label: 'Bash 工具',
+      path: 'packages/opencode/src/tool/bash.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/tool/bash.ts'
+    },
+    {
+      label: '任务编排工具',
+      path: 'packages/opencode/src/tool/task.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/tool/task.ts'
+    }
+  ]"
+/>
 
 ## 核心概念速览
 
@@ -575,7 +610,374 @@ if (t.id === "codesearch" || t.id === "websearch") {
 
 ---
 
-## 3.8 自定义工具开发指南
+## 3.8 Planning 与任务分解实战
+
+### 为什么需要任务分解
+
+当用户提出复杂需求时，比如”重构整个认证系统”，Agent 面临的挑战是：
+
+1. **任务太大**：无法一次性完成
+2. **需要规划**：必须先分析再执行
+3. **需要并行**：多个子任务可以同时进行
+4. **需要协作**：不同 Agent 擅长不同领域
+
+这就是 Planning 与任务分解的价值所在。
+
+### OpenCode 的任务分解机制
+
+#### 1. task 工具：创建子任务
+
+```typescript
+// Primary Agent 调用 task 工具
+{
+  “tool”: “task”,
+  “parameters”: {
+    “description”: “分析当前认证系统的实现”,
+    “agent”: “explore”,  // 使用 explore Agent
+    “prompt”: “找到所有与认证相关的文件和函数”
+  }
+}
+```
+
+**执行流程**：
+
+```text
+Primary Agent
+  ↓
+调用 task 工具
+  ↓
+创建子会话（Session.create）
+  ↓
+使用指定的 Subagent（explore）
+  ↓
+执行子任务
+  ↓
+返回结果给 Primary Agent
+  ↓
+Primary Agent 继续规划下一步
+```
+
+#### 2. 并行任务执行
+
+```typescript
+// Primary Agent 可以同时创建多个任务
+const tasks = [
+  {
+    tool: “task”,
+    agent: “explore”,
+    prompt: “找到所有认证相关文件”
+  },
+  {
+    tool: “task”,
+    agent: “explore”,
+    prompt: “找到所有测试文件”
+  },
+  {
+    tool: “task”,
+    agent: “general”,
+    prompt: “总结当前认证流程”
+  }
+]
+
+// 并行执行
+const results = await Promise.all(
+  tasks.map(t => executeTask(t))
+)
+```
+
+#### 3. 任务结果汇总
+
+```typescript
+// Primary Agent 收到所有子任务结果后
+{
+  “task_1”: “找到 5 个认证相关文件：auth.ts, login.ts...”,
+  “task_2”: “找到 3 个测试文件：auth.test.ts...”,
+  “task_3”: “当前使用 JWT 认证，流程是...”
+}
+
+// Primary Agent 基于结果制定计划
+“基于分析结果，我建议按以下步骤重构：
+1. 先重构 auth.ts 的核心逻辑
+2. 更新相关测试
+3. 迁移 login.ts 使用新接口
+...”
+```
+
+### Planning 模式：先规划再执行
+
+#### 进入 Planning 模式
+
+```typescript
+// Primary Agent 调用 plan_enter 工具
+{
+  “tool”: “plan_enter”,
+  “parameters”: {
+    “reason”: “任务复杂，需要先制定计划”
+  }
+}
+```
+
+**Planning 模式的特点**：
+
+1. **只读模式**：不能修改代码
+2. **可以编辑计划文件**：`.opencode/plans/*.md`
+3. **可以调用搜索工具**：分析代码结构
+4. **不能执行修改**：确保安全
+
+#### Planning 模式的工作流
+
+```text
+用户: “重构认证系统”
+  ↓
+Agent: “这是个复杂任务，让我先制定计划”
+  ↓
+进入 Planning 模式
+  ↓
+分析代码结构（使用 glob/grep/read）
+  ↓
+创建计划文件（.opencode/plans/auth-refactor.md）
+  ↓
+向用户展示计划
+  ↓
+用户确认
+  ↓
+退出 Planning 模式（plan_exit）
+  ↓
+按计划执行
+```
+
+#### 计划文件示例
+
+`.opencode/plans/auth-refactor.md`：
+
+```markdown
+# 认证系统重构计划
+
+## 当前状态分析
+
+- 使用 JWT 认证
+- 代码分散在 3 个文件中
+- 缺少统一的错误处理
+- 测试覆盖率 60%
+
+## 重构目标
+
+1. 统一认证接口
+2. 改进错误处理
+3. 提高测试覆盖率到 90%
+
+## 执行步骤
+
+### 步骤 1：重构核心逻辑
+- 文件：src/auth/core.ts
+- 预计时间：30 分钟
+- 风险：中等
+
+### 步骤 2：更新测试
+- 文件：src/auth/core.test.ts
+- 预计时间：20 分钟
+- 风险：低
+
+### 步骤 3：迁移调用方
+- 文件：src/auth/login.ts, src/auth/register.ts
+- 预计时间：40 分钟
+- 风险：高（需要仔细测试）
+
+## 回滚方案
+
+如果出现问题，可以：
+1. 恢复 git commit abc123
+2. 使用旧的认证接口
+```
+
+### 任务分解的最佳实践
+
+#### 1. 自顶向下分解
+
+```text
+大任务：重构认证系统
+  ↓
+子任务 1：分析现状
+  ├─ 找到所有相关文件
+  ├─ 分析依赖关系
+  └─ 识别潜在问题
+  ↓
+子任务 2：设计方案
+  ├─ 设计新接口
+  ├─ 规划迁移路径
+  └─ 评估风险
+  ↓
+子任务 3：执行重构
+  ├─ 重构核心逻辑
+  ├─ 更新测试
+  └─ 迁移调用方
+```
+
+#### 2. 明确任务边界
+
+**好的任务分解**：
+```
+✅ “找到所有使用 JWT 的文件”
+✅ “重构 auth.ts 的 login 函数”
+✅ “为 auth.ts 添加单元测试”
+```
+
+**不好的任务分解**：
+```
+❌ “改进代码”（太模糊）
+❌ “修复所有问题”（范围不明确）
+❌ “优化性能”（没有具体目标）
+```
+
+#### 3. 设置任务优先级
+
+```typescript
+const tasks = [
+  {
+    priority: “high”,
+    description: “修复安全漏洞”,
+    blocking: []
+  },
+  {
+    priority: “medium”,
+    description: “重构核心逻辑”,
+    blocking: [“task_1”]  // 依赖任务 1
+  },
+  {
+    priority: “low”,
+    description: “优化性能”,
+    blocking: [“task_2”]  // 依赖任务 2
+  }
+]
+```
+
+### 多 Agent 协作模式
+
+#### 模式 1：专家分工
+
+```typescript
+// Primary Agent 分配任务给不同的专家
+{
+  “explore”: “分析代码结构”,
+  “general”: “总结业务逻辑”,
+  “build”: “执行重构”
+}
+```
+
+#### 模式 2：流水线
+
+```text
+explore Agent
+  ↓ 找到相关文件
+general Agent
+  ↓ 分析业务逻辑
+build Agent
+  ↓ 执行修改
+```
+
+#### 模式 3：并行执行
+
+```text
+explore Agent (任务 1) ─┐
+explore Agent (任务 2) ─┼─→ 汇总结果 → build Agent
+general Agent (任务 3) ─┘
+```
+
+### 任务状态管理
+
+```typescript
+// 任务状态
+type TaskStatus =
+  | “pending”    // 等待执行
+  | “running”    // 执行中
+  | “completed”  // 已完成
+  | “failed”     // 失败
+  | “blocked”    // 被阻塞
+
+// 任务依赖
+interface Task {
+  id: string
+  status: TaskStatus
+  dependencies: string[]  // 依赖的任务 ID
+  agent: string
+  prompt: string
+}
+```
+
+### 实战案例：重构认证系统
+
+**完整流程**：
+
+```text
+1. 用户输入
+   “重构认证系统，使用更安全的方式”
+
+2. Primary Agent 分析
+   “这是个复杂任务，我需要：
+   - 先分析现状
+   - 制定计划
+   - 分步执行”
+
+3. 进入 Planning 模式
+   [调用 plan_enter]
+
+4. 并行分析
+   Task 1 (explore): “找到所有认证相关文件”
+   Task 2 (explore): “找到所有测试文件”
+   Task 3 (general): “总结当前认证流程”
+
+5. 制定计划
+   [创建 .opencode/plans/auth-refactor.md]
+
+6. 向用户展示计划
+   “我制定了以下计划：
+   1. 重构核心逻辑（30分钟）
+   2. 更新测试（20分钟）
+   3. 迁移调用方（40分钟）
+   是否继续？”
+
+7. 用户确认
+   “继续”
+
+8. 退出 Planning 模式
+   [调用 plan_exit]
+
+9. 执行步骤 1
+   [修改 src/auth/core.ts]
+
+10. 执行步骤 2
+    [更新测试文件]
+
+11. 执行步骤 3
+    [迁移调用方]
+
+12. 完成
+    “重构完成，所有测试通过”
+```
+
+### 调试任务分解
+
+**查看任务执行日志**：
+
+```bash
+# 查看所有子任务
+DEBUG=opencode:task:* bun dev
+```
+
+**日志示例**：
+
+```text
+[task] Creating task: analyze-auth
+[task] Agent: explore
+[task] Creating sub-session: sess_abc123
+[task] Executing...
+[task] Result: Found 5 files
+[task] Task completed: task_xyz789
+```
+
+---
+
+## 3.9 自定义工具开发指南
 
 ### 先选扩展方式
 
@@ -682,10 +1084,23 @@ export const hello = tool({
 2. 再看 `packages/opencode/src/tool/tool.ts`，理解一个工具如何被统一包装执行。
 3. 最后任选一个 I/O 工具和一个编排型工具，例如 `read.ts` + `task.ts`，比较它们的输入、权限和输出差异。
 
-### 动手练习
+### 任务
 
-1. 把当前工具按“文件操作 / 搜索定位 / 环境交互 / 编排”分成四类，各举两个例子。
-2. 顺着一条真实链路追一次：从 `registry.ts` 找到 `bash` 或 `read`，再看它是怎样进入 Agent 可见工具列表的。
+判断 OpenCode 的工具系统为什么必须先解决“统一注册与能力边界”，而不是先盯着某个具体工具写得多强。
+
+### 操作
+
+1. 打开 `packages/opencode/src/tool/registry.ts`，把当前工具按“文件操作 / 搜索定位 / 环境交互 / 编排”四类重新分组。
+2. 再读 `packages/opencode/src/tool/tool.ts`，确认一个工具在被真正执行前，会经过哪些统一包装步骤。
+3. 最后任选一条真实链路，从 `registry.ts` 追到 `bash.ts`、`read.ts` 或 `task.ts`，记录它是怎样进入 Agent 可见工具列表的。
+
+### 验收
+
+完成后你应该能说明：
+
+- 为什么工具系统的第一入口应该是注册表，而不是某个单独工具文件。
+- 为什么权限、输入输出结构和执行包装必须在同一层统一收口。
+- 为什么同一个需求有时更适合做成 Skill 或 Command，而不是继续加新工具。
 
 ### 下一篇预告
 

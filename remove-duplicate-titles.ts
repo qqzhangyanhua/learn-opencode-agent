@@ -1,7 +1,7 @@
-import { readFileSync, writeFileSync, readdirSync } from 'fs';
+import { readFileSync, writeFileSync } from 'fs';
 import { join } from 'path';
 
-const docsDir = 'src/content/docs';
+const docsDir = 'docs';
 
 const chapters = [
   '01-agent-basics',

@@ -1,10 +1,37 @@
 import { defineConfig } from 'vitepress'
 
+const siteTitle = '从零构建 AI Coding Agent'
+const siteDescription = 'OpenCode 源码剖析与实战'
+const bookRepository = 'https://github.com/qqzhangyanhua/learn-opencode-agent'
+const sourceRepository = 'https://github.com/anomalyco/opencode/tree/dev'
+
 export default defineConfig({
   srcDir: 'docs',
-  title: '从零构建 AI Coding Agent',
-  description: 'OpenCode 源码剖析与实战',
+  title: siteTitle,
+  description: siteDescription,
   lang: 'zh-CN',
+  lastUpdated: true,
+  transformPageData(pageData) {
+    const pageTitle = pageData.frontmatter.layout === 'home'
+      ? siteTitle
+      : pageData.title
+        ? `${pageData.title} | ${siteTitle}`
+        : siteTitle
+    const pageDescription = typeof pageData.description === 'string' && pageData.description
+      ? pageData.description
+      : siteDescription
+
+    pageData.frontmatter.head ??= []
+    pageData.frontmatter.head.push(
+      ['meta', { property: 'og:title', content: pageTitle }],
+      ['meta', { property: 'og:description', content: pageDescription }],
+      ['meta', { property: 'og:type', content: 'website' }],
+      ['meta', { property: 'og:locale', content: 'zh_CN' }],
+      ['meta', { name: 'twitter:card', content: 'summary' }],
+      ['meta', { name: 'twitter:title', content: pageTitle }],
+      ['meta', { name: 'twitter:description', content: pageDescription }]
+    )
+  },
 
   vite: {
     esbuild: {
@@ -35,7 +62,8 @@ export default defineConfig({
       { text: '阅读地图', link: '/reading-map' },
       { text: '版本说明', link: '/version-notes' },
       { text: '术语表', link: '/glossary' },
-      { text: 'GitHub', link: 'https://github.com/qqzhangyanhua/learn-opencode-agent' }
+      { text: '本书仓库', link: bookRepository },
+      { text: 'OpenCode 源码', link: sourceRepository }
     ],
 
     sidebar: [
@@ -56,16 +84,17 @@ export default defineConfig({
       { text: '第十二篇：插件与扩展', link: '/12-plugins-extensions/index' },
       { text: '第十三篇：部署与基础设施', link: '/13-deployment-infrastructure/index' },
       { text: '第十四篇：测试与质量保证', link: '/14-testing-quality/index' },
-      { text: '第十五篇：高级主题与最佳实践', link: '/15-advanced-topics/index' }
+      { text: '第十五篇：高级主题与最佳实践', link: '/15-advanced-topics/index' },
+      { text: '发布清单', link: '/release-checklist' }
     ],
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/qqzhangyanhua/learn-opencode-agent' }
+      { icon: 'github', link: bookRepository }
     ],
 
     editLink: {
-      pattern: 'https://github.com/qqzhangyanhua/learn-opencode-agent/edit/main/docs/book/:path',
-      text: '在 GitHub 上编辑此页'
+      pattern: `${bookRepository}/edit/main/docs/book/docs/:path`,
+      text: '在本书仓库中编辑此页'
     },
 
     lastUpdated: {

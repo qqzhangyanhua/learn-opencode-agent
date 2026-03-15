@@ -3,12 +3,47 @@ title: 第十三篇：部署与基础设施
 description: 第十三篇：部署与基础设施的详细内容
 ---
 
+<script setup>
+import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshotCard.vue'
+</script>
 
 > **对应路径**：`sst.config.ts`、`infra/`、`packages/function/`、`packages/console/`、`packages/containers/`
 > **前置阅读**：第一篇 Agent 基础架构、第八篇 HTTP API 服务器、第十篇 多端 UI 开发
 > **学习目标**：理解 OpenCode 不只是一个本地 CLI，而是一套同时覆盖本地运行时、云端 API、控制台与基础设施编排的多层系统
 
 ---
+
+<SourceSnapshotCard
+  title="第十三篇源码快照"
+  description="这一篇先抓 OpenCode 不是单机 CLI 这件事：本地运行时、云端 API、控制台和 SST 基础设施是怎样被拆层并一起交付的。"
+  repo="anomalyco/opencode"
+  repo-url="https://github.com/anomalyco/opencode/tree/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
+  branch="dev"
+  commit="f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
+  verified-at="2026-03-15"
+  :entries="[
+    {
+      label: 'SST 总入口',
+      path: 'sst.config.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/sst.config.ts'
+    },
+    {
+      label: '应用资源编排',
+      path: 'infra/app.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/infra/app.ts'
+    },
+    {
+      label: 'Console 资源编排',
+      path: 'infra/console.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/infra/console.ts'
+    },
+    {
+      label: '云端 API 入口',
+      path: 'packages/function/src/api.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/function/src/api.ts'
+    }
+  ]"
+/>
 
 ## 核心概念速览
 
@@ -632,12 +667,23 @@ new sst.cloudflare.x.SolidStart("Console", {
 5. 分别看 `packages/function/` 和 `packages/console/core/`，区分“云端公共 API”和“控制台业务域”。
 6. 最后看 `packages/containers/` 或发布相关脚本，理解构建环境为什么也被单独成包。
 
-### 动手练习
+### 任务
 
-1. 以“分享 session”或“登录控制台”为例，画出请求会经过哪几个包和基础设施资源。
-2. 试着回答：如果只想做一个本地 Agent 原型，哪些云端层可以先不做，哪些仍然值得提前抽象出来？
-3. 对比 `packages/opencode/src/storage/schema.ts`（本地 SQLite）和 `packages/console/core/src/schema/`（云端 PostgreSQL），分析两者的表结构差异和设计考量。
-4. 分析 Console Core 的 60+ 迁移文件，理解数据库 Schema 是如何演进的。
+判断 OpenCode 的部署与基础设施为什么不能被简化成“把一个应用部署到 Cloudflare”，而必须拆成本地运行时、云端 API、Console 和 IaC 资源编排几层。
+
+### 操作
+
+1. 打开 `sst.config.ts` 与 `infra/app.ts`，整理基础设施总入口怎样把 `app / console / enterprise` 三条线拆开。
+2. 再读 `packages/function/src/api.ts` 与 `packages/console/core/src/`，分别写出“云端公共 API”和“控制台业务域”各自解决什么问题。
+3. 最后以“分享 session”或“登录控制台”为例，画出请求会经过哪几个包和哪些基础设施资源。
+
+### 验收
+
+完成后你应该能说明：
+
+- 为什么 `packages/opencode/src/server`、`packages/function/src/api.ts`、`packages/console/core` 不能混成一个统一后端。
+- 为什么 SST 在这里管理的是资源编排，而不是替代业务架构设计。
+- 如果你只做本地 Agent 原型，哪些云端层可以先不做，但哪些边界最好从一开始就留出来。
 
 ### 下一篇预告
 

@@ -3,12 +3,46 @@ title: 第二篇：Agent 核心系统
 description: 第二篇：Agent 核心系统的详细内容
 ---
 
+<script setup>
+import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshotCard.vue'
+</script>
 
 > **对应路径**：`packages/opencode/src/agent/`
 > **前置阅读**：第一篇 Agent 基础架构
 > **学习目标**：理解 OpenCode 里的 Agent 不是一个抽象角色名，而是一组把模型、权限、提示词和模式绑在一起的运行时配置
 
----
+
+<SourceSnapshotCard
+  title="第二篇源码快照"
+  description="这一篇不要把 Agent 理解成一个抽象角色名，而要先抓它怎样把模型、权限、提示词和模式绑成一份可运行协议。"
+  repo="anomalyco/opencode"
+  repo-url="https://github.com/anomalyco/opencode/tree/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
+  branch="dev"
+  commit="f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
+  verified-at="2026-03-15"
+  :entries="[
+    {
+      label: 'Agent 定义',
+      path: 'packages/opencode/src/agent/agent.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/agent/agent.ts'
+    },
+    {
+      label: '权限规则',
+      path: 'packages/opencode/src/permission/next.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/permission/next.ts'
+    },
+    {
+      label: '系统提示词装配',
+      path: 'packages/opencode/src/session/system.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/session/system.ts'
+    },
+    {
+      label: '用户配置覆盖',
+      path: 'packages/opencode/src/config/config.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/config/config.ts'
+    }
+  ]"
+/>
 
 ## 核心概念速览
 
@@ -797,7 +831,402 @@ Do not create any files, or run bash commands that modify the user's system stat
 
 ---
 
-## 2.5 Agent 生命周期管理
+## 2.5 Agent 生命周期与执行循环
+
+### Agent 执行循环：AI Agent 的心脏
+
+在理解了 Agent 的配置、权限和提示词之后，最关键的问题来了：**Agent 是如何实际运行的？**
+
+这一节要解决的核心问题是：从用户输入到 Agent 输出，中间经历了什么？
+
+### 核心执行循环（Agent Loop）
+
+AI Agent 的执行本质上是一个循环过程：
+
+```text
+┌─────────────────────────────────────────────────────────┐
+│                    Agent 执行循环                         │
+└─────────────────────────────────────────────────────────┘
+
+用户输入
+  ↓
+① 接收并解析输入
+  ↓
+② 构建上下文（系统提示词 + 历史消息）
+  ↓
+③ 调用 LLM 思考
+  ↓
+④ LLM 决策：输出文本 OR 调用工具
+  ↓
+  ├─→ 如果是文本输出 → 返回给用户 → 结束
+  │
+  └─→ 如果是工具调用
+        ↓
+      ⑤ 权限检查（allow/deny/ask）
+        ↓
+      ⑥ 执行工具
+        ↓
+      ⑦ 观察工具结果
+        ↓
+      ⑧ 将结果添加到上下文
+        ↓
+        回到 ③（继续思考）
+```
+
+这个循环会一直持续，直到 LLM 决定不再调用工具，而是输出最终答案。
+
+### 实际代码流程
+
+**入口**：`packages/opencode/src/session/processor.ts`
+
+```typescript
+export async function process(session: Session, input: string) {
+  // ① 接收输入，创建用户消息
+  const userMessage = await Message.create({
+    sessionID: session.id,
+    role: "user",
+    content: input,
+  })
+
+  // ② 构建上下文
+  const messages = await buildContext(session)
+  const systemPrompt = await SystemPrompt.build(session.agent)
+
+  // ③ 开始执行循环
+  while (true) {
+    // 调用 LLM
+    const response = await llm.streamObject({
+      model: session.model,
+      system: systemPrompt,
+      messages: messages,
+      tools: getAvailableTools(session.agent),
+    })
+
+    // ④ 处理 LLM 响应
+    if (response.type === "text") {
+      // 文本输出，结束循环
+      await Message.create({
+        sessionID: session.id,
+        role: "assistant",
+        content: response.text,
+      })
+      break
+    }
+
+    if (response.type === "tool_call") {
+      // ⑤ 权限检查
+      const allowed = await Permission.check({
+        session,
+        tool: response.tool,
+        args: response.args,
+      })
+
+      if (!allowed) {
+        // 权限被拒绝，告知 LLM
+        messages.push({
+          role: "tool",
+          content: "Permission denied",
+        })
+        continue  // 回到循环开始
+      }
+
+      // ⑥ 执行工具
+      const result = await Tool.execute({
+        name: response.tool,
+        args: response.args,
+        context: session,
+      })
+
+      // ⑦⑧ 将工具结果添加到上下文
+      messages.push({
+        role: "tool",
+        tool_call_id: response.id,
+        content: result,
+      })
+
+      // 继续循环，让 LLM 观察结果并决定下一步
+    }
+  }
+}
+```
+
+### 关键环节详解
+
+#### 1. 上下文构建（Context Building）
+
+```typescript
+// session/context.ts
+async function buildContext(session: Session) {
+  const messages = []
+
+  // 加载历史消息
+  const history = await Message.list(session.id)
+
+  // 可能需要压缩（如果超过上下文窗口）
+  if (needsCompaction(history)) {
+    history = await compact(history)
+  }
+
+  // 转换为 LLM 格式
+  for (const msg of history) {
+    messages.push({
+      role: msg.role,
+      content: msg.content,
+      tool_calls: msg.toolCalls,
+    })
+  }
+
+  return messages
+}
+```
+
+#### 2. 工具调用决策（Tool Calling Decision）
+
+LLM 在每次思考时都会做出决策：
+
+```typescript
+// LLM 的内部决策过程（简化）
+{
+  "reasoning": "用户想要修改文件，我需要先读取它",
+  "action": "tool_call",
+  "tool": "read",
+  "arguments": {
+    "file_path": "src/index.ts"
+  }
+}
+```
+
+或者：
+
+```typescript
+{
+  "reasoning": "我已经完成了所有必要的操作",
+  "action": "respond",
+  "content": "文件已成功修改"
+}
+```
+
+#### 3. 权限检查（Permission Check）
+
+```typescript
+// permission/next.ts
+async function check(request: PermissionRequest) {
+  const rules = session.agent.permission
+
+  // 查找匹配的规则
+  const rule = findMatchingRule(rules, {
+    permission: request.tool,
+    pattern: request.args.file_path,
+  })
+
+  if (rule.action === "allow") return true
+  if (rule.action === "deny") return false
+  if (rule.action === "ask") {
+    // 询问用户
+    return await askUser(request)
+  }
+}
+```
+
+#### 4. 工具执行（Tool Execution）
+
+```typescript
+// tool/registry.ts
+async function execute(call: ToolCall) {
+  const tool = registry.get(call.name)
+
+  // 参数验证
+  const validated = tool.schema.parse(call.args)
+
+  // 执行工具
+  const result = await tool.handler(validated, context)
+
+  // 结果裁剪（如果太长）
+  if (result.length > MAX_TOOL_OUTPUT) {
+    result = truncate(result)
+  }
+
+  return result
+}
+```
+
+### 循环终止条件
+
+循环会在以下情况终止：
+
+1. **LLM 输出文本**：认为任务完成，不再需要工具
+2. **达到最大轮次**：防止无限循环（通常 10-20 轮）
+3. **用户中断**：用户手动停止
+4. **错误发生**：工具执行失败且无法恢复
+
+### 实际案例：修改文件的完整流程
+
+**用户输入**：
+```
+把 src/index.ts 里的 console.log 改成 console.error
+```
+
+**执行循环**：
+
+```text
+轮次 1:
+  LLM 思考: "我需要先读取文件内容"
+  工具调用: read("src/index.ts")
+  工具结果: "export function main() {\n  console.log('hello')\n}"
+
+轮次 2:
+  LLM 思考: "我看到了 console.log，现在修改它"
+  工具调用: edit({
+    file_path: "src/index.ts",
+    old_string: "console.log('hello')",
+    new_string: "console.error('hello')"
+  })
+  工具结果: "File edited successfully"
+
+轮次 3:
+  LLM 思考: "修改完成，向用户报告"
+  文本输出: "已将 console.log 改为 console.error"
+  → 循环结束
+```
+
+### 多轮对话的上下文管理
+
+```typescript
+// 第一轮对话
+用户: "读取 README.md"
+Agent: [调用 read 工具] "README 内容是..."
+
+// 第二轮对话（在同一会话中）
+用户: "把它翻译成中文"  // 注意：用户说的是"它"
+Agent: [理解"它"指的是 README.md] [调用 translate 工具] "已翻译"
+```
+
+Agent 能理解"它"，是因为上下文中保留了之前的对话历史。
+
+### 思考链（Chain of Thought）
+
+现代 LLM 在执行循环中会进行"思考链"：
+
+```typescript
+{
+  "thought": "用户想要重构函数，我需要：1. 读取文件 2. 分析结构 3. 提出方案 4. 征求同意 5. 执行修改",
+  "action": "tool_call",
+  "tool": "read",
+  "reasoning": "首先读取文件以了解当前实现"
+}
+```
+
+这种显式的思考过程帮助 Agent：
+- 规划多步骤任务
+- 避免遗漏关键步骤
+- 提高决策质量
+
+### 错误恢复机制
+
+```typescript
+// 工具执行失败时
+轮次 N:
+  工具调用: edit("non-existent.ts", ...)
+  工具结果: "Error: File not found"
+
+轮次 N+1:
+  LLM 思考: "文件不存在，我应该先检查文件是否存在"
+  工具调用: glob("*.ts")
+  工具结果: ["src/index.ts", "src/app.ts"]
+
+轮次 N+2:
+  LLM 思考: "用户可能是指 src/index.ts"
+  文本输出: "找不到 non-existent.ts，您是指 src/index.ts 吗？"
+```
+
+### 执行循环的优化
+
+#### 1. 并行工具调用
+
+```typescript
+// 一次调用多个工具
+{
+  "tool_calls": [
+    { "tool": "read", "args": { "file_path": "src/a.ts" } },
+    { "tool": "read", "args": { "file_path": "src/b.ts" } },
+    { "tool": "read", "args": { "file_path": "src/c.ts" } }
+  ]
+}
+
+// 并行执行
+const results = await Promise.all(
+  tool_calls.map(call => Tool.execute(call))
+)
+```
+
+#### 2. 流式输出
+
+```typescript
+// 边思考边输出
+for await (const chunk of llm.stream()) {
+  if (chunk.type === "text") {
+    // 实时显示给用户
+    stream.write(chunk.content)
+  }
+}
+```
+
+#### 3. 上下文压缩
+
+```typescript
+// 当历史消息太长时
+if (messages.length > 50) {
+  // 保留最近的消息
+  const recent = messages.slice(-20)
+
+  // 压缩旧消息
+  const summary = await summarize(messages.slice(0, -20))
+
+  messages = [summary, ...recent]
+}
+```
+
+### 与传统程序的区别
+
+| 特性 | 传统程序 | AI Agent |
+|------|---------|----------|
+| 执行路径 | 确定性 | 非确定性 |
+| 决策方式 | if/else | LLM 推理 |
+| 错误处理 | try/catch | 自我纠正 |
+| 任务分解 | 预定义 | 动态规划 |
+| 工具使用 | 直接调用 | 权限检查 |
+
+### 调试执行循环
+
+**查看执行日志**：
+
+```bash
+# 启动 OpenCode 并开启调试模式
+DEBUG=opencode:* bun dev
+```
+
+**日志输出示例**：
+
+```text
+[session] User input: "修改 README"
+[llm] Calling model: claude-sonnet-4
+[llm] Tool call: read("README.md")
+[tool] Executing: read
+[permission] Checking: read README.md
+[permission] Result: allow
+[tool] Result: "# OpenCode\n..."
+[llm] Tool call: edit(...)
+[tool] Executing: edit
+[tool] Result: "Success"
+[llm] Response: "已修改 README"
+[session] Complete
+```
+
+---
+
+## 2.6 Agent 生命周期管理
+
+## 2.6 Agent 生命周期管理
 
 ### Agent 的创建
 
@@ -971,10 +1400,24 @@ Ctrl+A → 选择 "plan" Agent
 2. 再读 `packages/opencode/src/session/system.ts`，看系统提示词怎样把环境、Skill 和 Agent prompt 拼起来。
 3. 最后回到 `packages/opencode/src/config/config.ts`，确认用户配置是怎么覆盖默认 Agent 定义的。
 
-### 动手练习
+### 任务
 
-1. 对比 `build` 和 `plan` 的权限差异，写出它们分别更适合什么任务。
-2. 试着设计一个你自己的自定义 Agent，只用文字写出它的 `mode`、`permission`、`prompt` 和适用场景。
+判断 OpenCode 里的 Agent 为什么首先是一份配置协议，而不是一个独立进程或超级类。
+
+### 操作
+
+1. 打开 `packages/opencode/src/agent/agent.ts`，记录 `Info` schema 里最关键的字段。
+2. 对比 `build`、`plan`、`explore` 三个内置 Agent，分别写出它们在 `mode`、`permission`、`prompt` 上的差异。
+3. 再读 `packages/opencode/src/session/system.ts` 和 `packages/opencode/src/config/config.ts`，确认系统提示词和用户配置是怎样叠加到 Agent 定义上的。
+
+### 验收
+
+完成后你应该能说明：
+
+- 为什么 Agent 的核心是“配置协议 + 权限边界”，而不是复杂类继承。
+- 为什么 `primary` 和 `subagent` 的差异会直接改变协作方式。
+- 为什么 prompt、permission、model 这三类配置必须放在同一个运行时对象里理解。
+
 
 ### 下一篇预告
 

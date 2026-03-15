@@ -3,6 +3,10 @@ title: 第一篇：Agent 基础架构
 description: 第一篇：Agent 基础架构的详细内容
 ---
 
+<script setup>
+import RuntimeLifecycleDiagram from '../../.vitepress/theme/components/RuntimeLifecycleDiagram.vue'
+import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshotCard.vue'
+</script>
 
 > **对应路径**：项目根目录、`packages/opencode/`、`packages/app/`、`packages/desktop/`
 > **前置阅读**：无
@@ -10,110 +14,247 @@ description: 第一篇：Agent 基础架构的详细内容
 
 ---
 
+<SourceSnapshotCard
+  title="第一篇源码快照"
+  description="这一篇先不急着通读所有目录，而是先抓住一次最小任务闭环：命令怎样进入运行时、怎样进入会话、怎样进入模型与工具循环。"
+  repo="anomalyco/opencode"
+  repo-url="https://github.com/anomalyco/opencode/tree/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
+  branch="dev"
+  commit="f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
+  verified-at="2026-03-15"
+  :entries="[
+    {
+      label: 'CLI 总入口',
+      path: 'packages/opencode/src/index.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/index.ts'
+    },
+    {
+      label: 'run 命令入口',
+      path: 'packages/opencode/src/cli/cmd/run.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/cli/cmd/run.ts'
+    },
+    {
+      label: '共享服务边界',
+      path: 'packages/opencode/src/server/server.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/server/server.ts'
+    },
+    {
+      label: '会话消息入口',
+      path: 'packages/opencode/src/server/routes/session.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/server/routes/session.ts'
+    },
+    {
+      label: '会话主循环',
+      path: 'packages/opencode/src/session/prompt.ts → processor.ts → llm.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/session/prompt.ts'
+    }
+  ]"
+/>
+
 ## 核心概念速览
 
-这一篇不是为了抽象定义“什么叫 Agent”，而是为了先把整本书的观察坐标定下来：
+这一篇最该先建立的，不是“Agent 的定义”，而是**一次任务到底怎样从输入走到结果**。
 
-- OpenCode 不是一个单文件 CLI
-- 它也不是只有聊天界面的 AI 工具
-- 它更像一套围绕本地开发工作流组织起来的 Agent 运行时
+很多初学者一上来就扎进 monorepo、workspace、Turbo、前端外壳，最后会越看越散。更有效的顺序正好相反：
 
-如果你后面想真正看懂这个仓库，最先要建立的不是某个模块细节，而是三层总图：
+- 先抓一次最小运行时闭环
+- 再回头解释目录为什么这样拆
+- 最后再理解多端、服务边界和工程组织
 
-1. `packages/opencode` 是核心运行时
-2. `packages/app` 和 `packages/desktop` 是不同终端外壳
-3. server、session、tool、provider、ui 都是在同一个 Agent 产品里协作
+所以这一篇最适合带着下面这个问题去读：
 
-这一篇最适合带着一个问题去读：
+**OpenCode 为什么不是单体 CLI，而是一套围绕运行时主链路组织起来的工程系统？**
 
-**OpenCode 为什么必须是今天这个目录结构，而不是更简单的单体应用？**
+## 先跑一次，再看架构
+
+如果你只记这一条线，后面十四篇就不容易碎掉：
+
+```text
+用户输入任务
+  -> packages/opencode/src/index.ts
+  -> packages/opencode/src/cli/cmd/run.ts
+  -> packages/opencode/src/server/server.ts
+  -> packages/opencode/src/server/routes/session.ts
+  -> packages/opencode/src/session/prompt.ts
+  -> packages/opencode/src/session/processor.ts
+  -> packages/opencode/src/session/llm.ts
+  -> packages/opencode/src/tool/registry.ts
+  -> packages/opencode/src/session/message-v2.ts
+  -> CLI / TUI / Web / Desktop 收到结果
+```
+
+这条链路先回答三件事：
+
+1. 命令入口不是只做参数解析，它会先把日志、环境变量、数据库迁移等运行时前置条件装起来。
+2. `run` 命令不是直接把 prompt 丢给模型，而是先进入共享 server / session 语义。
+3. OpenCode 保存的不是一段“聊天文本”，而是带 `text`、`reasoning`、`tool`、`file` 等部件的结构化消息流。
+
+<RuntimeLifecycleDiagram
+  :highlight-keys="['prompt', 'session', 'tools', 'provider', 'feedback']"
+  description="第一篇先看总链路，不追所有细节。你只要先知道一次任务怎样穿过这些环节，后面章节就都有落点。"
+/>
 
 ## 本章导读
 
 ### 这一章解决什么问题
 
-这一章不要求你先理解 Agent 内部实现，而是先建立一张“仓库总图”：
+这一章先不要求你背完整目录，而是先建立一张“系统怎样跑起来”的总图：
 
-- 哪个包是核心运行时
-- 哪些包是不同终端
-- 客户端和服务端为什么要分离
-- 为什么这个项目必须做成多包协作，而不是单体 CLI
+- 用户输入为什么会先进入 `run` 命令，而不是直接进入模型
+- 为什么共享 server / session 边界比“一个命令行脚本”更重要
+- 为什么多端外壳可以共用同一套运行时语义
+- 为什么这个项目最后会长成多包协作，而不是单体 CLI
 
 ### 必看入口
 
-- [package.json](https://github.com/anomalyco/opencode/blob/dev/package.json)：workspace、脚本、开发入口
-- [packages/opencode/src/index.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/index.ts)：CLI 和本地运行时总入口
-- [packages/opencode/src/server/server.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/server/server.ts)：共享服务端入口
-- [packages/app/src/entry.tsx](https://github.com/anomalyco/opencode/blob/dev/packages/app/src/entry.tsx)：浏览器端入口
-- [packages/desktop/src/index.tsx](https://github.com/anomalyco/opencode/blob/dev/packages/desktop/src/index.tsx)：桌面端入口
-
-### 一张图先建立感觉
-
-```text
-仓库根目录
-  -> package.json / workspaces
-  -> packages/opencode      核心运行时
-       -> CLI / TUI / 本地 server
-  -> packages/app           Web 共享应用层
-  -> packages/desktop       Desktop 平台壳
-  -> packages/ui            共享组件与视觉原语
-  -> packages/sdk/js        对外 SDK
-```
-
-### 先抓一条主链路
-
-建议先只抓下面这条链路，不要一上来就读全仓库：
-
-```text
-workspace / package.json
-  -> packages/opencode/src/index.ts
-  -> run / serve / web 等命令入口
-  -> packages/opencode/src/server/server.ts
-  -> packages/app 或 packages/desktop 等不同终端
-```
-
-这一条链路先解决“系统怎么装起来”，后面再进入 Agent、Tool、Session 的内部实现。
+- [package.json](https://github.com/anomalyco/opencode/blob/dev/package.json)：workspace、catalog、脚本入口
+- [packages/opencode/src/index.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/index.ts)：CLI 总入口与运行时前置初始化
+- [packages/opencode/src/cli/cmd/run.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/cli/cmd/run.ts)：最小任务闭环入口
+- [packages/opencode/src/server/server.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/server/server.ts)：共享服务边界与请求上下文装配
+- [packages/opencode/src/server/routes/session.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/server/routes/session.ts)：会话创建与消息入口
+- [packages/opencode/src/session/prompt.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/session/prompt.ts)：用户输入转为消息并进入主循环
+- [packages/opencode/src/session/processor.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/session/processor.ts)：模型 / 工具 / 结果回写循环
+- [packages/opencode/src/session/message-v2.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/session/message-v2.ts)：结构化消息模型
 
 ### 初学者阅读顺序
 
-1. 先看根目录 `package.json`，确认 monorepo 里有哪些关键包。
-2. 再看 `packages/opencode/src/index.ts`，理解本地运行时从哪里启动。
-3. 然后只挑 `server.ts`、`packages/app/src/entry.tsx`、`packages/desktop/src/index.tsx` 各看一个入口，建立多端共享后端的直觉。
+1. 先看 `index.ts` 和 `run.ts`，只问“任务从哪里进”。
+2. 再看 `server.ts` 和 `routes/session.ts`，只问“它怎样进入共享服务边界”。
+3. 然后看 `prompt.ts`、`processor.ts`、`llm.ts`、`tool/registry.ts`，只问“它怎样进入模型 / 工具循环”。
+4. 最后再回到根目录 `package.json`、`packages/app/`、`packages/desktop/`，理解多包和多端为什么是结果而不是前提。
 
 ### 最容易误解的点
 
-- `packages/app` 不等于“全部前端”，它更像 Web/Desktop 共享应用核心。
-- `packages/opencode` 不只是 CLI，它同时包含本地 server、TUI、Agent 核心能力。
-- “多端”不代表多套后端实现，OpenCode 这里更重要的是共享服务边界。
+- `packages/opencode` 不只是 CLI，它同时承载 server、session、tool、provider 等核心运行时语义。
+- `run` 命令不是“命令行特供逻辑”，它更像进入同一套会话系统的一扇门。
+- 目录拆分不是为了追求形式上的 monorepo，而是为了让多端外壳复用同一条主链路。
 
-## 1.1 什么是 AI Coding Agent
+## 1.1 先跑一次最小闭环，再理解目录结构
 
-### 从代码补全到 Agent 的演进
+### 从 `run` 命令进仓库，比先看 monorepo 更有效
 
-如果你用过 GitHub Copilot，可以把它理解成“你写代码时的预测器”；而 OpenCode 更接近“能接任务的执行者”。两者的差别，不在模型是否更聪明，而在系统是否给了 AI 一条可执行链路。
+如果你第一次读这个仓库就先看 workspace 和包关系，很容易把注意力放在“项目怎么拆目录”；但对初学者更重要的问题是：
 
-**代码补全工具的典型形态**：
+**一次任务到底怎么跑完？**
+
+在当前实现里，这条最小闭环比目录树更有解释力：
+
+```text
+index.ts
+  -> RunCommand
+  -> server.ts
+  -> session.ts
+  -> prompt.ts
+  -> processor.ts
+  -> llm.ts
+  -> tool/registry.ts
+  -> message-v2.ts
 ```
-你写代码 → AI 预测下一行 → 你选择接受或拒绝
-```
 
-**AI Coding Agent**：
-```
-你描述需求 → Agent 理解任务 → Agent 调用工具 → Agent 修改代码 → Agent 验证结果
-```
+只要把这条线读顺，你再回头看 monorepo、多端、客户端/服务器分离，就不会觉得它们是抽象名词。
 
-关键区别可以先记一句：**Agent 不只生成文本，还会在受控环境里调工具、改状态、做验证。**
+### 第一步：`index.ts` 先把运行时装起来
 
-### OpenCode 的定位
+`packages/opencode/src/index.ts` 最值得先看的，不是 `yargs(...).command(...)` 这几个注册调用，而是命令执行前那层全局 middleware。
 
-落到当前仓库，OpenCode 的定位可以压缩成四点：
+这里至少会先做这些事：
 
-- **开源 Agent 运行时**：核心能力放在仓库里，而不是藏在闭源后端
-- **提供商无关**：支持多种模型来源，不把系统绑死在单一厂商
-- **面向代码工作流**：内置 LSP、文件系统、终端、会话等开发能力
-- **多端交付**：同一套核心语义可以通过 CLI、Web、Desktop 暴露出来
+- 初始化日志
+- 写入 `AGENT`、`OPENCODE`、`OPENCODE_PID` 等环境标记
+- 确认本地数据库是否存在
+- 在首次运行时执行 JSON migration
 
-所以这一篇真正要建立的，不是“Agent 的抽象定义”，而是：**OpenCode 如何把这些能力装成一个能运行的产品。**
+这说明 CLI 入口不是一层薄壳。它先把“这个 Agent 进程已经具备运行条件”这件事做完，后面的 `run`、`serve`、`web` 命令才有意义。
+
+### 第二步：`RunCommand` 把任务送进共享运行时语义
+
+`packages/opencode/src/cli/cmd/run.ts` 是这一篇最值得抓的入口。
+
+它重要，不是因为它叫 `run`，而是因为它告诉你：
+
+- 用户输入的 message 怎样进入会话系统
+- CLI 怎样订阅和展示 tool / step / reasoning 等事件
+- 最终输出为什么能在终端里实时回流
+
+也就是说，CLI 不是直接“调模型 -> 打印文本”。它真正做的是把用户任务接进同一套 session / message / tool 语义。
+
+### 第三步：`server.ts` 把请求装进项目上下文
+
+为什么一个本地 CLI 还要绕进 `packages/opencode/src/server/server.ts`？
+
+因为 OpenCode 想复用的不只是“某个函数”，而是整套服务边界：
+
+- Basic Auth / 日志 / CORS 这类中间件顺序
+- `WorkspaceContext.provide()` 注入的工作区语义
+- `Instance.provide()` 初始化的当前项目实例
+- `project`、`session`、`pty`、`file` 等统一路由出口
+
+这一步很关键。它解释了为什么 OpenCode 不适合写成一堆直接互调的 CLI 函数：**它从一开始就把“当前请求属于哪个项目世界”当成核心语义。**
+
+### 第四步：`session.ts` 和 `prompt.ts` 把用户输入变成会话消息
+
+进入 `packages/opencode/src/server/routes/session.ts` 后，你会看到两件分开的事：
+
+1. 创建 session 容器
+2. 往某个 session 里发送消息
+
+再往下到 `packages/opencode/src/session/prompt.ts`，`prompt()` 会：
+
+- 取出当前 session
+- 清理需要回滚的状态
+- 创建本轮用户消息
+- `touch` 当前 session
+- 如果允许回复，就把控制权交给主循环
+
+这很重要，因为它说明“用户输入”在这里已经不是一段原始文本，而是进入了可持久化、可恢复、可继续处理的消息系统。
+
+### 第五步：`processor.ts`、`llm.ts` 和 `tool/registry.ts` 进入真正的 Agent 循环
+
+到了 `packages/opencode/src/session/processor.ts`，你才真正进入大家通常理解的“Agent 在干活”阶段。
+
+这时候系统开始处理：
+
+- reasoning 片段
+- tool call / tool result / tool error
+- step 开始与结束
+- usage、finish reason、token、cost 等运行时信息
+
+而 `packages/opencode/src/session/llm.ts` 会把另外三类东西绑定起来：
+
+- 当前 Agent 与系统提示词
+- 当前 Provider / Model 抽象
+- 当前可用工具集合
+
+工具集合不是散落各处的 if/else，而是统一从 `packages/opencode/src/tool/registry.ts` 进入，再按权限、模式、provider 能力继续过滤。
+
+这就是 OpenCode 真正的主链路：**模型不是单独工作，工具也不是外挂；两者是在同一个会话循环里一起运转。**
+
+### 第六步：`message-v2.ts` 决定结果怎样被保存和回流
+
+最后一定要看 `packages/opencode/src/session/message-v2.ts`。
+
+因为它解释了一个经常被忽略的问题：OpenCode 存的不是“最终答案字符串”，而是结构化 part。
+
+你会看到至少这些类型：
+
+- `text`
+- `reasoning`
+- `file`
+- 以及和工具、步骤相关的结构
+
+这带来的直接结果是：
+
+- CLI / TUI / Web / Desktop 可以消费同一份消息流
+- 会话可以恢复，而不是只能展示一段平面文本
+- 后续章节讨论工具、会话、Provider、多端 UI 时，都能挂回同一份数据模型
+
+### 先得到三个结论
+
+读完这一条最小闭环，你至少应该先记住：
+
+1. OpenCode 的主语不是“一个 CLI 命令”，而是一条完整运行时链路。
+2. 客户端/服务器分离不是形式主义，而是为了让不同终端共享同一套项目上下文和会话语义。
+3. monorepo 和多端结构是这条主链路外溢出来的工程结果，不是理解仓库的第一起点。
 
 ---
 
@@ -796,10 +937,24 @@ bun dev --log-level DEBUG
 2. 再读 `packages/opencode/src/index.ts`，理解 CLI 和本地 server 的总入口。
 3. 最后顺着 `packages/app/`、`packages/desktop/`、`packages/opencode/src/server/` 各看一个入口文件，建立三端共享后端的整体图。
 
-### 动手练习
+### 任务
 
-1. 画一张简单结构图，把 `packages/opencode`、`packages/app`、`packages/desktop`、`packages/sdk/js` 的职责各写一句话。
-2. 找出“同一个能力被多端复用”的一个例子，比如 HTTP API、主题、会话或 SDK，并写下它跨了哪几个目录。
+判断 OpenCode 为什么必须围绕共享运行时主链路组织，而不是做成单体 CLI。
+
+### 操作
+
+1. 打开 `packages/opencode/src/index.ts`、`packages/opencode/src/cli/cmd/run.ts`、`packages/opencode/src/server/server.ts`。
+2. 画出一条从用户输入到结果回流的最小链路，并标出哪一层负责运行时前置初始化、哪一层负责共享服务边界、哪一层负责模型与工具循环。
+3. 再各看一眼 `packages/app/` 或 `packages/desktop/` 的入口，确认它们为什么可以复用同一套后端语义。
+
+### 验收
+
+完成后你应该能清楚说明：
+
+- 为什么 `run` 命令不是直接把 prompt 丢给模型。
+- 为什么 `server.ts` 和 `session` 边界比“写一个 CLI 脚本”更重要。
+- 为什么多端形态是同一条运行时主链路的不同外壳，而不是三套独立实现。
+
 
 ### 下一篇预告
 

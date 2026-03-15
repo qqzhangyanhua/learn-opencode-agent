@@ -1,58 +1,56 @@
 <script setup lang="ts">
-interface Chapter {
-  name: string
-  link: string
-}
+import type { LearningPhase } from './types'
 
-interface Phase {
-  number: string
-  title: string
-  description: string
-  chapters: Chapter[]
-}
-
-const phases: Phase[] = [
+const phases: LearningPhase[] = [
   {
-    number: '01',
+    number: '阶段 1',
     title: '建立全局认知',
-    description: '先看懂 OpenCode 是什么系统，再进入内部实现',
+    description: '先看懂一次任务怎样跑完，再进入 Agent、工具和会话的内部结构。',
+    goal: '把 CLI 入口、会话装配、工具循环和多端外壳放到同一张图里。',
+    outcome: '看完后你应该能解释：为什么 OpenCode 不是单体 CLI，而是一套围绕运行时主链路组织的工程系统。',
     chapters: [
-      { name: 'Agent 基础架构', link: '/01-agent-basics/index' },
-      { name: 'Agent 核心系统', link: '/02-agent-core/index' },
-      { name: '工具系统', link: '/03-tool-system/index' },
-      { name: '会话管理', link: '/04-session-management/index' }
+      { name: '01 Agent 基础架构', link: '/01-agent-basics/index' },
+      { name: '02 Agent 核心系统', link: '/02-agent-core/index' },
+      { name: '03 工具系统', link: '/03-tool-system/index' },
+      { name: '04 会话管理', link: '/04-session-management/index' }
     ]
   },
   {
-    number: '02',
+    number: '阶段 2',
     title: '进入运行时主链路',
-    description: '理解模型、协议、HTTP 与存储怎样协同工作',
+    description: '理解模型、协议、HTTP 与存储怎样把这条主链路做成可运行产品。',
+    goal: '把 provider、MCP、HTTP server 和持久化放回同一条请求路径里。',
+    outcome: '看完后你应该能解释：一次请求怎样跨过模型抽象、服务边界和数据层，而不是停留在“调用了某个 API”。',
     chapters: [
-      { name: '多模型支持', link: '/05-provider-system/index' },
-      { name: 'MCP 协议集成', link: '/06-mcp-integration/index' },
-      { name: 'HTTP API 服务器', link: '/08-http-api-server/index' },
-      { name: '数据持久化', link: '/09-data-persistence/index' }
+      { name: '05 多模型支持', link: '/05-provider-system/index' },
+      { name: '06 MCP 协议集成', link: '/06-mcp-integration/index' },
+      { name: '08 HTTP API 服务器', link: '/08-http-api-server/index' },
+      { name: '09 数据持久化', link: '/09-data-persistence/index' }
     ]
   },
   {
-    number: '03',
+    number: '阶段 3',
     title: '理解交互与扩展',
-    description: '把 TUI、多端界面、代码智能和扩展体系串起来',
+    description: '把 TUI、多端界面、代码智能和扩展体系重新挂回同一后端语义。',
+    goal: '理解用户是怎样通过终端、桌面、Web 和扩展生态与同一套运行时协作的。',
+    outcome: '看完后你应该能解释：为什么“界面层”不是装饰，而是 Agent 可用性、协作性和扩展性的真实边界。',
     chapters: [
-      { name: 'TUI 终端界面', link: '/07-tui-interface/index' },
-      { name: '多端 UI 开发', link: '/10-multi-platform-ui/index' },
-      { name: '代码智能', link: '/11-code-intelligence/index' },
-      { name: '插件与扩展', link: '/12-plugins-extensions/index' }
+      { name: '07 TUI 终端界面', link: '/07-tui-interface/index' },
+      { name: '10 多端 UI 开发', link: '/10-multi-platform-ui/index' },
+      { name: '11 代码智能', link: '/11-code-intelligence/index' },
+      { name: '12 插件与扩展', link: '/12-plugins-extensions/index' }
     ]
   },
   {
-    number: '04',
+    number: '阶段 4',
     title: '完成工程化闭环',
-    description: '最后再看部署、测试与可迁移的工程经验',
+    description: '最后再看部署、测试和长期演进，把“能跑”变成“能维护”。',
+    goal: '把基础设施、质量保证和最佳实践看成工程收口，而不是附录。',
+    outcome: '看完后你应该能解释：一个 AI Coding Agent 项目怎样从功能演示走到可发布、可验证、可持续迭代。',
     chapters: [
-      { name: '部署与基础设施', link: '/13-deployment-infrastructure/index' },
-      { name: '测试与质量保证', link: '/14-testing-quality/index' },
-      { name: '高级主题与最佳实践', link: '/15-advanced-topics/index' }
+      { name: '13 部署与基础设施', link: '/13-deployment-infrastructure/index' },
+      { name: '14 测试与质量保证', link: '/14-testing-quality/index' },
+      { name: '15 高级主题与最佳实践', link: '/15-advanced-topics/index' }
     ]
   }
 ]
@@ -65,7 +63,6 @@ const phases: Phase[] = [
       :key="phase.number"
       class="phase-card"
     >
-      <!-- 阶段连接箭头（最后一项不显示） -->
       <div v-if="index < phases.length - 1" class="phase-connector" aria-hidden="true">
         <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
           <path d="M4 10h12M12 6l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -73,7 +70,7 @@ const phases: Phase[] = [
       </div>
 
       <div class="phase-header">
-        <span class="phase-number" aria-hidden="true">{{ phase.number }}</span>
+        <span class="phase-number">{{ phase.number }}</span>
         <div class="phase-title-group">
           <h3 class="phase-title">{{ phase.title }}</h3>
           <span class="chapter-badge">{{ phase.chapters.length }} 章</span>
@@ -81,6 +78,17 @@ const phases: Phase[] = [
       </div>
 
       <p class="phase-desc">{{ phase.description }}</p>
+
+      <dl class="phase-outcomes" :aria-label="`${phase.title}学习目标`">
+        <div>
+          <dt>这一阶段要看懂</dt>
+          <dd>{{ phase.goal }}</dd>
+        </div>
+        <div>
+          <dt>看完后你应该能解释</dt>
+          <dd>{{ phase.outcome }}</dd>
+        </div>
+      </dl>
 
       <ul class="chapter-list" :aria-label="`${phase.title}章节列表`">
         <li v-for="chapter in phase.chapters" :key="chapter.link">
@@ -112,7 +120,6 @@ const phases: Phase[] = [
   }
 }
 
-/* ===== 阶段卡片 ===== */
 .phase-card {
   padding: 24px;
   border-radius: 12px;
@@ -124,7 +131,6 @@ const phases: Phase[] = [
   overflow: hidden;
 }
 
-/* 顶部品牌色条 */
 .phase-card::before {
   content: '';
   position: absolute;
@@ -147,7 +153,6 @@ const phases: Phase[] = [
   box-shadow: var(--card-shadow-hover);
 }
 
-/* ===== 阶段连接器（绝对定位在卡片右侧） ===== */
 .phase-connector {
   position: absolute;
   right: -12px;
@@ -171,7 +176,6 @@ const phases: Phase[] = [
   }
 }
 
-/* ===== 卡片头部 ===== */
 .phase-header {
   display: flex;
   align-items: center;
@@ -183,10 +187,10 @@ const phases: Phase[] = [
   font-family: var(--vp-font-family-mono);
   color: var(--vp-c-brand-1);
   font-weight: 700;
-  font-size: 1.375rem;
+  font-size: 1rem;
   line-height: 1;
-  min-width: 2.5rem;
-  opacity: 0.85;
+  min-width: 3.8rem;
+  opacity: 0.9;
 }
 
 .phase-title-group {
@@ -204,7 +208,6 @@ const phases: Phase[] = [
   line-height: 1.3;
 }
 
-/* 章节数量徽章 */
 .chapter-badge {
   display: inline-flex;
   align-items: center;
@@ -218,7 +221,6 @@ const phases: Phase[] = [
   white-space: nowrap;
 }
 
-/* ===== 描述文字 ===== */
 .phase-desc {
   font-size: 0.9rem;
   line-height: 1.6;
@@ -226,7 +228,32 @@ const phases: Phase[] = [
   margin-bottom: 16px;
 }
 
-/* ===== 章节列表 ===== */
+.phase-outcomes {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 16px;
+}
+
+.phase-outcomes div {
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--vp-c-divider);
+  background: var(--vp-c-bg);
+}
+
+.phase-outcomes dt {
+  margin: 0 0 6px;
+  font-size: 0.78rem;
+  color: var(--vp-c-text-3);
+}
+
+.phase-outcomes dd {
+  margin: 0;
+  font-size: 0.88rem;
+  line-height: 1.6;
+  color: var(--vp-c-text-1);
+}
+
 .chapter-list {
   list-style: none;
   padding: 0;
@@ -262,35 +289,6 @@ const phases: Phase[] = [
 
 .chapter-list a:hover .arrow-icon {
   opacity: 1;
-  transform: translateX(2px);
-}
-
-.chapter-list a:focus-visible {
-  outline: 2px solid var(--vp-c-brand-1);
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-
-/* ===== 响应式 ===== */
-@media (max-width: 640px) {
-  .phase-card {
-    padding: 20px;
-  }
-
-  .phase-number {
-    font-size: 1.2rem;
-  }
-
-  .phase-title {
-    font-size: 1rem;
-  }
-
-  .phase-desc {
-    font-size: 0.85rem;
-  }
-
-  .chapter-list a {
-    font-size: 0.825rem;
-  }
+  transform: translateX(1px);
 }
 </style>

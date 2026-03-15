@@ -19,7 +19,7 @@ const chapters = [
   { dir: '15-advanced-topics', title: '第十五篇：高级主题与最佳实践' },
 ];
 
-const docsDir = 'src/content/docs';
+const docsDir = 'docs';
 
 for (const chapter of chapters) {
   const filePath = join(docsDir, chapter.dir, 'index.md');

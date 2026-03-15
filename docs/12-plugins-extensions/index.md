@@ -3,12 +3,47 @@ title: 第十二篇：插件与扩展
 description: 第十二篇：插件与扩展的详细内容
 ---
 
+<script setup>
+import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshotCard.vue'
+</script>
 
 > **对应路径**：`packages/plugin/`、`packages/opencode/src/plugin/`、`packages/opencode/src/skill/`、`packages/opencode/src/command/`、`.opencode/`、`sdks/vscode/`
 > **前置阅读**：第六篇 MCP 协议集成、第三篇 工具系统
 > **学习目标**：理解 OpenCode 当前仓库里的真实扩展方式，知道什么时候该写插件、什么时候该写 Skill、什么时候只需要一个命令模板
 
 ---
+
+<SourceSnapshotCard
+  title="第十二篇源码快照"
+  description="这一篇先把扩展手段分清楚：插件、Skill、命令和编辑器扩展各自从哪条入口进入系统，以及它们最后怎样汇入统一能力边界。"
+  repo="anomalyco/opencode"
+  repo-url="https://github.com/anomalyco/opencode/tree/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
+  branch="dev"
+  commit="f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
+  verified-at="2026-03-15"
+  :entries="[
+    {
+      label: '插件接口',
+      path: 'packages/plugin/src/index.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/plugin/src/index.ts'
+    },
+    {
+      label: '运行时插件加载',
+      path: 'packages/opencode/src/plugin/index.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/plugin/index.ts'
+    },
+    {
+      label: 'Skill 装载',
+      path: 'packages/opencode/src/skill/skill.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/skill/skill.ts'
+    },
+    {
+      label: 'Command 入口',
+      path: 'packages/opencode/src/command/index.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/command/index.ts'
+    }
+  ]"
+/>
 
 ## 核心概念速览
 
@@ -676,10 +711,23 @@ await fetch(`http://localhost:${port}/tui/append-prompt`, {
 2. 再看 `packages/opencode/src/skill/skill.ts` 与 `packages/opencode/src/command/index.ts`，理解 Skill 和命令模板怎样进入统一入口。
 3. 最后读 `sdks/vscode/src/extension.ts`，看编辑器扩展怎样把本地 opencode 接进开发环境。
 
-### 动手练习
+### 任务
 
-1. 为一个你常做的高频任务判断：它更适合写成 Plugin、Skill 还是 Command，并说明原因。
-2. 找一个现有 Skill 或命令模板，写出它是怎样被发现、列出并最终进入 Agent 上下文的。
+判断在 OpenCode 里，一个扩展需求到底应该落成 Plugin、Skill、Command 还是 MCP，关键不在功能听起来多高级，而在它需要进入哪一层运行时边界。
+
+### 操作
+
+1. 打开 `packages/plugin/src/index.ts` 和 `packages/opencode/src/plugin/index.ts`，确认代码型插件拿到哪些运行时上下文，以及它们怎样被加载进系统。
+2. 再读 `packages/opencode/src/skill/skill.ts` 与 `packages/opencode/src/command/index.ts`，比较 Skill、Command 和 MCP Prompt 是怎样被统一收进命令入口的。
+3. 最后拿一个你常做的高频任务做判断：它更适合写成 Plugin、Skill、Command 还是 MCP，并顺着相关入口文件写出原因。
+
+### 验收
+
+完成后你应该能说明：
+
+- 为什么很多扩展需求其实不需要新增运行时代码。
+- 为什么 Skill 和 Command 往往是比“直接写插件”更低漂移的第一步。
+- 为什么一个扩展想进入真实用户流程，最终还得回到统一的工具、命令或上下文边界。
 
 ### 下一篇预告
 

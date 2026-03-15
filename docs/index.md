@@ -13,18 +13,23 @@ hero:
       text: 阅读地图
       link: /reading-map
     - theme: alt
-      text: 查看源码
-      link: https://github.com/anomalyco/opencode
+      text: 查看 OpenCode 源码
+      link: https://github.com/anomalyco/opencode/tree/dev
 ---
 
 <script setup>
 import LearningPath from '../.vitepress/theme/components/LearningPath.vue'
+import RuntimeLifecycleDiagram from '../.vitepress/theme/components/RuntimeLifecycleDiagram.vue'
 import TechStackGrid from '../.vitepress/theme/components/TechStackGrid.vue'
 </script>
 
 ## 核心学习路径
 
 <LearningPath />
+
+## 先记住这条主链路
+
+<RuntimeLifecycleDiagram />
 
 ## 辅助阅读入口
 
@@ -37,10 +42,10 @@ import TechStackGrid from '../.vitepress/theme/components/TechStackGrid.vue'
 
 ## 这本书怎么读
 
-- 如果你是第一次系统学习 Agent 开发，建议按 `01 -> 02 -> 03 -> 04` 先建立运行时主链路。
-- 如果你更关心产品化落地，读完前四篇后优先看 `05、06、08、09`。
-- 如果你更关心界面、IDE 集成和扩展生态，读完前四篇后优先看 `07、10、11、12`。
-- `13、14、15` 更适合放在最后，它们回答的是部署、质量与长期演进问题。
+- 如果你是第一次系统学习 Agent 开发，先按**阶段 1**的 `01 -> 02 -> 03 -> 04` 建立最小运行时闭环。
+- 如果你更关心产品化落地，再进入**阶段 2**，优先看 `05、06、08、09`。
+- 如果你更关心界面、IDE 集成和扩展生态，再进入**阶段 3**，优先看 `07、10、11、12`。
+- `13、14、15` 对应**阶段 4**，更适合最后阅读，它们回答的是部署、质量与长期演进问题。
 
 ## 技术栈
 

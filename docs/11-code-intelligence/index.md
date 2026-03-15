@@ -3,12 +3,47 @@ title: 第十一篇：代码智能
 description: 第十一篇：代码智能的详细内容
 ---
 
+<script setup>
+import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshotCard.vue'
+</script>
 
 > **对应路径**：`packages/opencode/src/lsp/`、`packages/opencode/src/tool/lsp.ts`
 > **前置阅读**：第三篇 工具系统
 > **学习目标**：理解 OpenCode 的代码智能不是“单个 LSP 插件”，而是一套按语言启动、按项目隔离、按需同步、可被 Agent 调用的本地语义分析系统
 
 ---
+
+<SourceSnapshotCard
+  title="第十一篇源码快照"
+  description="这一篇先抓代码智能的服务化主链路：语言服务器怎样被选择和复用、文件怎样同步、以及语义能力怎样重新包装成 Agent 可调用的接口。"
+  repo="anomalyco/opencode"
+  repo-url="https://github.com/anomalyco/opencode/tree/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
+  branch="dev"
+  commit="f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
+  verified-at="2026-03-15"
+  :entries="[
+    {
+      label: 'LSP 总入口',
+      path: 'packages/opencode/src/lsp/index.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/lsp/index.ts'
+    },
+    {
+      label: '语言服务器定义',
+      path: 'packages/opencode/src/lsp/server.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/lsp/server.ts'
+    },
+    {
+      label: 'LSP 客户端',
+      path: 'packages/opencode/src/lsp/client.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/lsp/client.ts'
+    },
+    {
+      label: 'Agent LSP 工具',
+      path: 'packages/opencode/src/tool/lsp.ts',
+      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/tool/lsp.ts'
+    }
+  ]"
+/>
 
 ## 核心概念速览
 
@@ -476,10 +511,23 @@ if (Flag.OPENCODE_EXPERIMENTAL_LSP_TY) {
 2. 再看 `packages/opencode/src/lsp/index.ts`，理解调度、root 选择和 client 复用。
 3. 最后进入 `client.ts` 与 `server.ts`，补齐 JSON-RPC 生命周期和多语言 server 策略细节。
 
-### 动手练习
+### 任务
 
-1. 选一种你熟悉的语言，找出它在 `server.ts` 里的 root 检测规则和启动方式。
-2. 写下“显式 `lsp` 工具”和“文件工具间接复用 LSP”这两条路径分别适合什么场景。
+判断 OpenCode 里的 LSP 为什么更适合被看成一层底层语义基础设施，而不是单独一项“代码智能功能”。
+
+### 操作
+
+1. 从 `packages/opencode/src/tool/read.ts`、`edit.ts`、`write.ts` 找到它们与 LSP 联动的入口，记录文件工具怎样间接复用语义能力。
+2. 再读 `packages/opencode/src/lsp/index.ts`，整理 root 选择、client 复用和调度策略。
+3. 最后进入 `client.ts` 与 `server.ts`，选一种你熟悉的语言，写下它的 server 启动方式、root 检测规则，以及显式 `lsp` 工具适合的场景。
+
+### 验收
+
+完成后你应该能说明：
+
+- 为什么 `read/edit/write` 对 LSP 的复用，比单独暴露一个显式 `lsp` 工具更关键。
+- 为什么语言服务是否“真正可用”，取决于 root、诊断和复用策略，而不只是能不能启动进程。
+- 为什么 LSP 在 Agent 项目里属于底层语义设施，而不是附属增强功能。
 
 ### 下一篇预告
 
