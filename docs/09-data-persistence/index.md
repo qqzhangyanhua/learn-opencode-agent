@@ -1,568 +1,533 @@
 ---
-title: 第九篇：数据持久化
-description: 第九篇：数据持久化的详细内容
+title: 第10章：数据持久化
+description: SQLite + Drizzle ORM 的 Schema 设计、JSON blob 策略、事务与副效应队列、以及从文件存储到数据库的演进迁移
 ---
 
-<script setup>
-import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshotCard.vue'
-</script>
+## 为什么选择 SQLite？
 
-> **对应路径**：`packages/opencode/src/storage/`、`packages/opencode/src/session/`、`packages/opencode/src/project/`、`packages/opencode/src/control-plane/`
-> **前置阅读**：第四篇 会话管理、第八篇 HTTP API 服务器
-> **学习目标**：理解 OpenCode 的持久化不是“单纯用了 SQLite”，而是一套本地优先、兼容旧 JSON、支持工作区扩展、并和云端 Console 数据层明确分界的存储体系
+OpenCode 是一个在用户本地运行的工具，它的数据库选型必须满足几个苛刻条件：
 
----
+- **零配置**：不能要求用户安装 PostgreSQL 或 MySQL
+- **单文件**：整个数据库就是一个文件，方便备份、移动和调试
+- **嵌入式**：进程内运行，没有网络开销
+- **足够快**：会话消息可能有数千条 Part，查询要毫秒级返回
 
-<SourceSnapshotCard
-  title="第九篇源码快照"
-  description="这一篇先抓本地运行态和云端产品态的分界：数据怎样进 SQLite、怎样兼容旧 JSON、以及哪些状态根本不该和 Console 混在一起。"
-  repo="anomalyco/opencode"
-  repo-url="https://github.com/anomalyco/opencode/tree/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
-  branch="dev"
-  commit="f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
-  verified-at="2026-03-15"
-  :entries="[
-    {
-      label: '本地数据库入口',
-      path: 'packages/opencode/src/storage/db.ts',
-      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/storage/db.ts'
-    },
-    {
-      label: '会话表定义',
-      path: 'packages/opencode/src/session/session.sql.ts',
-      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/session/session.sql.ts'
-    },
-    {
-      label: 'JSON 迁移入口',
-      path: 'packages/opencode/src/storage/json-migration.ts',
-      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/storage/json-migration.ts'
-    },
-    {
-      label: 'Console 数据层',
-      path: 'packages/console/core/src/drizzle/index.ts',
-      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/console/core/src/drizzle/index.ts'
-    }
-  ]"
-/>
+SQLite 满足全部条件，而 Bun 的运行时更是内置了 `bun:sqlite`，零依赖。Drizzle ORM 则提供了类型安全的查询构建器，让 TypeScript 类型从 Schema 定义一路传递到查询结果。
 
-## 核心概念速览
+## 数据库的两个生命阶段
 
-很多人看到 OpenCode 的存储层，第一反应会是：
+OpenCode 的持久化层有一段有趣的演进历史：**它曾经用 JSON 文件存储所有数据，后来迁移到了 SQLite**。
 
-- 有一个 SQLite
-- 用了 Drizzle
-- 会话、消息、项目写进表里
+这不是抽象的架构讨论，而是代码里实实在在留存的痕迹：
 
-这当然没错，但还不够。
-
-当前仓库的持久化体系至少包含四层：
-
-1. **本地 SQLite 主库**：承载项目、会话、消息、权限等核心状态
-2. **数据库访问包装**：提供 lazy 初始化、事务上下文和副作用队列
-3. **历史 JSON 迁移层**：把旧版 `storage/*.json` 数据导入 SQLite
-4. **云端 Console 数据层**：独立于本地库，面向团队工作区和控制平面
-
-所以这一篇最重要的结论不是“OpenCode 用了什么数据库”，而是：
-
-**它把本地 Agent 运行态和云端产品态分成了两套数据边界。**
-
-最值得先看的入口有四个：
-
-- [packages/opencode/src/storage/db.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/storage/db.ts)
-- [packages/opencode/src/session/session.sql.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/session/session.sql.ts)
-- [packages/opencode/src/storage/json-migration.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/storage/json-migration.ts)
-- [packages/console/core/src/drizzle/index.ts](https://github.com/anomalyco/opencode/blob/dev/packages/console/core/src/drizzle/index.ts)
-
----
-
-## 本章导读
-
-### 这一章解决什么问题
-
-这一章要回答的是：
-
-- OpenCode 的本地状态到底落在哪里
-- 会话、项目、权限、分享、工作区这些数据是怎样建模的
-- 为什么存储层不只有 SQLite 表，还有 JSON 迁移和访问包装
-- 本地 Agent 数据层和云端 Console 数据层为什么必须分开
-
-### 必看入口
-
-- [packages/opencode/src/storage/db.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/storage/db.ts)：本地数据库主入口
-- [packages/opencode/src/storage/schema.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/storage/schema.ts)：本地表结构汇总
-- [packages/opencode/src/session/session.sql.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/session/session.sql.ts)：会话核心表
-- [packages/opencode/src/storage/json-migration.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/storage/json-migration.ts)：旧 JSON 升级入口
-- [packages/console/core/src/drizzle/index.ts](https://github.com/anomalyco/opencode/blob/dev/packages/console/core/src/drizzle/index.ts)：云端 Console 数据访问入口
-
-### 先抓一条主链路
-
-建议先顺着这一条线读：
-
-```text
-session / project / permission 等运行时状态
-  -> storage/db.ts 初始化本地数据库
-  -> session.sql.ts / project.sql.ts / workspace.sql.ts 定义表
-  -> schema.ts 汇总成完整本地数据模型
-  -> json-migration.ts 兼容旧数据
-  -> console/core/drizzle/index.ts 形成另一条云端数据边界
+```
+packages/opencode/src/storage/
+├── db.ts           # SQLite + Drizzle ORM（当前方案）
+├── schema.ts       # 汇总所有 SQL 表定义
+├── schema.sql.ts   # 共享的 Timestamps 字段
+├── storage.ts      # JSON 文件存储（历史方案，仍在使用中）
+└── json-migration.ts  # 一次性数据迁移：JSON → SQLite
 ```
 
-这条线先解决“数据怎么落地”，再去看性能、一致性和迁移细节。
+理解这两套系统，才能理解 OpenCode 数据层的全貌。
 
-### 初学者阅读顺序
+## SQLite 初始化：PRAGMA 配置的工程选择
 
-1. 先读 `storage/db.ts`，理解数据库是怎样初始化和被访问的。
-2. 再读 `session.sql.ts`、`project.sql.ts`、`workspace.sql.ts`，看真实表结构怎样映射产品模型。
-3. 最后读 `json-migration.ts` 和 `console/core/src/drizzle/index.ts`，理解历史兼容和云端边界。
+数据库初始化在 `db.ts` 的 `Database.Client` 懒加载函数中完成：
 
-### 最容易误解的点
+```typescript
+export const Client = lazy(() => {
+  const sqlite = new BunDatabase(Path, { create: true })
 
-- 持久化层不只是“用了 SQLite”，真正重要的是表结构和访问边界怎样服务于 Agent 运行时。
-- JSON 迁移不是历史包袱，而是理解项目演进路径的关键入口。
-- 本地数据库和云端 Console 数据库不是一主一从，而是两套不同职责的系统。
+  sqlite.run("PRAGMA journal_mode = WAL")        // 写前日志，提升并发
+  sqlite.run("PRAGMA synchronous = NORMAL")      // 平衡安全与性能
+  sqlite.run("PRAGMA busy_timeout = 5000")       // 锁等待最多 5 秒
+  sqlite.run("PRAGMA cache_size = -64000")       // 页缓存 64MB
+  sqlite.run("PRAGMA foreign_keys = ON")         // 强制外键约束
+  sqlite.run("PRAGMA wal_checkpoint(PASSIVE)")   // 非阻塞 WAL 检查点
 
-## 9.1 本地优先不是口号，而是数据库初始化策略
+  const db = drizzle({ client: sqlite })
+  migrate(db, entries)                           // 运行迁移
+  return db
+})
+```
 
-### `db.ts` 先解决的是“这台机器上的库怎么活起来”
+每个 PRAGMA 都有明确的工程理由：
 
-[packages/opencode/src/storage/db.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/storage/db.ts) 是当前本地数据库的主入口。
+| PRAGMA | 值 | 原因 |
+|--------|-----|------|
+| `journal_mode` | WAL | Write-Ahead Logging 允许读写并发，崩溃后自动恢复 |
+| `synchronous` | NORMAL | 比 FULL 快，比 OFF 安全（WAL 模式下足够） |
+| `busy_timeout` | 5000 | 同一进程的多个操作可能竞争锁，5 秒避免立即失败 |
+| `cache_size` | -64000 | 负值表示 KB，64MB 页缓存，热数据常驻内存 |
+| `foreign_keys` | ON | SQLite 默认关闭外键，这里显式开启以保证数据完整性 |
 
-它最先解决的不是表设计，而是“本地数据库如何稳定活起来”。初始化流程可以概括成：
+**WAL 模式的重要性**：OpenCode 服务器可能同时处理多个请求（TUI 操作 + Web API），WAL 模式确保读者不阻塞写者，写者不阻塞读者。
 
-1. 计算数据库文件路径
-2. 用 Bun SQLite 打开连接
-3. 配置若干 SQLite PRAGMA
-4. 创建 Drizzle client
-5. 自动应用迁移
-6. 通过上下文包装 `use()` 和 `transaction()`
+## 数据库文件路径：频道感知
 
-这套流程说明 OpenCode 关心的不只是“能不能写 SQL”，还包括：
+```typescript
+export const Path = iife(() => {
+  const channel = Installation.CHANNEL
+  if (["latest", "beta"].includes(channel) || Flag.OPENCODE_DISABLE_CHANNEL_DB)
+    return path.join(Global.Path.data, "opencode.db")
+  const safe = channel.replace(/[^a-zA-Z0-9._-]/g, "-")
+  return path.join(Global.Path.data, `opencode-${safe}.db`)
+})
+```
 
-- 本地库怎么按渠道隔离
-- 并发访问时怎么稳定一点
-- 事务外的后置副作用怎么统一执行
+正式发布版（latest/beta）使用 `opencode.db`，其他频道（如开发构建 `dev`）使用独立的 `opencode-dev.db`。这防止了"用开发版把正式版数据库改坏"的情况。对于持续集成和测试环境，可以通过 `Flag.OPENCODE_DISABLE_CHANNEL_DB` 强制使用统一文件名。
 
-### 数据库路径按发行渠道隔离
+## 核心 Schema：三级嵌套结构
 
-`Database.Path` 当前会根据 `Installation.CHANNEL` 生成不同文件名。
+所有表定义通过 `storage/schema.ts` 统一导出，但实际定义分散在各个领域模块中：
 
-典型行为是：
+```typescript
+// storage/schema.ts
+export { ProjectTable } from "../project/project.sql"
+export { SessionTable, MessageTable, PartTable, TodoTable, PermissionTable } from "../session/session.sql"
+export { SessionShareTable } from "../share/share.sql"
+```
 
-- `latest`、`beta` 默认写到 `opencode.db`
-- 其他渠道写到 `opencode-{channel}.db`
-- `OPENCODE_DISABLE_CHANNEL_DB` 可以关闭这层隔离
+这种就近原则（schema 和对应的业务代码放在一起）比把所有 schema 集中到 `storage/` 目录更容易维护。
 
-背后的工程考虑很直接：
+### Timestamps 共享模式
 
-- 开发版和正式版不要混数据
-- 不同发布渠道不要互相踩库
-- 升级实验功能时更容易控制影响范围
+```typescript
+// storage/schema.sql.ts
+export const Timestamps = {
+  time_created: integer()
+    .notNull()
+    .$default(() => Date.now()),   // 插入时自动设置
+  time_updated: integer()
+    .notNull()
+    .$onUpdate(() => Date.now()),  // 更新时自动刷新
+}
+```
 
-### SQLite 参数不是“性能彩蛋”，而是运行稳定性的底座
+`Timestamps` 是一个可复用的字段组合，通过展开运算符 `...Timestamps` 注入到每张表。所有时间戳都存储为 **Unix 毫秒整数**，避免时区问题，排序和比较也比 ISO 字符串高效。
 
-当前初始化至少会设置：
+### ProjectTable：万物的根
 
-- `PRAGMA journal_mode = WAL`
-- `PRAGMA synchronous = NORMAL`
-- `PRAGMA busy_timeout = 5000`
-- `PRAGMA cache_size = -64000`
-- `PRAGMA foreign_keys = ON`
-- `PRAGMA wal_checkpoint(PASSIVE)`
+```typescript
+export const ProjectTable = sqliteTable("project", {
+  id: text().$type<ProjectID>().primaryKey(),
+  worktree: text().notNull(),           // Git 仓库根路径
+  vcs: text(),                          // 版本控制类型（"git"）
+  name: text(),                         // 项目名称（可选）
+  icon_url: text(),                     // 项目图标 URL
+  icon_color: text(),                   // 项目图标颜色
+  ...Timestamps,
+  time_initialized: integer(),          // 首次初始化时间
+  sandboxes: text({ mode: "json" })     // 沙箱配置（JSON 数组）
+    .notNull().$type<string[]>(),
+  commands: text({ mode: "json" })      // 项目命令（JSON 对象）
+    .$type<{ start?: string }>(),
+})
+```
 
-这几项不是随手加的“性能参数”，而是在分别处理本地运行时最常见的问题：
+`ProjectID` 是通过 Git 仓库的初始 commit hash 生成的，这保证了"同一个仓库在不同机器上的 ProjectID 相同"，为跨设备同步提供了稳定标识。
 
-- `WAL` 让读写并发体验更平稳
-- `busy_timeout` 减少锁冲突带来的立即失败
-- `foreign_keys` 让级联关系真正生效
-- `cache_size` 和 checkpoint 让本地库在长期运行时更可控
+### SessionTable：会话的完整状态
 
-对本地 Agent 来说，这些设置往往比“选哪个 ORM”更影响日常稳定性。
+```typescript
+export const SessionTable = sqliteTable(
+  "session",
+  {
+    id: text().$type<SessionID>().primaryKey(),
+    project_id: text().$type<ProjectID>().notNull()
+      .references(() => ProjectTable.id, { onDelete: "cascade" }),
+    workspace_id: text().$type<WorkspaceID>(),    // 远程工作区（可选）
+    parent_id: text().$type<SessionID>(),         // fork 来源（可选）
+    slug: text().notNull(),                       // URL 友好标识
+    directory: text().notNull(),                  // 工作目录
+    title: text().notNull(),                      // 会话标题
+    version: text().notNull(),                    // OpenCode 版本
+    share_url: text(),                            // 分享链接（可选）
+    summary_additions: integer(),                 // 代码增加行数
+    summary_deletions: integer(),                 // 代码删除行数
+    summary_files: integer(),                     // 修改文件数
+    summary_diffs: text({ mode: "json" })         // 详细 diff（JSON）
+      .$type<Snapshot.FileDiff[]>(),
+    revert: text({ mode: "json" })                // 撤销状态（JSON）
+      .$type<{ messageID: MessageID; partID?: PartID; ... }>(),
+    permission: text({ mode: "json" })            // 权限规则集（JSON）
+      .$type<PermissionNext.Ruleset>(),
+    ...Timestamps,
+    time_compacting: integer(),                   // 最近一次压缩时间
+    time_archived: integer(),                     // 归档时间
+  },
+  (table) => [
+    index("session_project_idx").on(table.project_id),
+    index("session_workspace_idx").on(table.workspace_id),
+    index("session_parent_idx").on(table.parent_id),
+  ],
+)
+```
 
-### `Database.use()` 和 `Database.transaction()` 是真正的访问边界
+注意 `{ onDelete: "cascade" }`：当 Project 被删除时，所有关联的 Session 自动级联删除。Session 表里有三个外键创建了索引，分别支持"按项目查询会话"、"按工作区查询会话"、"查询 fork 链"三种查询模式。
 
-`db.ts` 里没有把 Drizzle client 到处裸传，而是统一包成：
+### MessageTable 和 PartTable：JSON Blob 策略
 
-- `Database.use()`
-- `Database.transaction()`
-- `Database.effect()`
+```typescript
+export const MessageTable = sqliteTable(
+  "message",
+  {
+    id: text().$type<MessageID>().primaryKey(),
+    session_id: text().$type<SessionID>().notNull()
+      .references(() => SessionTable.id, { onDelete: "cascade" }),
+    ...Timestamps,
+    data: text({ mode: "json" }).notNull()  // 存储 MessageV2.Info 的大部分字段
+      .$type<Omit<MessageV2.Info, "id" | "sessionID">>(),
+  },
+  (table) => [index("message_session_idx").on(table.session_id)],
+)
 
-它们背后的设计重点也很明确：
+export const PartTable = sqliteTable(
+  "part",
+  {
+    id: text().$type<PartID>().primaryKey(),
+    message_id: text().$type<MessageID>().notNull()
+      .references(() => MessageTable.id, { onDelete: "cascade" }),
+    session_id: text().$type<SessionID>().notNull(),  // 冗余但避免 JOIN
+    ...Timestamps,
+    data: text({ mode: "json" }).notNull()  // 存储 Part 的 type-specific 数据
+      .$type<Omit<MessageV2.Part, "id" | "sessionID" | "messageID">>(),
+  },
+  (table) => [
+    index("part_message_idx").on(table.message_id),
+    index("part_session_idx").on(table.session_id),
+  ],
+)
+```
 
-- 没有事务上下文时，自动用全局 client
-- 有事务上下文时，复用当前 `tx`
-- 副作用函数先收集，事务完成后再执行
+这里有一个关键的架构决策：**大量字段以 JSON blob 形式存储在 `data` 列，而不是拆分为多列**。
 
-也就是说，这里不只是给 ORM 套壳，而是在建立一套数据库上下文协议。
+为什么这样做？
+
+1. **Part 类型多样**：TextPart、ToolPart、ReasoningPart 等有完全不同的字段结构。如果每种类型都拆开存储，要么需要大量 NULL 列，要么需要多张表做 JOIN。JSON blob 让一张表容纳所有 Part 类型。
+
+2. **类型可以演化**：增减 Part 内部的字段，不需要数据库 Schema 迁移，只需要应用层兼容处理。
+
+3. **查询模式简单**：大多数查询是"给我这个会话的所有消息和 Parts"，很少需要按 Part 的内部字段过滤。不需要索引内部字段，JSON blob 就够了。
+
+`PartTable.session_id` 是冗余字段（可以通过 `message_id → MessageTable.session_id` 推导），但保留它是为了避免 JOIN，直接 `WHERE session_id = ?` 就能查出该会话的所有 Parts。
+
+### TodoTable：复合主键设计
+
+```typescript
+export const TodoTable = sqliteTable(
+  "todo",
+  {
+    session_id: text().$type<SessionID>().notNull()
+      .references(() => SessionTable.id, { onDelete: "cascade" }),
+    content: text().notNull(),
+    status: text().notNull(),    // "pending" | "done" | "in_progress"
+    priority: text().notNull(),  // "high" | "medium" | "low"
+    position: integer().notNull(),  // 排序位置
+    ...Timestamps,
+  },
+  (table) => [
+    primaryKey({ columns: [table.session_id, table.position] }),
+    index("todo_session_idx").on(table.session_id),
+  ],
+)
+```
+
+Todo 使用 `(session_id, position)` 复合主键，而不是独立的 UUID。这种设计意味着"同一会话内 position 唯一"，天然保证了待办事项的有序性，不需要额外的 ORDER BY 字段。
+
+## Database 命名空间：事务与副效应分离
+
+`db.ts` 暴露了三个核心函数，它们共同构成了一个轻量级的事务管理系统：
+
+### `Database.use()`：读取或非事务写入
+
+```typescript
+export function use<T>(callback: (trx: TxOrDb) => T): T {
+  try {
+    return callback(ctx.use().tx)  // 如果在事务中，复用现有事务
+  } catch (err) {
+    if (err instanceof Context.NotFound) {
+      const effects: (() => void | Promise<void>)[] = []
+      const result = ctx.provide({ effects, tx: Client() }, () => callback(Client()))
+      for (const effect of effects) effect()  // 执行副效应
+      return result
+    }
+    throw err
+  }
+}
+```
+
+`use()` 是最简单的数据库访问方式。如果当前已在事务中（通过 `transaction()` 发起的），它会自动复用该事务，避免嵌套事务的问题。如果没有，则直接使用数据库连接。
+
+### `Database.transaction()`：原子性操作
+
+```typescript
+export function transaction<T>(callback: (tx: TxOrDb) => T): T {
+  try {
+    return callback(ctx.use().tx)  // 已在事务中则复用
+  } catch (err) {
+    if (err instanceof Context.NotFound) {
+      const effects: (() => void | Promise<void>)[] = []
+      const result = (Client().transaction as any)((tx: TxOrDb) => {
+        return ctx.provide({ tx, effects }, () => callback(tx))
+      })
+      for (const effect of effects) effect()  // 事务成功后执行副效应
+      return result
+    }
+    throw err
+  }
+}
+```
+
+`transaction()` 包裹 SQLite 原生事务，回调失败则自动回滚。关键在于**副效应队列**：在事务执行期间注册的副效应（通过 `Database.effect()`）会在事务提交成功后才执行，而不是在事务中间执行。
+
+### `Database.effect()`：延迟副效应
+
+```typescript
+export function effect(fn: () => any | Promise<any>) {
+  try {
+    ctx.use().effects.push(fn)  // 在事务中：加入队列等待提交后执行
+  } catch {
+    fn()  // 不在事务中：立即执行
+  }
+}
+```
+
+这解决了一个经典问题：**数据库事务成功后触发 Bus 事件通知客户端**。如果直接在事务内部发 Bus 事件，可能发生"事务还没提交，客户端已收到通知去查数据库，却查不到新数据"的竞态。通过副效应队列，Bus 事件总在事务提交后才发出。
+
+使用示例：
+
+```typescript
+Database.transaction((tx) => {
+  // 写入数据库
+  tx.insert(SessionTable).values({ id, ... }).run()
+
+  // 注册副效应：事务提交后通知 TUI 刷新
+  Database.effect(() => {
+    Bus.publish(Session.Events.Created, { sessionID: id })
+  })
+})
+// 事务提交成功 → Bus.publish 执行 → 客户端收到通知
+```
+
+## JSON 文件存储：历史与现状
+
+在 SQLite 引入之前，OpenCode 使用 `Storage` 命名空间管理基于文件系统的 JSON 存储：
+
+```
+~/.opencode/data/storage/
+├── project/
+│   └── <projectID>.json
+├── session/
+│   └── <projectID>/
+│       └── <sessionID>.json
+├── message/
+│   └── <sessionID>/
+│       └── <messageID>.json
+├── part/
+│   └── <messageID>/
+│       └── <partID>.json
+├── todo/
+│   └── <sessionID>.json
+└── permission/
+    └── <projectID>.json
+```
+
+`Storage` 命名空间提供了简单的 CRUD API：
+
+```typescript
+// 读取（持有读锁）
+const session = await Storage.read<Session.Info>(["session", projectID, sessionID])
+
+// 写入（持有写锁）
+await Storage.write(["session", projectID, sessionID], sessionData)
+
+// 更新（持有写锁，read-modify-write 原子操作）
+await Storage.update<Session.Info>(["session", projectID, sessionID], (draft) => {
+  draft.title = newTitle
+})
+
+// 列出（glob 扫描）
+const sessions = await Storage.list(["session", projectID])
+```
+
+文件锁通过 `Lock.read()` / `Lock.write()` 实现，使用 ES2023 的 `using` 语法自动释放：
+
+```typescript
+using _ = await Lock.write(target)  // 离开作用域时自动释放
+await Filesystem.writeJson(target, content)
+```
+
+JSON 文件存储的优点是"无需数据库，直接用文件编辑器就能查看和修改数据"，但随着数据量增大，性能逐渐成为瓶颈。
+
+## 从 JSON 到 SQLite：大规模数据迁移
+
+`json-migration.ts` 实现了一次性的数据迁移，将旧的 JSON 文件数据完整迁移到 SQLite。
+
+迁移的工程细节非常值得学习：
+
+### 1. 迁移顺序遵循外键依赖
+
+```
+Projects（无外键依赖）
+  ↓
+Sessions（依赖 projects）
+  ↓
+Messages（依赖 sessions）
+  ↓
+Parts（依赖 messages + sessions）
+  ↓
+Todos（依赖 sessions）
+Permissions（依赖 projects）
+SessionShares（依赖 sessions）
+```
+
+任何违反这个顺序的插入都会因为 `PRAGMA foreign_keys = ON` 失败。
+
+### 2. 迁移期间的 SQLite 优化
+
+```typescript
+// 批量导入时临时关闭部分安全措施，换取速度
+sqlite.exec("PRAGMA journal_mode = WAL")
+sqlite.exec("PRAGMA synchronous = OFF")    // 迁移期间不需要持久性保证
+sqlite.exec("PRAGMA cache_size = 10000")
+sqlite.exec("PRAGMA temp_store = MEMORY")
+```
+
+`synchronous = OFF` 在正常运行时是危险的（崩溃会丢数据），但在迁移这种"可以重试"的场景中换来了大幅性能提升。
+
+### 3. 批处理防止内存溢出
+
+```typescript
+const batchSize = 1000  // 每批 1000 条记录
+
+for (let i = 0; i < allMessageFiles.length; i += batchSize) {
+  const end = Math.min(i + batchSize, allMessageFiles.length)
+  const batch = await read(allMessageFiles, i, end)
+  // ... 处理并插入
+  stats.messages += insert(values, MessageTable, "message")
+  step("messages", end - i)
+}
+```
+
+### 4. 孤立记录处理
+
+```typescript
+if (!projectIds.has(projectID)) {
+  orphans.sessions++
+  continue  // 跳过，而不是失败
+}
+```
+
+迁移不会因为数据不一致而中止，而是记录孤立记录数量并继续。这是生产迁移的正确姿态。
+
+### 5. 事务包裹整个迁移
+
+```typescript
+sqlite.exec("BEGIN TRANSACTION")
+// ... 所有迁移操作
+sqlite.exec("COMMIT")
+```
+
+整个迁移在一个事务中完成，要么全部成功，要么全部回滚，不留中间状态。
+
+## 数据关系全貌
+
+```
+Project ─┬─ Session ─┬─ Message ─── Part
+         │            ├─ Todo
+         │            └─ Permission（会话级权限）
+         └─ Permission（项目级权限）
+
+ProjectTable
+  id (PK, git root commit hash)
+  worktree, vcs, name, sandboxes, commands
+
+SessionTable
+  id (PK)
+  project_id (FK → Project, CASCADE DELETE)
+  parent_id (self-ref, fork 来源)
+  summary_diffs, revert, permission (JSON blobs)
+
+MessageTable
+  id (PK)
+  session_id (FK → Session, CASCADE DELETE)
+  data (JSON blob: role, agent, model, cost...)
+
+PartTable
+  id (PK)
+  message_id (FK → Message, CASCADE DELETE)
+  session_id (冗余索引，避免 JOIN)
+  data (JSON blob: type-specific 字段)
+
+TodoTable
+  (session_id, position) (PK)
+  content, status, priority
+
+PermissionTable
+  project_id (PK, FK → Project, CASCADE DELETE)
+  data (JSON blob: allow/deny/ask 规则集)
+```
+
+## 迁移系统：SQL 迁移文件管理
+
+OpenCode 使用 Drizzle 的标准迁移系统，迁移文件位于 `packages/opencode/migration/` 目录：
+
+```
+migration/
+├── 20240101000000_init/
+│   └── migration.sql
+├── 20240215000000_add_workspace/
+│   └── migration.sql
+└── ...
+```
+
+每个目录名以 `YYYYMMDDHHmmss` 格式的时间戳开头。`db.ts` 会解析这个时间戳来确定迁移顺序：
+
+```typescript
+function time(tag: string) {
+  const match = /^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/.exec(tag)
+  if (!match) return 0
+  return Date.UTC(
+    Number(match[1]),
+    Number(match[2]) - 1,  // 月份从 0 开始
+    Number(match[3]),
+    Number(match[4]),
+    Number(match[5]),
+    Number(match[6]),
+  )
+}
+```
+
+在生产构建中，迁移文件会通过 `OPENCODE_MIGRATIONS` 全局变量打包进二进制，不依赖文件系统路径。开发模式则直接读取 `migration/` 目录。
+
+## 设计总结
+
+OpenCode 数据持久化层的核心设计决策：
+
+| 决策 | 选择 | 理由 |
+|------|------|------|
+| 数据库 | SQLite + WAL | 零配置、单文件、支持并发读 |
+| ORM | Drizzle | 类型安全、轻量、与 Bun 契合 |
+| 时间戳 | Unix 毫秒整数 | 无时区问题，排序高效 |
+| 复杂字段 | JSON blob | Part 类型多样，避免宽表或多表 JOIN |
+| 外键 | CASCADE DELETE | 删除父记录时自动清理子记录 |
+| 冗余字段 | `part.session_id` | 空间换时间，避免 JOIN |
+| 副效应 | 事务后执行 | 防止"通知先于数据"竞态 |
 
 ---
 
-## 9.2 真实表结构反映的是 Agent 运行模型
+**思考题**：
 
-### `schema.ts` 只是导出总表，真正的数据模型分散在业务模块里
+1. `PartTable` 中 `data` 列存储 JSON blob，而 `id`、`message_id`、`session_id`、`timestamps` 作为独立列。这个"部分列化"的边界是如何确定的？如果未来需要按某个 Part 内部字段查询，应该怎么改？
 
-[packages/opencode/src/storage/schema.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/storage/schema.ts) 自身很短，但它把多个模块下的表重新导出：
+2. `Database.effect()` 实现了"事务提交后执行副效应"。如果副效应本身失败（比如 Bus 事件发布时客户端已断线），会发生什么？这个设计如何权衡？
 
-- `ProjectTable`
-- `SessionTable`
-- `MessageTable`
-- `PartTable`
-- `TodoTable`
-- `PermissionTable`
-- `SessionShareTable`
-- `WorkspaceTable`
-
-这说明当前仓库的数据建模不是“数据库目录一把抓”，而是：
-
-**谁负责业务对象，谁就定义自己的表。**
-
-### 项目层：`project`
-
-[packages/opencode/src/project/project.sql.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/project/project.sql.ts) 里的 `project` 表保存的是 OpenCode 认识一个仓库所需的最小信息：
-
-- `id`
-- `worktree`
-- `vcs`
-- `name`
-- `icon_url`
-- `icon_color`
-- `time_initialized`
-- `sandboxes`
-- `commands`
-
-从这些字段能看出，Project 在 OpenCode 里不是 Git 仓库元数据的完整镜像，而是“Agent 工作入口”的配置对象。
-
-### 会话层：`session -> message -> part`
-
-[packages/opencode/src/session/session.sql.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/session/session.sql.ts) 是整套本地数据模型里最核心的一组表。
-
-其中：
-
-- `session` 保存会话级元信息
-- `message` 保存消息级信息
-- `part` 保存消息的细粒度分片
-
-`session` 表里最值得注意的字段包括：
-
-- `project_id`
-- `workspace_id`
-- `parent_id`
-- `slug`
-- `directory`
-- `title`
-- `version`
-- `share_url`
-- `summary_*`
-- `revert`
-- `permission`
-- `time_compacting`
-- `time_archived`
-
-这组字段恰好映射了你在前几篇看到的能力：
-
-- 一个会话属于某个项目
-- 会话可能属于某个 workspace
-- 会话可以 fork，所以有 `parent_id`
-- 会话可能被摘要压缩、回滚、分享、归档
-
-也就是说，数据库结构本身就在说明产品能力边界。
-
-### Todo、Permission、Share 不是附属表，而是会话治理的一部分
-
-同一个文件里还定义了：
-
-- `todo`
-- `permission`
-
-另一个文件 [packages/opencode/src/share/share.sql.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/share/share.sql.ts) 定义了：
-
-- `session_share`
-
-这些表对应的是 Agent 运行时经常被忽视的“治理信息”：
-
-- 当前会话有哪些待办
-- 当前项目允许哪些权限规则
-- 某个会话是否被分享、用什么 secret、对应什么 URL
-
-如果电子书只讲 `session` 和 `message`，读者会误以为持久化层只是聊天记录库，这会把 OpenCode 讲窄很多。
-
-### `workspace` 表说明本地库已经在承接控制平面信息
-
-[packages/opencode/src/control-plane/workspace.sql.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/control-plane/workspace.sql.ts) 当前定义了本地 `workspace` 表：
-
-- `id`
-- `type`
-- `branch`
-- `name`
-- `directory`
-- `extra`
-- `project_id`
-
-它的意义不是“把整个云端工作区数据都落本地”，而是：
-
-- 本地知道有哪些 workspace
-- 知道它们属于哪个 project
-- 知道怎么通过 adaptor 去连接或转发
-
-这正是第八篇里 `WorkspaceRouterMiddleware` 能工作的前提。
+3. 从 JSON 文件迁移到 SQLite 时，迁移脚本对"孤立记录"的处理是"跳过而不失败"。在真实的生产迁移中，这是正确的做法吗？什么情况下应该选择"严格模式（遇到错误就停止）"？
 
 ---
 
-## 9.3 迁移系统分成两类：SQL 迁移和旧 JSON 升级
+**下一章预告**
 
-### 第一类：当前 SQLite schema 的正式迁移
-
-`db.ts` 里会在启动时收集迁移条目：
-
-- 生产环境优先用打包进产物的 `OPENCODE_MIGRATIONS`
-- 开发环境则从 `packages/opencode/migration/` 目录扫描
-
-然后统一走 `migrate(db, entries)`。
-
-这套机制的价值在于：
-
-- 开发环境可以直接跟着源码目录走
-- 打包产物不必依赖源码目录结构
-- schema 演进能保持稳定记录
-
-### 第二类：历史 JSON 数据导入 SQLite
-
-[packages/opencode/src/storage/json-migration.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/storage/json-migration.ts) 是当前文档里最容易被漏讲、但最能体现项目演进路径的文件。
-
-它处理的不是 SQL schema 变更，而是：
-
-**把早期存放在 `Global.Path.data/storage/` 下的 JSON 数据搬进 SQLite。**
-
-它会扫描：
-
-- `project/*.json`
-- `session/*/*.json`
-- `message/*/*.json`
-- `part/*/*.json`
-- `todo/*.json`
-- `permission/*.json`
-- `session_share/*.json`
-
-然后批量导入对应表。
-
-### 这套 JSON 迁移逻辑有几个很真实的工程细节
-
-首先，它不是单文件循环插入，而是：
-
-- 先全量扫描文件
-- 按批读取
-- 批量插入
-- 收集错误
-- 统计 orphan 数据
-
-其次，它会优先根据**文件路径**推导 ID，而不是完全相信 JSON 内容本身。  
-源码里甚至直接写了注释，解释为什么这样做：
-
-- 早期迁移可能移动过目录
-- JSON 内部的 ID 未必同步更新
-
-这类细节非常适合写给初学者，因为它体现了真实项目的常态：
-
-**数据迁移最难的部分，往往不是导入动作本身，而是纠正历史不一致。**
-
-### 旧版 `storage.ts` 还保留着更早一代文件存储接口
-
-[packages/opencode/src/storage/storage.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/storage/storage.ts) 现在仍然存在，它提供：
-
-- `read`
-- `write`
-- `update`
-- `remove`
-- `list`
-
-并带着更早期的文件级迁移逻辑。
-
-这说明当前仓库不是“从一开始就完美统一到 SQLite”，而是经历过：
-
-1. 纯文件 JSON
-2. 文件迁移整理
-3. JSON 导入 SQLite
-4. SQLite 成为主存储
-
-如果你是 Agent 开发初学者，这段演进史比抽象讨论“为什么选择某数据库”更有价值。
-
----
-
-## 9.4 本地数据库和云端 Console 数据层是两套边界
-
-### 当前 `packages/opencode` 里的数据库是本地运行态数据库
-
-本地 SQLite 主要保存：
-
-- 当前机器上打开过哪些项目
-- 每个项目有哪些 session
-- 每个 session 的消息、分片、todo、权限、分享状态
-- 实验性 workspace 映射
-
-这套数据的目标是支撑：
-
-- CLI
-- 本地 API server
-- Desktop/Web 对本地实例的访问
-
-也就是说，它首先服务的是“本地 Agent 运行态”。
-
-### 云端 Console 走的是另一套 Drizzle + PlanetScale
-
-[packages/console/core/src/drizzle/index.ts](https://github.com/anomalyco/opencode/blob/dev/packages/console/core/src/drizzle/index.ts) 可以看到，Console 侧使用的是：
-
-- `drizzle-orm/planetscale-serverless`
-- `@planetscale/database`
-
-这意味着云端 Console 的数据库形态和本地完全不同：
-
-- 本地是 Bun SQLite
-- 云端是 PlanetScale MySQL
-
-它们虽然都用了 Drizzle，但关注点不一样：
-
-- 本地关心单机、离线、轻量、低依赖
-- 云端关心团队协作、控制平面、服务化数据管理
-
-### `workspace` 是两套数据边界的连接点，不是混用点
-
-这一点很关键。
-
-OpenCode 本地库里有 `workspace` 表，不代表云端数据被“整个同步到本地”。  
-当前更准确的理解是：
-
-- 本地保存 workspace 的最小连接信息
-- HTTP 层用这些信息决定是否转发请求
-- 云端 Console 继续维护它自己的完整业务表
-
-所以如果你写这本书，要明确告诉读者：
-
-**同样都是 Drizzle，不代表它们属于同一个数据库域。**
-
-这是很多初学者最容易混淆的地方。
-
----
-
-## 9.5 性能和一致性不是附录，而是存储层主设计
-
-### 索引和级联关系已经是 schema 的一部分
-
-`session.sql.ts` 里给常用查询路径建了索引，例如：
-
-- `session_project_idx`
-- `session_workspace_idx`
-- `session_parent_idx`
-- `message_session_idx`
-- `part_message_idx`
-- `part_session_idx`
-- `todo_session_idx`
-
-同时外键上也配了 `onDelete: "cascade"`。
-
-这意味着数据层当前默认支持这些高频动作：
-
-- 按项目列会话
-- 按父会话找子会话
-- 按 session 拉消息
-- 删 session 时连带清理 message/part/todo
-
-### 批量迁移场景做了专门优化
-
-在 `json-migration.ts` 里，为了批量导入旧数据，代码会临时调整 SQLite 参数，例如：
-
-- `journal_mode = WAL`
-- `synchronous = OFF`
-- `cache_size = 10000`
-- `temp_store = MEMORY`
-
-这说明当前仓库对“迁移过程”和“日常运行过程”是分开调优的。  
-这是很成熟的工程思路。
-
-### `Timestamps` 混入统一了大部分实体的时间语义
-
-[packages/opencode/src/storage/schema.sql.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/storage/schema.sql.ts) 只导出一个很小的 `Timestamps`：
-
-- `time_created`
-- `time_updated`
-
-但它的价值很大，因为多个表都共用了同一组时间字段定义。  
-这能减少时间语义在不同表里逐渐漂移。
-
-### `Database.effect()` 体现了“事务后副作用”意识
-
-很多项目在事务成功后会顺手做：
-
-- 发事件
-- 刷缓存
-- 更新状态
-
-如果这些动作散落在各个业务函数里，一旦事务回滚就容易出错。  
-`Database.effect()` 的设计正是在提前处理这类一致性问题。
-
-对初学者来说，这是一条很值得迁移到自己项目里的经验：
-
-**数据库事务和事务后副作用，最好在基础设施层有明确约束。**
-
----
-
-## 本章小结
-
-理解 OpenCode 的持久化层，重点不是停在“SQLite + Drizzle”这六个字，而是看清楚三件事：
-
-1. 本地 SQLite 是 Agent 运行态的主数据库
-2. 历史 JSON 迁移说明这个项目经历过真实的存储演进
-3. 云端 Console 数据库和本地库虽然都用 Drizzle，但属于不同数据边界
-
-如果你后面想自己做一个 Agent 项目，我更建议你借鉴 OpenCode 的这套思路：
-
-- 先把本地运行态数据建模清楚
-- 再考虑如何平滑迁移旧格式
-- 最后再决定哪些数据真的应该进入云端控制平面
-
-### 关键代码位置
-
-| 模块 | 位置 | 建议关注点 |
-| --- | --- | --- |
-| 数据库入口 | `packages/opencode/src/storage/db.ts` | 初始化、迁移、事务包装 |
-| Schema 汇总 | `packages/opencode/src/storage/schema.ts` | 本地表结构组合方式 |
-| 通用字段定义 | `packages/opencode/src/storage/schema.sql.ts` | 时间字段与复用模式 |
-| JSON 迁移 | `packages/opencode/src/storage/json-migration.ts` | 旧格式导入与批量迁移优化 |
-| 存储兼容层 | `packages/opencode/src/storage/storage.ts` | 历史存储访问与边界过渡 |
-| 项目表 | `packages/opencode/src/project/project.sql.ts` | 项目维度的最小建模 |
-| 会话表 | `packages/opencode/src/session/session.sql.ts` | 会话、消息、part 主结构 |
-| 工作区表 | `packages/opencode/src/control-plane/workspace.sql.ts` | 本地 workspace 建模 |
-| 云端 Drizzle | `packages/console/core/src/drizzle/index.ts` | Console 数据层入口 |
-
-### 源码阅读路径
-
-1. 先读 `storage/db.ts`，理解本地 SQLite 是怎么初始化、迁移和包事务的。
-2. 再读 `project.sql.ts`、`session.sql.ts`、`share.sql.ts`、`workspace.sql.ts`，建立核心表关系。
-3. 最后读 `json-migration.ts` 和 `packages/console/core/src/drizzle/index.ts`，分别看旧格式迁移和云端数据库边界。
-
-### 任务
-
-判断 OpenCode 的持久化设计为什么必须把“本地运行态数据库”和“云端产品数据层”明确拆开，而不是追求一套统一主库。
-
-### 操作
-
-1. 打开 `packages/opencode/src/storage/db.ts`，理解本地 SQLite 是怎样初始化、迁移和包事务的。
-2. 再读 `project.sql.ts`、`session.sql.ts`、`share.sql.ts`、`workspace.sql.ts`，写出一个 session 可能关联到哪些表，以及删除时哪些数据会级联变化。
-3. 最后对比 `json-migration.ts` 和 `packages/console/core/src/drizzle/index.ts`，分别记录历史兼容层和云端数据层在系统里承担什么职责。
-
-### 验收
-
-完成后你应该能说明：
-
-- 为什么本地库更像运行时状态底座，而不是云端产品库的缓存。
-- 为什么历史 JSON 迁移代码对理解当前边界仍然重要。
-- 如果要新增一个持久化字段，你应该先判断它属于本地运行态、云端产品态，还是根本不该入库。
-
-### 下一篇预告
-
-下一篇会回到用户真正能看到的界面层，也就是多端 UI。  
-到那时你会更清楚：为什么本地数据库、HTTP API 和前端状态管理必须同时设计，而不能各写各的。
-
-### 思考题
-
-1. 为什么 OpenCode 要把本地运行态数据库和云端 Console 数据层明确拆开，而不是统一成一套远端主库？
-2. `json-migration.ts` 这类历史兼容代码，对理解当前系统边界有什么帮助？
-3. 如果你要为会话系统新增一个持久化字段，它更应该落在本地库、云端库，还是两边都不需要？
+第11章：**多端 UI 开发** — 深入 `packages/app/` 和 `packages/desktop/`，学习：SolidJS Web 应用的组件架构、Tauri 桌面端的 Rust + TypeScript 桥接、多端共享代码的策略，以及如何用同一套 HTTP API 支撑 TUI、Web 和桌面三种客户端。

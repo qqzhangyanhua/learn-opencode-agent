@@ -1,548 +1,482 @@
 ---
-title: 第十一篇：代码智能
-description: 第十一篇：代码智能的详细内容
+title: 第12章：代码智能
+description: LSP 客户端的工程实现：懒加载客户端管理、诊断信息注入 AI 响应、LspTool 的九种操作，以及文件编辑与代码分析的协作流水线
 ---
 
-<script setup>
-import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshotCard.vue'
-</script>
+## AI 为什么需要 LSP？
 
-> **对应路径**：`packages/opencode/src/lsp/`、`packages/opencode/src/tool/lsp.ts`
-> **前置阅读**：第三篇 工具系统
-> **学习目标**：理解 OpenCode 的代码智能不是“单个 LSP 插件”，而是一套按语言启动、按项目隔离、按需同步、可被 Agent 调用的本地语义分析系统
+语言服务器协议（Language Server Protocol，LSP）是微软在 VS Code 中提出的标准，让编辑器和语言服务器解耦：编辑器负责 UI，语言服务器负责理解代码。
 
----
+对 AI Coding Agent 来说，LSP 带来了两个关键能力：
 
-<SourceSnapshotCard
-  title="第十一篇源码快照"
-  description="这一篇先抓代码智能的服务化主链路：语言服务器怎样被选择和复用、文件怎样同步、以及语义能力怎样重新包装成 Agent 可调用的接口。"
-  repo="anomalyco/opencode"
-  repo-url="https://github.com/anomalyco/opencode/tree/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
-  branch="dev"
-  commit="f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
-  verified-at="2026-03-15"
-  :entries="[
-    {
-      label: 'LSP 总入口',
-      path: 'packages/opencode/src/lsp/index.ts',
-      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/lsp/index.ts'
-    },
-    {
-      label: '语言服务器定义',
-      path: 'packages/opencode/src/lsp/server.ts',
-      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/lsp/server.ts'
-    },
-    {
-      label: 'LSP 客户端',
-      path: 'packages/opencode/src/lsp/client.ts',
-      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/lsp/client.ts'
-    },
-    {
-      label: 'Agent LSP 工具',
-      path: 'packages/opencode/src/tool/lsp.ts',
-      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/tool/lsp.ts'
+**1. 即时诊断反馈**：AI 修改文件后，LSP 服务器会异步发送诊断结果（类型错误、语法错误、lint 警告）。如果错误会被直接注入到工具的返回值里，AI 可以在同一轮对话中立刻修复，而不是等用户手动运行编译器发现问题。
+
+**2. 精确的代码导航**：AI 需要理解"这个函数在哪里定义"、"哪些地方调用了这个方法"、"这个接口有哪些实现"。LSP 提供的 `goToDefinition`、`findReferences`、`goToImplementation` 等操作，比文本搜索更精确，不会被字符串巧合误导。
+
+## LSP 子系统的整体架构
+
+```
+packages/opencode/src/lsp/
+├── index.ts      # 主命名空间：管理服务器和客户端的生命周期
+├── server.ts     # 内置 LSP 服务器定义（如何启动 tsserver、gopls 等）
+├── client.ts     # LSP 客户端：JSON-RPC 连接封装
+└── language.ts   # 文件扩展名 → 语言 ID 映射表（80+ 种语言）
+```
+
+这四个文件共同构成了一个懒加载、按需启动的 LSP 客户端管理层。关键设计是：**LSP 服务器只在需要时才启动**，不是在 OpenCode 启动时一次性启动所有服务器。
+
+## LSP 状态：每个项目实例独立
+
+`lsp/index.ts` 的状态绑定到项目实例（Instance），这意味着不同工作目录有独立的 LSP 客户端池：
+
+```typescript
+const state = Instance.state(
+  async () => {
+    const servers: Record<string, LSPServer.Info> = {}
+    const cfg = await Config.get()
+
+    // 全局禁用
+    if (cfg.lsp === false) {
+      return { broken: new Set(), servers: {}, clients: [], spawning: new Map() }
     }
-  ]"
-/>
 
-## 核心概念速览
+    // 加载内置服务器定义
+    for (const server of Object.values(LSPServer)) {
+      servers[server.id] = server
+    }
 
-很多 Agent 产品会说自己“支持 LSP”，但真正落到工程里，至少要解决四个问题：
+    // 实验性标志：Python 可选 ty（Rust 实现）而非 pyright
+    filterExperimentalServers(servers)
 
-1. 不同语言怎么选服务器
-2. 一个仓库里多个项目根怎么隔离
-3. 文件修改后怎么同步给服务器
-4. 这些能力怎么重新包装成 Agent 工具
+    // 合并用户自定义服务器配置
+    for (const [name, item] of Object.entries(cfg.lsp ?? {})) {
+      if (item.disabled) { delete servers[name]; continue }
+      servers[name] = {
+        id: name,
+        extensions: item.extensions ?? [],
+        spawn: async (root) => ({
+          process: spawn(item.command[0], item.command.slice(1), {
+            cwd: root, env: { ...process.env, ...item.env },
+          }),
+          initialization: item.initialization,
+        }),
+      }
+    }
 
-OpenCode 在这几件事上做得比较完整。它的 LSP 系统至少包含：
-
-- `LSPServer`：描述每种语言服务器怎么找 root、怎么启动
-- `LSP`：管理客户端池、生命周期和调用入口
-- `LSPClient`：负责 JSON-RPC 通信、文件同步、诊断等待
-- `LspTool`：把部分能力暴露给 Agent
-
-对初学者来说，这一篇最该学到的不是 LSP 协议教科书，而是：
-
-**Agent 的代码理解能力，往往来自“把 IDE 时代的语义工具重新服务化”。**
-
----
-
-## 本章导读
-
-### 这一章解决什么问题
-
-这一章要回答的是：
-
-- OpenCode 的代码智能到底由哪几层组成
-- 不同语言服务器怎样被选择、启动和隔离
-- 文件变更、诊断、跳转等语义能力怎样进入 Agent 工作流
-- 为什么 LSP 在这里不是“附加插件”，而是核心代码理解基础设施
-
-### 必看入口
-
-- [packages/opencode/src/lsp/index.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/lsp/index.ts)：LSP 总入口与能力导出
-- [packages/opencode/src/lsp/server.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/lsp/server.ts)：语言服务器定义
-- [packages/opencode/src/lsp/client.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/lsp/client.ts)：JSON-RPC 客户端与文件同步
-- [packages/opencode/src/lsp/language.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/lsp/language.ts)：语言映射
-- [packages/opencode/src/tool/lsp.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/tool/lsp.ts)：暴露给 Agent 的实验性 LSP 工具
-
-### 先抓一条主链路
-
-建议先追这条线：
-
-```text
-文件被 read / edit / write 等工具触达
-  -> lsp/index.ts 选择或复用客户端
-  -> server.ts 决定语言服务器如何启动
-  -> client.ts 同步文件与请求诊断
-  -> 结果回流到工具、会话和界面
+    return {
+      broken: new Set<string>(),   // 启动失败的服务器，不再重试
+      servers,                      // 可用服务器定义表
+      clients: [],                  // 已连接的客户端列表
+      spawning: new Map(),          // 正在启动中的任务（防止重复启动）
+    }
+  },
+  async (state) => {
+    // 项目实例销毁时关闭所有 LSP 连接
+    await Promise.all(state.clients.map((c) => c.shutdown()))
+  },
+)
 ```
 
-这条线先解决“LSP 怎样成为产品能力”，再去看协议细节。
+四个状态字段各有职责：
 
-### 初学者阅读顺序
+| 字段 | 类型 | 作用 |
+|------|------|------|
+| `servers` | `Record<string, LSPServer.Info>` | 服务器配置表（不代表已启动） |
+| `clients` | `LSPClient.Info[]` | 已成功连接的客户端 |
+| `broken` | `Set<string>` | 启动失败的 `root+serverID` 键，避免无限重试 |
+| `spawning` | `Map<string, Promise<...>>` | 正在启动的任务，防止并发请求导致重复启动 |
 
-1. 先读 `lsp/index.ts`，建立整体职责分工。
-2. 再读 `server.ts` 和 `language.ts`，理解语言支持是怎样被声明的。
-3. 最后读 `client.ts` 和 `tool/lsp.ts`，看语义能力如何真正被调用。
+## 懒加载客户端：getClients 的状态机
 
-### 最容易误解的点
+每当工具需要对某个文件执行 LSP 操作，都会调用 `getClients(file)`：
 
-- LSP 在这里不是单独面向用户的功能页，而是很多编辑与诊断能力的底层依赖。
-- 代码智能的难点不在“连上语言服务器”，而在项目根隔离、文件同步和诊断时序。
-- 显式 `lsp` 工具只是能力出口之一，不代表全部 LSP 能力都只通过它暴露。
+```typescript
+async function getClients(file: string) {
+  const s = await state()
+  const extension = path.parse(file).ext || file  // 如 ".ts"
+  const result: LSPClient.Info[] = []
 
-## 11.1 OpenCode 的 LSP 架构
+  for (const server of Object.values(s.servers)) {
+    // 1. 扩展名过滤：服务器不处理该文件类型则跳过
+    if (server.extensions.length && !server.extensions.includes(extension)) continue
 
-### 先看整体角色分工
+    // 2. 找根目录（如 tsconfig.json 所在的最近目录）
+    const root = await server.root(file)
+    if (!root) continue  // 找不到根目录（该文件可能不在受管理的项目中）
 
-当前仓库里的 LSP 体系可以先压缩成下面这张图：
+    // 3. 跳过已知失败的服务器
+    const key = root + server.id
+    if (s.broken.has(key)) continue
 
-```text
-Agent / Tool
-  -> tool/lsp.ts
-  -> LSP.index.ts
-  -> LSPClient.create()
-  -> 具体语言服务器进程
+    // 4. 复用已有客户端
+    const match = s.clients.find((x) => x.root === root && x.serverID === server.id)
+    if (match) { result.push(match); continue }
 
-文件变化
-  -> LSP.touchFile()
-  -> didOpen / didChange / didChangeWatchedFiles
-  -> publishDiagnostics
-  -> 回流到 read / edit / write 的输出
-```
+    // 5. 等待正在启动的任务（避免重复启动）
+    const inflight = s.spawning.get(key)
+    if (inflight) {
+      const client = await inflight
+      if (client) result.push(client)
+      continue
+    }
 
-这张图先说明两件事：
-
-1. LSP 不只是单独的 `lsp` 工具在用
-2. 文件工具和 LSP 系统是直接联动的
-
-也就是说，即使模型没有显式调用 `lsp` 工具，也可能通过 `read/edit/write` 间接拿到语义能力。
-
-### `LSP.index.ts` 才是调度中枢
-
-[packages/opencode/src/lsp/index.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/lsp/index.ts) 负责：
-
-- 读取配置
-- 装配内置 server
-- 应用实验开关
-- 接入自定义 LSP 配置
-- 按文件扩展名挑选候选 server
-- 按 root 复用客户端
-- 调度 definition / references / hover 等操作
-
-这里真正值得看的不是某个单独函数，而是它长期维护的状态：
-
-- `servers`
-- `clients`
-- `broken`
-- `spawning`
-
-这说明 OpenCode 把 LSP 当成长期运行的本地基础设施，而不是一次性脚本。
-
-### 一个文件可能触发多种 server，但会按 root 去重
-
-当前调度逻辑也不是“一个扩展名绑定一个 server”那么简单。它会：
-
-1. 遍历所有启用的 server
-2. 检查扩展名是否命中
-3. 让各自的 `root(file)` 决定是否接管
-4. 同 root 同 server 复用现有 client
-5. 并发启动中的 client 会被 `spawning` 复用
-
-这套设计解决的是现代仓库最常见的现实问题：**多语言、多子项目、多 workspace 共存。**
-
----
-
-## 11.2 真实支持的语言服务器比文档里常见示例多得多
-
-### 不要只记 TypeScript、Python、Go
-
-当前仓库的 [packages/opencode/src/lsp/server.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/lsp/server.ts) 里，内置 server 远比“常规六件套”多。
-
-至少可以看到这些明确的内置项：
-
-- `deno`
-- `typescript`
-- `vue`
-- `eslint`
-- `oxlint`
-- `gopls`
-- `ty`
-- `pyright`
-- `elixir-ls`
-- `zls`
-- `csharp`
-- `fsharp`
-- `sourcekit-lsp`
-- `rust`
-- `clangd`
-
-这对写电子书非常重要，因为它体现了 OpenCode 的一个真实定位：
-
-**它不是只服务于 TypeScript 仓库，而是在努力把 LSP 做成多语言基础能力。**
-
-### 不同 server 的安装策略也不同
-
-OpenCode 没有强行要求所有语言服务器都预装。
-
-从 `server.ts` 可以看到三种典型策略：
-
-1. **系统已有则直接用**
-2. **缺失时自动下载/安装**
-3. **完全依赖本机工具链**
-
-比如：
-
-- `typescript` 通过 `typescript-language-server` 启动
-- `vue` 缺失时会自动安装 `@vue/language-server`
-- `eslint` 缺失时甚至会下载并编译 VS Code ESLint server
-- `pyright` 缺失时会自动安装
-- `rust-analyzer`、`clangd` 更依赖本机已有环境
-
-这说明 OpenCode 的 LSP 策略不是纯粹“约定用户自己准备环境”，而是尽量帮用户补齐缺口。
-
-### 自动下载也有明确开关
-
-仓库里有一个很关键的开关：
-
-- `OPENCODE_DISABLE_LSP_DOWNLOAD`
-
-这意味着自动安装是可控的，而不是偷偷进行。  
-对于企业环境或受限环境，这一点尤其重要。
-
----
-
-## 11.3 根目录检测与项目隔离
-
-### 每种语言都有自己的 root 规则
-
-LSPServer 里的 `root()` 设计很值得学习。
-
-OpenCode 并不是简单把当前工作目录当 root，而是为不同语言定义不同的锚点：
-
-- TypeScript：锁文件，如 `package-lock.json`、`bun.lock`、`pnpm-lock.yaml`
-- Deno：`deno.json` / `deno.jsonc`
-- Go：`go.mod`
-- Rust：`Cargo.toml` / `Cargo.lock`，还会继续向上找 workspace
-- Clang：`compile_commands.json`、`CMakeLists.txt`、`Makefile`
-
-这种做法有两个价值：
-
-1. 避免错误地把整个 monorepo 当成一个语言项目
-2. 保证语言服务器拿到更合适的 workspace root
-
-### Rust 的 root 逻辑尤其能体现“工程细节”
-
-`rust` 的处理不止找最近的 `Cargo.toml`，还会继续向上找 `[workspace]`。
-
-这类细节非常适合写给初学者，因为它说明：
-
-**代码智能真正难的地方，常常不在协议调用，而在“如何找到正确项目边界”。**
-
-### 自定义 LSP 也能通过配置接入
-
-`LSP.index.ts` 还支持把用户配置并进现有服务器表：
-
-```ts
-for (const [name, item] of Object.entries(cfg.lsp ?? {})) {
-  servers[name] = {
-    ...existing,
-    id: name,
-    root: existing?.root ?? (async () => Instance.directory),
-    extensions: item.extensions ?? existing?.extensions ?? [],
-    spawn: async (root) => ({ ... }),
+    // 6. 启动新客户端
+    const task = schedule(server, root, key)
+    s.spawning.set(key, task)
+    task.finally(() => {
+      if (s.spawning.get(key) === task) s.spawning.delete(key)
+    })
+    const client = await task
+    if (client) result.push(client)
   }
+
+  return result
 }
 ```
 
-所以如果某个语言不在内置列表里，或者你想覆写内置行为，也不需要改核心源码。
+这是一个 6 步状态机：过滤 → 找根 → 检查失败 → 复用 → 等待中 → 新建。`spawning` Map 的作用是防止"两个并发请求都判断客户端不存在，然后各自启动一个"的竞态。
 
----
+## LSP 客户端：JSON-RPC over stdio
 
-## 11.4 LSP 客户端实现：不仅是连上去，还要把文件状态养起来
+LSP 服务器通过子进程运行，客户端通过标准输入输出通信。这是所有 LSP 工具的统一架构：
 
-### `LSPClient.create()` 负责完整 JSON-RPC 生命周期
-
-[packages/opencode/src/lsp/client.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/lsp/client.ts) 做的事情比文稿里常见的“发个 initialize”更完整：
-
-1. 建立消息连接
-2. 监听 `publishDiagnostics`
-3. 处理多种反向请求
-4. 发送 `initialize`
-5. 发送 `initialized`
-6. 必要时同步 `workspace/didChangeConfiguration`
-7. 维护文件版本表
-
-这里很关键的一点是，OpenCode 不把 LSP server 当黑箱，而是认真处理了它反向请求的协作面。
-
-### 文件同步不只是 `didOpen` / `didChange`
-
-当前实现会同时发：
-
-- `workspace/didChangeWatchedFiles`
-- `textDocument/didOpen`
-- `textDocument/didChange`
-
-这点很重要，因为不同语言服务器对文件状态变化的敏感点不同。  
-OpenCode 这里走的是偏稳妥路线，而不是只赌一个最小协议子集。
-
-### 版本号管理是必须的，不是可选细节
-
-客户端里会维护：
-
-```ts
-const files: { [path: string]: number } = {}
+```
+OpenCode 进程
+  ├── spawn("typescript-language-server", ["--stdio"])
+  │     stdin  ← JSON-RPC 请求/通知
+  │     stdout → JSON-RPC 响应/推送
+  └── LSPClient（vscode-jsonrpc 封装）
 ```
 
-并在每次变更时递增版本号。  
-这是让 `didChange` 生效的基础之一，也能帮助服务端正确理解文件演化顺序。
+客户端初始化过程（`client.ts`）：
 
-### 诊断等待不是立即返回，而是做了轻量 debounce
+```typescript
+const connection = createMessageConnection(
+  new StreamMessageReader(server.process.stdout),
+  new StreamMessageWriter(server.process.stdin),
+)
 
-这一点是当前实现里很值得讲的工程细节。
+// 注册服务器推送的处理器
+connection.onNotification("textDocument/publishDiagnostics", (params) => {
+  // 接收并缓存诊断信息
+  diagnostics.set(filePath, params.diagnostics)
+  Bus.publish(Event.Diagnostics, { path: filePath, serverID })
+})
+connection.onRequest("workspace/configuration", async () => [initialization ?? {}])
+connection.onRequest("workspace/workspaceFolders", async () => [{ name: "workspace", uri: rootUri }])
 
-OpenCode 不会在收到第一条诊断就立刻结束等待，而是用了一个短暂 debounce：
+connection.listen()
 
-- `DIAGNOSTICS_DEBOUNCE_MS = 150`
+// LSP 握手：initialize → initialized → didChangeConfiguration
+await connection.sendRequest("initialize", {
+  rootUri: pathToFileURL(root).href,
+  capabilities: {
+    textDocument: {
+      synchronization: { didOpen: true, didChange: true },
+      publishDiagnostics: { versionSupport: true },
+    },
+  },
+})
+await connection.sendNotification("initialized", {})
+```
 
-目的很现实：
+`initialize` 请求要声明客户端支持哪些能力，服务器据此决定发哪些通知。`versionSupport: true` 表示客户端理解文档版本号，这对增量同步至关重要。
 
-- 某些 LSP 会先给语法诊断
-- 再给语义诊断
+## 文件版本追踪：didOpen vs didChange
 
-如果不做 debounce，Agent 常常会拿到一个半成品诊断结果。
+LSP 规范要求客户端追踪每个文件的版本，客户端的 `notify.open()` 方法统一处理"首次打开"和"后续更新"两种场景：
 
----
+```typescript
+const files: { [path: string]: number } = {}  // 文件版本记录
 
-## 11.5 诊断、跳转与 Agent 工具的关系
+notify: {
+  async open(input: { path: string }) {
+    const text = await Filesystem.readText(input.path)
+    const languageId = LANGUAGE_EXTENSIONS[extension] ?? "plaintext"
+    const version = files[input.path]
 
-### `LSP` 命名空间暴露的是能力 API
+    if (version !== undefined) {
+      // 文件已打开过：发送 didChange（内容完整替换）
+      const next = version + 1
+      files[input.path] = next
+      await connection.sendNotification("textDocument/didChange", {
+        textDocument: { uri, version: next },
+        contentChanges: [{ text }],  // 完整文件内容
+      })
+      return
+    }
 
-在 [packages/opencode/src/lsp/index.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/lsp/index.ts) 里，真正被其他模块消费的是这些函数：
-
-- `touchFile`
-- `diagnostics`
-- `hover`
-- `workspaceSymbol`
-- `documentSymbol`
-- `definition`
-- `references`
-- `implementation`
-- `prepareCallHierarchy`
-- `incomingCalls`
-- `outgoingCalls`
-
-也就是说，LSP 系统本质上已经被包装成了一套本地语义 API。
-
-### 文件工具比显式 `lsp` 工具更常用
-
-这是当前仓库里最值得提醒读者的一点。
-
-虽然存在 [packages/opencode/src/tool/lsp.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/tool/lsp.ts)，但它是实验性工具，且是否注册受：
-
-- `OPENCODE_EXPERIMENTAL_LSP_TOOL`
-
-控制。
-
-相反，真正高频发生的是：
-
-- `read` 之后预热 `LSP.touchFile()`
-- `edit` 后触发 `LSP.touchFile(file, true)`
-- `write` 后拉取全局 `diagnostics()`
-
-也就是说，在 OpenCode 当前实现中，LSP 更像“底层语义服务”，而不是永远由模型显式调用的工具。
-
-### `lsp` 工具当前暴露的操作范围
-
-如果显式启用了 `lsp` 工具，它支持的操作包括：
-
-- `goToDefinition`
-- `findReferences`
-- `hover`
-- `documentSymbol`
-- `workspaceSymbol`
-- `goToImplementation`
-- `prepareCallHierarchy`
-- `incomingCalls`
-- `outgoingCalls`
-
-这里还有一个很细的实现点：
-
-- `workspaceSymbol` 目前实际传的是空查询字符串
-
-这说明工具层有时并不是把底层 API 一比一搬上来，而是做了符合 Agent 使用习惯的简化封装。
-
----
-
-## 11.6 实验开关与能力切换
-
-### `ty` 和 `pyright` 之间存在实验切换
-
-在 `LSP.index.ts` 里有一个很关键的逻辑：
-
-```ts
-if (Flag.OPENCODE_EXPERIMENTAL_LSP_TY) {
-  delete servers["pyright"]
-} else {
-  delete servers["ty"]
+    // 第一次打开：清空旧诊断，发送 didOpen
+    diagnostics.delete(input.path)
+    await connection.sendNotification("textDocument/didOpen", {
+      textDocument: { uri, languageId, version: 0, text },
+    })
+    files[input.path] = 0
+  },
 }
 ```
 
-这说明：
+每次文件被修改后，OpenCode 都会调用 `LSP.touchFile(file)` → `client.notify.open(file)`，把最新内容完整推送给 LSP 服务器，触发重新分析。
 
-- `ty` 目前是实验路线
-- 一旦开启它，会替换掉 `pyright`
+## 等待诊断：防抖与超时
 
-这类设计很适合电子书里拿来说明：
+诊断分析是异步的，工具需要等待 LSP 服务器完成分析再读取结果。`waitForDiagnostics` 实现了带防抖的等待：
 
-**Agent 系统里的能力演进，不一定靠大重构，也可以靠 feature flag 逐步替换。**
+```typescript
+const DIAGNOSTICS_DEBOUNCE_MS = 150
 
-### LSP 工具本身也是实验能力
+async waitForDiagnostics(input: { path: string }) {
+  let debounceTimer: ReturnType<typeof setTimeout> | undefined
 
-同样，显式的 `lsp` 工具也不是默认永久开放，而是由实验开关决定是否加入工具列表。
+  return await withTimeout(
+    new Promise<void>((resolve) => {
+      const unsub = Bus.subscribe(Event.Diagnostics, (event) => {
+        if (event.properties.path !== normalizedPath) return
+        if (event.properties.serverID !== result.serverID) return
 
-这说明团队当前对 LSP 的定位比较谨慎：
+        // 防抖：等待 150ms 内不再有新诊断
+        if (debounceTimer) clearTimeout(debounceTimer)
+        debounceTimer = setTimeout(() => {
+          unsub()
+          resolve()
+        }, DIAGNOSTICS_DEBOUNCE_MS)
+      })
+    }),
+    3000,  // 最多等 3 秒
+  ).catch(() => {})  // 超时不抛异常，只是没有诊断
+}
+```
 
-- 底层诊断能力已经稳定使用
-- 显式工具暴露仍在继续验证
+防抖的原因：LSP 服务器通常分两轮发送诊断——第一轮是语法错误（快，几十毫秒），第二轮是语义错误（慢，需要类型推断）。如果只等第一轮，就会漏掉类型错误。150ms 的防抖窗口让两轮之间的间隔被合并。
 
-这是很真实的工程状态，反而比“全面支持一切”更值得写进书里。
+还有一个 TypeScript 特殊处理：
+
+```typescript
+connection.onNotification("textDocument/publishDiagnostics", (params) => {
+  const exists = diagnostics.has(filePath)
+  diagnostics.set(filePath, params.diagnostics)
+  if (!exists && input.serverID === "typescript") return  // 忽略 TypeScript 第一次推送
+  Bus.publish(Event.Diagnostics, { path: filePath, serverID: input.serverID })
+})
+```
+
+`tsserver` 的第一次 `publishDiagnostics` 通常是空的（还没完成分析），忽略它可以避免 `waitForDiagnostics` 在看到空结果后就提前返回。
+
+## 诊断注入：工具与 LSP 的协作流水线
+
+这是 LSP 与 AI 工具系统集成的核心机制。以 `edit` 工具为例：
+
+```typescript
+// tool/edit.ts
+let output = "Edit applied successfully."
+await LSP.touchFile(filePath, true)  // 通知 LSP 文件已变更，等待诊断
+const diagnostics = await LSP.diagnostics()
+const issues = diagnostics[normalizedFilePath] ?? []
+const errors = issues.filter((item) => item.severity === 1)  // severity=1 是 ERROR
+
+if (errors.length > 0) {
+  const limited = errors.slice(0, MAX_DIAGNOSTICS_PER_FILE)
+  output += `\n\nLSP errors detected in this file, please fix:\n` +
+    `<diagnostics file="${filePath}">\n` +
+    `${limited.map(LSP.Diagnostic.pretty).join("\n")}\n` +
+    `</diagnostics>`
+}
+```
+
+`LSP.Diagnostic.pretty()` 把诊断格式化为人类可读的字符串：
+
+```typescript
+export function pretty(diagnostic: LSPClient.Diagnostic) {
+  const severityMap = { 1: "ERROR", 2: "WARN", 3: "INFO", 4: "HINT" }
+  const severity = severityMap[diagnostic.severity || 1]
+  const line = diagnostic.range.start.line + 1      // 0-based → 1-based
+  const col = diagnostic.range.start.character + 1
+  return `${severity} [${line}:${col}] ${diagnostic.message}`
+}
+// 输出示例：ERROR [42:5] Type 'string' is not assignable to type 'number'.
+```
+
+**完整流水线**：
+
+```
+用户要求：修改 foo.ts 的某个函数
+
+[工具: edit]
+  1. 定位修改位置，应用文本替换
+  2. LSP.touchFile("foo.ts", waitForDiagnostics=true)
+     → textDocument/didChange 发送给 tsserver
+     → 等待 publishDiagnostics（防抖 150ms，最多 3s）
+  3. LSP.diagnostics() → 读取所有客户端的诊断缓存
+  4. 过滤 severity=1（ERROR）
+  5. 格式化并附加到工具输出：
+     "Edit applied successfully.
+
+      LSP errors detected in this file, please fix:
+      <diagnostics file="foo.ts">
+      ERROR [15:3] Property 'bar' does not exist on type 'Foo'.
+      </diagnostics>"
+
+[AI 看到工具返回值]
+  → 发现有 LSP 错误
+  → 自动再次调用 edit 工具修复
+  → 循环直到没有错误
+```
+
+这个机制让 AI 具备了"编译-修复"的内循环能力，大量减少了"修改后才发现有错误"的往返次数。
+
+`read.ts` 也调用 `LSP.touchFile`，但不等待诊断：
+
+```typescript
+// tool/read.ts（读取文件时）
+LSP.touchFile(filepath, false)  // 预热：通知 LSP 文件被打开，但不阻塞工具返回
+```
+
+这是一个优化：提前让 LSP 开始分析，等到后续 edit 操作真正需要诊断时，结果已经准备好了。
+
+## LspTool：给 AI 的直接 LSP 接口
+
+除了隐式注入，OpenCode 还提供了一个显式的 `lsp` 工具，让 AI 可以主动查询代码信息：
+
+```typescript
+export const LspTool = Tool.define("lsp", {
+  description: DESCRIPTION,  // 从 lsp.txt 加载（详细描述每个操作）
+  parameters: z.object({
+    operation: z.enum([
+      "goToDefinition",       // 跳转到定义
+      "findReferences",       // 查找所有引用
+      "hover",                // 悬停信息（类型、文档）
+      "documentSymbol",       // 文件内的符号列表
+      "workspaceSymbol",      // 工作区全局符号搜索
+      "goToImplementation",   // 跳转到接口实现
+      "prepareCallHierarchy", // 准备调用层次分析
+      "incomingCalls",        // 谁调用了这个函数
+      "outgoingCalls",        // 这个函数调用了谁
+    ]),
+    filePath: z.string(),
+    line: z.number().int().min(1),      // 1-based（用户视角）
+    character: z.number().int().min(1), // 1-based（用户视角）
+  }),
+  execute: async (args, ctx) => {
+    // 权限检查
+    await ctx.ask({ permission: "lsp", patterns: ["*"], always: ["*"], metadata: {} })
+
+    // 先确保 LSP 客户端可用
+    const available = await LSP.hasClients(file)
+    if (!available) throw new Error("No LSP server available for this file type.")
+
+    // 预热并等待诊断
+    await LSP.touchFile(file, true)
+
+    // 执行操作（line/character 转换为 0-based）
+    const position = { file, line: args.line - 1, character: args.character - 1 }
+    const result = await (() => {
+      switch (args.operation) {
+        case "goToDefinition":    return LSP.definition(position)
+        case "findReferences":    return LSP.references(position)
+        case "hover":             return LSP.hover(position)
+        case "documentSymbol":    return LSP.documentSymbol(uri)
+        case "workspaceSymbol":   return LSP.workspaceSymbol("")
+        case "goToImplementation":return LSP.implementation(position)
+        case "incomingCalls":     return LSP.incomingCalls(position)
+        case "outgoingCalls":     return LSP.outgoingCalls(position)
+      }
+    })()
+
+    return { title, metadata: { result }, output: JSON.stringify(result, null, 2) }
+  },
+})
+```
+
+值得注意的坐标转换：LSP 协议使用 0-based 行列号，但工具参数接受 1-based（与编辑器显示一致），内部使用 `args.line - 1` 转换。
+
+## 内置 LSP 服务器配置
+
+`server.ts` 定义了 OpenCode 内置支持的语言服务器。每个服务器有三个关键属性：
+
+```typescript
+interface LSPServer.Info {
+  id: string
+  extensions: string[]                  // 处理的文件扩展名
+  root: (file: string) => Promise<string | undefined>  // 如何确定根目录
+  spawn: (root: string) => Promise<Handle | undefined> // 如何启动进程
+}
+```
+
+根目录策略（`NearestRoot`）：从文件所在目录向上查找特定配置文件：
+
+- TypeScript：查找 `tsconfig.json`、`package.json`
+- Python（pyright）：查找 `pyrightconfig.json`、`pyproject.toml`、`setup.py`
+- Go：查找 `go.mod`
+- Rust：查找 `Cargo.toml`
+
+找不到根配置文件时，LSP 客户端不会启动（该文件可能不在受管理的项目中）。
+
+## 语言映射表：language.ts
+
+`language.ts` 维护了 80+ 种文件扩展名到 LSP 语言 ID 的映射，直接照搬 VS Code 的命名规范：
+
+```typescript
+export const LANGUAGE_EXTENSIONS = {
+  ".ts": "typescript",
+  ".tsx": "typescriptreact",
+  ".py": "python",
+  ".go": "go",
+  ".rs": "rust",
+  ".java": "java",
+  // ...80+ 更多
+}
+```
+
+这个映射在 `notify.open` 中用于设置 `textDocument/didOpen` 的 `languageId` 字段，告诉 LSP 服务器如何解析该文件。
+
+## 从诊断到修复：完整循环
+
+把所有模块串起来，一次 AI 代码修改的完整 LSP 流程：
+
+```
+AI 决定修改文件 → edit 工具执行
+  ↓
+Filesystem.writeFile(content)
+  ↓
+LSP.touchFile(file, waitForDiagnostics=true)
+  ↓
+getClients(file)
+  ↓ （如果客户端未启动）
+server.spawn(root) → 子进程 "typescript-language-server --stdio"
+  ↓
+LSPClient.create() → initialize握手
+  ↓
+client.notify.open(file) → textDocument/didOpen/didChange
+  ↓
+tsserver 分析文件
+  ↓
+textDocument/publishDiagnostics → client 缓存诊断
+  ↓ （150ms 防抖后）
+waitForDiagnostics resolve
+  ↓
+LSP.diagnostics() → 读取缓存
+  ↓
+过滤 severity=1 错误
+  ↓
+格式化为 <diagnostics> XML 块
+  ↓
+附加到 edit 工具返回值
+  ↓
+AI 收到工具结果，看到类型错误 → 再次调用 edit 修复
+```
 
 ---
 
-## 11.7 给初学者的阅读和实践路线
+**思考题**：
 
-### 第一步：先看 `read/edit/write` 与 LSP 的联动
+1. `waitForDiagnostics` 使用 150ms 防抖而不是"等待第二次 publishDiagnostics"。这两种方式各有什么优缺点？如果 LSP 服务器分三轮发送诊断，150ms 防抖还能正确工作吗？
 
-不要一上来就啃 `server.ts` 全文。  
-更好的切入是：
+2. TypeScript 服务器的第一次 `publishDiagnostics` 被跳过（不触发 Bus 事件）。如果第一次推送不是空的而是真正的错误，这会导致什么问题？
 
-1. 看 `read.ts`
-2. 看 `edit.ts`
-3. 看 `write.ts`
-4. 找它们调用 `LSP.touchFile()` 和 `LSP.diagnostics()` 的位置
-
-这样你会先理解 LSP 在产品里的作用，而不是先陷进协议细节。
-
-### 第二步：再看 `index.ts`
-
-重点只看：
-
-- server 装配
-- root 选择
-- client 复用
-- 能力函数导出
-
-这一层解决的是“系统怎么组织”。
-
-### 第三步：最后再进 `client.ts` 和 `server.ts`
-
-重点是：
-
-- JSON-RPC 初始化
-- diagnostics 生命周期
-- 各语言 server 的 root / spawn 差异
-
-这一层解决的是“细节怎么落地”。
-
-### 初学者最常见的两个误区
-
-#### 误区 1：以为 LSP 只是 `lsp` 工具
-
-其实当前仓库里，LSP 更多是底层公共能力，被文件工具大量复用。
-
-#### 误区 2：以为“支持某语言”只等于能启动一个进程
-
-真实情况是还要考虑：
-
-- root 检测
-- 安装方式
-- 配置同步
-- 文件变化通知
-- 诊断稳定性
+3. `LspTool` 的 `workspaceSymbol` 操作总是传入空字符串 `""` 作为查询词。LSP 规范中空字符串通常返回所有符号，这会返回太多结果吗？OpenCode 如何在工具描述中引导 AI 正确使用这个操作？
 
 ---
 
-## 本章小结
+**下一章预告**
 
-### 这一篇最重要的认识
-
-1. OpenCode 的 LSP 是一套本地语义基础设施，不只是一个工具
-2. 代码智能能力很多时候通过 `read/edit/write` 间接发挥作用
-3. 多语言支持的核心难点在 root 检测、安装策略和生命周期管理
-4. 诊断等待、能力切换、实验开关这些细节，决定了系统是否可用
-5. LSP 在 Agent 里最有价值的地方，不是“支持多少协议方法”，而是“能否稳定地服务真实修改流程”
-
-### 关键代码位置
-
-| 模块 | 位置 | 建议重点 |
-| --- | --- | --- |
-| LSP 调度中枢 | `packages/opencode/src/lsp/index.ts` | server/client 管理、能力导出、实验开关 |
-| LSP 客户端 | `packages/opencode/src/lsp/client.ts` | initialize、文件同步、diagnostics debounce |
-| 语言服务器表 | `packages/opencode/src/lsp/server.ts` | root 检测、spawn 策略、自动下载 |
-| 语言映射 | `packages/opencode/src/lsp/language.ts` | 扩展名到 languageId |
-| 显式 LSP 工具 | `packages/opencode/src/tool/lsp.ts` | Agent 可调用操作 |
-| 文件工具联动 | `packages/opencode/src/tool/read.ts`、`edit.ts`、`write.ts` | LSP 在真实工作流中的接入点 |
-
-### 源码阅读路径
-
-1. 先从 `read.ts`、`edit.ts`、`write.ts` 找到它们和 LSP 联动的入口。
-2. 再看 `packages/opencode/src/lsp/index.ts`，理解调度、root 选择和 client 复用。
-3. 最后进入 `client.ts` 与 `server.ts`，补齐 JSON-RPC 生命周期和多语言 server 策略细节。
-
-### 任务
-
-判断 OpenCode 里的 LSP 为什么更适合被看成一层底层语义基础设施，而不是单独一项“代码智能功能”。
-
-### 操作
-
-1. 从 `packages/opencode/src/tool/read.ts`、`edit.ts`、`write.ts` 找到它们与 LSP 联动的入口，记录文件工具怎样间接复用语义能力。
-2. 再读 `packages/opencode/src/lsp/index.ts`，整理 root 选择、client 复用和调度策略。
-3. 最后进入 `client.ts` 与 `server.ts`，选一种你熟悉的语言，写下它的 server 启动方式、root 检测规则，以及显式 `lsp` 工具适合的场景。
-
-### 验收
-
-完成后你应该能说明：
-
-- 为什么 `read/edit/write` 对 LSP 的复用，比单独暴露一个显式 `lsp` 工具更关键。
-- 为什么语言服务是否“真正可用”，取决于 root、诊断和复用策略，而不只是能不能启动进程。
-- 为什么 LSP 在 Agent 项目里属于底层语义设施，而不是附属增强功能。
-
-### 下一篇预告
-
-第十二篇会把视角从“代码智能”切回“扩展智能”：
-
-- 插件怎么接到 OpenCode
-- Skill 怎么给 Agent 注入方法论
-- 命令模板怎么复用 Prompt
-- VS Code / Zed 怎么把编辑器上下文送进 Agent
-
-这样你会看到另一个同样重要的问题：  
-不是 Agent 能看懂代码就够了，它还得能被持续扩展。
-
-### 思考题
-
-1. 为什么在 Agent 项目里，LSP 更应该被看成底层语义基础设施，而不是单独一项“代码智能功能”？
-2. `read/edit/write` 复用 LSP 能力，比单独暴露一个显式 `lsp` 工具更关键的原因是什么？
-3. 如果某种语言“能启动服务端但诊断不稳定”，你会把它视为已经支持了吗？为什么？
+第13章：**插件与扩展** — 深入 `packages/opencode/src/skill/`、`packages/opencode/src/agent/`，学习：Skill 系统如何让 AI 拥有可复用的专项能力、Agent 模式如何切换任务风格、CLAUDE.md 如何作为项目级上下文注入提示词，以及如何通过配置扩展 OpenCode 的行为。

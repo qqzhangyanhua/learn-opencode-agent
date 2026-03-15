@@ -1,252 +1,92 @@
 ---
-title: 第三篇：工具系统
-description: 第三篇：工具系统的详细内容
+title: 第4章：工具系统
+description: 深入 OpenCode 工具系统——Tool.define 抽象、注册表过滤、权限控制、输出截断，以及核心工具的实现细节
 ---
 
-<script setup>
-import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshotCard.vue'
-</script>
-
-> **对应路径**：`packages/opencode/src/tool/`
-> **前置阅读**：第二篇 Agent 核心系统
-> **学习目标**：理解 OpenCode 里的工具不是几个零散脚本，而是一套统一的能力注册、权限控制、结果裁剪和模型适配机制
+> **学习目标**：理解工具如何定义、注册、过滤和执行，读懂核心工具的实现，掌握权限控制机制
+> **前置知识**：第3章"OpenCode 项目介绍"
+> **源码路径**：`packages/opencode/src/tool/`
+> **阅读时间**：25 分钟
 
 ---
 
-<SourceSnapshotCard
-  title="第三篇源码快照"
-  description="这一篇先别急着背工具清单，而要先抓住工具怎样被注册、筛选、执行和约束，真正看清 Agent 和外部世界的能力边界。"
-  repo="anomalyco/opencode"
-  repo-url="https://github.com/anomalyco/opencode/tree/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
-  branch="dev"
-  commit="f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
-  verified-at="2026-03-15"
-  :entries="[
-    {
-      label: '工具注册表',
-      path: 'packages/opencode/src/tool/registry.ts',
-      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/tool/registry.ts'
-    },
-    {
-      label: '统一工具壳',
-      path: 'packages/opencode/src/tool/tool.ts',
-      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/tool/tool.ts'
-    },
-    {
-      label: 'Bash 工具',
-      path: 'packages/opencode/src/tool/bash.ts',
-      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/tool/bash.ts'
-    },
-    {
-      label: '任务编排工具',
-      path: 'packages/opencode/src/tool/task.ts',
-      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/tool/task.ts'
-    }
-  ]"
-/>
-
-## 核心概念速览
-
-如果说 Agent 是“大脑”，那工具系统就是它和外部世界的全部接口。
-
-在当前仓库里，OpenCode 的工具系统不是简单的“给模型几个函数”：
-
-- 工具先在注册表里汇总
-- 再按客户端、模型、实验开关做过滤
-- 执行前会走权限询问
-- 执行后会统一裁剪输出
-- 部分工具还会触发 LSP、子任务、插件 Hook 等后续链路
-
-这意味着你理解工具系统时，不能只盯着 `read.ts` 或 `bash.ts`，而要先看“工具是怎么被接入 Agent 的”。
-
-当前最关键的入口有三个：
-
-- [packages/opencode/src/tool/tool.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/tool/tool.ts)：工具抽象
-- [packages/opencode/src/tool/registry.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/tool/registry.ts)：工具注册表
-- [packages/opencode/src/tool/schema.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/tool/schema.ts)：工具 ID 类型
+工具（Tool）是 Agent 与外部世界的全部接口。理解工具系统，就是理解 Agent 能做什么、被允许做什么、以及做完之后结果怎么传回 LLM。
 
 ---
 
-## 本章导读
+## 4.1 工具的数据结构
 
-### 这一章解决什么问题
+### Tool.Info：工具的最小协议
 
-这一章不是教你背工具清单，而是要回答：
+每个工具在 OpenCode 里都是一个 `Tool.Info` 对象。看 `tool/tool.ts` 的定义：
 
-- 工具怎样进入 Agent 可见列表
-- 为什么同一仓库里，不同模型和不同客户端看到的工具集合会不同
-- 工具执行前后的权限、裁剪、metadata 更新是谁负责的
-- 什么时候应该写新工具，什么时候应该改用 Skill 或 Command
-
-### 必看入口
-
-- [packages/opencode/src/tool/registry.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/tool/registry.ts)：工具汇总和过滤入口
-- [packages/opencode/src/tool/tool.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/tool/tool.ts)：统一工具包装器
-- [packages/opencode/src/tool/read.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/tool/read.ts)：典型 I/O 工具
-- [packages/opencode/src/tool/bash.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/tool/bash.ts)：高风险环境交互工具
-- [packages/opencode/src/tool/task.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/tool/task.ts)：编排型工具
-
-### 一张图先建立感觉
-
-```text
-registry.ts
-  -> 汇总内置工具
-  -> 接入插件 / Skill 工具
-  -> 按模型 / 客户端 / 开关过滤
-  -> Tool.define() 包装统一执行壳
-  -> 权限 / 参数 / 输出裁剪
-  -> read / bash / task ... 具体能力落地
-```
-
-### 先抓一条主链路
-
-建议只追下面这条链路：
-
-```text
-registry.ts
-  -> 生成当前可用工具列表
-  -> Tool.define() 统一包装
-  -> 权限检查 / 参数校验
-  -> 具体工具执行
-  -> 输出裁剪 / metadata 更新
-```
-
-先理解“工具是怎样被系统接纳和约束的”，再分别去看 `read`、`bash`、`task` 这些具体实现。
-
-### 初学者阅读顺序
-
-1. 先看 `registry.ts`，建立工具全景。
-2. 再看 `tool.ts`，理解每个工具共有的执行外壳。
-3. 最后选一个读写类工具和一个编排类工具，对比它们的输入、权限和输出结构。
-
-### 最容易误解的点
-
-- 工具不是“模型直接调用的几个函数”，而是带权限、裁剪和产品元数据的一层系统边界。
-- 新需求不一定要新工具，很多时候 Skill、Command、Prompt 组合更合适。
-- 看工具时不能只盯函数体，真正决定工程质量的往往是执行前后的约束层。
-
-## 3.1 工具注册与发现机制
-
-### 先看真实注册表，而不是只看单个工具文件
-
-OpenCode 当前内置工具的真实集合在 [packages/opencode/src/tool/registry.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/tool/registry.ts)。
-
-它不是只注册 `read/write/edit/glob/grep`，而是把多类工具统一收进一个列表：
-
-```ts
-return [
-  InvalidTool,
-  ...(question ? [QuestionTool] : []),
-  BashTool,
-  ReadTool,
-  GlobTool,
-  GrepTool,
-  EditTool,
-  WriteTool,
-  TaskTool,
-  WebFetchTool,
-  TodoWriteTool,
-  WebSearchTool,
-  CodeSearchTool,
-  SkillTool,
-  ApplyPatchTool,
-  ...(Flag.OPENCODE_EXPERIMENTAL_LSP_TOOL ? [LspTool] : []),
-  ...(config.experimental?.batch_tool === true ? [BatchTool] : []),
-  ...(Flag.OPENCODE_EXPERIMENTAL_PLAN_MODE && Flag.OPENCODE_CLIENT === "cli" ? [PlanExitTool] : []),
-  ...custom,
-]
-```
-
-这张列表至少说明三件事：
-
-1. 工具系统不仅处理文件，还处理提问、任务拆分、网页读取、技能装载、补丁应用
-2. 一部分工具是否启用，取决于运行环境
-3. “当前有哪些工具可用”不是静态结论，而是注册表运行后的结果
-
-### 工具的来源其实有三层
-
-注册表会收集三类工具：
-
-1. **内置工具**
-2. **项目级自定义工具**
-3. **插件提供的工具**
-
-其中项目级自定义工具会扫描 `tool/` 或 `tools/` 目录：
-
-```ts
-Glob.scanSync("{tool,tools}/*.{js,ts}", { cwd: dir, absolute: true, dot: true, symlink: true })
-```
-
-插件工具则来自 `plugin.tool`：
-
-```ts
-for (const plugin of plugins) {
-  for (const [id, def] of Object.entries(plugin.tool ?? {})) {
-    custom.push(fromPlugin(id, def))
+```typescript
+// packages/opencode/src/tool/tool.ts
+export namespace Tool {
+  export interface Info<Parameters extends z.ZodType = z.ZodType> {
+    id: string
+    init: (ctx?: InitContext) => Promise<{
+      description: string
+      parameters: Parameters
+      execute(
+        args: z.infer<Parameters>,
+        ctx: Context,
+      ): Promise<{
+        title: string
+        output: string
+        metadata: Metadata
+        attachments?: FilePart[]
+      }>
+    }>
   }
 }
 ```
 
-也就是说，OpenCode 的工具扩展路径至少有两条：
+三个核心字段：
 
-- 你可以在项目里直接塞一个工具文件
-- 也可以通过 npm 插件把工具注入进来
+- **`id`**：工具名称，LLM 用这个名字发起调用
+- **`description`**：工具用途描述，**LLM 根据这段文字决定是否调用**
+- **`parameters`**：Zod schema，定义参数类型，同时自动生成 JSON Schema 给 LLM
 
-这比“必须改核心源码才能加工具”更接近真实产品化设计。
+`init` 是延迟初始化——工具在被注册时不立即初始化，而是在每次会话开始时按需初始化。这让工具可以访问运行时上下文（如当前 Agent 配置）。
 
-### 工具不是全部无条件暴露给模型
+### Tool.define：创建工具的工厂函数
 
-工具列表拿到之后，还会继续过滤。当前仓库里至少有三类过滤逻辑：
+实际写工具时使用 `Tool.define` 辅助函数，它在 `init` 外层加了两件事：
 
-1. **客户端条件**
-2. **模型条件**
-3. **实验开关条件**
+1. **参数验证**：每次执行前用 Zod 校验参数，格式错误直接抛出，不让 LLM 用错误参数调用工具
+2. **输出截断**：工具输出可能很长（比如读一个大文件），自动截断并告知 LLM 结果被截断了
 
-例如：
-
-- `question` 只在 `app/cli/desktop` 或显式开关下启用
-- `websearch/codesearch` 只在 `opencode` provider 或 Exa 开关下启用
-- `apply_patch` 和 `edit/write` 会根据模型类型二选一
-- `lsp`、`batch`、`plan_exit` 都受实验开关控制
-
-其中最有意思的是补丁工具选择：
-
-```ts
-const usePatch =
-  model.modelID.includes("gpt-") && !model.modelID.includes("oss") && !model.modelID.includes("gpt-4")
-if (t.id === "apply_patch") return usePatch
-if (t.id === "edit" || t.id === "write") return !usePatch
-```
-
-这说明工具系统不只是“能力目录”，还会根据模型交互风格调整暴露给模型的工具形态。
-
----
-
-## 3.2 Tool 抽象：一个工具到底由什么组成
-
-### `Tool.define()` 才是工具的标准入口
-
-当前工具定义统一走 [packages/opencode/src/tool/tool.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/tool/tool.ts)：
-
-```ts
-export function define(id, init) {
+```typescript
+// tool/tool.ts（简化）
+export function define<P extends z.ZodType>(
+  id: string,
+  init: InitFn<P>,
+): Info<P> {
   return {
     id,
     init: async (initCtx) => {
-      const toolInfo = init instanceof Function ? await init(initCtx) : init
-      const execute = toolInfo.execute
+      const toolInfo = typeof init === "function" ? await init(initCtx) : init
+
+      // 包装 execute，加入验证 + 截断
+      const originalExecute = toolInfo.execute
       toolInfo.execute = async (args, ctx) => {
-        toolInfo.parameters.parse(args)
-        const result = await execute(args, ctx)
-        const truncated = await Truncate.output(result.output, {}, initCtx?.agent)
-        return {
-          ...result,
-          output: truncated.content,
-          metadata: {
-            ...result.metadata,
-            truncated: truncated.truncated,
-          },
+        // 1. 参数验证
+        try {
+          toolInfo.parameters.parse(args)
+        } catch (error) {
+          throw new Error(`工具参数无效：${error}`)
         }
+
+        // 2. 执行原始逻辑
+        const result = await originalExecute(args, ctx)
+
+        // 3. 输出截断（如果工具自己没处理）
+        if (result.metadata.truncated === undefined) {
+          const truncated = await Truncate.output(result.output, {}, initCtx?.agent)
+          return { ...result, output: truncated.content, metadata: { ...result.metadata, truncated: truncated.truncated } }
+        }
+        return result
       }
       return toolInfo
     },
@@ -254,867 +94,560 @@ export function define(id, init) {
 }
 ```
 
-从这段代码你能看出，一个工具最少要解决四件事：
-
-1. 定义参数 Schema
-2. 提供面向模型的描述
-3. 实现执行逻辑
-4. 接受统一的结果裁剪包装
-
-### 工具上下文里真正有价值的字段
-
-`Tool.Context` 里最常用的不是很多，而是下面几个：
-
-- `sessionID`
-- `messageID`
-- `agent`
-- `abort`
-- `messages`
-- `metadata()`
-- `ask()`
-
-其中最重要的是两个：
-
-#### `ctx.ask()`
-
-这不是“可选交互”，而是权限系统和工具系统的连接点。  
-很多工具真正危险的地方，不在执行代码本身，而在它们拿到什么权限。
-
-#### `ctx.metadata()`
-
-这允许工具把中间输出同步给前端，例如 `bash` 工具会在命令执行过程中不断更新输出片段，而不是等进程结束后一次性给结果。
-
-### 工具 ID 也是正式类型，不是随便一串字符串
-
-[packages/opencode/src/tool/schema.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/tool/schema.ts) 里定义了 `ToolID`，虽然不复杂，但它体现的是工程态度：
-
-- 工具名称是系统协议的一部分
-- 它会被其他模块稳定引用
-- 不能把工具名当成无约束文本随便传来传去
-
 ---
 
-## 3.3 按职责理解工具，而不是按文件名死记
-
-如果你是初学者，我更建议按“能力类型”来记工具，而不是按文件个数来记。
-
-### 第一类：文件与代码操作
-
-这类是最基础的：
-
-- `read`
-- `edit`
-- `write`
-- `apply_patch`
-
-它们的区别不是“都能改文件”，而是修改粒度不同：
-
-| 工具 | 适合场景 | 特点 |
-| --- | --- | --- |
-| `read` | 看文件、看目录、读取附件 | 支持目录、分页、图片/PDF |
-| `edit` | 精确替换局部文本 | 强依赖 `oldString` 命中 |
-| `write` | 整体重写文件 | 适合完整生成 |
-| `apply_patch` | 用补丁格式做结构化修改 | 更适合某些 GPT 模型 |
-
-### 第二类：搜索与定位
-
-这类是 Agent 真正“会找东西”的基础：
-
-- `glob`
-- `grep`
-- `codesearch`
-- `lsp`（实验）
-
-其中：
-
-- `glob` 解决“去哪找”
-- `grep` 解决“搜什么文本”
-- `codesearch` 解决“语义相关代码”
-- `lsp` 解决“符号级理解”
-
-一个成熟 Agent 往往不是直接 `read` 大量文件，而是先靠这几种定位工具收窄范围。
-
-### 第三类：环境交互
-
-最典型的是：
-
-- `bash`
-- `webfetch`
-- `websearch`
-
-这三者分别解决：
-
-- 本地环境执行
-- 单页网页抓取
-- 搜索引擎级发现
-
-注意这三类能力的权限风险都比 `read` 高，所以当前仓库对它们的约束也更重。
-
-### 第四类：任务编排
-
-当前仓库里这类能力很重要，但初学者常常忽略：
-
-- `task`
-- `question`
-- `skill`
-- `todo`
-- `plan_exit`
-- `batch`（实验）
-
-这些工具告诉我们，OpenCode 并不把工具系统限制在”外部 I/O”。
-它也把”任务拆分””向用户追问””加载工作流””管理待办”都纳入了工具系统。
-
-这正是现代 Agent 和早期函数调用机器人最大的区别之一。
-
-**重要说明**：
-- `skill` 在这里指的是 **SkillTool**（一个工具），不是 Skill 本身
-- Skill 是提示词工作流（SKILL.md + 辅助文件），不是工具
-- SkillTool 的作用是把 Skill 内容加载到上下文
-- 详见第十二篇对 Skill 系统的完整讲解
-
----
-
-## 3.4 文件工具：不只是读写，而是一整套安全修改链路
-
-### `read` 的重点不是读文本，而是处理真实文件世界
-
-[packages/opencode/src/tool/read.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/tool/read.ts) 的能力比表面上丰富很多：
-
-- 支持相对路径转绝对路径
-- 会检查外部目录访问
-- 会走 `read` 权限询问
-- 目录可直接读取
-- 图片和 PDF 会转附件返回
-- 大文件会分页与字节截断
-- 会预热 LSP
-- 会携带文件相关 instruction prompt
-
-也就是说，`read` 在 OpenCode 里不是一个简单 `fs.readFile()` 包装器，而是“安全文件读取协议”。
-
-### `edit` 体现了 Agent 修改代码最难的部分
-
-[packages/opencode/src/tool/edit.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/tool/edit.ts) 值得重点看，因为它非常接近真实 Agent 编辑难题：
-
-1. 先校验参数
-2. 外部目录检查
-3. 文件锁
-4. 文件时间校验
-5. 保持原始换行风格
-6. 生成 diff
-7. 请求编辑权限
-8. 写回文件
-9. 广播文件变更事件
-10. 触发 LSP 诊断
-
-这个链路说明一个现实问题：
-
-**Agent 改代码最难的不是“替换字符串”，而是确保替换过程在并发、诊断、权限和可回溯性上都成立。**
-
-### `write` 与 `edit` 的区别
-
-`write` 不是 `edit` 的简化版，而是适合“整体生成”的另一条路径。
-
-它的典型流程是：
-
-1. 读取旧内容
-2. 生成整文件 diff
-3. 请求 `edit` 权限
-4. 写入新内容
-5. 发布文件变更事件
-6. 触发项目级 LSP 诊断
-
-值得注意的是：
-
-- `write` 会汇总当前文件诊断
-- 还会附带其他文件的部分诊断
-
-这意味着 OpenCode 假设“一个新文件或整文件重写，可能影响整个工程”，而不是只影响当前文件。
-
----
-
-## 3.5 `bash` 工具：最强也最危险的能力
-
-### 为什么 `bash` 是 Agent 系统里的分水岭
-
-[packages/opencode/src/tool/bash.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/tool/bash.ts) 不是简单 `spawn(command)`。
-
-它先做了很多准备：
-
-- 解析命令 AST
-- 识别潜在外部目录
-- 推导命令前缀权限模式
-- 请求 `external_directory` 权限
-- 请求 `bash` 权限
-- 通过插件 Hook 注入环境变量
-- 处理超时、终止、流式输出和元数据更新
-
-尤其是这两段逻辑很关键：
-
-```ts
-await ctx.ask({
-  permission: "external_directory",
-  patterns: globs,
-  always: globs,
-  metadata: {},
-})
-
-await ctx.ask({
-  permission: "bash",
-  patterns: Array.from(patterns),
-  always: Array.from(always),
-  metadata: {},
-})
-```
-
-这说明 OpenCode 不是粗暴地把“执行命令”当成一个整体权限，而是拆成：
-
-1. 你要不要碰外部目录
-2. 你要不要执行这类命令
-
-### `bash` 也是插件插手运行环境的入口
-
-命令执行前，`bash` 会触发：
-
-```ts
-const shellEnv = await Plugin.trigger("shell.env", ...)
-```
-
-这意味着插件可以给 shell 注入环境变量。  
-所以工具系统和插件系统不是割裂的，它们在运行期会实际协作。
-
-这类设计很适合写进电子书，因为它能让初学者明白：
-
-**Agent 的能力不是单模块决定的，而是多个子系统在工具执行时汇合。**
-
----
-
-## 3.6 搜索、网页与远程上下文工具
-
-### `glob` / `grep` 是真正的第一跳
-
-虽然这两类工具看起来普通，但在 Agent 工作流里优先级很高。
-
-经验上，一个稳健的 Agent 搜仓库通常是：
-
-1. `glob` 先缩小文件范围
-2. `grep` 再找文本命中
-3. `read` 只读少量候选文件
-4. 必要时才上 `lsp`
-
-这也是你写电子书时可以反复强调的一条方法论：
-
-**Agent 高效，不是因为它什么都能做，而是因为它先缩小搜索空间。**
-
-### `webfetch` 解决的是“拉正文”，不是“全网搜索”
-
-[packages/opencode/src/tool/webfetch.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/tool/webfetch.ts) 的职责很清晰：
-
-- URL 校验
-- `webfetch` 权限确认
-- 超时控制
-- 请求头协商
-- 按需返回 text / markdown / html
-- 图片直接转附件
-
-它适合的是：
-
-- 已经知道目标 URL
-- 需要拉正文
-- 需要把网页转成适合模型消费的格式
-
-### `websearch` / `codesearch` 受供应商能力控制
-
-注册表里对这两个工具有专门条件：
-
-```ts
-if (t.id === "codesearch" || t.id === "websearch") {
-  return model.providerID === ProviderID.opencode || Flag.OPENCODE_ENABLE_EXA
+## 4.2 注册表：工具的统一管理
+
+### ToolRegistry：所有工具的集合
+
+`tool/registry.ts` 是整个工具系统的入口，它做三件事：
+
+1. **列举内置工具**：维护所有内置工具的完整列表
+2. **加载自定义工具**：扫描用户配置目录里的工具文件
+3. **按模型过滤**：不同 LLM 支持的工具不同，注册表负责过滤
+
+```typescript
+// tool/registry.ts（精简）
+async function all(): Promise<Tool.Info[]> {
+  const custom = await state().then((x) => x.custom)
+
+  // question 工具只在有 UI 的客户端可用（不在纯 CLI 中）
+  const question = ["app", "cli", "desktop"].includes(Flag.OPENCODE_CLIENT)
+    || Flag.OPENCODE_ENABLE_QUESTION_TOOL
+
+  return [
+    InvalidTool,
+    ...(question ? [QuestionTool] : []),
+    BashTool,
+    ReadTool,
+    GlobTool,
+    GrepTool,
+    EditTool,
+    WriteTool,
+    TaskTool,
+    WebFetchTool,
+    TodoWriteTool,
+    WebSearchTool,
+    CodeSearchTool,
+    SkillTool,
+    ApplyPatchTool,
+    // LSP 工具是实验性的，需要 Flag 开启
+    ...(Flag.OPENCODE_EXPERIMENTAL_LSP_TOOL ? [LspTool] : []),
+    // 批处理工具需要配置开启
+    ...(config.experimental?.batch_tool === true ? [BatchTool] : []),
+    // Plan 模式工具只在特定场景下可用
+    ...(Flag.OPENCODE_EXPERIMENTAL_PLAN_MODE && Flag.OPENCODE_CLIENT === "cli"
+      ? [PlanExitTool] : []),
+    ...custom,  // 用户自定义工具
+  ]
 }
 ```
 
-这背后有两个现实约束：
+### 按模型过滤：tools() 函数
 
-1. 搜索能力通常依赖外部服务，不是所有部署都能用
-2. 工具集本身会受到产品套餐、provider 或环境开关影响
-
-从 Agent 工程角度看，这说明工具系统同时也是**商业能力和运行时能力的分发层**。
-
----
-
-## 3.7 `task`、`question`、`skill`：工具系统里的编排能力
-
-### `task` 工具其实是在创建子 Agent 会话
-
-[packages/opencode/src/tool/task.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/tool/task.ts) 很值得看，因为它不是传统意义上的“工具调用外部 API”。
-
-它会：
-
-1. 检查 `task` 权限
-2. 找到目标 `Subagent`
-3. 创建或恢复子会话
-4. 继承父消息模型信息
-5. 禁掉一部分工具
-6. 调用 `SessionPrompt.prompt()` 运行子任务
-7. 返回 `task_id`
-
-这意味着 `task` 工具其实是 OpenCode 的“多 Agent 编排入口”。
-
-所以你在写书时完全可以把它定义为：
-
-**任务型工具，而不是 I/O 型工具。**
-
-### `question` 工具是 Agent 何时该停下来问人的正式机制
-
-[packages/opencode/src/tool/question.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/tool/question.ts) 的价值在于，它把“问用户补充信息”做成了一个标准工具，而不是让模型随便输出一句问题。
-
-这会带来两个好处：
-
-1. 前端可以针对它做专门交互
-2. 回答结果能结构化返回给 Agent
-
-这也是为什么一个成熟 Agent 系统不该把所有交互都塞进纯文本。
-
-### `skill` 工具负责”按需加载 Skill 内容”
-
-**重要概念区分**：
-
-很多初学者会困惑：Skill 是工具吗？
-
-答案：**Skill 不是工具，但有一个工具用来加载 Skill。**
-
-- **Skill**：一份 SKILL.md + 辅助文件（提示词工作流）
-- **SkillTool**：一个内置工具，用来把 Skill 内容注入上下文
-- **关系**：`SkillTool.execute(name)` → 返回 `Skill.content`
-
-**SkillTool 的实现**：
-
-[packages/opencode/src/tool/skill.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/tool/skill.ts) 会做三件事：
-
-1. 列出当前可用 Skill
-2. 请求 `skill` 权限
-3. 把 `SKILL.md` 内容和目录样本注入上下文
-
-所以 Skill 的本质不是”静态文档”，而是**上下文按需装载机制**。
-
-**为什么这个区分很重要**：
-
-- Skill 在工具注册表中的体现是 SkillTool
-- Skill 本身存储在 `.opencode/skill/` 目录
-- 第十二篇会详细讲解 Skill 系统的完整设计
-
-### `todo` 把待办列表也变成了工具
-
-- `todo`：把待办列表正式结构化
-
-这说明 OpenCode 的工具系统并不局限于”操作外部世界”，它同样承担”组织 Agent 自身工作流”的角色。
-
----
-
-## 3.8 Planning 与任务分解实战
-
-### 为什么需要任务分解
-
-当用户提出复杂需求时，比如”重构整个认证系统”，Agent 面临的挑战是：
-
-1. **任务太大**：无法一次性完成
-2. **需要规划**：必须先分析再执行
-3. **需要并行**：多个子任务可以同时进行
-4. **需要协作**：不同 Agent 擅长不同领域
-
-这就是 Planning 与任务分解的价值所在。
-
-### OpenCode 的任务分解机制
-
-#### 1. task 工具：创建子任务
+工具不是"加入列表就所有模型都能用"。`tools()` 函数在返回前还要按模型过滤：
 
 ```typescript
-// Primary Agent 调用 task 工具
-{
-  “tool”: “task”,
-  “parameters”: {
-    “description”: “分析当前认证系统的实现”,
-    “agent”: “explore”,  // 使用 explore Agent
-    “prompt”: “找到所有与认证相关的文件和函数”
-  }
+// tool/registry.ts
+export async function tools(model: { providerID, modelID }, agent?: Agent.Info) {
+  const allTools = await all()
+
+  return Promise.all(
+    allTools
+      .filter((t) => {
+        // codesearch/websearch 只对 OpenCode 付费用户或开启特定 Flag 的用户可用
+        if (t.id === "codesearch" || t.id === "websearch") {
+          return model.providerID === ProviderID.opencode || Flag.OPENCODE_ENABLE_EXA
+        }
+
+        // GPT 模型使用 apply_patch，其他模型使用 edit/write
+        const usePatch = model.modelID.includes("gpt-") && !model.modelID.includes("gpt-4")
+        if (t.id === "apply_patch") return usePatch
+        if (t.id === "edit" || t.id === "write") return !usePatch
+
+        return true
+      })
+      .map(async (t) => {
+        const tool = await t.init({ agent })
+        return { id: t.id, ...tool }
+      })
+  )
 }
 ```
 
-**执行流程**：
+**关键设计**：GPT 系列模型和 Claude 使用不同的文件编辑工具。GPT 更擅长生成 patch 格式，所以用 `apply_patch`；Claude 更擅长直接 `edit`（指定 oldString/newString）。注册表在这里做了模型感知的工具选择。
 
-```text
-Primary Agent
-  ↓
-调用 task 工具
-  ↓
-创建子会话（Session.create）
-  ↓
-使用指定的 Subagent（explore）
-  ↓
-执行子任务
-  ↓
-返回结果给 Primary Agent
-  ↓
-Primary Agent 继续规划下一步
-```
+### 自定义工具加载
 
-#### 2. 并行任务执行
+注册表在初始化时还会扫描用户配置目录里的自定义工具：
 
 ```typescript
-// Primary Agent 可以同时创建多个任务
-const tasks = [
-  {
-    tool: “task”,
-    agent: “explore”,
-    prompt: “找到所有认证相关文件”
-  },
-  {
-    tool: “task”,
-    agent: “explore”,
-    prompt: “找到所有测试文件”
-  },
-  {
-    tool: “task”,
-    agent: “general”,
-    prompt: “总结当前认证流程”
-  }
-]
-
-// 并行执行
-const results = await Promise.all(
-  tasks.map(t => executeTask(t))
+// tool/registry.ts
+const matches = await Config.directories().then((dirs) =>
+  dirs.flatMap((dir) =>
+    Glob.scanSync("{tool,tools}/*.{js,ts}", { cwd: dir, absolute: true })
+  )
 )
-```
 
-#### 3. 任务结果汇总
-
-```typescript
-// Primary Agent 收到所有子任务结果后
-{
-  “task_1”: “找到 5 个认证相关文件：auth.ts, login.ts...”,
-  “task_2”: “找到 3 个测试文件：auth.test.ts...”,
-  “task_3”: “当前使用 JWT 认证，流程是...”
-}
-
-// Primary Agent 基于结果制定计划
-“基于分析结果，我建议按以下步骤重构：
-1. 先重构 auth.ts 的核心逻辑
-2. 更新相关测试
-3. 迁移 login.ts 使用新接口
-...”
-```
-
-### Planning 模式：先规划再执行
-
-#### 进入 Planning 模式
-
-```typescript
-// Primary Agent 调用 plan_enter 工具
-{
-  “tool”: “plan_enter”,
-  “parameters”: {
-    “reason”: “任务复杂，需要先制定计划”
+for (const match of matches) {
+  const namespace = path.basename(match, path.extname(match))
+  const mod = await import(pathToFileURL(match).href)
+  for (const [id, def] of Object.entries(mod)) {
+    custom.push(fromPlugin(id, def))
   }
 }
 ```
 
-**Planning 模式的特点**：
+用户只需要在 `~/.config/opencode/tool/` 或项目级 `.opencode/tool/` 目录下放一个导出工具定义的 `.ts` 文件，就能给 Agent 加新工具，不需要修改 OpenCode 源码。
 
-1. **只读模式**：不能修改代码
-2. **可以编辑计划文件**：`.opencode/plans/*.md`
-3. **可以调用搜索工具**：分析代码结构
-4. **不能执行修改**：确保安全
+---
 
-#### Planning 模式的工作流
+## 4.3 核心工具解析
 
-```text
-用户: “重构认证系统”
-  ↓
-Agent: “这是个复杂任务，让我先制定计划”
-  ↓
-进入 Planning 模式
-  ↓
-分析代码结构（使用 glob/grep/read）
-  ↓
-创建计划文件（.opencode/plans/auth-refactor.md）
-  ↓
-向用户展示计划
-  ↓
-用户确认
-  ↓
-退出 Planning 模式（plan_exit）
-  ↓
-按计划执行
-```
-
-#### 计划文件示例
-
-`.opencode/plans/auth-refactor.md`：
-
-```markdown
-# 认证系统重构计划
-
-## 当前状态分析
-
-- 使用 JWT 认证
-- 代码分散在 3 个文件中
-- 缺少统一的错误处理
-- 测试覆盖率 60%
-
-## 重构目标
-
-1. 统一认证接口
-2. 改进错误处理
-3. 提高测试覆盖率到 90%
-
-## 执行步骤
-
-### 步骤 1：重构核心逻辑
-- 文件：src/auth/core.ts
-- 预计时间：30 分钟
-- 风险：中等
-
-### 步骤 2：更新测试
-- 文件：src/auth/core.test.ts
-- 预计时间：20 分钟
-- 风险：低
-
-### 步骤 3：迁移调用方
-- 文件：src/auth/login.ts, src/auth/register.ts
-- 预计时间：40 分钟
-- 风险：高（需要仔细测试）
-
-## 回滚方案
-
-如果出现问题，可以：
-1. 恢复 git commit abc123
-2. 使用旧的认证接口
-```
-
-### 任务分解的最佳实践
-
-#### 1. 自顶向下分解
-
-```text
-大任务：重构认证系统
-  ↓
-子任务 1：分析现状
-  ├─ 找到所有相关文件
-  ├─ 分析依赖关系
-  └─ 识别潜在问题
-  ↓
-子任务 2：设计方案
-  ├─ 设计新接口
-  ├─ 规划迁移路径
-  └─ 评估风险
-  ↓
-子任务 3：执行重构
-  ├─ 重构核心逻辑
-  ├─ 更新测试
-  └─ 迁移调用方
-```
-
-#### 2. 明确任务边界
-
-**好的任务分解**：
-```
-✅ “找到所有使用 JWT 的文件”
-✅ “重构 auth.ts 的 login 函数”
-✅ “为 auth.ts 添加单元测试”
-```
-
-**不好的任务分解**：
-```
-❌ “改进代码”（太模糊）
-❌ “修复所有问题”（范围不明确）
-❌ “优化性能”（没有具体目标）
-```
-
-#### 3. 设置任务优先级
+### read：最常用的工具
 
 ```typescript
-const tasks = [
-  {
-    priority: “high”,
-    description: “修复安全漏洞”,
-    blocking: []
-  },
-  {
-    priority: “medium”,
-    description: “重构核心逻辑”,
-    blocking: [“task_1”]  // 依赖任务 1
-  },
-  {
-    priority: “low”,
-    description: “优化性能”,
-    blocking: [“task_2”]  // 依赖任务 2
+// tool/read.ts（简化）
+export const ReadTool = Tool.define("read", {
+  description: "读取文件内容，返回文件文本",
+  parameters: z.object({
+    filePath: z.string().describe("要读取的文件的绝对路径"),
+    startLine: z.number().optional().describe("起始行（包含），从 1 开始"),
+    endLine: z.number().optional().describe("结束行（包含），从 1 开始"),
+  }),
+  async execute({ filePath, startLine, endLine }, ctx) {
+    const content = await fs.readFile(filePath, "utf-8")
+    const lines = content.split("\n")
+
+    const start = (startLine ?? 1) - 1
+    const end = endLine ?? lines.length
+    const selected = lines.slice(start, end)
+
+    return {
+      title: filePath,
+      output: selected.map((line, i) => `${start + i + 1}→${line}`).join("\n"),
+      metadata: { startLine: start + 1, endLine: end, totalLines: lines.length },
+    }
   }
-]
+})
 ```
 
-### 多 Agent 协作模式
+注意输出格式：每行前面加行号（`23→content`）。这让 LLM 在后续 `edit` 调用时能准确定位要修改的内容，也让输出对用户更可读。
 
-#### 模式 1：专家分工
+### edit：最精密的工具
+
+`edit` 工具是 OpenCode 里实现最复杂的工具之一。它要做到**精确字符串替换**——找到文件里的 `oldString`，替换成 `newString`：
 
 ```typescript
-// Primary Agent 分配任务给不同的专家
-{
-  “explore”: “分析代码结构”,
-  “general”: “总结业务逻辑”,
-  “build”: “执行重构”
-}
+// tool/edit.ts（核心逻辑简化）
+export const EditTool = Tool.define("edit", {
+  description: DESCRIPTION,  // 从 edit.txt 加载，很长的说明
+  parameters: z.object({
+    filePath: z.string().describe("要修改的文件的绝对路径"),
+    oldString: z.string().describe("要替换的文本"),
+    newString: z.string().describe("替换后的文本（必须与 oldString 不同）"),
+    replaceAll: z.boolean().optional().describe("是否替换所有匹配（默认 false）"),
+  }),
+  async execute(params, ctx) {
+    // 1. 权限检查（会在 UI 里弹出确认）
+    const diff = createTwoFilesPatch(filePath, filePath, contentOld, contentNew)
+    await ctx.ask({
+      permission: "edit",
+      patterns: [path.relative(Instance.worktree, filePath)],
+      metadata: { filepath: filePath, diff },
+    })
+
+    // 2. 执行替换
+    const newContent = replaceAll
+      ? content.replaceAll(oldString, newString)
+      : content.replace(oldString, newString)
+
+    await fs.writeFile(filePath, newContent)
+
+    // 3. 触发 LSP 诊断（检查修改后是否有类型错误）
+    const diagnostics = await LSP.diagnostics(filePath)
+
+    // 4. 返回 diff + 诊断信息
+    return {
+      title: path.basename(filePath),
+      output: diff + (diagnostics.length ? "\n\n诊断：\n" + formatDiagnostics(diagnostics) : ""),
+      metadata: { filepath: filePath, diff },
+    }
+  }
+})
 ```
 
-#### 模式 2：流水线
+三个重要设计：
 
-```text
-explore Agent
-  ↓ 找到相关文件
-general Agent
-  ↓ 分析业务逻辑
-build Agent
-  ↓ 执行修改
-```
+1. **修改前权限确认**：`ctx.ask()` 会暂停执行，等待用户在 UI 里点击"允许"
+2. **集成 LSP 诊断**：修改文件后立即运行类型检查，把错误信息返回给 LLM，让它能自动修复
+3. **返回 diff**：LLM 看到 diff 而不是新文件全文，减少 token 消耗
 
-#### 模式 3：并行执行
-
-```text
-explore Agent (任务 1) ─┐
-explore Agent (任务 2) ─┼─→ 汇总结果 → build Agent
-general Agent (任务 3) ─┘
-```
-
-### 任务状态管理
+### bash：最强大也最危险的工具
 
 ```typescript
-// 任务状态
-type TaskStatus =
-  | “pending”    // 等待执行
-  | “running”    // 执行中
-  | “completed”  // 已完成
-  | “failed”     // 失败
-  | “blocked”    // 被阻塞
+// tool/bash.ts（简化）
+export const BashTool = Tool.define("bash", async () => {
+  const shell = Shell.acceptable()  // 检测系统可用的 shell（bash/zsh/sh）
 
-// 任务依赖
-interface Task {
-  id: string
-  status: TaskStatus
-  dependencies: string[]  // 依赖的任务 ID
-  agent: string
-  prompt: string
-}
+  return {
+    description: DESCRIPTION,  // 从 bash.txt 加载
+    parameters: z.object({
+      command: z.string().describe("要执行的命令"),
+      timeout: z.number().optional().describe("超时时间（毫秒）"),
+      workdir: z.string().optional().describe("工作目录"),
+      description: z.string().describe("5-10字描述这个命令在做什么"),
+    }),
+    async execute(params, ctx) {
+      // 1. 权限检查（bash 工具每次都需要确认，除非在规则里设置了 always allow）
+      await ctx.ask({
+        permission: "execute",
+        patterns: [params.command],
+        metadata: { command: params.command },
+      })
+
+      // 2. 执行命令
+      const result = await runCommand(params.command, {
+        cwd: params.workdir || Instance.directory,
+        timeout: params.timeout || DEFAULT_TIMEOUT,
+        shell,
+      })
+
+      return {
+        title: params.description,
+        output: result.stdout + result.stderr,
+        metadata: { exitCode: result.exitCode },
+      }
+    }
+  }
+})
 ```
 
-### 实战案例：重构认证系统
+`bash` 工具的 `description` 参数有一个巧妙设计——它要求 LLM 在调用时必须提供一个简短的人类可读描述（"安装项目依赖"、"运行测试"）。这个描述会显示在 UI 里，让用户知道 Agent 在执行什么命令，而不是只看到一行晦涩的 shell 命令。
 
-**完整流程**：
+### grep 和 glob：搜索工具
 
-```text
-1. 用户输入
-   “重构认证系统，使用更安全的方式”
+```typescript
+// tool/grep.ts（简化）
+export const GrepTool = Tool.define("grep", {
+  description: "在文件内容中搜索正则表达式模式",
+  parameters: z.object({
+    pattern: z.string().describe("正则表达式"),
+    path: z.string().optional().describe("搜索路径"),
+    glob: z.string().optional().describe("文件名过滤模式，如 '*.ts'"),
+    caseInsensitive: z.boolean().optional(),
+    output: z.enum(["content", "files", "count"]).optional(),
+  }),
+  async execute(params, ctx) {
+    // 用 ripgrep（rg）执行，比原生 grep 快 10 倍以上
+    const results = await runRipgrep(params)
+    return { title: params.pattern, output: formatResults(results), metadata: {} }
+  }
+})
 
-2. Primary Agent 分析
-   “这是个复杂任务，我需要：
-   - 先分析现状
-   - 制定计划
-   - 分步执行”
-
-3. 进入 Planning 模式
-   [调用 plan_enter]
-
-4. 并行分析
-   Task 1 (explore): “找到所有认证相关文件”
-   Task 2 (explore): “找到所有测试文件”
-   Task 3 (general): “总结当前认证流程”
-
-5. 制定计划
-   [创建 .opencode/plans/auth-refactor.md]
-
-6. 向用户展示计划
-   “我制定了以下计划：
-   1. 重构核心逻辑（30分钟）
-   2. 更新测试（20分钟）
-   3. 迁移调用方（40分钟）
-   是否继续？”
-
-7. 用户确认
-   “继续”
-
-8. 退出 Planning 模式
-   [调用 plan_exit]
-
-9. 执行步骤 1
-   [修改 src/auth/core.ts]
-
-10. 执行步骤 2
-    [更新测试文件]
-
-11. 执行步骤 3
-    [迁移调用方]
-
-12. 完成
-    “重构完成，所有测试通过”
-```
-
-### 调试任务分解
-
-**查看任务执行日志**：
-
-```bash
-# 查看所有子任务
-DEBUG=opencode:task:* bun dev
-```
-
-**日志示例**：
-
-```text
-[task] Creating task: analyze-auth
-[task] Agent: explore
-[task] Creating sub-session: sess_abc123
-[task] Executing...
-[task] Result: Found 5 files
-[task] Task completed: task_xyz789
+// tool/glob.ts（简化）
+export const GlobTool = Tool.define("glob", {
+  description: "按文件名模式查找文件",
+  parameters: z.object({
+    pattern: z.string().describe("glob 模式，如 '**/*.ts'"),
+    path: z.string().optional(),
+  }),
+  async execute(params) {
+    const files = await glob(params.pattern, { cwd: params.path || Instance.directory })
+    return { title: params.pattern, output: files.join("\n"), metadata: {} }
+  }
+})
 ```
 
 ---
 
-## 3.9 自定义工具开发指南
+## 4.4 权限系统
 
-### 先选扩展方式
+### 为什么需要权限控制
 
-在当前仓库里，自定义工具主要有两条路：
+工具是 Agent 的能力，但能力需要约束。没有权限系统，Agent 会在没有用户意识的情况下删文件、执行危险命令、访问敏感路径。
 
-1. **项目级工具**
-2. **插件工具**
+OpenCode 的权限模型基于**规则（Rule）**，每条规则是一个三元组：
 
-如果你只是给当前项目自己用，优先选项目级工具。  
-如果你要做复用或发布，才考虑插件工具。
+```typescript
+// permission/next.ts
+export interface Rule {
+  permission: string    // 权限类型，如 "edit"、"execute"、"read"
+  pattern: string       // 路径或命令的匹配模式，支持 glob
+  action: "allow" | "deny" | "ask"  // 对应操作
+}
+```
 
-### 项目级工具的思路
+### 规则的来源
 
-注册表会扫描 `tool/*.ts` 或 `tools/*.ts`，并把导出的定义转成标准工具。
+规则从三个地方合并：
 
-所以一个最小项目级工具通常只需要：
+```typescript
+// 1. 用户配置文件（config.json）
+{
+  "permission": {
+    "execute": "ask",           // 所有命令执行都询问
+    "edit": {
+      "src/**": "allow",        // src 目录下的编辑直接允许
+      "*.lock": "deny"          // lock 文件禁止修改
+    }
+  }
+}
 
-```ts
-import { tool } from "@opencode-ai/plugin"
+// 2. Agent 定义里的默认规则（agent/agent.ts）
 
-export const hello = tool({
-  description: "返回测试文本",
-  args: {
-    name: tool.schema.string(),
-  },
-  async execute(args) {
-    return `hello ${args.name}`
+// 3. 运行时动态添加（用户点击"总是允许"时）
+```
+
+### ctx.ask()：权限请求机制
+
+工具通过 `ctx.ask()` 发起权限请求：
+
+```typescript
+// 工具执行时请求权限
+await ctx.ask({
+  permission: "edit",
+  patterns: ["src/config.ts"],
+  always: ["src/**"],           // 如果用户点"总是允许"，自动添加这个规则
+  metadata: {
+    filepath: "src/config.ts",
+    diff: "- port = 3000\n+ port = 8080",
   },
 })
 ```
 
-然后把文件放进项目的 `tool/` 目录即可。
+`PermissionNext` 的核心逻辑：
 
-### 写工具时最容易忽略的四件事
+```typescript
+// permission/next.ts（简化）
+export async function check(request: Request): Promise<Action> {
+  const rules = await getRuleset()
 
-#### 1. 先想权限，不要先想功能
+  for (const rule of rules) {
+    // 匹配权限类型
+    if (!matchesPermission(rule.permission, request.permission)) continue
+    // 匹配路径/命令模式
+    if (!Wildcard.match(rule.pattern, request.patterns)) continue
 
-如果你的工具会：
+    if (rule.action === "allow") return "allow"
+    if (rule.action === "deny")  return "deny"
+    // rule.action === "ask"：中断执行，等待用户响应
+  }
 
-- 改文件
-- 跑命令
-- 访问外部目录
-- 发网络请求
+  // 没有匹配规则：默认询问
+  return "ask"
+}
+```
 
-那第一件事就是设计 `ctx.ask()`，而不是先写业务逻辑。
+当结果是 `"ask"` 时，工具执行暂停，通过 Bus 发布权限请求事件，UI 显示确认弹窗，等待用户响应。
 
-#### 2. 输出要面向模型，而不只是面向人
+### 权限配置示例
 
-工具返回的 `output` 不是日志，而是下一步推理的输入。  
-所以输出结构要清楚、短、可继续推理。
+常见的权限配置：
 
-#### 3. `metadata` 是给界面和调试用的
+```json
+{
+  "permission": {
+    "execute": {
+      "git *": "allow",
+      "npm test": "allow",
+      "rm *": "deny",
+      "*": "ask"
+    },
+    "edit": {
+      "src/**": "allow",
+      "package.json": "ask",
+      "*.lock": "deny"
+    }
+  }
+}
+```
 
-不要把所有信息都塞进 `output`。  
-能放进 `metadata` 的中间状态，尽量放进 `metadata`。
+---
 
-#### 4. 接受输出裁剪这件事
+## 4.5 输出截断：Truncate 系统
 
-只要你不自己声明 `metadata.truncated`，工具返回值默认会被 `Truncate.output()` 统一处理。  
-这意味着你不能假设模型一定能看到完整原始输出。
+### 为什么要截断
 
-### 什么时候不该新增工具
+工具输出可能很大：
+- 读一个 10000 行的文件
+- `bash` 命令输出了几千行日志
+- `grep` 匹配到了几百个结果
 
-这是给初学者最重要的一条提醒。
+把所有内容都塞进 LLM 的上下文会：
+1. 超出 token 限制
+2. 浪费大量 token（有效内容只占一小部分）
+3. 影响 LLM 的注意力（更多无关内容 → 更低准确率）
 
-下面几种情况通常不需要新工具：
+### Truncate.output：截断策略
 
-- 只是想复用一段提示词：用 Command
-- 只是想固定一个流程：用 Skill
-- 只是想把多个已有工具串起来：先用 Agent Prompt 或 Skill
+```typescript
+// tool/truncation.ts（简化）
+export namespace Truncate {
+  export const MAX_LINES = 1000
+  export const MAX_BYTES = 100_000  // 约 100KB
 
-很多新手会过早把问题“代码化”。  
-但在 Agent 工程里，真正稀缺的往往不是新工具，而是合理的流程约束。
+  export async function output(
+    content: string,
+    opts: {},
+    agent?: Agent.Info,
+  ): Promise<{ content: string; truncated: boolean; outputPath?: string }> {
+    const lines = content.split("\n")
+
+    if (lines.length <= MAX_LINES && Buffer.byteLength(content) <= MAX_BYTES) {
+      return { content, truncated: false }
+    }
+
+    // 超出限制：截断并保存完整内容到临时文件
+    const truncated = lines.slice(0, MAX_LINES).join("\n")
+    const outputPath = await saveTempFile(content)
+
+    return {
+      content: truncated + `\n\n[内容已截断。完整输出保存在 ${outputPath}，共 ${lines.length} 行]`,
+      truncated: true,
+      outputPath,
+    }
+  }
+}
+```
+
+截断不是丢弃——完整内容保存到临时文件，并在截断处告知 LLM 完整内容的位置。LLM 如果需要更多内容，可以调用 `read` 工具读取完整文件。
+
+---
+
+## 4.6 Task 工具：子任务编排
+
+`task` 工具是工具系统里最特殊的一个——它不操作文件或执行命令，而是**启动一个子 Agent**：
+
+```typescript
+// tool/task.ts（简化）
+export const TaskTool = Tool.define("task", {
+  description: `启动子 Agent 完成独立的子任务。
+    适用场景：
+    - 探索代码库（不需要修改文件）
+    - 并行执行多个独立任务
+    - 需要独立上下文的子任务
+  `,
+  parameters: z.object({
+    description: z.string().describe("子任务的详细描述"),
+    prompt: z.string().describe("发给子 Agent 的指令"),
+  }),
+  async execute(params, ctx) {
+    // 创建子会话
+    const subSession = await Session.create({
+      agent: "subagent",     // 使用 subagent 模式（权限受限）
+      parentID: ctx.sessionID,
+    })
+
+    // 在子会话里执行任务
+    await Session.prompt(subSession.id, { content: params.prompt })
+
+    // 等待子任务完成并返回结果
+    const result = await waitForCompletion(subSession.id)
+    return { title: params.description, output: result, metadata: {} }
+  }
+})
+```
+
+这是 Multi-Agent 模式的具体实现。主 Agent 可以把"探索代码库"、"查找相关文件"这类探索性任务交给 subagent，自己专注于实际修改，提高效率并减少主上下文的 token 占用。
+
+---
+
+## 4.7 描述即接口：工具设计的关键
+
+### description 是 Agent 和工具之间的"API 文档"
+
+工具的 `description` 不是给人看的注释，而是 LLM 决策的依据。它直接影响工具是否被调用、何时被调用、参数如何填写。
+
+看 `bash.ts` 从外部 `.txt` 文件加载 description 的设计：
+
+```typescript
+import DESCRIPTION from "./bash.txt"
+
+export const BashTool = Tool.define("bash", async () => ({
+  description: DESCRIPTION
+    .replaceAll("${directory}", Instance.directory)
+    .replaceAll("${maxLines}", String(Truncate.MAX_LINES)),
+  // ...
+}))
+```
+
+把 description 放在独立的 `.txt` 文件里有两个好处：
+1. 可以写很长的说明（bash.txt 有几十行）而不影响代码可读性
+2. 运行时动态插入变量（当前工作目录、最大输出行数等）
+
+### 好描述 vs 坏描述
+
+```text
+坏描述（太模糊）：
+  "执行命令"
+
+结果：LLM 什么时候该用这个工具？不知道。
+
+好描述（具体、有边界）：
+  "在 shell 里执行命令。用于：运行测试、安装依赖、执行脚本。
+   不要用于：读写文件（用 read/write 工具）、搜索内容（用 grep 工具）。
+   工作目录：${directory}。
+   输出超过 ${maxLines} 行会被截断。"
+
+结果：LLM 清楚知道这个工具的边界，不会滥用。
+```
+
+OpenCode 的工具 description 都遵循这个原则：告诉 LLM 什么时候用、什么时候不用、有什么限制。
 
 ---
 
 ## 本章小结
 
-### 这一篇最该记住什么
+工具系统的四层结构：
 
-1. 工具系统的核心入口不是单个工具文件，而是注册表
-2. 工具集合会随着客户端、模型和开关变化
-3. OpenCode 的工具不只做文件和命令，也做提问、任务拆分、技能装载
-4. 每个工具的真实价值不在函数体，而在权限、输出、裁剪和后续链路
-5. 不是所有需求都该新增工具，很多需求更适合 Skill 或 Command
+```text
+┌─────────────────────────────────────────────────────┐
+│             ToolRegistry.tools()                     │
+│   按模型过滤 + 加载自定义工具 + 初始化                 │
+└─────────────────────────────────────────────────────┘
+                        ↓
+┌─────────────────────────────────────────────────────┐
+│               Tool.define()                          │
+│   参数验证（Zod）+ 输出截断（Truncate）               │
+└─────────────────────────────────────────────────────┘
+                        ↓
+┌─────────────────────────────────────────────────────┐
+│              工具 execute() 函数                      │
+│   ctx.ask()（权限）+ 实际业务逻辑                     │
+└─────────────────────────────────────────────────────┘
+                        ↓
+┌─────────────────────────────────────────────────────┐
+│           PermissionNext.check()                     │
+│   规则匹配：allow / deny / ask（等待用户）            │
+└─────────────────────────────────────────────────────┘
+```
 
-### 关键代码位置
+**关键设计决策**：
 
-| 模块 | 位置 | 建议重点 |
-| --- | --- | --- |
-| 工具抽象 | `packages/opencode/src/tool/tool.ts` | `Tool.define()`、参数校验、输出裁剪 |
-| 工具注册表 | `packages/opencode/src/tool/registry.ts` | 内置工具、模型过滤、自定义工具接入 |
-| 文件读取 | `packages/opencode/src/tool/read.ts` | 目录读取、附件、分页、权限 |
-| 精确编辑 | `packages/opencode/src/tool/edit.ts` | diff、锁、LSP、文件时间校验 |
-| 整体写入 | `packages/opencode/src/tool/write.ts` | 覆写、诊断汇总、文件事件 |
-| 命令执行 | `packages/opencode/src/tool/bash.ts` | AST 分析、权限、插件环境、流式元数据 |
-| 子任务编排 | `packages/opencode/src/tool/task.ts` | `Subagent`、子会话、任务恢复 |
-| 用户追问 | `packages/opencode/src/tool/question.ts` | 结构化提问与回答 |
-| 网页抓取 | `packages/opencode/src/tool/webfetch.ts` | 内容协商、超时、附件 |
-
-### 源码阅读路径
-
-1. 先看 `packages/opencode/src/tool/registry.ts`，把当前工具全景建立起来。
-2. 再看 `packages/opencode/src/tool/tool.ts`，理解一个工具如何被统一包装执行。
-3. 最后任选一个 I/O 工具和一个编排型工具，例如 `read.ts` + `task.ts`，比较它们的输入、权限和输出差异。
-
-### 任务
-
-判断 OpenCode 的工具系统为什么必须先解决“统一注册与能力边界”，而不是先盯着某个具体工具写得多强。
-
-### 操作
-
-1. 打开 `packages/opencode/src/tool/registry.ts`，把当前工具按“文件操作 / 搜索定位 / 环境交互 / 编排”四类重新分组。
-2. 再读 `packages/opencode/src/tool/tool.ts`，确认一个工具在被真正执行前，会经过哪些统一包装步骤。
-3. 最后任选一条真实链路，从 `registry.ts` 追到 `bash.ts`、`read.ts` 或 `task.ts`，记录它是怎样进入 Agent 可见工具列表的。
-
-### 验收
-
-完成后你应该能说明：
-
-- 为什么工具系统的第一入口应该是注册表，而不是某个单独工具文件。
-- 为什么权限、输入输出结构和执行包装必须在同一层统一收口。
-- 为什么同一个需求有时更适合做成 Skill 或 Command，而不是继续加新工具。
-
-### 下一篇预告
-
-理解了工具之后，再看会话系统就更容易了：
-
-- 工具输出如何进入消息流
-- 子任务和父任务如何形成会话树
-- 为什么上下文压缩会影响工具使用
-- 流式响应和 SSE 为什么是会话层问题
-
-这也是第四篇要解决的核心问题。
+| 决策 | 原因 |
+|------|------|
+| 工具用独立 `.ts` 文件，不是 switch-case | 新增工具不改注册表，只加文件 |
+| description 从 `.txt` 加载 | 可以写详细说明，支持运行时变量 |
+| edit 工具集成 LSP 诊断 | 修改后立刻知道有没有类型错误 |
+| bash 工具要求填写 description 参数 | 用户能在 UI 里看懂 Agent 在做什么 |
+| 输出截断保存到临时文件 | 不丢数据，LLM 可以按需获取完整内容 |
+| GPT 和 Claude 用不同的编辑工具 | 不同模型对不同格式的执行效果不同 |
 
 ### 思考题
 
-1. 为什么工具系统的核心入口应该先看 `registry.ts` 和 `tool.ts`，而不是直接看某个具体工具文件？
-2. 如果一个需求既可以写成新工具，也可以写成 Skill 或 Command，你会怎么判断边界？
-3. 为什么同一个工具在不同模型或不同客户端下，可能不应该暴露成同一套能力？
+1. 为什么 `edit` 工具要求提供 `oldString` 而不是行号？行号定位在什么情况下会出问题？
+2. 输出截断的阈值（1000 行 / 100KB）是如何平衡"给 LLM 足够信息"和"不浪费 token"的？
+3. 如果你要给 OpenCode 加一个"发送 Slack 消息"的工具，permission 字段应该设计成什么类型？
+
+---
+
+## 下一章预告
+
+**第5章：会话管理**
+
+深入 `packages/opencode/src/session/`，学习：
+- Session 的数据模型（session.sql.ts）
+- `prompt.ts`：用户消息如何进入会话
+- `processor.ts`：执行循环的完整实现
+- `message-v2.ts`：结构化消息模型与多端同步

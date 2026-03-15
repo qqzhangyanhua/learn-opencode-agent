@@ -1,973 +1,548 @@
 ---
-title: 第五篇：多模型支持
-description: 第五篇：多模型支持的详细内容
+title: 第6章：多模型支持
+description: 深入 Provider 抽象层——模型能力描述、消息格式转换、认证机制，以及 Vercel AI SDK 如何统一十余个提供商
 ---
 
-<script setup>
-import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshotCard.vue'
-</script>
-
-> **对应路径**：`packages/opencode/src/provider/`
-> **前置阅读**：第四篇 会话管理
-> **学习目标**：理解 OpenCode 为什么必须把模型提供商做成独立抽象层，以及消息格式、能力差异、成本和认证是怎样被统一接入的
+> **学习目标**：理解 Provider 层的设计动机，掌握模型能力如何驱动运行时决策，了解认证与消息格式转换机制
+> **前置知识**：第5章"会话管理"
+> **源码路径**：`packages/opencode/src/provider/`
+> **阅读时间**：20 分钟
 
 ---
 
-<SourceSnapshotCard
-  title="第五篇源码快照"
-  description="这一篇先别把多模型支持看成多接几个 API，而要先抓住 provider 层怎样把模型能力、消息格式、认证和厂商差异统一收口。"
-  repo="anomalyco/opencode"
-  repo-url="https://github.com/anomalyco/opencode/tree/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
-  branch="dev"
-  commit="f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
-  verified-at="2026-03-15"
-  :entries="[
-    {
-      label: 'Provider 抽象',
-      path: 'packages/opencode/src/provider/provider.ts',
-      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/provider/provider.ts'
-    },
-    {
-      label: '模型能力表',
-      path: 'packages/opencode/src/provider/models.ts',
-      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/provider/models.ts'
-    },
-    {
-      label: '协议转换层',
-      path: 'packages/opencode/src/provider/transform.ts',
-      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/provider/transform.ts'
-    },
-    {
-      label: '认证入口',
-      path: 'packages/opencode/src/provider/auth.ts',
-      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/provider/auth.ts'
-    }
-  ]"
-/>
+一个用户可能今天用 Claude 3.5 Sonnet，明天切换到 GPT-4o，后天用本地的 Ollama 模型。每个提供商的 API 格式不同、鉴权方式不同、能力边界也不同。
 
-## 核心概念速览
+Provider 层的职责就是把这些差异统一收口，让 `processor.ts` 只面向一个抽象接口，不感知底层是哪个提供商。
 
-对 Agent 项目来说，多模型支持真正难的地方从来都不是“再接一个 API”，而是：
+---
 
-- 不同模型参数不一样
-- 工具调用能力不一样
-- 推理能力和 token 限制不一样
-- 成本和认证方式也不一样
+## 6.1 为什么需要 Provider 抽象
 
-OpenCode 当前把这些差异集中在 provider 层处理，而不是让 session、tool、ui 到处感知差异。
-
-所以这一篇最重要的观察角度是：
-
-**Provider 层不是可选插件，而是整个 Agent 产品保持“提供商无关”的前提。**
-
-## 本章导读
-
-### 这一章解决什么问题
-
-这一章要回答的是：
-
-- 为什么 Agent 项目不能把各家模型 API 直接写进业务层
-- provider 层到底在隔离哪些差异
-- 消息格式、推理参数、模型能力、认证方式怎样统一收口
-- 新增一个 provider 时，最小接入路径是什么
-
-### 必看入口
-
-- [packages/opencode/src/provider/provider.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/provider/provider.ts)：provider 抽象与注册入口
-- [packages/opencode/src/provider/models.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/provider/models.ts)：模型元信息与能力描述
-- [packages/opencode/src/provider/transform.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/provider/transform.ts)：消息与参数转换
-- [packages/opencode/src/provider/schema.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/provider/schema.ts)：类型约束
-- [packages/opencode/src/provider/auth.ts](https://github.com/anomalyco/opencode/blob/dev/packages/opencode/src/provider/auth.ts)：认证与凭证处理
-
-### 一张图先建立感觉
-
-```text
-session / tool 产出统一消息
-  -> provider.ts 选择模型与提供商
-  -> models.ts 读取能力信息
-  -> transform.ts 转换参数和消息
-  -> auth.ts 注入凭证
-  -> 厂商 SDK 发请求
-  -> 响应回流给 session / tool / UI
-```
-
-### 先抓一条主链路
-
-建议先只顺着这一条线读：
-
-```text
-session / tool 层准备消息
-  -> provider/provider.ts 选择模型提供商
-  -> transform.ts 统一转换消息和参数
-  -> auth.ts 注入认证信息
-  -> 具体 provider 请求上游模型
-  -> models.ts 描述能力差异并回流给系统
-```
-
-先理解“上游差异是怎样被收敛的”，再分别看具体提供商的细节。
-
-### 初学者阅读顺序
-
-1. 先读 `provider.ts`，看 provider 抽象到底暴露了哪些统一能力。
-2. 再读 `models.ts` 和 `schema.ts`，建立“模型元信息”和“能力约束”的直觉。
-3. 最后读 `transform.ts` 和 `auth.ts`，理解一条真实请求怎样从统一格式落到具体厂商协议。
-
-### 最容易误解的点
-
-- provider 层不只是“换 API 地址”，更重要的是隔离能力和协议差异。
-- 模型能力不是一个静态字符串列表，而会影响工具调用、推理参数和上下文预算。
-- “支持多个模型”真正难的地方不在接入数量，而在统一抽象是否足够稳。
-
-## 5.1 提供商抽象层设计
-
-### 提供商抽象到底在隔离什么
-
-不同 AI 提供商的 API 差异很大，例如：
-- Anthropic：使用 `thinking` 参数控制推理
-- OpenAI：使用 `reasoningEffort` 参数
-- Google：使用 `thinkingConfig` 参数
-- 本地模型：可能完全不支持推理
-
-如果直接把这些差异写进 session、tool 或 UI，系统很快就会被 provider 特判淹没。
-
-OpenCode 当前的做法可以概括成：**统一抽象层 + 适配转换层**。
-
-```
-用户代码
-  ↓
-Provider.Model（统一接口）
-  ↓
-ProviderTransform（适配层）
-  ↓
-AI SDK（Vercel AI SDK）
-  ↓
-各家 API（Anthropic/OpenAI/Google...）
-```
-
-### Provider.Model 数据结构
-
-打开 `provider/provider.ts`，先看 `Provider.Model` 这份统一描述：
+不抽象的话，session 层的代码需要这样写：
 
 ```typescript
-export namespace Provider {
-  export const Model = z.object({
-    id: ModelID.zod,              // 模型 ID（如 "claude-sonnet-4"）
-    providerID: ProviderID.zod,   // 提供商 ID（如 "anthropic"）
-    name: z.string(),             // 显示名称
-    family: z.string().optional(), // 模型家族（如 "claude"）
-    release_date: z.string(),     // 发布日期
-
-    // 能力标记
-    capabilities: z.object({
-      attachment: z.boolean(),    // 是否支持附件
-      reasoning: z.boolean(),     // 是否支持推理
-      temperature: z.boolean(),   // 是否支持温度参数
-      tool_call: z.boolean(),     // 是否支持工具调用
-      interleaved: z.union([      // 是否支持交错内容
-        z.literal(true),
-        z.object({
-          field: z.enum(["reasoning_content", "reasoning_details"]),
-        }),
-      ]).optional(),
-      input: z.record(z.boolean()), // 输入模态（text/image/audio/video/pdf）
-      output: z.record(z.boolean()), // 输出模态
-    }),
-
-    // 成本信息
-    cost: z.object({
-      input: z.number(),          // 输入价格（每百万 tokens）
-      output: z.number(),         // 输出价格
-      cache_read: z.number().optional(),   // 缓存读取价格
-      cache_write: z.number().optional(),  // 缓存写入价格
-    }).optional(),
-
-    // 限制
-    limit: z.object({
-      context: z.number(),        // 上下文窗口大小
-      input: z.number().optional(), // 输入限制
-      output: z.number(),         // 输出限制
-    }),
-
-    // API 信息
-    api: z.object({
-      id: z.string(),             // API 模型 ID
-      npm: z.string(),            // NPM 包名（如 "@ai-sdk/anthropic"）
-    }),
+// 没有抽象：丑陋、难维护
+if (provider === "anthropic") {
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
+    headers: { "x-api-key": process.env.ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01" },
+    body: JSON.stringify({ model, messages: formatForAnthropic(messages), tools: toAnthropicTools(tools) })
   })
-
-  export type Model = z.infer<typeof Model>
+} else if (provider === "openai") {
+  const response = await fetch("https://api.openai.com/v1/responses", {
+    headers: { "Authorization": `Bearer ${process.env.OPENAI_API_KEY}` },
+    body: JSON.stringify({ model, input: formatForOpenAI(messages), tools: toOpenAITools(tools) })
+  })
+} else if (provider === "google") {
+  // ...又一套
 }
 ```
 
-这份结构里最重要的不是字段多少，而是它把多家模型的差异收敛成了一份稳定协议：
-- `id`：OpenCode 内部使用的标识符
-- `api.id`：调用 API 时使用的标识符
-- `capabilities`：声明式能力描述，避免运行时检测
-- `cost`：用于显示成本估算
-
-### 模型数据来源：models.dev
-
-OpenCode 不维护模型列表，而是从 https://models.dev 获取。
-
-`provider/models.ts` 里可以看到 models.dev 的拉取顺序：
+有了 Provider 抽象：
 
 ```typescript
-export namespace ModelsDev {
-  export const Data = lazy(async () => {
-    // 1. 尝试读取本地缓存
-    const result = await Filesystem.readJson(filepath).catch(() => {})
-    if (result) return result
-
-    // 2. 尝试使用构建时快照
-    const snapshot = await import("./models-snapshot")
-      .then((m) => m.snapshot)
-      .catch(() => undefined)
-    if (snapshot) return snapshot
-
-    // 3. 从 models.dev 获取最新数据
-    if (Flag.OPENCODE_DISABLE_MODELS_FETCH) return {}
-    const json = await fetch(`${url()}/api.json`).then((x) => x.text())
-    return JSON.parse(json)
-  })
-
-  export async function refresh() {
-    const result = await fetch(`${url()}/api.json`, {
-      headers: { "User-Agent": Installation.USER_AGENT },
-      signal: AbortSignal.timeout(10 * 1000),
-    }).catch((e) => {
-      log.error("Failed to fetch models.dev", { error: e })
-    })
-    if (result && result.ok) {
-      await Filesystem.write(filepath, await result.text())
-      ModelsDev.Data.reset()
-    }
-  }
-}
-
-// 每小时自动刷新
-setInterval(async () => {
-  await ModelsDev.refresh()
-}, 60 * 1000 * 60).unref()
+// 有抽象：session 层只看到统一接口
+const model = await Provider.getModel(providerID, modelID)
+const stream = LLM.stream({ model, messages, tools, system })
+// 不管底层是 Claude/GPT/Gemini，接口完全一致
 ```
-
-这样做的直接好处是：
-
-- 模型列表可以持续更新
-- 离线时还能回退到缓存或快照
-- 新模型接入不必全靠仓库手写维护
 
 ---
 
-## 5.2 统一的 AI SDK 接口
+## 6.2 Provider.Model：模型的完整描述
 
-### Vercel AI SDK 的作用
+OpenCode 用一个统一的 `Provider.Model` 类型描述任何一个模型，包含四类信息：
 
-OpenCode 使用 [Vercel AI SDK](https://sdk.vercel.ai/) 作为底层：
+### 标识信息
 
 ```typescript
-import { streamObject } from "ai"
-
-const result = await streamObject({
-  model: provider.model("claude-sonnet-4"),
-  messages: [...],
-  tools: {...},
+// provider/provider.ts
+export const Model = z.object({
+  id: ModelID.zod,           // 模型 ID，如 "claude-sonnet-4-6"
+  providerID: ProviderID.zod,// 提供商 ID，如 "anthropic"
+  name: z.string(),          // 显示名称，如 "Claude Sonnet 4.6"
+  family: z.string().optional(), // 模型系列，如 "claude-sonnet"
+  api: z.object({
+    id: z.string(),    // API 层面的 model ID（可能和上面 id 不同）
+    url: z.string(),   // API 端点
+    npm: z.string(),   // 使用哪个 AI SDK 包，如 "@ai-sdk/anthropic"
+  }),
+  release_date: z.string(),
+  status: z.enum(["alpha", "beta", "active", "deprecated"]),
 })
 ```
 
-**AI SDK 的优势**：
-- 统一接口：所有提供商使用相同的 API
-- 流式支持：原生支持 SSE
-- 工具调用：标准化的工具调用格式
-- 类型安全：完整的 TypeScript 类型
+### 能力标志（Capabilities）
 
-### Provider 初始化
-
-`provider/provider.ts` 里 provider 初始化流程是集中处理的：
+这是 Provider 层最重要的字段——能力标志直接驱动运行时的行为：
 
 ```typescript
-export namespace Provider {
-  export async function init(input: {
-    providerID: ProviderID
-    modelID?: ModelID
-  }) {
-    const providers = await ModelsDev.get()
-    const provider = providers[input.providerID]
-    if (!provider) throw new Error(`Provider ${input.providerID} not found`)
+capabilities: z.object({
+  temperature: z.boolean(),  // 是否支持调节随机性
+  reasoning: z.boolean(),    // 是否支持扩展思维（如 Claude Extended Thinking）
+  attachment: z.boolean(),   // 是否支持图片/文件输入
+  toolcall: z.boolean(),     // 是否支持 Function Calling
+  interleaved: z.union([
+    z.boolean(),             // 是否支持思维与工具调用交替
+    z.object({ field: z.enum(["reasoning_content", "reasoning_details"]) })
+  ]),
+  input: z.object({
+    text: z.boolean(),
+    audio: z.boolean(),
+    image: z.boolean(),
+    video: z.boolean(),
+    pdf: z.boolean(),
+  }),
+  output: z.object({ text, audio, image, video, pdf }),
+})
+```
 
-    // 1. 获取认证信息
-    const auth = await Auth.get(input.providerID)
+能力标志怎么用？举几个例子：
 
-    // 2. 创建 SDK 实例
-    const sdk = await createSDK({
-      npm: provider.npm,
-      api: provider.api,
-      auth,
-    })
+- `toolcall: false` → 不向这个模型传递 tools 列表，避免 API 报错
+- `reasoning: true` → 在 System Prompt 里添加激活扩展思维的指令
+- `attachment: false` → 用户上传图片时提示"当前模型不支持图片输入"
+- `interleaved: true` → 允许模型在工具调用中间穿插推理过程
 
-    // 3. 返回模型实例
-    return sdk(input.modelID || provider.models[0].id)
-  }
+### 成本信息
 
-  async function createSDK(input: {
-    npm: string
-    api: string
-    auth: Auth.Credentials
-  }) {
-    switch (input.npm) {
-      case "@ai-sdk/anthropic":
-        return createAnthropic({
-          apiKey: input.auth.apiKey,
-        })
+```typescript
+cost: z.object({
+  input: z.number(),   // 每百万 input token 的美元成本
+  output: z.number(),  // 每百万 output token 的美元成本
+  cache: z.object({
+    read: z.number(),  // 缓存命中的读取成本（通常更便宜）
+    write: z.number(), // 写入缓存的成本
+  }),
+})
+```
 
-      case "@ai-sdk/openai":
-        return createOpenAI({
-          apiKey: input.auth.apiKey,
-        })
+processor.ts 在每步结束时计算费用：
 
-      case "@ai-sdk/google":
-        return createGoogleGenerativeAI({
-          apiKey: input.auth.apiKey,
-        })
+```typescript
+// session/processor.ts（finish-step 处理）
+const usage = Session.getUsage({ model, usage: value.usage })
+// usage.cost = input_tokens * model.cost.input + output_tokens * model.cost.output + ...
+await Session.updatePart({ type: "step-finish", cost: usage.cost })
+```
 
-      case "@ai-sdk/openai-compatible":
-        return createOpenAICompatible({
-          baseURL: input.auth.baseURL,
-          apiKey: input.auth.apiKey,
-        })
+这让用户可以在对话历史里看到每一步花了多少钱。
 
-      // ... 更多提供商
+### 上下文限制
+
+```typescript
+limit: z.object({
+  context: z.number(),        // 总上下文窗口（input + output）
+  input: z.number().optional(),// 最大 input tokens（部分模型单独限制）
+  output: z.number(),         // 最大 output tokens
+})
+```
+
+`SessionCompaction.isOverflow()` 直接读取 `model.limit` 来判断何时需要压缩。
+
+---
+
+## 6.3 模型元数据：从哪里来
+
+OpenCode 的模型列表来自 [models.dev](https://models.dev)——一个维护各提供商最新模型数据的外部服务。
+
+```typescript
+// provider/models.ts
+export namespace ModelsDev {
+  // 从 models.dev 获取的原始数据结构
+  export const Model = z.object({
+    id: z.string(),
+    name: z.string(),
+    tool_call: z.boolean(),      // 是否支持 Function Calling
+    reasoning: z.boolean(),      // 是否支持推理模式
+    attachment: z.boolean(),     // 是否支持附件
+    cost: z.object({
+      input: z.number(),         // $/M tokens
+      output: z.number(),
+    }).optional(),
+    limit: z.object({
+      context: z.number(),
+      output: z.number(),
+    }),
+    modalities: z.object({
+      input: z.array(z.enum(["text", "audio", "image", "video", "pdf"])),
+    }).optional(),
+  })
+}
+```
+
+启动时，OpenCode 从缓存（`~/.opencode/cache/models.json`）加载模型数据，并定期从 models.dev 更新。这意味着：
+
+- **无需升级 OpenCode** 就能获得新发布的模型
+- 模型的成本、上下文窗口等参数可以保持最新
+- 提供商停用某个模型，本地缓存更新后 OpenCode 自动跟进
+
+---
+
+## 6.4 支持的提供商清单
+
+OpenCode 在 `BUNDLED_PROVIDERS` 里硬编码了所有内置提供商的 AI SDK 工厂函数：
+
+```typescript
+// provider/provider.ts
+const BUNDLED_PROVIDERS: Record<string, (options) => SDK> = {
+  "@ai-sdk/anthropic":            createAnthropic,
+  "@ai-sdk/openai":               createOpenAI,
+  "@ai-sdk/google":               createGoogleGenerativeAI,
+  "@ai-sdk/google-vertex":        createVertex,
+  "@ai-sdk/google-vertex/anthropic": createVertexAnthropic,
+  "@ai-sdk/amazon-bedrock":       createAmazonBedrock,
+  "@ai-sdk/azure":                createAzure,
+  "@openrouter/ai-sdk-provider":  createOpenRouter,
+  "@ai-sdk/xai":                  createXai,
+  "@ai-sdk/mistral":              createMistral,
+  "@ai-sdk/groq":                 createGroq,
+  "@ai-sdk/deepinfra":            createDeepInfra,
+  "@ai-sdk/cerebras":             createCerebras,
+  "@ai-sdk/cohere":               createCohere,
+  "@ai-sdk/togetherai":           createTogetherAI,
+  "@ai-sdk/perplexity":           createPerplexity,
+  "@ai-sdk/vercel":               createVercel,
+  "@ai-sdk/gateway":              createGateway,
+  "@gitlab/gitlab-ai-provider":   createGitLab,
+  "@ai-sdk/github-copilot":       createGitHubCopilotOpenAICompatible,
+  // 以及 Amazon Bedrock、Cloudflare、SAP 等
+}
+```
+
+这张列表说明了 OpenCode "提供商无关"承诺的实际范围——20+ 个提供商，涵盖主流 SaaS（OpenAI、Anthropic、Google）、企业版（Azure、Amazon Bedrock、Google Vertex）、路由服务（OpenRouter、Vercel AI Gateway）和特殊集成（GitHub Copilot、GitLab Duo）。
+
+### CUSTOM_LOADERS：提供商特殊初始化
+
+每个提供商除了通用的 SDK 工厂函数，还可能有特殊的初始化逻辑，放在 `CUSTOM_LOADERS` 里：
+
+```typescript
+const CUSTOM_LOADERS = {
+  // Anthropic 需要特定的 beta 请求头
+  async anthropic() {
+    return {
+      autoload: false,
+      options: {
+        headers: {
+          "anthropic-beta": "claude-code-20250219,interleaved-thinking-2025-05-14,fine-grained-tool-streaming-2025-05-14",
+        },
+      },
+    }
+  },
+
+  // Amazon Bedrock 需要 AWS 认证，使用区域前缀处理模型 ID
+  async "amazon-bedrock"() {
+    const region = configRegion ?? envRegion ?? "us-east-1"
+    return {
+      autoload: true,
+      async getModel(sdk, modelID) {
+        // 根据区域给模型 ID 加前缀：us.claude-... / eu.claude-...
+        const regionPrefix = region.split("-")[0]
+        if (modelID.includes("claude")) modelID = `${regionPrefix}.${modelID}`
+        return sdk.languageModel(modelID)
+      },
+    }
+  },
+
+  // GitHub Copilot 需要 OAuth 认证
+  async "github-copilot"() {
+    return {
+      autoload: false,
+      async getModel(sdk, modelID) {
+        return shouldUseCopilotResponsesApi(modelID)
+          ? sdk.responses(modelID)
+          : sdk.chat(modelID)
+      },
+    }
+  },
+}
+```
+
+`getModel` 自定义函数处理一类特殊情况：不同提供商（甚至同一提供商的不同模型）调用 SDK 创建模型实例的方式不同——有些用 `.languageModel()`，有些用 `.responses()`，有些用 `.chat()`。
+
+---
+
+## 6.5 认证系统
+
+### 三种认证方式
+
+```typescript
+// auth/index.ts
+export namespace Auth {
+  // 1. API Key 认证（最常见）
+  export const Api = z.object({
+    type: z.literal("api"),
+    key: z.string(),
+  })
+
+  // 2. OAuth 认证（GitHub Copilot、GitLab Duo）
+  export const Oauth = z.object({
+    type: z.literal("oauth"),
+    refresh: z.string(),   // refresh token
+    access: z.string(),    // access token
+    expires: z.number(),   // 过期时间戳
+    accountId: z.string().optional(),
+    enterpriseUrl: z.string().optional(),
+  })
+
+  // 3. WellKnown 认证（企业内部服务）
+  export const WellKnown = z.object({
+    type: z.literal("wellknown"),
+    key: z.string(),
+    token: z.string(),
+  })
+}
+```
+
+### 认证信息的优先级
+
+OpenCode 按以下优先级查找认证信息：
+
+```text
+1. 环境变量（ANTHROPIC_API_KEY、OPENAI_API_KEY...）
+   ↓ 没有时
+2. 用户认证存储（~/.config/opencode/auth.json，加密存储）
+   ↓ 没有时
+3. 配置文件 options.apiKey（opencode.json）
+   ↓ 没有时
+4. 不可用（提供商不会出现在可选列表里）
+```
+
+```typescript
+// provider/provider.ts（认证检查示例，opencode provider）
+async opencode(input) {
+  const hasKey = await (async () => {
+    const env = Env.all()
+    if (input.env.some((item) => env[item])) return true        // 环境变量
+    if (await Auth.get(input.id)) return true                    // 本地存储
+    if (config.provider?.["opencode"]?.options?.apiKey) return true  // 配置文件
+    return false
+  })()
+  return { autoload: hasKey, ... }
+}
+```
+
+`autoload: false` 意味着这个提供商不会自动出现在模型选择列表里，用户必须主动配置认证后才能使用。
+
+### 首次设置流程
+
+```bash
+# 方式1：环境变量（推荐用于 CI/CD）
+export ANTHROPIC_API_KEY="sk-ant-..."
+opencode
+
+# 方式2：opencode 命令交互设置
+opencode auth add anthropic
+# 根据提示输入 API Key，加密存储到本地
+
+# 方式3：配置文件
+# ~/.config/opencode/config.json
+{
+  "provider": {
+    "anthropic": {
+      "options": { "apiKey": "sk-ant-..." }
     }
   }
 }
 ```
 
-**流程**：
-1. 从 models.dev 获取提供商信息
-2. 从配置获取认证信息（API Key）
-3. 创建对应的 SDK 实例
-4. 返回模型对象
+---
+
+## 6.6 Vercel AI SDK：统一接口层
+
+OpenCode 不直接调用各家 API，而是通过 **Vercel AI SDK** 作为统一的中间层。
+
+### AI SDK 做了什么
+
+```typescript
+// session/llm.ts（调用 LLM 的核心代码，简化）
+import { streamText, type LanguageModelV2 } from "ai"
+
+export async function stream(input: StreamInput) {
+  // 这里的 input.model 是 LanguageModelV2 接口
+  // 不管它来自 Anthropic、OpenAI 还是 Google，接口完全一致
+  return streamText({
+    model: input.model,          // 统一的 LanguageModelV2 接口
+    messages: input.messages,   // 统一的 ModelMessage[] 格式
+    tools: input.tools,         // 统一的工具格式
+    system: input.system,       // System prompt
+    maxSteps: input.maxSteps,   // 最大步骤数
+  })
+}
+```
+
+AI SDK 屏蔽了各家 API 的差异：
+
+| 差异点 | 实际情况 | AI SDK 做法 |
+|--------|----------|------------|
+| 请求格式 | Anthropic 用 `messages`，OpenAI 用 `input` | 统一转换 |
+| 工具格式 | 各家 JSON Schema 细节不同 | 统一生成 |
+| 流式事件 | 各家 SSE 格式不同 | 统一的 `fullStream` 迭代器 |
+| 错误类型 | 各家错误码不同 | 统一的错误类 |
+| 认证方式 | API Key 位置不同（Header/Query） | 各 SDK 包自己处理 |
+
+### LanguageModelV2：AI SDK 的核心抽象
+
+每个提供商的 AI SDK 包（`@ai-sdk/anthropic`、`@ai-sdk/openai` 等）都实现了 `LanguageModelV2` 接口。OpenCode 获取模型实例的过程：
+
+```typescript
+// provider/provider.ts（getModel 简化）
+export async function getModel(providerID: ProviderID, modelID: ModelID): Promise<Model> {
+  const provider = await get(providerID)
+
+  // 1. 找到对应的 AI SDK 工厂函数
+  const sdkFactory = BUNDLED_PROVIDERS[provider.api.npm]
+
+  // 2. 用认证信息初始化 SDK
+  const sdk = sdkFactory({ apiKey: provider.key, ...provider.options })
+
+  // 3. 用自定义加载器（如果有）创建模型实例
+  const loader = CUSTOM_LOADERS[providerID]
+  const loaderResult = await loader?.(provider)
+  const model = loaderResult?.getModel
+    ? await loaderResult.getModel(sdk, modelID)
+    : sdk.languageModel(modelID)
+
+  // 4. 返回包含完整元数据的 Provider.Model
+  return { ...modelMetadata, __sdk: model }
+}
+```
 
 ---
 
-## 5.3 模型能力适配与转换
+## 6.7 消息格式转换：ProviderTransform
 
-### 消息格式转换
+各提供商虽然通过 AI SDK 统一了接口，但对消息内容的细节处理仍有差异。`ProviderTransform` 在调用前做最后一层适配：
 
-不同提供商对消息格式的要求不同，这部分集中在 `provider/transform.ts`：
+### Anthropic 的特殊要求
 
 ```typescript
+// provider/transform.ts
 export namespace ProviderTransform {
-  function normalizeMessages(
-    msgs: ModelMessage[],
-    model: Provider.Model,
-    options: Record<string, unknown>,
-  ): ModelMessage[] {
-    // 1. Anthropic：拒绝空消息
-    if (model.api.npm === "@ai-sdk/anthropic") {
+  function normalizeMessages(msgs, model) {
+    // Anthropic 不接受空内容的消息
+    if (model.api.npm === "@ai-sdk/anthropic" || model.api.npm === "@ai-sdk/amazon-bedrock") {
       msgs = msgs
         .map((msg) => {
-          if (typeof msg.content === "string" && msg.content === "") {
-            return undefined
-          }
+          // 过滤掉空字符串消息
+          if (typeof msg.content === "string" && msg.content === "") return undefined
+          // 过滤掉内容数组里的空 text 部件
           if (Array.isArray(msg.content)) {
-            const filtered = msg.content.filter((part) => {
-              if (part.type === "text" || part.type === "reasoning") {
-                return part.text !== ""
-              }
-              return true
-            })
-            if (filtered.length === 0) return undefined
-            return { ...msg, content: filtered }
+            const filtered = msg.content.filter(
+              part => !(part.type === "text" && part.text === "")
+            )
+            return filtered.length === 0 ? undefined : { ...msg, content: filtered }
           }
           return msg
         })
-        .filter((msg): msg is ModelMessage => msg !== undefined)
+        .filter(Boolean)
     }
-
-    // 2. Claude：工具调用 ID 只能包含字母数字和下划线
-    if (model.api.id.includes("claude")) {
-      return msgs.map((msg) => {
-        if (Array.isArray(msg.content)) {
-          msg.content = msg.content.map((part) => {
-            if (part.type === "tool-call" && "toolCallId" in part) {
-              return {
-                ...part,
-                toolCallId: part.toolCallId.replace(/[^a-zA-Z0-9_-]/g, "_"),
-              }
-            }
-            return part
-          })
-        }
-        return msg
-      })
-    }
-
-    // 3. Mistral：工具调用 ID 必须是 9 个字符
-    if (model.providerID === "mistral") {
-      return msgs.map((msg) => {
-        if (Array.isArray(msg.content)) {
-          msg.content = msg.content.map((part) => {
-            if (part.type === "tool-call" && "toolCallId" in part) {
-              const normalizedId = part.toolCallId
-                .replace(/[^a-zA-Z0-9]/g, "")  // 移除非字母数字
-                .substring(0, 9)                // 取前 9 个字符
-                .padEnd(9, "0")                 // 不足 9 个用 0 填充
-
-              return { ...part, toolCallId: normalizedId }
-            }
-            return part
-          })
-        }
-        return msg
-      })
-    }
-
     return msgs
   }
 }
 ```
 
-**适配策略**：
-- Anthropic：过滤空消息
-- Claude：清理工具调用 ID
-- Mistral：标准化工具调用 ID 长度
+这类适配代码处理各提供商的"怪癖"，让 session 层不需要感知这些细节。
 
-### 推理参数适配
+### SSE 超时包装
 
-不同模型的推理参数名称和格式不同，这部分也在 `transform.ts` 里统一映射：
+OpenCode 还给 SSE 流加了超时机制：
 
 ```typescript
-export function variants(model: Provider.Model): Record<string, Record<string, any>> {
-  if (!model.capabilities.reasoning) return {}
+// provider/provider.ts
+function wrapSSE(res: Response, ms: number, ctl: AbortController) {
+  // 如果 ms 毫秒内没收到新的 SSE 数据块，触发超时
+  // 默认 DEFAULT_CHUNK_TIMEOUT = 120_000ms（2分钟）
+  // 防止网络问题导致 Agent 静默挂住
+}
+```
 
-  const id = model.id.toLowerCase()
+120秒内如果没有新数据——不是任务完成，就是连接断了——触发中止，`processor.ts` 的重试机制接管。
 
-  // 1. Anthropic Claude：使用 thinking 参数
-  if (model.api.npm === "@ai-sdk/anthropic") {
-    return {
-      high: {
-        thinking: {
-          type: "enabled",
-          budgetTokens: 16000,
-        },
+---
+
+## 6.8 自定义提供商与模型
+
+### 通过配置添加自定义提供商
+
+支持 OpenAI 兼容 API 的服务（Ollama、LocalAI、各种私有部署）都可以通过配置接入：
+
+```json
+// ~/.config/opencode/config.json 或项目级 .opencode/config.json
+{
+  "provider": {
+    "my-local-llm": {
+      "name": "本地 Ollama",
+      "api": {
+        "url": "http://localhost:11434/v1",
+        "npm": "@ai-sdk/openai-compatible"
       },
-      max: {
-        thinking: {
-          type: "enabled",
-          budgetTokens: 31999,
-        },
-      },
-    }
-  }
-
-  // 2. OpenAI：使用 reasoningEffort 参数
-  if (model.api.npm === "@ai-sdk/openai") {
-    return {
-      none: { reasoningEffort: "none" },
-      minimal: { reasoningEffort: "minimal" },
-      low: { reasoningEffort: "low" },
-      medium: { reasoningEffort: "medium" },
-      high: { reasoningEffort: "high" },
-    }
-  }
-
-  // 3. Google Gemini：使用 thinkingConfig 参数
-  if (model.api.npm === "@ai-sdk/google") {
-    if (id.includes("2.5")) {
-      return {
-        high: {
-          thinkingConfig: {
-            includeThoughts: true,
-            thinkingBudget: 16000,
-          },
-        },
-        max: {
-          thinkingConfig: {
-            includeThoughts: true,
-            thinkingBudget: 24576,
-          },
-        },
+      "models": {
+        "llama3.2": {
+          "name": "Llama 3.2",
+          "limit": { "context": 128000, "output": 8192 },
+          "tool_call": true,
+          "attachment": false,
+          "cost": { "input": 0, "output": 0 }
+        }
       }
     }
-    return {
-      low: {
-        thinkingConfig: {
-          includeThoughts: true,
-          thinkingLevel: "low",
-        },
-      },
-      high: {
-        thinkingConfig: {
-          includeThoughts: true,
-          thinkingLevel: "high",
-        },
-      },
-    }
-  }
-
-  // 4. OpenAI 兼容：通用参数
-  if (model.api.npm === "@ai-sdk/openai-compatible") {
-    return {
-      low: { reasoningEffort: "low" },
-      medium: { reasoningEffort: "medium" },
-      high: { reasoningEffort: "high" },
-    }
-  }
-
-  return {}
-}
-```
-
-**设计思想**：
-- 每个提供商有自己的参数格式
-- `variants` 返回预设配置（low/medium/high/max）
-- 用户可以选择推理强度
-
-### 温度和 Top-P 适配
-
-`transform.ts` 里还有一组按模型家族给出的默认采样参数：
-
-```typescript
-export function temperature(model: Provider.Model) {
-  const id = model.id.toLowerCase()
-  if (id.includes("qwen")) return 0.55
-  if (id.includes("claude")) return undefined  // Claude 不需要设置
-  if (id.includes("gemini")) return 1.0
-  if (id.includes("glm-4.6")) return 1.0
-  if (id.includes("kimi-k2")) return 0.6
-  return undefined
-}
-
-export function topP(model: Provider.Model) {
-  const id = model.id.toLowerCase()
-  if (id.includes("qwen")) return 1
-  if (id.includes("gemini")) return 0.95
-  if (id.includes("kimi-k2.5")) return 0.95
-  return undefined
-}
-
-export function topK(model: Provider.Model) {
-  const id = model.id.toLowerCase()
-  if (id.includes("minimax-m2")) return 40
-  if (id.includes("gemini")) return 64
-  return undefined
-}
-```
-
-**这些默认值在解决什么**
-- 不同模型的最佳参数不同
-- Claude 不需要温度参数（内部优化）
-- Gemini 需要较高的 Top-P
-- Qwen 需要较低的温度
-
-### 缓存策略
-
-`transform.ts` 里的缓存逻辑会优先标记系统提示和最近消息：
-
-```typescript
-function applyCaching(msgs: ModelMessage[], model: Provider.Model): ModelMessage[] {
-  // 选择要缓存的消息
-  const system = msgs.filter((msg) => msg.role === "system").slice(0, 2)
-  const final = msgs.filter((msg) => msg.role !== "system").slice(-2)
-
-  const providerOptions = {
-    anthropic: {
-      cacheControl: { type: "ephemeral" },
-    },
-    openrouter: {
-      cacheControl: { type: "ephemeral" },
-    },
-    bedrock: {
-      cachePoint: { type: "default" },
-    },
-    openaiCompatible: {
-      cache_control: { type: "ephemeral" },
-    },
-  }
-
-  for (const msg of unique([...system, ...final])) {
-    msg.providerOptions = mergeDeep(msg.providerOptions ?? {}, providerOptions)
-  }
-
-  return msgs
-}
-```
-
-**缓存策略**：
-- 缓存前 2 条系统消息（提示词）
-- 缓存最后 2 条消息（最近对话）
-- 不同提供商使用不同的缓存参数
-
----
-
-## 5.4 接入一个新提供商的最小路径
-
-### 先补模型元数据
-
-**位置**：https://github.com/anomalyco/models.dev
-
-**示例**：添加 DeepSeek 提供商
-
-```yaml
-# providers/deepseek.yaml
-id: deepseek
-name: DeepSeek
-api: https://api.deepseek.com
-npm: "@ai-sdk/openai-compatible"
-env:
-  - DEEPSEEK_API_KEY
-
-models:
-  deepseek-chat:
-    id: deepseek-chat
-    name: DeepSeek Chat
-    family: deepseek
-    release_date: "2024-01-01"
-    attachment: true
-    reasoning: false
-    temperature: true
-    tool_call: true
-    cost:
-      input: 0.14
-      output: 0.28
-    limit:
-      context: 64000
-      output: 4096
-    modalities:
-      input: [text]
-      output: [text]
-```
-
-**提交 PR**：
-1. Fork models.dev 仓库
-2. 创建 `providers/deepseek.yaml`
-3. 提交 PR
-4. 等待合并
-
-### 再补 SDK 适配
-
-如果提供商需要特殊处理，在 `provider/provider.ts` 添加：
-
-```typescript
-export namespace Provider {
-  async function createSDK(input: {
-    npm: string
-    api: string
-    auth: Auth.Credentials
-  }) {
-    // ... 现有代码
-
-    // 添加 DeepSeek 支持
-    if (input.api === "https://api.deepseek.com") {
-      return createOpenAICompatible({
-        baseURL: "https://api.deepseek.com/v1",
-        apiKey: input.auth.apiKey,
-        headers: {
-          "X-Custom-Header": "value",
-        },
-      })
-    }
   }
 }
 ```
 
-### 必要时补消息转换
+使用 `@ai-sdk/openai-compatible` 包可以对接任何兼容 OpenAI API 格式的服务，这是接入本地模型最简单的路径。
 
-如果提供商有特殊要求，在 `provider/transform.ts` 添加：
+### 通过插件添加 Provider
 
-```typescript
-function normalizeMessages(
-  msgs: ModelMessage[],
-  model: Provider.Model,
-  options: Record<string, unknown>,
-): ModelMessage[] {
-  // ... 现有代码
-
-  // DeepSeek 特殊处理
-  if (model.providerID === "deepseek") {
-    return msgs.map((msg) => {
-      // 自定义转换逻辑
-      return msg
-    })
-  }
-
-  return msgs
-}
-```
-
-### 做一次端到端验证
-
-```bash
-# 1. 配置 API Key
-export DEEPSEEK_API_KEY="sk-..."
-
-# 2. 启动 OpenCode
-bun dev
-
-# 3. 选择 DeepSeek 模型
-> /model deepseek/deepseek-chat
-
-# 4. 测试对话
-> 你好
-```
-
-### 最后对照产品文档入口
-
-如果你不只是“把 provider 接进源码”，还想补齐面向用户的说明文档，就不要凭空新增一个目录。
-
-当前仓库里的产品文档入口是集中维护的，例如中文文档位于：
-
-- [packages/web/src/content/docs/zh-cn/providers.mdx](https://github.com/anomalyco/opencode/blob/dev/packages/web/src/content/docs/zh-cn/providers.mdx)
-
-这也说明一个很重要的工程细节：
-
-- **源码接入** 和 **用户文档暴露** 是两条不同链路
-- provider 真正可用，不代表官网文档已经自动同步
-- 对初学者来说，补完最后这一步，才算走完一次完整的产品化接入流程
-
----
-
-## 5.5 本地模型集成实践
-
-### 使用 Ollama
-
-**安装 Ollama**：
-```bash
-# macOS
-brew install ollama
-
-# 启动服务
-ollama serve
-
-# 下载模型
-ollama pull qwen2.5-coder:7b
-```
-
-**配置 OpenCode**：
-
-```json
-{
-  "provider": {
-    "ollama": {
-      "baseURL": "http://localhost:11434/v1",
-      "apiKey": "ollama"
-    }
-  }
-}
-```
-
-**使用**：
-```bash
-bun dev
-
-> /model ollama/qwen2.5-coder:7b
-> 帮我写一个快速排序
-```
-
-### 使用 LM Studio
-
-**下载 LM Studio**：https://lmstudio.ai
-
-**启动本地服务器**：
-1. 打开 LM Studio
-2. 下载模型（如 Qwen2.5-Coder-7B）
-3. 点击 "Start Server"（默认端口 1234）
-
-**配置 OpenCode**：
-
-```json
-{
-  "provider": {
-    "lmstudio": {
-      "baseURL": "http://localhost:1234/v1",
-      "apiKey": "lm-studio"
-    }
-  }
-}
-```
-
-### 使用 vLLM
-
-**安装 vLLM**：
-```bash
-pip install vllm
-
-# 启动服务器
-vllm serve Qwen/Qwen2.5-Coder-7B-Instruct \
-  --host 0.0.0.0 \
-  --port 8000
-```
-
-**配置 OpenCode**：
-
-```json
-{
-  "provider": {
-    "vllm": {
-      "baseURL": "http://localhost:8000/v1",
-      "apiKey": "vllm"
-    }
-  }
-}
-```
-
-### 本地模型的限制
-
-**不支持的功能**：
-- 工具调用（大部分本地模型不支持）
-- 推理模式（需要模型原生支持）
-- 多模态输入（图片、音频）
-
-**解决方案**：
-1. 使用支持工具调用的模型（如 Qwen2.5-Coder）
-2. 使用 Function Calling 适配层
-3. 降级到纯文本模式
+更复杂的集成可以通过插件系统动态注入 Provider，无需修改 OpenCode 核心代码。插件可以注册新的提供商、修改现有模型的配置、添加自定义认证逻辑。
 
 ---
 
 ## 本章小结
 
-### 核心概念
+Provider 层的三层结构：
 
-1. **提供商抽象层**
-   - `Provider.Model`：统一的模型接口
-   - `ModelsDev`：从 models.dev 获取模型列表
-   - `ProviderTransform`：适配不同提供商的差异
-
-2. **AI SDK 集成**
-   - Vercel AI SDK：统一的底层接口
-   - 流式支持：原生 SSE
-   - 工具调用：标准化格式
-
-3. **能力适配**
-   - 消息格式转换：处理空消息、工具调用 ID
-   - 推理参数适配：thinking/reasoningEffort/thinkingConfig
-   - 温度和采样：不同模型的最佳参数
-   - 缓存策略：优化成本和性能
-
-4. **添加新提供商**
-   - 提交到 models.dev
-   - 添加 SDK 适配器
-   - 添加消息转换
-   - 测试和文档
-
-5. **本地模型支持**
-   - Ollama：最简单的本地部署
-   - LM Studio：图形化界面
-   - vLLM：高性能推理
-   - 限制：工具调用、推理模式
-
-### 关键代码位置
-
-| 功能 | 文件路径 |
-|------|---------|
-| 提供商定义 | `packages/opencode/src/provider/provider.ts` |
-| 模型数据 | `packages/opencode/src/provider/models.ts` |
-| 消息转换 | `packages/opencode/src/provider/transform.ts` |
-| 类型定义 | `packages/opencode/src/provider/schema.ts` |
-| 认证管理 | `packages/opencode/src/provider/auth.ts` |
-
-### 设计模式总结
-
-#### 1. 适配器模式
-
-```typescript
-// 统一接口
-interface Provider {
-  model(id: string): LanguageModel
-}
-
-// 不同实现
-const anthropic = createAnthropic({ apiKey })
-const openai = createOpenAI({ apiKey })
-const google = createGoogleGenerativeAI({ apiKey })
+```text
+┌──────────────────────────────────────────────────┐
+│         Provider.Model（统一模型描述）             │
+│   capabilities / cost / limit / api              │
+└──────────────────────────────────────────────────┘
+                      ↓
+┌──────────────────────────────────────────────────┐
+│         Vercel AI SDK（统一调用接口）              │
+│   LanguageModelV2 / streamText / fullStream      │
+└──────────────────────────────────────────────────┘
+                      ↓
+┌──────────────────────────────────────────────────┐
+│         @ai-sdk/anthropic / openai / google...   │
+│   BUNDLED_PROVIDERS + CUSTOM_LOADERS             │
+└──────────────────────────────────────────────────┘
 ```
 
-**好处**：
-- 隔离变化
-- 易于扩展
-- 统一调用
+**关键设计决策**：
 
-#### 2. 策略模式
-
-```typescript
-// 不同策略
-function temperature(model: Provider.Model) {
-  if (model.id.includes("claude")) return undefined
-  if (model.id.includes("gemini")) return 1.0
-  if (model.id.includes("qwen")) return 0.55
-  return undefined
-}
-```
-
-**好处**：
-- 灵活配置
-- 易于维护
-- 可测试
-
-#### 3. 工厂模式
-
-```typescript
-async function createSDK(input: {
-  npm: string
-  auth: Auth.Credentials
-}) {
-  switch (input.npm) {
-    case "@ai-sdk/anthropic":
-      return createAnthropic({ apiKey: input.auth.apiKey })
-    case "@ai-sdk/openai":
-      return createOpenAI({ apiKey: input.auth.apiKey })
-    // ...
-  }
-}
-```
-
-**好处**：
-- 集中创建逻辑
-- 易于添加新提供商
-- 类型安全
-
-### 源码阅读路径
-
-1. 先看 `packages/opencode/src/provider/provider.ts`，理解 Provider 抽象层的总入口。
-2. 再看 `packages/opencode/src/provider/transform.ts`，理解不同模型参数是如何被统一转换的。
-3. 最后选两个具体 provider 目录，比如 OpenAI 和 Anthropic，比较它们 SDK 适配层的差异。
-
-### 任务
-
-判断 OpenCode 的 Provider 层为什么不是“多接几家模型 SDK”，而是一层统一模型能力、参数转换和认证边界的协议适配层。
-
-### 操作
-
-1. 打开 `packages/opencode/src/provider/provider.ts`，整理 Provider 抽象层对外暴露的核心职责。
-2. 再读 `packages/opencode/src/provider/transform.ts` 和 `models.ts`，记录模型能力表与参数转换各自解决什么问题。
-3. 最后选两个具体 provider（例如 OpenAI 和 Anthropic），比较它们在认证、参数和返回结构上的差异，以及这些差异是怎样被统一收口的。
-
-### 验收
-
-完成后你应该能说明：
-
-- 为什么 Provider 层的关键不是 SDK 调用，而是统一能力边界。
-- 为什么模型能力表、参数转换和认证入口必须一起设计。
-- 为什么用户选择模型之后，真正稳定的不是厂商 API，而是仓库内部这层抽象协议。
-
-### 下一篇预告
-
-**第六篇：MCP 协议集成（Model Context Protocol）**
-
-我们将深入 `packages/opencode/src/mcp/` 目录，学习：
-- MCP 协议的设计理念
-- 如何开发 MCP 服务器
-- 内置 MCP 服务器实现
-- 与外部工具的集成
-- MCP 的安全模型
-
----
+| 决策 | 原因 |
+|------|------|
+| 模型元数据来自 models.dev | 无需升级 OpenCode 就能获得新模型 |
+| 能力标志（capabilities）驱动行为 | 不同模型的工具格式、推理模式自动适配 |
+| AI SDK 作为中间层 | 20+ 提供商复用同一套流式处理代码 |
+| CUSTOM_LOADERS 处理特殊逻辑 | Amazon Bedrock 区域前缀、GitHub Copilot OAuth 等怪癖隔离 |
+| 认证信息加密存储 | API Key 不明文出现在配置文件里 |
 
 ### 思考题
 
-1. 为什么 OpenCode 选择 Vercel AI SDK 而不是直接调用各家 API？
-2. `variants` 函数为什么要返回预设配置而不是让用户自己设置参数？
-3. 本地模型为什么大多不支持工具调用？如何解决？
+1. `capabilities.toolcall: false` 的模型，OpenCode 如何让它"完成任务"？（提示：工具调用是 LLM 完成任务的唯一方式吗？）
+2. 为什么 Amazon Bedrock 需要区域前缀（`us.claude-...`）？这个设计解决了什么问题？
+3. 如果要支持一个只有 REST API（不兼容 OpenAI 格式）的私有模型，需要在 OpenCode 的哪些地方做修改？
 
-（提示：答案都在本章的代码示例中）
+---
+
+## 下一章预告
+
+**第7章：MCP 协议集成**
+
+深入 `packages/opencode/src/mcp/`，学习：
+- MCP（Model Context Protocol）协议的设计思想
+- OpenCode 如何作为 MCP Client 连接外部 Server
+- MCP 工具如何被注册到 ToolRegistry 并被 Agent 调用
+- 配置 MCP Server 的完整流程
