@@ -22,6 +22,7 @@ docs/book/
 │   └── theme/
 ├── docs/
 │   ├── index.md
+│   ├── 00-what-is-ai-agent/index.md
 │   ├── 01-agent-basics/index.md
 │   ├── 02-agent-core/index.md
 │   └── ...
@@ -62,6 +63,7 @@ bun preview
 
 当前正式维护的电子书内容位于：
 
+- `docs/book/docs/00-what-is-ai-agent/index.md`
 - `docs/book/docs/01-agent-basics/index.md`
 - `docs/book/docs/02-agent-core/index.md`
 - ...
