@@ -75,40 +75,40 @@ export default withMermaid(defineConfig({
         text: '第一部分：AI Agent 基础',
         collapsed: false,
         items: [
-          { text: '第1章：什么是 AI Agent', link: '/00-what-is-ai-agent/index' },
-          { text: '第2章：AI Agent 的核心组件', link: '/01-agent-basics/index' },
+          { text: '第1章：什么是 AI Agent', link: '/00-what-is-ai-agent/' },
+          { text: '第2章：AI Agent 的核心组件', link: '/01-agent-basics/' },
         ]
       },
       {
         text: '第二部分：OpenCode 项目架构',
         collapsed: false,
         items: [
-          { text: '第3章：OpenCode 项目介绍', link: '/02-agent-core/index' },
+          { text: '第3章：OpenCode 项目介绍', link: '/02-agent-core/' },
         ]
       },
       {
         text: '第三部分：Agent 核心机制',
         collapsed: false,
         items: [
-          { text: '第4章：工具系统', link: '/03-tool-system/index' },
-          { text: '第5章：会话管理', link: '/04-session-management/index' },
-          { text: '第6章：多模型支持', link: '/05-provider-system/index' },
-          { text: '第7章：MCP 协议集成', link: '/06-mcp-integration/index' },
+          { text: '第4章：工具系统', link: '/03-tool-system/' },
+          { text: '第5章：会话管理', link: '/04-session-management/' },
+          { text: '第6章：多模型支持', link: '/05-provider-system/' },
+          { text: '第7章：MCP 协议集成', link: '/06-mcp-integration/' },
         ]
       },
       {
         text: '第四部分：OpenCode 深入主题',
         collapsed: false,
         items: [
-          { text: '第8章：TUI 终端界面', link: '/07-tui-interface/index' },
-          { text: '第9章：HTTP API 服务器', link: '/08-http-api-server/index' },
-          { text: '第10章：数据持久化', link: '/09-data-persistence/index' },
-          { text: '第11章：多端 UI 开发', link: '/10-multi-platform-ui/index' },
-          { text: '第12章：代码智能', link: '/11-code-intelligence/index' },
-          { text: '第13章：插件与扩展', link: '/12-plugins-extensions/index' },
-          { text: '第14章：部署与基础设施', link: '/13-deployment-infrastructure/index' },
-          { text: '第15章：测试与质量保证', link: '/14-testing-quality/index' },
-          { text: '第16章：高级主题与最佳实践', link: '/15-advanced-topics/index' },
+          { text: '第8章：TUI 终端界面', link: '/07-tui-interface/' },
+          { text: '第9章：HTTP API 服务器', link: '/08-http-api-server/' },
+          { text: '第10章：数据持久化', link: '/09-data-persistence/' },
+          { text: '第11章：多端 UI 开发', link: '/10-multi-platform-ui/' },
+          { text: '第12章：代码智能', link: '/11-code-intelligence/' },
+          { text: '第13章：插件与扩展', link: '/12-plugins-extensions/' },
+          { text: '第14章：部署与基础设施', link: '/13-deployment-infrastructure/' },
+          { text: '第15章：测试与质量保证', link: '/14-testing-quality/' },
+          { text: '第16章：高级主题与最佳实践', link: '/15-advanced-topics/' },
         ]
       },
       { text: '发布清单', link: '/release-checklist' }
@@ -119,7 +119,7 @@ export default withMermaid(defineConfig({
     ],
 
     editLink: {
-      pattern: `${bookRepository}/edit/main/docs/book/docs/:path`,
+      pattern: `${bookRepository}/edit/main/docs/:path`,
       text: '在本书仓库中编辑此页'
     },
 
