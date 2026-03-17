@@ -5,7 +5,7 @@
 ## 目录结构
 
 ```text
-docs/book/
+.
 ├── .vitepress/
 │   ├── config.mts              # 站点配置（导航、侧边栏、Mermaid 插件）
 │   └── theme/
@@ -71,8 +71,6 @@ docs/book/
 ## 本地开发
 
 ```bash
-cd docs/book
-
 bun install
 bun dev      # 启动开发服务器
 bun build    # 构建静态产物到 .vitepress/dist/

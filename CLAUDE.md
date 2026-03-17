@@ -4,52 +4,71 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What This Is
 
-A VitePress-based e-book site: **从零构建 AI Coding Agent — OpenCode 源码剖析与实战**. It documents the OpenCode source code across 15 chapters plus auxiliary pages (reading map, glossary, version notes, release checklist).
+A VitePress-based e-book: **从零构建 AI Coding Agent — OpenCode 源码剖析与实战** (Building AI Coding Agent from Scratch — OpenCode Source Code Analysis and Practice). Documents OpenCode architecture across 16 chapters plus auxiliary pages.
 
 ## Commands
 
-All commands run from `docs/book/`:
+Run from repository root:
 
 ```bash
-bun dev        # start dev server
-bun build      # build static site
+bun dev        # start dev server (default port 5173)
+bun build      # build static site to .vitepress/dist
 bun preview    # preview built site
+bun start      # serve with Caddy on port 3000
 ```
 
-## Site Structure
+## Project Structure
 
-- **Config**: `.vitepress/config.mts` — `srcDir` is set to `docs/`, so all content paths are relative to `docs/`
-- **Chapters**: `docs/NN-slug/index.md` (01–15)
-- **Auxiliary pages**: `docs/reading-map.md`, `docs/version-notes.md`, `docs/glossary.md`, `docs/release-checklist.md`
-- **Home page**: `docs/index.md` (uses `layout: home` with Vue component imports)
-- **Custom theme**: `.vitepress/theme/` — extends default theme, adds `LearningPath.vue` and `TechStackGrid.vue`
-
-## Frontmatter Convention
-
-Every chapter page must have:
-
-```md
----
-title: 第N篇：章节标题
-description: 章节标题的详细内容
----
+```
+.
+├── .vitepress/
+│   ├── config.mts              # VitePress configuration
+│   ├── theme/
+│   │   ├── index.ts            # Theme entry, registers global components
+│   │   ├── components/         # Vue components (ReActLoop, StreamingDemo, etc.)
+│   │   └── custom.css          # Custom styles
+│   └── dist/                   # Build output (gitignored)
+├── docs/                       # Content root (srcDir in config)
+│   ├── index.md                # Homepage (layout: home)
+│   ├── 00-what-is-ai-agent/index.md
+│   ├── 01-agent-basics/index.md
+│   ├── ...
+│   ├── 15-advanced-topics/index.md
+│   ├── reading-map.md          # Reading guide
+│   ├── glossary.md             # Terminology
+│   ├── version-notes.md        # Version history
+│   └── release-checklist.md    # Pre-release checklist
+├── add-frontmatter.ts          # Utility: add frontmatter to chapters
+├── remove-duplicate-titles.ts  # Utility: remove duplicate H1s
+└── package.json
 ```
 
-Do **not** include an H1 that duplicates the `title` — VitePress renders the title from frontmatter automatically.
+## Content Conventions
+
+- **Frontmatter required**: Every chapter must have `title` and `description` in YAML frontmatter
+- **No duplicate H1**: VitePress renders title from frontmatter; don't add `# Title` in content
+- **Chapter naming**: `docs/NN-slug/index.md` format (00-15)
+- **Auxiliary pages**: Direct under `docs/` (no subdirectory)
+
+## VitePress Configuration
+
+- **srcDir**: `docs` — all content paths relative to `docs/`
+- **Sidebar**: Manually defined in `.vitepress/config.mts` (not auto-generated)
+- **Custom components**: Registered in `.vitepress/theme/index.ts`, usable in any markdown file
+- **Mermaid support**: Enabled via `vitepress-plugin-mermaid`
 
 ## Utility Scripts
 
-Two helper scripts exist at the repo root of `docs/book/`:
+Two TypeScript utilities at root:
 
-- `add-frontmatter.ts` — prepends frontmatter to chapter files
-- `remove-duplicate-titles.ts` — strips H1 that duplicates frontmatter title
+- `add-frontmatter.ts` — Prepends frontmatter to chapter files
+- `remove-duplicate-titles.ts` — Strips H1 duplicating frontmatter title
 
-**Warning**: Both scripts hardcode the path `src/content/docs` (a leftover from an old Astro setup). The actual content lives under `docs/`. These scripts will fail as-is — update the `docsDir` constant to `docs` before running.
+**Note**: Both scripts hardcode chapter list and paths. Update manually if adding/removing chapters.
 
-## Chapter–Draft Mapping
+## Development Notes
 
-Source drafts live in `../` (the parent `docs/` folder). The canonical mapping is in `../CLAUDE.md`. When editing chapter content, keep the site version (`docs/NN-slug/index.md`) and the draft (e.g., `../第一篇-Agent基础架构.md`) in sync.
-
-## Navigation
-
-Sidebar and nav are fully defined in `.vitepress/config.mts`. Adding a new page requires manually adding it to `themeConfig.sidebar` and/or `themeConfig.nav`.
+- Uses **bun** as package manager (not npm/pnpm)
+- TypeScript config at root (`tsconfig.json`) covers `.vitepress/**` and `docs/**`
+- Build output: `.vitepress/dist` (served by Caddy in production via `Caddyfile`)
+- Local search enabled (no external search service)

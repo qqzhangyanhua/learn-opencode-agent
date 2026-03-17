@@ -45,6 +45,7 @@ export default withMermaid(defineConfig({
       }
     },
     optimizeDeps: {
+      include: ['mermaid', 'dayjs'],
       esbuildOptions: {
         tsconfigRaw: {
           compilerOptions: {
@@ -54,6 +55,9 @@ export default withMermaid(defineConfig({
           }
         }
       }
+    },
+    ssr: {
+      noExternal: ['mermaid']
     }
   },
 
