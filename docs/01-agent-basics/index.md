@@ -595,7 +595,7 @@ graph TD
         TR -->|tool_result| LLM
     end
     PLAN[📋 Planning\nSystem Prompt / ReAct] -->|指导行为| LLM
-    MEM[💾 Memory\n短期: messages[]\n长期: SQLite] -->|对话历史| LLM
+    MEM[💾 Memory\n短期: messages 数组\n长期: SQLite] -->|对话历史| LLM
     LLM -->|持久化| MEM
 ```
 

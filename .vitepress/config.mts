@@ -111,7 +111,6 @@ export default withMermaid(defineConfig({
           { text: '第16章：高级主题与最佳实践', link: '/15-advanced-topics/' },
         ]
       },
-      { text: '发布清单', link: '/release-checklist' }
     ],
 
     socialLinks: [
