@@ -19,9 +19,9 @@ defineProps<PracticeTagCloudProps>()
 }
 
 .tag {
-  background: #1c1917;
+  background: var(--vp-c-bg-soft);
   color: #f97316;
-  border: 1px solid #292524;
+  border: 1px solid var(--vp-c-divider);
   padding: 4px 12px;
   border-radius: 4px;
   font-size: 12px;
@@ -30,6 +30,6 @@ defineProps<PracticeTagCloudProps>()
 }
 
 .tag:hover {
-  border-color: #f97316;
+  border-color: var(--vp-c-brand-1);
 }
 </style>

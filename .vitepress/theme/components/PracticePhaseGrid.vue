@@ -35,8 +35,8 @@ defineProps<PracticePhaseGridProps>()
 }
 
 .phase-card {
-  background: #1c1917;
-  border: 1px solid #292524;
+  background: var(--vp-c-bg-soft);
+  border: 1px solid var(--vp-c-divider);
   border-radius: 8px;
   padding: 16px;
   text-decoration: none;
@@ -45,7 +45,7 @@ defineProps<PracticePhaseGridProps>()
 }
 
 .phase-card:hover {
-  border-color: #ea580c;
+  border-color: var(--vp-c-brand-1);
   transform: translateY(-2px);
 }
 
@@ -59,14 +59,14 @@ defineProps<PracticePhaseGridProps>()
 }
 
 .phase-title {
-  color: #f5f5f4;
+  color: var(--vp-c-text-1);
   font-size: 13px;
   font-weight: 600;
   margin-bottom: 4px;
 }
 
 .phase-subtitle {
-  color: #78716c;
+  color: var(--vp-c-text-2);
   font-size: 11px;
   margin-bottom: 10px;
   line-height: 1.5;

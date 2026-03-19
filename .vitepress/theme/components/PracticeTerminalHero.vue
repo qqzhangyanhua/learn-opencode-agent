@@ -18,12 +18,26 @@ function sleep(ms: number) {
   return new Promise<void>(resolve => { timer = setTimeout(resolve, ms) })
 }
 
+let destroyed = false
+
+onMounted(() => {
+  destroyed = false
+  animate()
+})
+onUnmounted(() => {
+  destroyed = true
+  if (timer) clearTimeout(timer)
+})
+
 async function animate() {
+  if (destroyed) return
   displayedLines.value = []
   for (const line of LINES) {
+    if (destroyed) return
     const entry = { text: '', color: line.color, done: false }
     displayedLines.value.push(entry)
     for (const char of line.text) {
+      if (destroyed) return
       entry.text += char
       await sleep(55)
     }
@@ -31,11 +45,8 @@ async function animate() {
     await sleep(500)
   }
   await sleep(2000)
-  animate()
+  if (!destroyed) animate()
 }
-
-onMounted(() => { animate() })
-onUnmounted(() => { if (timer) clearTimeout(timer) })
 </script>
 
 <template>

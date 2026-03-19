@@ -7,9 +7,12 @@ const props = defineProps<RunCommandProps>()
 const copied = ref(false)
 
 function copy() {
+  if (typeof navigator === 'undefined') return
   navigator.clipboard.writeText(props.command).then(() => {
     copied.value = true
     setTimeout(() => { copied.value = false }, 1800)
+  }).catch(() => {
+    // clipboard API unavailable or permission denied — silently ignore
   })
 }
 </script>

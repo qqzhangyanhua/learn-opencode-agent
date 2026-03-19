@@ -22,7 +22,7 @@ const difficultyColor: Record<ProjectCardProps['difficulty'], string> = {
       <div class="project-title">{{ title }}</div>
       <div class="project-meta">
         <span class="difficulty" :style="{ color: difficultyColor[difficulty] }">
-          ● {{ difficultyLabel[difficulty] }}
+          {{ difficultyLabel[difficulty] }}
         </span>
         <span class="duration">时长：{{ duration }}</span>
       </div>
