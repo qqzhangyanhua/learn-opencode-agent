@@ -24,7 +24,7 @@ const difficultyColor: Record<ProjectCardProps['difficulty'], string> = {
         <span class="difficulty" :style="{ color: difficultyColor[difficulty] }">
           ● {{ difficultyLabel[difficulty] }}
         </span>
-        <span class="duration">⏱ {{ duration }}</span>
+        <span class="duration">时长：{{ duration }}</span>
       </div>
     </div>
     <div v-if="prerequisites.length" class="project-row">
