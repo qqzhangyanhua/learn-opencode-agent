@@ -75,6 +75,7 @@ export default withMermaid(defineConfig({
     sidebar: {
       '/practice/': [
         { text: '← 返回理论篇', link: '/' },
+        { text: '开始前先看', link: '/practice/setup' },
         { text: '课程介绍', link: '/practice/' },
         {
           text: 'Phase 1 — Agent 基础',
@@ -235,5 +236,4 @@ export default withMermaid(defineConfig({
     }
   }
 }))
-
 
