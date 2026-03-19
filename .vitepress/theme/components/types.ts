@@ -62,6 +62,10 @@ export interface PracticePhase {
   link: string
 }
 
+export interface PracticePhaseGridProps {
+  phases: PracticePhase[]
+}
+
 export interface PracticeTagCloudProps {
   tags: string[]
 }
