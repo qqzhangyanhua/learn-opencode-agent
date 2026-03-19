@@ -445,3 +445,44 @@ html {
     font-size: 14px;
   }
 }
+
+/* ===== 实践篇首页主题 (practice-page) ===== */
+.practice-page {
+  --vp-c-brand-1: #ea580c;
+  --vp-c-brand-2: #f97316;
+  --vp-c-brand-3: #c2410c;
+  --vp-c-brand-soft: rgba(234, 88, 12, 0.12);
+  --vp-home-hero-name-color: #f97316;
+  --vp-home-hero-name-background: none;
+  --vp-c-bg: #0c0a09;
+  --vp-c-bg-soft: #1c1917;
+  --vp-c-bg-mute: #292524;
+  --vp-c-text-1: #f5f5f4;
+  --vp-c-text-2: #a8a29e;
+  --vp-c-text-3: #78716c;
+  --vp-c-divider: #292524;
+}
+
+.practice-page .VPHero {
+  background-image:
+    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(234, 88, 12, 0.08) 0%, transparent 60%),
+    linear-gradient(rgba(249, 115, 22, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(249, 115, 22, 0.04) 1px, transparent 1px);
+  background-size: auto, 32px 32px, 32px 32px;
+}
+
+.practice-page .VPHero::after {
+  background: linear-gradient(90deg, #ea580c, #f97316);
+}
+
+.practice-page .VPButton.brand {
+  background: #ea580c;
+  border-color: #ea580c;
+  font-family: monospace;
+}
+
+.practice-page .VPButton.brand:hover {
+  background: #c2410c;
+  border-color: #c2410c;
+  box-shadow: 0 4px 16px rgba(234, 88, 12, 0.35);
+}
