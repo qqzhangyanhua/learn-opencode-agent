@@ -80,7 +80,7 @@ description: 示例描述
 Run:
 
 ```bash
-bun run build
+pnpm -s run build
 ```
 
 Expected: `vitepress build` 成功，无路径或 frontmatter 报错
@@ -128,7 +128,7 @@ git commit -m "feat(intermediate): scaffold intermediate section pages"
 Run:
 
 ```bash
-bun run build
+pnpm -s run build
 ```
 
 Expected: 构建通过，无 `config.mts` 语法错误
@@ -178,7 +178,7 @@ git commit -m "feat(intermediate): add nav and sidebar entries"
 Run:
 
 ```bash
-bun run build
+pnpm -s run build
 ```
 
 Expected: 构建通过，无 broken link 级别报错
@@ -224,7 +224,7 @@ git commit -m "feat(intermediate): add homepage and reading map entry"
 Run:
 
 ```bash
-bun run build
+pnpm -s run build
 ```
 
 Expected: 中级篇首页生成成功
@@ -346,7 +346,7 @@ git commit -m "feat(intermediate): import teaching code examples"
 Run:
 
 ```bash
-bun run build
+pnpm -s run build
 ```
 
 Expected: 这 4 篇页面正常构建，无 Markdown 容器或组件引用错误
@@ -391,7 +391,7 @@ git commit -m "feat(intermediate): add first four intermediate chapters"
 Run:
 
 ```bash
-bun run build
+pnpm -s run build
 ```
 
 Expected: 后 4 篇页面正常构建
@@ -440,7 +440,7 @@ Expected: 所有链接指向现有有效路径，无明显拼写错误
 Run:
 
 ```bash
-bun run build
+pnpm -s run build
 ```
 
 Expected: 全站构建通过
@@ -473,7 +473,7 @@ git commit -m "docs(intermediate): align source mapping and example links"
 Run:
 
 ```bash
-bun run build
+pnpm -s run build
 ```
 
 Expected: 构建成功，输出 `build complete` 类结果
@@ -493,3 +493,4 @@ Expected: 构建成功，输出 `build complete` 类结果
 git add docs/index.md docs/reading-map.md docs/intermediate
 git commit -m "docs: finalize intermediate section delivery"
 ```
+
