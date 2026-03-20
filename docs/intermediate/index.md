@@ -41,7 +41,7 @@ description: 面向掌握基础 Agent 理论后想进入工程专题的读者，
 | [System Prompt 设计指南](/intermediate/29-system-prompt-design/) | [第2章：AI Agent 的核心组件](/01-agent-basics/) / [第16章：高级主题与最佳实践](/15-advanced-topics/) | 说明 Prompt 作为 Agent 核心说明书，其设计思路需要在核心组件与高级实践之间平衡。 |
 | [生产架构](/intermediate/30-production-architecture/) | [第9章：HTTP API 服务器](/08-http-api-server/) / [第10章：数据持久化](/09-data-persistence/) / [第14章：部署与基础设施](/13-deployment-infrastructure/) / [P23：生产部署清单](/practice/p23-production/) | 连接部署基础设施与实际生产线，强调架构边界与依赖管理。 |
 | [安全与边界](/intermediate/31-safety-boundaries/) | [第4章：工具系统](/03-tool-system/) / [第16章：高级主题与最佳实践](/15-advanced-topics/) / [P19：Agent 安全与防注入](/practice/p19-security/) | 探讨安全边界的策略如何建立在已有工具系统与污染防线的基础上。 |
-| [性能与成本优化](/intermediate/32-performance-cost/) | [第6章：多模型支持](/17-multi-model-orchestration/) / [第10章：数据持久化](/09-data-persistence/) / [P18：多模型路由与成本控制](/practice/p18-model-routing/) / [P20：可观测性与调试](/practice/p20-observability/) | 重新解读性能与成本管理，强调模型路由、缓存与可观测性的全链路设计。 |
+| [性能与成本优化](/intermediate/32-performance-cost/) | [第6章：多模型支持](/05-provider-system/) / [第10章：数据持久化](/09-data-persistence/) / [P18：多模型路由与成本控制](/practice/p18-model-routing/) / [P20：可观测性与调试](/practice/p20-observability/) | 重新解读性能与成本管理，强调模型路由、缓存与可观测性的全链路设计。 |
 
 ## 阅读建议
 

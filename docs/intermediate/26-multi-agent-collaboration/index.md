@@ -188,7 +188,7 @@ OpenCode 最值得借鉴的，不是“多 Agent 很酷”，而是它把多 Age
 
 ## 教学代码示例映射
 
-**下面这些都是教学示例，不是 OpenCode 原仓实现。** 本章对应的示例只有一个文件：`docs/intermediate/examples/26-multi-agent-collaboration/multi_agent.py`。
+**下面这些都是教学示例，不是 OpenCode 原仓实现。** 本章对应的示例目录是 `docs/intermediate/examples/26-multi-agent-collaboration/`，当前目录里主要就是一个 `multi_agent.py` 文件。
 
 它做了三件事：
 
