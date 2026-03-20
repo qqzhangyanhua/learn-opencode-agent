@@ -10,8 +10,8 @@ pip install -r requirements.txt
 ```
 
 ## 必要环境变量
-- `DEEPSEEK_API_KEY`：用于与 DeepSeek API 建立会话助手调用，必须先在环境中导出（macOS/Linux: `export DEEPSEEK_API_KEY="your_key"`；Windows: `set DEEPSEEK_API_KEY=your_key`）。
-- `SILICONFLOW_API_KEY`：用于 Embedding / 向量检索呼叫（v1...v5 以及 production_rag.py 都会校验），同样需提前导出。
+- `DEEPSEEK_API_KEY`：用于与 DeepSeek API 建立会话助手调用，所有脚本（v1~v5 及 `production_rag.py`）都必须先导出（macOS/Linux: `export DEEPSEEK_API_KEY="your_key"`；Windows: `set DEEPSEEK_API_KEY=your_key`）。
+- `SILICONFLOW_API_KEY`：仅在涉及 Embedding/向量请求的脚本中校验，包括 `v1_chunk_problem.py`、`v2_embedding_problem.py`、`v3_hybrid_search.py`、`v4_prompt_control.py` 和 `production_rag.py`；`v5_metadata_conflict.py` 等仅需 `DEEPSEEK_API_KEY`。
 
 ## 建议先运行哪个文件
 ```bash
