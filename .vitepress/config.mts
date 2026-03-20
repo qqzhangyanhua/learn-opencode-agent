@@ -65,6 +65,7 @@ export default withMermaid(defineConfig({
     nav: [
       { text: '首页', link: '/' },
       { text: '实践篇', link: '/practice/', activeMatch: '/practice/' },
+      { text: '中级篇', link: '/intermediate/' },
       { text: '阅读地图', link: '/reading-map' },
       { text: '版本说明', link: '/version-notes' },
       { text: '术语表', link: '/glossary' },
@@ -201,6 +202,21 @@ export default withMermaid(defineConfig({
             { text: '第24章：实战案例与最佳实践', link: '/20-best-practices/' },
           ]
         },
+        {
+          text: '第六部分：中级专题与工程进阶',
+          collapsed: false,
+          items: [
+            { text: '中级篇导读', link: '/intermediate/' },
+            { text: '第25章：RAG 为什么总是答不准？', link: '/intermediate/25-rag-failure-patterns/' },
+            { text: '第26章：多智能体协作实战', link: '/intermediate/26-multi-agent-collaboration/' },
+            { text: '第27章：Planning 机制', link: '/intermediate/27-planning-mechanism/' },
+            { text: '第28章：上下文工程实战', link: '/intermediate/28-context-engineering/' },
+            { text: '第29章：System Prompt 设计', link: '/intermediate/29-system-prompt-design/' },
+            { text: '第30章：生产架构', link: '/intermediate/30-production-architecture/' },
+            { text: '第31章：安全与边界', link: '/intermediate/31-safety-boundaries/' },
+            { text: '第32章：性能与成本', link: '/intermediate/32-performance-cost/' },
+          ]
+        },
       ],
     },
 
@@ -236,4 +252,3 @@ export default withMermaid(defineConfig({
     }
   }
 }))
-
