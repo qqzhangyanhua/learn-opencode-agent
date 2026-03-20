@@ -11,7 +11,7 @@ description: 综合多 Agent 编排、安全检测、结构化输出等技术，
   :tags="['Project', 'Code Review', 'Multi-Agent', 'TypeScript', 'OpenAI SDK']"
 />
 
-> 开始前先看：[实践环境准备](/practice/setup)。本章对应示例文件已提供在仓库根目录，可直接按命令运行。
+> 开始前先看：[实践环境准备](/practice/setup)。本章对应示例文件位于 `practice/` 目录，可直接按命令运行。
 
 ## 前置准备
 
@@ -22,7 +22,7 @@ description: 综合多 Agent 编排、安全检测、结构化输出等技术，
 - 环境变量已配置：`OPENAI_API_KEY`
 - 建议先完成前置章节：`P1`、`P10`、`P15`、`P19`
 - 本章建议入口命令：`bun run p22-project.ts`
-- 示例文件位置：仓库根目录 `p22-project.ts`
+- 示例文件位置：`practice/p22-project.ts`
 
 ## 背景与目标
 
@@ -143,7 +143,10 @@ ReportGenerator（生成最终报告）
 // p22-project.ts
 import OpenAI from 'openai'
 
-const anthropic = new OpenAI()
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  baseURL: process.env.OPENAI_BASE_URL,
+})
 
 // ─── 类型定义 ───
 
@@ -268,38 +271,39 @@ SecurityReviewer 是一个专注于安全维度的 LLM 调用。它的 system pr
 // p22-project.ts（续）
 
 const findingsTool: OpenAI.ChatCompletionTool = {
-  name: 'submit_findings',
-  description: '提交审查发现列表。每个发现必须包含具体的文件、行号、严重等级和改进建议。',
-  input_schema: {
-    type: 'object',
-    properties: {
-      findings: {
-        type: 'array',
-        items: {
-          type: 'object',
-          properties: {
-            file: { type: 'string', description: '文件路径' },
-            line: { type: 'number', description: '问题所在行号' },
-            severity: {
-              type: 'string',
-              enum: ['critical', 'warning', 'info'],
-              description: 'critical=必须修复, warning=建议修复, info=供参考',
+  type: 'function',
+  function: {
+    name: 'submit_findings',
+    description: '提交结构化审查发现列表。',
+    parameters: {
+      type: 'object',
+      properties: {
+        findings: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              file: { type: 'string', description: '文件路径' },
+              line: { type: 'number', description: '问题所在行号' },
+              severity: {
+                type: 'string',
+                enum: ['critical', 'warning', 'info'],
+                description: '问题严重等级',
+              },
+              category: {
+                type: 'string',
+                enum: ['security', 'quality', 'performance', 'naming', 'error-handling', 'typescript'],
+                description: '问题分类',
+              },
+              message: { type: 'string', description: '问题描述' },
+              suggestion: { type: 'string', description: '修复建议' },
             },
-            category: {
-              type: 'string',
-              enum: [
-                'security', 'quality', 'performance',
-                'naming', 'error-handling', 'typescript',
-              ],
-            },
-            message: { type: 'string', description: '问题描述' },
-            suggestion: { type: 'string', description: '具体的修复建议' },
+            required: ['file', 'line', 'severity', 'category', 'message', 'suggestion'],
           },
-          required: ['file', 'line', 'severity', 'category', 'message', 'suggestion'],
         },
       },
+      required: ['findings'],
     },
-    required: ['findings'],
   },
 }
 
@@ -308,32 +312,24 @@ async function runSecurityReview(
 ): Promise<ReviewResult> {
   console.log('[SecurityReviewer] 开始安全审查...')
 
-  const diffSummary = changes
-    .map(f => `--- ${f.filePath} (${f.changeType}) ---\n${
-      f.hunks.map(h => h.content).join('\n')
-    }`)
-    .join('\n\n')
+  const diffSummary = buildDiffSummary(changes)
 
   const response = await client.chat.completions.create({
-    model: 'gpt-4o',
+    model: process.env.OPENAI_MODEL || 'gpt-4o',
     max_tokens: 4096,
-    system: [
-      '你是一位资深安全审查专家。',
-      '你只关注安全相关问题，不评论代码风格或性能。',
-      '重点检查以下类别：',
-      '- SQL 注入：字符串拼接 SQL、未使用参数化查询',
-      '- XSS：未转义的用户输入直接输出到 HTML',
-      '- eval/Function：动态代码执行',
-      '- 硬编码密钥：密码、API key、token 写在代码中',
-      '- 路径遍历：未校验的文件路径操作',
-      '- 不安全的依赖：已知有漏洞的库或不安全的导入',
-      '',
-      '如果没有发现安全问题，提交空数组。不要为了凑数而编造问题。',
-      '审查完成后，必须调用 submit_findings 工具提交结果。',
-    ].join('\n'),
     tools: [findingsTool],
-    tool_choice: { type: 'tool', name: 'submit_findings' },
+    tool_choice: { type: 'function', function: { name: 'submit_findings' } },
     messages: [
+      {
+        role: 'system',
+        content: [
+          '你是一位资深安全审查专家。',
+          '你只关注安全问题，不评论代码风格或性能。',
+          '重点检查：SQL 注入、XSS、eval/Function、硬编码密钥、路径遍历、不安全文件操作。',
+          '如果没有问题，提交空数组。',
+          '审查完成后必须调用 submit_findings 工具提交结果。',
+        ].join('\n'),
+      },
       {
         role: 'user',
         content: `请对以下代码变更进行安全审查：\n\n${diffSummary}`,
@@ -344,6 +340,17 @@ async function runSecurityReview(
   const findings = extractFindings(response, 'security-reviewer')
   console.log(`[SecurityReviewer] 完成，发现 ${findings.length} 个安全问题`)
   return { reviewerId: 'security-reviewer', findings }
+}
+
+function buildDiffSummary(changes: FileChange[]): string {
+  return changes
+    .map((change) =>
+      [
+        `--- ${change.filePath} (${change.changeType}) ---`,
+        change.hunks.map((hunk) => hunk.content).join('\n'),
+      ].join('\n'),
+    )
+    .join('\n\n')
 }
 ```
 

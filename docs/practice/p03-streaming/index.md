@@ -11,7 +11,7 @@ description: 用 stream() API 实现逐 token 打印，让 Agent 回复不再让
   :tags="['OpenAI SDK', 'Streaming', 'TypeScript']"
 />
 
-> 开始前先看：[实践环境准备](/practice/setup)。本章对应示例文件已提供在仓库根目录，可直接按命令运行。
+> 开始前先看：[实践环境准备](/practice/setup)。本章对应示例文件位于 `practice/` 目录，可直接按命令运行。
 
 ## 前置准备
 
@@ -22,7 +22,7 @@ description: 用 stream() API 实现逐 token 打印，让 Agent 回复不再让
 - 环境变量已配置：`OPENAI_API_KEY`
 - 建议先完成前置章节：`P1`
 - 本章建议入口命令：`bun run p03-streaming.ts`
-- 示例文件位置：仓库根目录 `p03-streaming.ts`
+- 示例文件位置：`practice/p03-streaming.ts`
 
 ## 背景与目标
 
@@ -57,25 +57,22 @@ OpenAI SDK 提供两个入口，底层协议不同：
 
 | 方法 | 返回 | 行为 |
 |------|------|------|
-| `client.chat.completions.create()` | `Promise<Message>` | 等待全部生成完毕，一次性返回 |
-| `client.messages.stream()` | `MessageStream` | 返回 AsyncIterable，每个事件立刻推送 |
+| `client.chat.completions.create()` | `Promise<ChatCompletion>` | 等待全部生成完毕，一次性返回 |
+| `client.chat.completions.create({ stream: true })` | `Stream<ChatCompletionChunk>` | 返回 AsyncIterable，每个 chunk 立刻推送 |
 
-`stream()` 在传输层用 HTTP 分块传输（chunked transfer），服务器边生成边写入响应流。
+流式模式在传输层用 HTTP 分块传输（chunked transfer），服务器边生成边写入响应流。
 
-### 流式事件类型
+### 流式 Chunk 结构
 
-`stream()` 返回的事件流里有多种事件类型，最关键的三类：
+每个 chunk 的 `choices[0].delta` 包含增量内容，最关键的两类字段：
 
 ```
-content_block_start   -> 一个新的内容块开始（text 或 tool_use）
-content_block_delta   -> 当前块的增量内容
-  - type: text_delta      -> 文本片段，属性 delta.text
-  - type: input_json_delta -> 工具调用的参数 JSON 片段
-content_block_stop    -> 当前块结束
-message_stop          -> 整条消息结束
+delta.content         -> 文本片段，直接打印即可
+delta.tool_calls      -> 工具调用增量：函数名和参数 JSON 分片推送
+choices[0].finish_reason -> 'stop' 表示文本完毕，'tool_calls' 表示需要执行工具
 ```
 
-实际消费流时，你主要处理 `content_block_delta` 中的 `text_delta`。
+实际消费流时，你主要处理 `delta.content` 的文本片段。
 
 ### 流式 + 工具调用的组合问题
 
@@ -83,12 +80,12 @@ message_stop          -> 整条消息结束
 
 ```
 [流式文字] 好的，我来查询北京的天气...
-[暂停]  <- 模型在生成 tool_use block（参数 JSON 逐步推送，但你不打印）
+[暂停]  <- 模型在生成 tool_calls（参数 JSON 逐步推送，但你不打印）
 [工具执行] 拿到结果
 [流式文字] 继续：北京今天晴朗，气温 22°C...
 ```
 
-处理方式：在事件循环里检测 `tool_use` 类型的 `content_block_start`，收集完整的工具调用 block 后执行，把结果推回 `messages`，再发起新一轮 `stream()` 请求。
+处理方式：在流消费循环里检测 `delta.tool_calls`，按 `index` 累积每个工具调用的函数名和参数 JSON，等流结束后统一执行，把结果推回 `messages`，再发起新一轮流式请求。
 
 ## 动手实现
 
@@ -115,17 +112,20 @@ const client = new OpenAI()
 
 const tools: OpenAI.ChatCompletionTool[] = [
   {
-    name: 'get_weather',
-    description: '查询指定城市的当前天气',
-    input_schema: {
-      type: 'object',
-      properties: {
-        city: {
-          type: 'string',
-          description: '城市名称，如"北京"、"上海"',
+    type: 'function',
+    function: {
+      name: 'get_weather',
+      description: '查询指定城市的当前天气',
+      parameters: {
+        type: 'object',
+        properties: {
+          city: {
+            type: 'string',
+            description: '城市名称，如"北京"、"上海"',
+          },
         },
+        required: ['city'],
       },
-      required: ['city'],
     },
   },
 ]
@@ -155,7 +155,7 @@ function executeTool(name: string, input: Record<string, string>): string {
 
 ### 第三步：流式 Agent 循环
 
-核心实现。用 `for await` 遍历事件流，分类处理每种事件：
+核心实现。用 `for await` 遍历流式 chunk，分类处理文本和工具调用增量：
 
 ```ts
 async function runStreamingAgent(userMessage: string): Promise<void> {
@@ -165,114 +165,137 @@ async function runStreamingAgent(userMessage: string): Promise<void> {
 
   while (true) {
     // 启动流式请求
-    const stream = client.messages.stream({
-      model: 'gpt-4o',
-      max_tokens: 1024,
+    const stream = await client.chat.completions.create({
+      model: process.env.OPENAI_MODEL || 'gpt-4o',
       tools,
       messages,
+      stream: true,
     })
 
-    // 收集本轮完整的 assistant content blocks（用于历史记录和工具调用检测）
-    const contentBlocks: OpenAI.ChatCompletionContentPart[] = []
+    // 收集本轮的文本内容和工具调用
+    let textContent = ''
+    const toolCalls: Array<{
+      id: string
+      type: 'function'
+      function: { name: string; arguments: string }
+    }> = []
 
-    // 当前正在构建的工具调用 block（参数 JSON 分多个 delta 推送）
-    let currentToolUse: {
+    // 当前正在构建的工具调用（参数 JSON 分多个 delta 推送）
+    let currentToolCall: {
+      index: number
       id: string
       name: string
-      inputJson: string
+      arguments: string
     } | null = null
 
-    let stopReason: string | null = null
+    let finishReason: string | null = null
 
-    for await (const event of stream) {
-      if (event.type === 'content_block_start') {
-        if (event.content_block.type === 'tool_use') {
-          // 工具调用块开始，初始化收集器
-          currentToolUse = {
-            id: event.content_block.id,
-            name: event.content_block.name,
-            inputJson: '',
+    for await (const chunk of stream) {
+      const delta = chunk.choices[0]?.delta
+
+      // 文本片段，直接打印到终端
+      if (delta?.content) {
+        process.stdout.write(delta.content)
+        textContent += delta.content
+      }
+
+      // 工具调用增量处理
+      if (delta?.tool_calls) {
+        for (const toolCallDelta of delta.tool_calls) {
+          if (toolCallDelta.index !== undefined) {
+            if (
+              currentToolCall === null ||
+              currentToolCall.index !== toolCallDelta.index
+            ) {
+              // 新的工具调用开始，先保存上一个
+              if (currentToolCall) {
+                toolCalls.push({
+                  id: currentToolCall.id,
+                  type: 'function',
+                  function: {
+                    name: currentToolCall.name,
+                    arguments: currentToolCall.arguments,
+                  },
+                })
+              }
+
+              currentToolCall = {
+                index: toolCallDelta.index,
+                id: toolCallDelta.id ?? '',
+                name: toolCallDelta.function?.name ?? '',
+                arguments: toolCallDelta.function?.arguments ?? '',
+              }
+
+              if (toolCallDelta.function?.name) {
+                process.stdout.write(`\n[调用工具: ${toolCallDelta.function.name} `)
+              }
+            } else {
+              // 同一个工具调用的参数增量
+              if (toolCallDelta.function?.arguments) {
+                currentToolCall.arguments += toolCallDelta.function.arguments
+              }
+            }
           }
-          process.stdout.write(`\n[调用工具: ${event.content_block.name} `)
         }
       }
 
-      if (event.type === 'content_block_delta') {
-        if (event.delta.type === 'text_delta') {
-          // 文本片段，直接打印到终端
-          process.stdout.write(event.delta.text)
-        } else if (event.delta.type === 'input_json_delta' && currentToolUse) {
-          // 工具参数 JSON 分片，累积起来（不打印原始 JSON，等凑齐后显示）
-          currentToolUse.inputJson += event.delta.partial_json
-        }
-      }
-
-      if (event.type === 'content_block_stop' && currentToolUse) {
-        // 工具调用块结束，参数已完整
-        let parsedInput: Record<string, string> = {}
-        try {
-          parsedInput = JSON.parse(currentToolUse.inputJson) as Record<string, string>
-        } catch {
-          parsedInput = {}
-        }
-        process.stdout.write(`${JSON.stringify(parsedInput)}]\n`)
-        contentBlocks.push({
-          type: 'tool_use',
-          id: currentToolUse.id,
-          name: currentToolUse.name,
-          input: parsedInput,
-        })
-        currentToolUse = null
-      }
-
-      if (event.type === 'message_delta') {
-        stopReason = event.delta.stop_reason ?? null
-      }
-
-      if (event.type === 'content_block_start' && event.content_block.type === 'text') {
-        // 文本块开始，将其加入 contentBlocks 供后续记录
-        contentBlocks.push({ type: 'text', text: '' })
-      }
-
-      if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
-        // 更新 contentBlocks 中最后一个 text block 的内容
-        const last = contentBlocks[contentBlocks.length - 1]
-        if (last?.type === 'text') {
-          last.text += event.delta.text
-        }
+      if (chunk.choices[0]?.finish_reason) {
+        finishReason = chunk.choices[0].finish_reason
       }
     }
 
-    // 将本轮 assistant 回复加入历史
-    messages.push({ role: 'assistant', content: contentBlocks })
+    // 保存最后一个工具调用
+    if (currentToolCall) {
+      toolCalls.push({
+        id: currentToolCall.id,
+        type: 'function',
+        function: {
+          name: currentToolCall.name,
+          arguments: currentToolCall.arguments,
+        },
+      })
+      process.stdout.write(`${currentToolCall.arguments}]\n`)
+    }
 
-    if (stopReason === 'end_turn') {
+    // 构建 assistant 消息并加入历史
+    const assistantMessage: OpenAI.ChatCompletionAssistantMessageParam = {
+      role: 'assistant',
+      content: textContent || null,
+    }
+    if (toolCalls.length > 0) {
+      assistantMessage.tool_calls = toolCalls
+    }
+    messages.push(assistantMessage)
+
+    if (finishReason === 'stop') {
       // 模型已生成完整文本回复，结束循环
       process.stdout.write('\n')
-      break
+      return
     }
 
-    if (stopReason === 'tool_use') {
-      // 执行所有工具调用，收集结果
-      const toolResults: OpenAI.ChatCompletionToolResultBlockParam[] = []
+    if (finishReason !== 'tool_calls') {
+      process.stdout.write(`\n[未处理的 finish_reason: ${finishReason ?? 'null'}]\n`)
+      return
+    }
 
-      for (const block of contentBlocks) {
-        if (block.type !== 'tool_use') continue
-
-        const input = block.input as Record<string, string>
-        const result = executeTool(block.name, input)
-
-        console.log(`[工具结果: ${result}]`)
-
-        toolResults.push({
-          type: 'tool_result',
-          tool_use_id: block.id,
-          content: result,
-        })
+    // 执行所有工具调用，收集结果
+    for (const toolCall of toolCalls) {
+      let parsedInput: Record<string, string> = {}
+      try {
+        parsedInput = JSON.parse(toolCall.function.arguments) as Record<string, string>
+      } catch {
+        parsedInput = {}
       }
 
+      const result = executeTool(toolCall.function.name, parsedInput)
+      console.log(`[工具结果: ${result}]`)
+
       // 把工具结果推回 messages，继续下一轮流式
-      messages.push({ role: 'user', content: toolResults })
+      messages.push({
+        role: 'tool',
+        tool_call_id: toolCall.id,
+        content: result,
+      })
     }
   }
 }
@@ -297,11 +320,11 @@ runStreamingAgent('北京天气怎么样，适合跑步吗？').catch(console.er
 
 | 概念 | 说明 |
 |------|------|
-| `client.messages.stream()` | 返回 `MessageStream`，可用 `for await` 遍历事件 |
-| `content_block_delta` + `text_delta` | 文本流的最小单位，用 `process.stdout.write()` 打印，不加换行 |
-| `input_json_delta` | 工具参数 JSON 分片推送，需自行累积成完整 JSON 后 `JSON.parse()` |
-| `content_block_stop` | 标志一个 block（文本或工具调用）已完整，工具调用在此处执行 |
-| `message_delta.stop_reason` | `end_turn` 表示文本回复完毕，`tool_use` 表示需要执行工具 |
+| `create({ stream: true })` | 返回 `Stream<ChatCompletionChunk>`，可用 `for await` 遍历 chunk |
+| `delta.content` | 文本流的最小单位，用 `process.stdout.write()` 打印，不加换行 |
+| `delta.tool_calls` | 工具调用增量，按 `index` 区分不同工具调用，参数 JSON 分片推送需累积 |
+| `finish_reason` | `'stop'` 表示文本回复完毕，`'tool_calls'` 表示需要执行工具 |
+| `ChatCompletionAssistantMessageParam` | 手动构建 assistant 消息，包含 `content` 和 `tool_calls` |
 | `process.stdout.write()` vs `console.log()` | `stdout.write` 不自动加换行，适合逐字追加；`console.log` 每次换行 |
 | 工具调用时暂停流式 | 参数 JSON 在流中推送但不打印，凑齐后执行，结果推回 messages 再开新一轮流式 |
 
@@ -313,7 +336,7 @@ runStreamingAgent('北京天气怎么样，适合跑步吗？').catch(console.er
 
 **Q: 工具调用时为什么不能流式？**
 
-因为工具执行需要完整的参数。模型生成 `{"city": "北京"}` 这个 JSON 时，它是一个字符一个字符推送的：先是 `{`，然后 `"c`，然后 `it`... 直到 `}` 才完整。在收到完整参数之前你无法知道要调什么，所以工具调用天然是等待完整块后再执行的。参数 JSON 在流中存在，但你在 `input_json_delta` 阶段只是积累字符串，等 `content_block_stop` 才真正解析执行。
+因为工具执行需要完整的参数。模型生成 `{"city": "北京"}` 这个 JSON 时，它是一个字符一个字符推送的：先是 `{`，然后 `"c`，然后 `it`... 直到 `}` 才完整。在收到完整参数之前你无法知道要调什么，所以工具调用天然是等待完整块后再执行的。参数 JSON 通过 `delta.tool_calls[].function.arguments` 分片推送，你在流消费阶段只是累积字符串，等 `finish_reason` 出现后才真正解析执行。
 
 **Q: 如何在 Web 场景用 SSE 转发流式输出？**
 
@@ -325,11 +348,11 @@ app.get('/stream', async (req, res) => {
   res.setHeader('Content-Type', 'text/event-stream')
   res.setHeader('Cache-Control', 'no-cache')
 
-  const stream = client.messages.stream({ ... })
+  const stream = await client.chat.completions.create({ ..., stream: true })
 
-  for await (const event of stream) {
-    if (event.type === 'content_block_delta' && event.delta.type === 'text_delta') {
-      res.write(`data: ${JSON.stringify({ text: event.delta.text })}\n\n`)
+  for await (const chunk of stream) {
+    if (chunk.choices[0]?.delta?.content) {
+      res.write(`data: ${JSON.stringify({ text: chunk.choices[0].delta.content })}\n\n`)
     }
   }
 
@@ -344,7 +367,7 @@ app.get('/stream', async (req, res) => {
 
 本章做了三件事：
 
-- 把 `create()` 换成 `stream()`，用 `for await` 消费事件流
+- 给 `create()` 加上 `stream: true`，用 `for await` 消费 chunk 流
 - 用 `process.stdout.write()` 逐 token 打印，消除等待感
 - 在工具调用时暂停打印，执行完毕后开新一轮流式请求继续
 

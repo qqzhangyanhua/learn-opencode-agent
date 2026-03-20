@@ -302,6 +302,9 @@ docs/book/
 | `PracticeTerminalHero` | `components/PracticeTerminalHero.vue` | 实践篇首页终端风格 Hero |
 | `PracticePhaseGrid` | `components/PracticePhaseGrid.vue` | 实践篇 7 个阶段网格展示 |
 | `PracticeTagCloud` | `components/PracticeTagCloud.vue` | 实践篇技术标签云 |
+| `ProjectCard` | `components/ProjectCard.vue` | 实践篇章节项目卡片（难度/时长/前置/标签） |
+| `RunCommand` | `components/RunCommand.vue` | 运行命令展示（含已验证标识） |
+| `PracticePreview` | `components/PracticePreview.vue` | 实践篇预览（首页引用） |
 
 ### 类型定义
 

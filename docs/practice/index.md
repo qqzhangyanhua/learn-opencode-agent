@@ -168,7 +168,7 @@ import PracticeTagCloud from '../../.vitepress/theme/components/PracticeTagCloud
 
 补充说明：
 
-- `P14` 章节除了 `p14-mcp.ts` 外，还需要仓库根目录的 `p14-mcp-server.ts` 配合运行。
+- `P14` 章节除了 `p14-mcp.ts` 外，还需要 `practice/p14-mcp-server.ts` 配合运行。
 - 运行前仍建议先看 [实践环境准备](/practice/setup)，重点确认依赖和 `OPENAI_API_KEY`。
 
 <style scoped>

@@ -11,7 +11,7 @@ description: Rate Limiting、Circuit Breaker、超时控制、优雅降级、健
   :tags="['Production', 'Deployment', 'Checklist', 'TypeScript']"
 />
 
-> 开始前先看：[实践环境准备](/practice/setup)。本章对应示例文件已提供在仓库根目录，可直接按命令运行。
+> 开始前先看：[实践环境准备](/practice/setup)。本章对应示例文件已提供在 `practice/` 目录，可直接按命令运行。
 
 ## 前置准备
 
@@ -22,7 +22,7 @@ description: Rate Limiting、Circuit Breaker、超时控制、优雅降级、健
 - 环境变量已配置：`OPENAI_API_KEY`
 - 建议先完成前置章节：`P18`、`P19`、`P20`
 - 本章建议入口命令：`bun run p23-production.ts`
-- 示例文件位置：仓库根目录 `p23-production.ts`
+- 示例文件位置：`practice/p23-production.ts`
 
 ## 背景与目标
 
@@ -215,9 +215,10 @@ class TokenBucketRateLimiter {
 
 class CircuitBreaker {
   private state: CircuitState = 'closed'
-  private failures: number = 0
+  private failures = 0
   private lastFailureTime: number | null = null
-  private config: CircuitBreakerConfig
+  private halfOpenInFlight = false
+  private readonly config: CircuitBreakerConfig
 
   constructor(config: CircuitBreakerConfig) {
     this.config = config
@@ -226,17 +227,24 @@ class CircuitBreaker {
   /** 当前是否允许请求通过 */
   canPass(): boolean {
     if (this.state === 'closed') return true
+
     if (this.state === 'open') {
-      // 检查冷却期是否已过
       const elapsed = Date.now() - (this.lastFailureTime ?? 0)
       if (elapsed >= this.config.cooldownMs) {
         this.state = 'half-open'
+        this.halfOpenInFlight = false
         console.log('[CircuitBreaker] 冷却期结束，进入半开状态')
-        return true
+      } else {
+        return false
       }
-      return false
     }
-    // half-open：允许一次试探
+
+    if (this.state === 'half-open') {
+      if (this.halfOpenInFlight) return false
+      this.halfOpenInFlight = true
+      return true
+    }
+
     return true
   }
 
@@ -247,18 +255,26 @@ class CircuitBreaker {
     }
     this.failures = 0
     this.state = 'closed'
+    this.halfOpenInFlight = false
   }
 
   /** 记录一次失败 */
   recordFailure(): void {
     this.failures += 1
     this.lastFailureTime = Date.now()
+    this.halfOpenInFlight = false
+
     if (this.failures >= this.config.failureThreshold) {
       this.state = 'open'
       console.log(
-        `[CircuitBreaker] 连续失败 ${this.failures} 次，熔断器断开，` +
-        `冷却 ${this.config.cooldownMs}ms`
+        `[CircuitBreaker] 连续失败 ${this.failures} 次，熔断器断开，冷却 ${this.config.cooldownMs}ms`,
       )
+      return
+    }
+
+    if (this.state === 'half-open') {
+      this.state = 'open'
+      console.log('[CircuitBreaker] 半开试探失败，重新断开')
     }
   }
 
@@ -281,27 +297,30 @@ class CircuitBreaker {
 // p23-production.ts（续）
 
 class ProductionAgent {
-  private client: OpenAI
-  private config: ProductionConfig
-  private rateLimiter: TokenBucketRateLimiter
-  private circuitBreakers: Map<string, CircuitBreaker> = new Map()
-  private startTime: number
+  private readonly client: OpenAI
+  private readonly config: ProductionConfig
+  private readonly rateLimiter: TokenBucketRateLimiter
+  private readonly circuitBreakers = new Map<string, CircuitBreaker>()
+  private readonly startTime: number
 
   constructor(config: ProductionConfig) {
-    this.client = new OpenAI()
+    this.client = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+      baseURL: process.env.OPENAI_BASE_URL,
+    })
     this.config = config
-    this.startTime = Date.now()
     this.rateLimiter = new TokenBucketRateLimiter(config.rateLimiter)
+    this.startTime = Date.now()
   }
 
   /** 获取或创建某个 Provider 的熔断器 */
   private getCircuitBreaker(model: string): CircuitBreaker {
-    let cb = this.circuitBreakers.get(model)
-    if (!cb) {
-      cb = new CircuitBreaker(this.config.circuitBreaker)
-      this.circuitBreakers.set(model, cb)
+    let breaker = this.circuitBreakers.get(model)
+    if (!breaker) {
+      breaker = new CircuitBreaker(this.config.circuitBreaker)
+      this.circuitBreakers.set(model, breaker)
     }
-    return cb
+    return breaker
   }
 
   /** 带超时的 API 调用 */
@@ -311,22 +330,17 @@ class ProductionAgent {
     system: string,
   ): Promise<OpenAI.ChatCompletion> {
     const controller = new AbortController()
-    const timer = setTimeout(
-      () => controller.abort(),
-      this.config.timeoutMs,
-    )
+    const timer = setTimeout(() => controller.abort(), this.config.timeoutMs)
 
     try {
-      const response = await this.client.chat.completions.create(
+      return await this.client.chat.completions.create(
         {
           model,
           max_tokens: 1024,
-          system,
-          messages,
+          messages: [{ role: 'system', content: system }, ...messages],
         },
         { signal: controller.signal },
       )
-      return response
     } finally {
       clearTimeout(timer)
     }
@@ -335,7 +349,7 @@ class ProductionAgent {
   /** 核心方法：带全部生产防护的消息发送 */
   async chat(
     messages: OpenAI.ChatCompletionMessageParam[],
-    system: string = 'You are a helpful assistant.',
+    system = 'You are a helpful assistant.',
   ): Promise<string> {
     const model = this.config.model
 
@@ -343,37 +357,27 @@ class ProductionAgent {
     await this.rateLimiter.waitForToken()
 
     // 第二层：熔断检查
-    const cb = this.getCircuitBreaker(model)
-    if (!cb.canPass()) {
-      console.log(`[Production] 熔断器已断开，返回降级响应`)
+    const breaker = this.getCircuitBreaker(model)
+    if (!breaker.canPass()) {
+      console.log('[Production] 熔断器已断开，返回降级响应')
       return this.config.fallbackMessage
     }
 
     // 第三层：带超时的调用
     try {
       const response = await this.callWithTimeout(model, messages, system)
+      breaker.recordSuccess()
 
-      // 成功：重置熔断器
-      cb.recordSuccess()
-
-      const text = response.content
-        .filter((b): b is OpenAI.ChatCompletionMessage => b.type === 'text')
-        .map(b => b.text)
-        .join('')
+      const text = response.choices[0]?.message.content?.trim() ?? ''
 
       console.log(
-        `[Production] 成功 | model=${model} ` +
-        `input=${response.usage.input_tokens} output=${response.usage.output_tokens}`
+        `[Production] 成功 | model=${model} input=${response.usage?.prompt_tokens ?? 0} output=${response.usage?.completion_tokens ?? 0}`,
       )
       return text
-    } catch (err) {
-      const error = err instanceof Error ? err : new Error(String(err))
-
-      // 第四层：记录失败，触发熔断
-      cb.recordFailure()
-      console.log(`[Production] 调用失败: ${error.message}`)
-
-      // 第五层：优雅降级
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error)
+      breaker.recordFailure()
+      console.log(`[Production] 调用失败: ${message}`)
       return this.config.fallbackMessage
     }
   }
@@ -381,11 +385,11 @@ class ProductionAgent {
   /** 健康检查 */
   healthCheck(): HealthStatus {
     const providers: HealthStatus['providers'] = {}
-    for (const [model, cb] of this.circuitBreakers.entries()) {
-      providers[model] = cb.getStatus()
+    for (const [model, breaker] of this.circuitBreakers.entries()) {
+      providers[model] = breaker.getStatus()
     }
 
-    const status: HealthStatus = {
+    return {
       healthy: this.isHealthy(),
       uptime: Date.now() - this.startTime,
       providers,
@@ -394,15 +398,13 @@ class ProductionAgent {
         maxTokens: this.config.rateLimiter.maxTokens,
       },
     }
-    return status
   }
 
   /** 判断整体是否健康：至少有一个 Provider 的熔断器没有断开 */
   private isHealthy(): boolean {
     if (this.circuitBreakers.size === 0) return true
-    for (const cb of this.circuitBreakers.values()) {
-      const status = cb.getStatus()
-      if (status.circuit !== 'open') return true
+    for (const breaker of this.circuitBreakers.values()) {
+      if (breaker.getStatus().circuit !== 'open') return true
     }
     return false
   }
@@ -415,26 +417,35 @@ class ProductionAgent {
 
 ```ts
 // p23-production.ts（续）
+import { createServer, type Server } from 'node:http'
+import type { AddressInfo } from 'node:net'
 
-function startHealthServer(agent: ProductionAgent, port: number): void {
-  const server = Bun.serve({
-    port,
-    fetch(req) {
-      const url = new URL(req.url)
+function startHealthServer(agent: ProductionAgent, port: number): Server {
+  const server = createServer((req, res) => {
+    if (!req.url) {
+      res.statusCode = 400
+      res.end('Bad Request')
+      return
+    }
 
-      if (url.pathname === '/health') {
-        const status = agent.healthCheck()
-        return new Response(JSON.stringify(status, null, 2), {
-          status: status.healthy ? 200 : 503,
-          headers: { 'Content-Type': 'application/json' },
-        })
-      }
+    const url = new URL(req.url, 'http://127.0.0.1')
+    if (url.pathname === '/health') {
+      const status = agent.healthCheck()
+      res.statusCode = status.healthy ? 200 : 503
+      res.setHeader('Content-Type', 'application/json; charset=utf-8')
+      res.end(JSON.stringify(status, null, 2))
+      return
+    }
 
-      return new Response('Not Found', { status: 404 })
-    },
+    res.statusCode = 404
+    res.end('Not Found')
   })
 
-  console.log(`[Health] 健康检查端点已启动: http://localhost:${server.port}/health`)
+  server.listen(port)
+  const address = server.address()
+  const actualPort = typeof address === 'object' && address ? (address as AddressInfo).port : port
+  console.log(`[Health] 健康检查端点已启动: http://localhost:${actualPort}/health`)
+  return server
 }
 ```
 
@@ -445,46 +456,57 @@ function startHealthServer(agent: ProductionAgent, port: number): void {
 ```ts
 // p23-production.ts（续）
 
+async function closeServer(server: Server): Promise<void> {
+  await new Promise<void>((resolve, reject) => {
+    server.close((error) => {
+      if (error) reject(error)
+      else resolve()
+    })
+  })
+}
+
 async function main(): Promise<void> {
   const agent = new ProductionAgent({
-    model: 'gpt-4o',
+    model: process.env.OPENAI_MODEL || 'gpt-4o',
     fallbackMessage: '抱歉，服务暂时不可用，请稍后再试。',
     timeoutMs: 30_000,
     rateLimiter: {
-      maxTokens: 5,       // 桶容量 5 个令牌
-      refillRate: 1,       // 每秒补充 1 个
+      maxTokens: 2,
+      refillRate: 1,
     },
     circuitBreaker: {
-      failureThreshold: 3, // 连续 3 次失败后熔断
-      cooldownMs: 10_000,  // 10 秒冷却期
+      failureThreshold: 3,
+      cooldownMs: 10_000,
     },
   })
 
-  // 启动健康检查端点
-  startHealthServer(agent, 3100)
+  const server = startHealthServer(agent, 3100)
 
-  // 模拟连续请求
-  const questions = [
-    '用一句话解释什么是 Circuit Breaker。',
-    'TypeScript 的 type 和 interface 有什么区别？',
-    '解释令牌桶算法的工作原理。',
-  ]
+  try {
+    const questions = [
+      '用一句话解释什么是 Circuit Breaker。',
+      'TypeScript 的 type 和 interface 有什么区别？',
+      '解释令牌桶算法的工作原理。',
+    ]
 
-  for (const q of questions) {
-    console.log(`\n${'─'.repeat(50)}`)
-    console.log(`用户: ${q}`)
-    const answer = await agent.chat(
-      [{ role: 'user', content: q }],
-    )
-    console.log(`助手: ${answer}`)
+    for (const question of questions) {
+      console.log(`\n${'─'.repeat(50)}`)
+      console.log(`用户: ${question}`)
+      const answer = await agent.chat([{ role: 'user', content: question }])
+      console.log(`助手: ${answer}`)
+    }
+
+    console.log('\n--- 健康检查 ---')
+    console.log(JSON.stringify(agent.healthCheck(), null, 2))
+  } finally {
+    await closeServer(server)
   }
-
-  // 打印健康状态
-  console.log('\n--- 健康检查 ---')
-  console.log(JSON.stringify(agent.healthCheck(), null, 2))
 }
 
-main().catch(console.error)
+main().catch((error) => {
+  console.error(error)
+  process.exitCode = 1
+})
 ```
 
 ### 运行结果

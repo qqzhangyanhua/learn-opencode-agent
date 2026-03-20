@@ -11,7 +11,7 @@ description: 让 Agent 生成初稿后用评审者角色评估质量，根据反
   :tags="['Reflection', 'Self-Evaluation', 'TypeScript', 'OpenAI SDK']"
 />
 
-> 开始前先看：[实践环境准备](/practice/setup)。本章对应示例文件已提供在仓库根目录，可直接按命令运行。
+> 开始前先看：[实践环境准备](/practice/setup)。本章对应示例文件位于 `practice/` 目录，可直接按命令运行。
 
 ## 前置准备
 
@@ -22,7 +22,7 @@ description: 让 Agent 生成初稿后用评审者角色评估质量，根据反
 - 环境变量已配置：`OPENAI_API_KEY`
 - 建议先完成前置章节：`P10`
 - 本章建议入口命令：`bun run p12-reflection.ts`
-- 示例文件位置：仓库根目录 `p12-reflection.ts`
+- 示例文件位置：`practice/p12-reflection.ts`
 
 ## 背景与目标
 
@@ -125,7 +125,10 @@ Reflection 模式有两种实现方式：
 // p12-reflection.ts
 import OpenAI from 'openai'
 
-const client = new OpenAI()
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  baseURL: process.env.OPENAI_BASE_URL,
+})
 
 // 评审结果结构
 interface ReflectionResult {
@@ -178,15 +181,13 @@ ${previousFeedback.suggestions.map((s, i) => `  ${i + 1}. ${s}`).join('\n')}
 
     const response = await client.chat.completions.create({
       model: this.model,
-      max_tokens: 1024,
-      system: systemPrompt,
-      messages: [{ role: 'user', content: userPrompt }],
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+      ],
     })
 
-    return response.content
-      .filter((b): b is OpenAI.ChatCompletionMessage => b.type === 'text')
-      .map(b => b.text)
-      .join('')
+    return response.choices[0].message.content ?? ''
   }
 }
 ```
@@ -235,16 +236,13 @@ ${output}
 
     const response = await client.chat.completions.create({
       model: this.model,
-      max_tokens: 512,
-      system: systemPrompt,
-      messages: [{ role: 'user', content: userPrompt }],
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt },
+      ],
     })
 
-    const responseText = response.content
-      .filter((b): b is OpenAI.ChatCompletionMessage => b.type === 'text')
-      .map(b => b.text)
-      .join('')
-      .trim()
+    const responseText = (response.choices[0].message.content ?? '').trim()
 
     // 提取 JSON（模型有时会在 JSON 前后加说明文字）
     const jsonMatch = responseText.match(/\{[\s\S]*\}/)

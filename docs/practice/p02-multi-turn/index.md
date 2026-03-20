@@ -11,7 +11,7 @@ description: 构建有记忆的对话助手，掌握 messages 历史管理与 To
   :tags="['OpenAI SDK', 'Context Management', 'TypeScript']"
 />
 
-> 开始前先看：[实践环境准备](/practice/setup)。本章对应示例文件已提供在仓库根目录，可直接按命令运行。
+> 开始前先看：[实践环境准备](/practice/setup)。本章对应示例文件位于 `practice/` 目录，可直接按命令运行。
 
 ## 前置准备
 
@@ -21,8 +21,8 @@ description: 构建有记忆的对话助手，掌握 messages 历史管理与 To
 - 基础依赖已就绪：`openai`
 - 环境变量已配置：`OPENAI_API_KEY`
 - 建议先完成前置章节：`P1`
-- 本章建议入口命令：`bun run p02-multi-turn.ts`
-- 示例文件位置：仓库根目录 `p02-multi-turn.ts`
+- 本章建议入口命令：`bun run practice/p02-multi-turn.ts`
+- 示例文件位置：`practice/p02-multi-turn.ts`
 
 ## 背景与目标
 
@@ -109,7 +109,7 @@ function estimateTokens(text: string): number {
 
 ## 动手实现
 
-<RunCommand command="bun run p02-multi-turn.ts" :verified="true" />
+<RunCommand command="bun run practice/p02-multi-turn.ts" :verified="true" />
 
 ### 运行与验证
 
@@ -195,16 +195,14 @@ class ChatSession {
 
     const response = await client.chat.completions.create({
       model: 'gpt-4o-mini',
-      max_tokens: 1024,
-      system: this.systemPrompt,
-      messages: this.messages,
+      messages: [
+        { role: 'system', content: this.systemPrompt },
+        ...this.messages,
+      ],
     })
 
     // 提取文本回复
-    const assistantText = response.content
-      .filter((block): block is OpenAI.ChatCompletionMessage => block.type === 'text')
-      .map(block => block.text)
-      .join('')
+    const assistantText = response.choices[0].message.content ?? ''
 
     // 把 assistant 回复追加到历史
     this.addMessage('assistant', assistantText)
@@ -298,11 +296,11 @@ test('average ignores undefined', () => {
 | 概念 | 说明 |
 |------|------|
 | `messages` 数组 | 每轮追加 `{role: 'user'}` 和 `{role: 'assistant'}` 两条记录 |
-| system prompt | 通过 `system` 字段独立传入，不占 `messages` 数组位置 |
+| system prompt | 作为 `{ role: 'system' }` 消息放在 `messages` 数组开头 |
 | Token 估算 | `字符数 / 4`，粗略但实用，避免调用额外 API |
 | 裁剪时机 | 发送请求前检查，超出预算则删除最旧的 user+assistant 对 |
 | 保留最后一轮 | `messages.length > 2` 作为裁剪终止条件，避免把刚追加的用户消息也删掉 |
-| `gpt-4o-mini` | 速度最快、成本最低的 Claude 模型，适合多轮对话场景 |
+| `gpt-4o-mini` | 速度快、成本低的模型，适合多轮对话场景 |
 
 ## 常见问题
 

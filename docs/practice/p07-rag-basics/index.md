@@ -11,7 +11,7 @@ description: 向量化、分块策略、语义检索，构建让 Agent 能读文
   :tags="['RAG', 'Vector Search', 'TypeScript', 'OpenAI SDK']"
 />
 
-> 开始前先看：[实践环境准备](/practice/setup)。本章对应示例文件已提供在仓库根目录，可直接按命令运行。
+> 开始前先看：[实践环境准备](/practice/setup)。本章对应示例文件位于 `practice/` 目录，可直接按命令运行。
 
 ## 前置准备
 
@@ -21,8 +21,8 @@ description: 向量化、分块策略、语义检索，构建让 Agent 能读文
 - 基础依赖已就绪：`openai`
 - 环境变量已配置：`OPENAI_API_KEY`
 - 建议先完成前置章节：`P1`、`P5`
-- 本章建议入口命令：`bun run p07-rag-basics.ts`
-- 示例文件位置：仓库根目录 `p07-rag-basics.ts`
+- 本章建议入口命令：`bun run practice/p07-rag-basics.ts`
+- 示例文件位置：`practice/p07-rag-basics.ts`
 
 ## 背景与目标
 
@@ -159,7 +159,7 @@ type 更灵活，支持联合类型、交叉类型和条件类型...
 
 ## 动手实现
 
-<RunCommand command="bun run p07-rag-basics.ts" :verified="true" />
+<RunCommand command="bun run practice/p07-rag-basics.ts" :verified="true" />
 
 ### 运行与验证
 
@@ -378,17 +378,20 @@ class RAGAgent {
       : this.baseSystem
 
     // 3. 调用模型
+    const messages: OpenAI.ChatCompletionMessageParam[] = [
+      { role: 'user', content: userMessage },
+    ]
+
+    if (systemPrompt) {
+      messages.unshift({ role: 'system', content: systemPrompt })
+    }
+
     const response = await this.client.chat.completions.create({
       model: 'gpt-4o',
-      max_tokens: 512,
-      system: systemPrompt || undefined,
-      messages: [{ role: 'user', content: userMessage }],
+      messages,
     })
 
-    return response.content
-      .filter((b): b is OpenAI.ChatCompletionMessage => b.type === 'text')
-      .map(b => b.text)
-      .join('')
+    return response.choices[0].message.content ?? ''
   }
 }
 ```

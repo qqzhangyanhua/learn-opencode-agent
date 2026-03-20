@@ -11,7 +11,7 @@ description: 构建系统化的 Agent 评估框架——测试用例设计、LLM
   :tags="['Evaluation', 'Benchmarking', 'LLM-as-Judge', 'TypeScript', 'OpenAI SDK']"
 />
 
-> 开始前先看：[实践环境准备](/practice/setup)。本章对应示例文件已提供在仓库根目录，可直接按命令运行。
+> 开始前先看：[实践环境准备](/practice/setup)。本章对应示例文件已提供在 `practice/` 目录，可直接按命令运行。
 
 ## 前置准备
 
@@ -22,7 +22,7 @@ description: 构建系统化的 Agent 评估框架——测试用例设计、LLM
 - 环境变量已配置：`OPENAI_API_KEY`
 - 建议先完成前置章节：`P1`、`P12`
 - 本章建议入口命令：`bun run p21-evaluation.ts`
-- 示例文件位置：仓库根目录 `p21-evaluation.ts`
+- 示例文件位置：`practice/p21-evaluation.ts`
 
 ## 背景与目标
 
@@ -188,23 +188,18 @@ async function runAgent(
 
   const response = await client.chat.completions.create({
     model: config.model,
-    max_tokens: 1024,
-    system: config.systemPrompt,
-    messages: [{ role: 'user', content: userInput }],
+    messages: [
+      { role: 'system', content: config.systemPrompt },
+      { role: 'user', content: userInput },
+    ],
   })
 
-  const latencyMs = Date.now() - start
-  const output = response.content
-    .filter((b): b is OpenAI.ChatCompletionMessage => b.type === 'text')
-    .map(b => b.text)
-    .join('')
-
   return {
-    output,
-    latencyMs,
+    output: (response.choices[0].message.content ?? '').trim(),
+    latencyMs: Date.now() - start,
     tokenUsage: {
-      input: response.usage.input_tokens,
-      output: response.usage.output_tokens,
+      input: response.usage?.prompt_tokens ?? 0,
+      output: response.usage?.completion_tokens ?? 0,
     },
   }
 }
@@ -303,38 +298,45 @@ ${agentOutput}
 请严格按 JSON 格式输出评审结果。`
 
   const response = await client.chat.completions.create({
-    model: 'gpt-4o',
-    max_tokens: 512,
-    system: systemPrompt,
-    messages: [{ role: 'user', content: userPrompt }],
+    model: process.env.OPENAI_MODEL || 'gpt-4o',
+    messages: [
+      { role: 'system', content: systemPrompt },
+      { role: 'user', content: userPrompt },
+    ],
   })
 
-  const responseText = response.content
-    .filter((b): b is OpenAI.ChatCompletionMessage => b.type === 'text')
-    .map(b => b.text)
-    .join('')
-    .trim()
+  const responseText = (response.choices[0].message.content ?? '').trim()
 
   const jsonMatch = responseText.match(/\{[\s\S]*\}/)
   if (!jsonMatch) {
-    console.warn(`[Judge] JSON 提取失败：${responseText.slice(0, 100)}`)
-    return { score: 0, passed: false, reasoning: 'Judge 输出格式错误', criteriaScores: {} }
+    return {
+      score: 0,
+      passed: false,
+      reasoning: 'Judge 输出格式错误，未提取到 JSON。',
+      criteriaScores: {},
+    }
   }
 
-  let parsed: unknown
   try {
-    parsed = JSON.parse(jsonMatch[0])
+    const parsed = JSON.parse(jsonMatch[0]) as unknown
+    if (isJudgeResult(parsed)) {
+      return parsed
+    }
   } catch {
-    console.warn(`[Judge] JSON 解析失败`)
-    return { score: 0, passed: false, reasoning: 'Judge 返回了无效 JSON', criteriaScores: {} }
+    return {
+      score: 0,
+      passed: false,
+      reasoning: 'Judge 返回了无效 JSON。',
+      criteriaScores: {},
+    }
   }
 
-  if (!isJudgeResult(parsed)) {
-    console.warn(`[Judge] 类型校验失败`)
-    return { score: 0, passed: false, reasoning: 'Judge JSON 字段不完整', criteriaScores: {} }
+  return {
+    score: 0,
+    passed: false,
+    reasoning: 'Judge JSON 字段不完整。',
+    criteriaScores: {},
   }
-
-  return parsed
 }
 ```
 
@@ -590,31 +592,36 @@ function compareReports(a: EvalReport, b: EvalReport): void {
 定义两套 Agent 配置——一套用简洁 prompt，一套用详细 prompt——然后用同一组测试用例分别评估，最后做 A/B 对比。
 
 ```ts
-const configA: AgentConfig = {
-  name: '简洁 Prompt',
-  model: 'gpt-4o',
-  systemPrompt: '你是一个技术助手。直接回答用户问题。',
+async function main(): Promise<void> {
+  const baselineConfig: AgentConfig = {
+    name: 'A-基线配置',
+    model: process.env.OPENAI_MODEL || 'gpt-4o',
+    systemPrompt: '你是一个通用 TypeScript 助手，请直接回答用户问题。',
+  }
+
+  const structuredConfig: AgentConfig = {
+    name: 'B-结构化配置',
+    model: process.env.OPENAI_MODEL || 'gpt-4o',
+    systemPrompt: [
+      '你是一个高质量 TypeScript 助手。',
+      '回答时优先保证技术准确性、结构清晰和格式遵循。',
+      '如果用户要求列表、JSON 或代码，请严格遵守输出格式。',
+    ].join('\n'),
+  }
+
+  const runner = new EvalRunner(testCases)
+  const reportA = await runner.run(baselineConfig)
+  const reportB = await runner.run(structuredConfig)
+
+  printReport(reportA)
+  printReport(reportB)
+  compareReports(reportA, reportB)
 }
 
-const configB: AgentConfig = {
-  name: '详细 Prompt',
-  model: 'gpt-4o',
-  systemPrompt: `你是一位资深的 TypeScript 技术专家。回答问题时请遵循以下原则：
-- 先给出核心要点，再展开解释
-- 代码示例要完整、可运行
-- 如果被要求用特定格式输出，严格遵守格式要求
-- 保持简洁，不要冗余`,
-}
-
-const runner = new EvalRunner(testCases)
-
-const reportA = await runner.run(configA)
-printReport(reportA)
-
-const reportB = await runner.run(configB)
-printReport(reportB)
-
-compareReports(reportA, reportB)
+main().catch((error) => {
+  console.error(error)
+  process.exitCode = 1
+})
 ```
 
 ### 运行结果

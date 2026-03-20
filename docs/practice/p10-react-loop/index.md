@@ -11,7 +11,7 @@ description: 实现 Reason-Act 循环，让 Agent 在每次行动前显式输出
   :tags="['ReAct', 'Reasoning', 'Agent Loop', 'TypeScript', 'OpenAI SDK']"
 />
 
-> 开始前先看：[实践环境准备](/practice/setup)。本章对应示例文件已提供在仓库根目录，可直接按命令运行。
+> 开始前先看：[实践环境准备](/practice/setup)。本章对应示例文件位于 `practice/` 目录，可直接按命令运行。
 
 ## 前置准备
 
@@ -22,13 +22,13 @@ description: 实现 Reason-Act 循环，让 Agent 在每次行动前显式输出
 - 环境变量已配置：`OPENAI_API_KEY`
 - 建议先完成前置章节：`P1`、`P4`
 - 本章建议入口命令：`bun run p10-react-loop.ts`
-- 示例文件位置：仓库根目录 `p10-react-loop.ts`
+- 示例文件位置：`practice/p10-react-loop.ts`
 
 ## 背景与目标
 
 P1 实现的最小 Agent 循环能用，但有一个调试噩梦：**你不知道模型为什么调用某个工具**。
 
-模型直接跳到 `tool_use`，没有中间过程。出问题时只能盲猜：是 prompt 不清楚？工具选错了？参数理解有偏差？
+模型直接跳到 `tool_calls`，没有中间过程。出问题时只能盲猜：是 prompt 不清楚？工具选错了？参数理解有偏差？
 
 2022 年，Google 发表了 ReAct 论文（*ReAct: Synergizing Reasoning and Acting in Language Models*），提出了一个简洁的解法：**在每次行动前，强制模型先写出推理过程**。
 
@@ -298,11 +298,7 @@ function parseReActOutput(text: string): ReActOutput {
 
 ```ts
 class ReActAgent {
-  private maxSteps: number
-
-  constructor(maxSteps = 10) {
-    this.maxSteps = maxSteps
-  }
+  constructor(private readonly maxSteps = 10) {}
 
   async run(userInput: string): Promise<void> {
     console.log(`用户: ${userInput}\n`)
@@ -313,21 +309,17 @@ class ReActAgent {
     // ReAct 使用纯文本对话，不使用 tools 参数
     // 工具调用通过文本格式约定，手动解析执行
     const messages: OpenAI.ChatCompletionMessageParam[] = [
+      { role: 'system', content: systemPrompt },
       { role: 'user', content: userInput },
     ]
 
     for (let step = 0; step < this.maxSteps; step++) {
       const response = await client.chat.completions.create({
-        model: 'gpt-4o',
-        max_tokens: 1024,
-        system: systemPrompt,
+        model: process.env.OPENAI_MODEL || 'gpt-4o',
         messages,
       })
 
-      const responseText = response.content
-        .filter((b): b is OpenAI.ChatCompletionMessage => b.type === 'text')
-        .map(b => b.text)
-        .join('')
+      const responseText = response.choices[0].message.content ?? ''
 
       const parsed = parseReActOutput(responseText)
 
@@ -348,13 +340,9 @@ class ReActAgent {
 
         // 执行工具
         const toolFn = toolRegistry[parsed.action]
-        let observation: string
-
-        if (toolFn) {
-          observation = toolFn(parsed.actionInput)
-        } else {
-          observation = `错误：未知工具 "${parsed.action}"，可用工具：${Object.keys(toolRegistry).join(', ')}`
-        }
+        const observation = toolFn
+          ? toolFn(parsed.actionInput)
+          : `错误：未知工具 "${parsed.action}"，可用工具：${Object.keys(toolRegistry).join(', ')}`
 
         console.log(`Observation: ${observation}\n`)
 
@@ -379,8 +367,15 @@ class ReActAgent {
 }
 
 // 运行示例
-const agent = new ReActAgent()
-await agent.run('北京和上海哪个城市今天更适合户外跑步？')
+async function main(): Promise<void> {
+  const agent = new ReActAgent()
+  await agent.run('北京和上海哪个城市今天更适合户外跑步？')
+}
+
+main().catch((error) => {
+  console.error(error)
+  process.exitCode = 1
+})
 ```
 
 ### 运行结果
@@ -422,7 +417,7 @@ Final Answer: 今天北京更适合户外跑步。
 | `parseReActOutput` | 用正则提取标签内容，需要处理 JSON 解析失败等边界情况 |
 | 对话历史扩展 | 每步把模型输出和 `Observation` 追加到 `messages`，形成推理链上下文 |
 | `maxSteps` 保护 | 防止死循环，生产环境必须设置 |
-| `Final Answer` 信号 | 模型写出 `Final Answer:` 时结束循环，类似 P1 中的 `end_turn` |
+| `Final Answer` 信号 | 模型写出 `Final Answer:` 时结束循环，类似 P1 中的 `finish_reason: 'stop'` |
 | 工具未知处理 | 工具名解析失败时返回错误信息作为 Observation，让模型自行纠错 |
 
 ## 常见问题
@@ -431,7 +426,7 @@ Final Answer: 今天北京更适合户外跑步。
 
 P1 的工具调用通过 API 的 `tools` 参数实现，由 SDK 负责解析工具调用请求，更可靠。ReAct 策略 A 把工具调用"藏"在文本格式里，要自己解析。
 
-核心差异在于**推理可见性**：P1 中模型的决策是黑盒（直接跳到 `tool_use`），ReAct 中 `Thought:` 把决策过程暴露出来。两者不互斥，实际项目里可以结合——用原生工具调用保证可靠性，同时要求模型在工具调用前输出 reasoning 文本。
+核心差异在于**推理可见性**：P1 中模型的决策是黑盒（直接跳到 `tool_calls`），ReAct 中 `Thought:` 把决策过程暴露出来。两者不互斥，实际项目里可以结合——用原生工具调用保证可靠性，同时要求模型在工具调用前输出 reasoning 文本。
 
 **Q: 模型不按格式输出怎么办？**
 

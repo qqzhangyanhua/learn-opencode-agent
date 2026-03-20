@@ -11,7 +11,7 @@ description: 指数退避、工具调用失败降级、让 Agent 在不稳定环
   :tags="['Error Handling', 'Retry', 'OpenAI SDK', 'TypeScript']"
 />
 
-> 开始前先看：[实践环境准备](/practice/setup)。本章对应示例文件已提供在仓库根目录，可直接按命令运行。
+> 开始前先看：[实践环境准备](/practice/setup)。本章对应示例文件位于 `practice/` 目录，可直接按命令运行。
 
 ## 前置准备
 
@@ -22,7 +22,7 @@ description: 指数退避、工具调用失败降级、让 Agent 在不稳定环
 - 环境变量已配置：`OPENAI_API_KEY`
 - 建议先完成前置章节：`P1`、`P2`
 - 本章建议入口命令：`bun run p04-error-handling.ts`
-- 示例文件位置：仓库根目录 `p04-error-handling.ts`
+- 示例文件位置：`practice/p04-error-handling.ts`
 
 ## 背景与目标
 
@@ -30,7 +30,7 @@ description: 指数退避、工具调用失败降级、让 Agent 在不稳定环
 
 ```
 OpenAI.APIError: 429 rate_limit_error - Too many requests
-OpenAI.APIError: 529 overloaded_error - Service temporarily overloaded
+OpenAI.APIError: 503 service_unavailable - Service temporarily overloaded
 Error: Tool execution failed: Network timeout after 30s
 Agent ran 47 iterations and never stopped
 ```
@@ -41,7 +41,7 @@ Agent ran 47 iterations and never stopped
 
 ```
 API 错误  →  指数退避重试，区分可重试与不可重试错误
-工具失败  →  捕获异常，把错误信息作为 tool_result 返回给模型
+工具失败  →  捕获异常，把错误信息作为 tool 消息返回给模型
 无限循环  →  maxIterations 保护，超限时主动终止
 ```
 
@@ -58,8 +58,8 @@ OpenAI SDK 抛出 `APIError`，通过 `status` 字段区分：
 | 状态码 | 错误类型 | 是否可重试 | 处理方式 |
 |--------|----------|------------|----------|
 | 429 | `rate_limit_error` | 是 | 退避后重试 |
-| 529 | `overloaded_error` | 是 | 退避后重试 |
-| 500 | `api_error` | 有时是 | 退避后重试（有限次） |
+| 500 | `server_error` | 有时是 | 退避后重试（有限次） |
+| 503 | `service_unavailable` | 是 | 退避后重试 |
 | 400 | `invalid_request_error` | 否 | 立即抛出，参数有误 |
 | 401 | `authentication_error` | 否 | 立即抛出，密钥无效 |
 
@@ -67,11 +67,11 @@ OpenAI SDK 抛出 `APIError`，通过 `status` 字段区分：
 
 工具函数本身抛出异常——网络超时、文件不存在、权限拒绝。
 
-错误的处理方式：**不要让异常向上冒泡**。把错误信息包装成 `tool_result` 返回给模型，让模型决定下一步。模型可能会重试、换个参数、或者告知用户。
+错误的处理方式：**不要让异常向上冒泡**。把错误信息包装成 `role: 'tool'` 消息返回给模型，让模型决定下一步。模型可能会重试、换个参数、或者告知用户。
 
 **第三类：模型行为错误**
 
-模型陷入循环——重复调用同一工具、生成无意义内容、始终不返回 `end_turn`。
+模型陷入循环——重复调用同一工具、生成无意义内容、始终不返回 `finish_reason: 'stop'`。
 
 处理方式：加 `maxIterations` 计数器，超过阈值强制终止。
 
@@ -125,7 +125,7 @@ const RETRY_CONFIG = {
 const MAX_ITERATIONS = 10
 
 // 可重试的 HTTP 状态码
-const RETRYABLE_STATUS = new Set([429, 529, 500])
+const RETRYABLE_STATUS = new Set([429, 500, 503])
 ```
 
 ### 第二步：实现 `withRetry`
@@ -153,7 +153,7 @@ async function withRetry<T>(
       }
 
       // 不可重试的错误立即抛出
-      if (!RETRYABLE_STATUS.has(err.status)) {
+      if (!RETRYABLE_STATUS.has(err.status ?? 0)) {
         throw err
       }
 
@@ -169,7 +169,7 @@ async function withRetry<T>(
 
       console.log(
         `[retry] attempt ${attempt + 1}/${maxAttempts} failed` +
-        ` (${err.status} ${err.error?.type ?? 'unknown'}).` +
+        ` (${err.status} ${err.type ?? 'unknown'}).` +
         ` Waiting ${Math.round(delay)}ms...`
       )
 
@@ -211,21 +211,24 @@ function query_database(table: string, id: number): string {
 // 工具声明
 const tools: OpenAI.ChatCompletionTool[] = [
   {
-    name: 'query_database',
-    description: '查询数据库中的记录。table 支持 users 和 orders，id 为记录编号',
-    input_schema: {
-      type: 'object' as const,
-      properties: {
-        table: {
-          type: 'string',
-          description: '表名：users 或 orders',
+    type: 'function',
+    function: {
+      name: 'query_database',
+      description: '查询数据库中的记录。table 支持 users 和 orders，id 为记录编号',
+      parameters: {
+        type: 'object',
+        properties: {
+          table: {
+            type: 'string',
+            description: '表名：users 或 orders',
+          },
+          id: {
+            type: 'number',
+            description: '记录 ID',
+          },
         },
-        id: {
-          type: 'number',
-          description: '记录 ID',
-        },
+        required: ['table', 'id'],
       },
-      required: ['table', 'id'],
     },
   },
 ]
@@ -250,57 +253,52 @@ async function runAgent(userMessage: string): Promise<void> {
     // 调用 API，带重试保护
     const response = await withRetry(() =>
       client.chat.completions.create({
-        model: 'gpt-4o',
-        max_tokens: 1024,
+        model: process.env.OPENAI_MODEL || 'gpt-4o',
         tools,
         messages,
       })
     )
 
-    messages.push({ role: 'assistant', content: response.content })
+    const message = response.choices[0].message
+    messages.push(message)
 
-    if (response.stop_reason === 'end_turn') {
-      const text = response.content
-        .filter((b): b is OpenAI.ChatCompletionMessage => b.type === 'text')
-        .map(b => b.text)
-        .join('')
-      console.log('\nAgent:', text)
+    if (message.content) {
+      console.log(`\nAgent: ${message.content}`)
+    }
+
+    if (response.choices[0].finish_reason === 'stop') {
       return
     }
 
-    if (response.stop_reason !== 'tool_use') {
-      console.log(`[warn] unexpected stop_reason: ${response.stop_reason}`)
-      break
+    if (response.choices[0].finish_reason !== 'tool_calls' || !message.tool_calls) {
+      console.log(`[warn] unexpected finish_reason: ${response.choices[0].finish_reason}`)
+      return
     }
 
     // 执行工具，捕获所有错误
-    const toolResults: OpenAI.ChatCompletionToolResultBlockParam[] = []
+    for (const toolCall of message.tool_calls) {
+      if (toolCall.type !== 'function') continue
 
-    for (const block of response.content) {
-      if (block.type !== 'tool_use') continue
-
-      const input = block.input as ToolInput
-      console.log(`[tool] ${block.name}(table="${input.table}", id=${input.id})`)
+      const input = JSON.parse(toolCall.function.arguments) as ToolInput
+      console.log(`[tool] ${toolCall.function.name}(table="${input.table}", id=${input.id})`)
 
       let content: string
       try {
         content = query_database(input.table, input.id)
         console.log(`[tool] success: ${content}`)
       } catch (err) {
-        // 工具失败：把错误信息作为 tool_result 返回，不抛异常
+        // 工具失败：把错误信息作为 tool 消息返回，不抛异常
         const message = err instanceof Error ? err.message : String(err)
         content = `Error: ${message}`
         console.log(`[tool] failed: ${message}`)
       }
 
-      toolResults.push({
-        type: 'tool_result',
-        tool_use_id: block.id,
+      messages.push({
+        role: 'tool',
+        tool_call_id: toolCall.id,
         content,
       })
     }
-
-    messages.push({ role: 'user', content: toolResults })
   }
 
   // 超出最大循环次数
@@ -308,7 +306,10 @@ async function runAgent(userMessage: string): Promise<void> {
 }
 
 // 运行示例
-await runAgent('帮我查一下用户 ID 为 1 的信息，以及订单 101 的详情')
+runAgent('帮我查一下用户 ID 为 1 的信息，以及订单 101 的详情').catch((error) => {
+  console.error(error)
+  process.exitCode = 1
+})
 ```
 
 ### 运行结果
@@ -355,10 +356,10 @@ Agent: 用户 ID 1 的信息：Alice（alice@example.com）。
 
 | 概念 | 说明 |
 |------|------|
-| `instanceof OpenAI.APIError` | SDK 统一的错误基类，通过 `status` 和 `error.type` 区分错误种类 |
-| 可重试状态码 | 429 (rate_limit)、529 (overloaded)、500 (server error)；400/401 立即抛出 |
+| `instanceof OpenAI.APIError` | SDK 统一的错误基类，通过 `status` 和 `type` 区分错误种类 |
+| 可重试状态码 | 429 (rate_limit)、500 (server error)、503 (service unavailable)；400/401 立即抛出 |
 | 指数退避 | `baseDelay * 2^attempt + jitter`，防止集中重试打垮服务器 |
-| 工具错误降级 | `try/catch` 包裹工具调用，catch 时构造 `tool_result` 而非抛出异常 |
+| 工具错误降级 | `try/catch` 包裹工具调用，catch 时构造 `role: 'tool'` 消息而非抛出异常 |
 | `maxIterations` | Agent 循环的硬性上限，防止模型行为异常导致无限运行 |
 | 模型自主重试 | 收到工具错误信息后，模型可能自行决定重试——这是 Agent 智能的体现 |
 
@@ -366,11 +367,11 @@ Agent: 用户 ID 1 的信息：Alice（alice@example.com）。
 
 **Q: 重试多少次合适？**
 
-取决于错误类型和业务容忍度。对于 429 限流，Anthropic 官方建议等待 `Retry-After` 响应头指定的时间（如果有）。没有的话，4 次重试、最长等待 30 秒，基本覆盖大多数瞬时过载场景。超过这个阈值说明问题不是瞬时的，继续重试只会浪费时间。
+取决于错误类型和业务容忍度。对于 429 限流，建议检查 `Retry-After` 响应头指定的等待时间（如果有）。没有的话，4 次重试、最长等待 30 秒，基本覆盖大多数瞬时过载场景。超过这个阈值说明问题不是瞬时的，继续重试只会浪费时间。
 
 **Q: 工具失败应该告诉用户吗？**
 
-应该，但由模型来决定怎么说。把错误信息放入 `tool_result`，模型会根据错误严重程度和任务上下文，自行决定是向用户报告、重试，还是用其他方式完成任务。不要在代码层面硬编码"失败就停止"——这剥夺了模型的自主判断空间。
+应该，但由模型来决定怎么说。把错误信息放入 `role: 'tool'` 消息的 `content`，模型会根据错误严重程度和任务上下文，自行决定是向用户报告、重试，还是用其他方式完成任务。不要在代码层面硬编码"失败就停止"——这剥夺了模型的自主判断空间。
 
 **Q: 如何区分"模型在思考"和"Agent 卡死了"？**
 

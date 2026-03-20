@@ -11,7 +11,7 @@ description: Orchestrator-Worker 架构设计 — 一个编排器拆解任务，
   :tags="['Multi-Agent', 'Orchestrator', 'Parallel', 'TypeScript', 'OpenAI SDK']"
 />
 
-> 开始前先看：[实践环境准备](/practice/setup)。本章对应示例文件已提供在仓库根目录，可直接按命令运行。
+> 开始前先看：[实践环境准备](/practice/setup)。本章对应示例文件位于 `practice/` 目录，可直接按命令运行。
 
 ## 前置准备
 
@@ -22,7 +22,7 @@ description: Orchestrator-Worker 架构设计 — 一个编排器拆解任务，
 - 环境变量已配置：`OPENAI_API_KEY`
 - 建议先完成前置章节：`P1`、`P11`
 - 本章建议入口命令：`bun run p15-multi-agent.ts`
-- 示例文件位置：仓库根目录 `p15-multi-agent.ts`
+- 示例文件位置：`practice/p15-multi-agent.ts`
 
 ## 背景与目标
 
@@ -123,7 +123,10 @@ interface DispatchInput {
 // p15-multi-agent.ts
 import OpenAI from 'openai'
 
-const anthropic = new OpenAI()
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  baseURL: process.env.OPENAI_BASE_URL,
+})
 
 // 子任务描述（Orchestrator 输出）
 interface SubTask {
@@ -152,22 +155,21 @@ async function runWorker(task: SubTask): Promise<WorkerResult> {
   console.log(`[Worker:${task.id}] 开始执行: ${task.title}`)
 
   const response = await client.chat.completions.create({
-    model: 'gpt-4o', // 示例型号，实际项目请替换为当前可用模型 ID
-    max_tokens: 2048,
-    system: [
-      `你是一位专注于「${task.expertise}」的专家。`,
-      '请严格围绕分配给你的任务进行分析，不要涉及其他维度。',
-      '输出格式：先给出核心结论（1-2句），再列出具体发现（要点列表）。',
-    ].join('\n'),
+    model: process.env.OPENAI_MODEL || 'gpt-4o',
     messages: [
+      {
+        role: 'system',
+        content: [
+          `你是一位专注于「${task.expertise}」的专家。`,
+          '请严格围绕分配给你的任务进行分析，不要涉及其他维度。',
+          '输出格式：先给出核心结论（1-2句），再列出具体发现（要点列表）。',
+        ].join('\n'),
+      },
       { role: 'user', content: task.description },
     ],
   })
 
-  const output = response.content
-    .filter((b): b is OpenAI.ChatCompletionMessage => b.type === 'text')
-    .map(b => b.text)
-    .join('')
+  const output = response.choices[0].message.content ?? ''
 
   console.log(`[Worker:${task.id}] 完成 (${output.length} chars)\n`)
 
@@ -188,41 +190,45 @@ async function runWorker(task: SubTask): Promise<WorkerResult> {
 ```ts
 // p15-multi-agent.ts（续）
 
-// dispatch_workers 工具的 input schema
+// dispatch_workers 工具的 schema（OpenAI ChatCompletionTool 格式）
 const dispatchToolSchema: OpenAI.ChatCompletionTool = {
-  name: 'dispatch_workers',
-  description: '将任务分派给多个专家 Worker 并行执行。每个 Worker 独立工作，互不可见。执行完成后返回所有 Worker 的结果。',
-  input_schema: {
-    type: 'object',
-    properties: {
-      tasks: {
-        type: 'array',
-        items: {
-          type: 'object',
-          properties: {
-            id: {
-              type: 'string',
-              description: '子任务唯一标识，如 "security"、"performance"',
+  type: 'function',
+  function: {
+    name: 'dispatch_workers',
+    description:
+      '将任务分派给多个专家 Worker 并行执行。每个 Worker 独立工作，互不可见。执行完成后返回所有 Worker 的结果。',
+    parameters: {
+      type: 'object',
+      properties: {
+        tasks: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              id: {
+                type: 'string',
+                description: '子任务唯一标识，如 "security"、"performance"',
+              },
+              title: {
+                type: 'string',
+                description: '子任务名称',
+              },
+              description: {
+                type: 'string',
+                description: '给 Worker 的详细执行指令，要包含足够的上下文',
+              },
+              expertise: {
+                type: 'string',
+                description: 'Worker 的专业领域，如 "安全审计"、"性能优化"',
+              },
             },
-            title: {
-              type: 'string',
-              description: '子任务名称',
-            },
-            description: {
-              type: 'string',
-              description: '给 Worker 的详细执行指令，要包含足够的上下文',
-            },
-            expertise: {
-              type: 'string',
-              description: 'Worker 的专业领域，如 "安全审计"、"性能优化"',
-            },
+            required: ['id', 'title', 'description', 'expertise'],
           },
-          required: ['id', 'title', 'description', 'expertise'],
+          description: '要分派的子任务列表',
         },
-        description: '要分派的子任务列表',
       },
+      required: ['tasks'],
     },
-    required: ['tasks'],
   },
 }
 
@@ -234,15 +240,9 @@ async function executeDispatch(tasks: SubTask[]): Promise<string> {
   const results = await Promise.all(tasks.map(runWorker))
 
   // 将结果格式化为文本，供 Orchestrator 聚合
-  const formatted = results
-    .map(r => [
-      `### ${r.title} (${r.taskId})`,
-      '',
-      r.output,
-    ].join('\n'))
+  return results
+    .map((result) => [`### ${result.title} (${result.taskId})`, '', result.output].join('\n'))
     .join('\n\n---\n\n')
-
-  return formatted
 }
 ```
 
@@ -255,73 +255,79 @@ Orchestrator 本身也是一个 Agent 循环：发送用户请求，模型决定
 ```ts
 // p15-multi-agent.ts（续）
 
+// 类型守卫：验证子任务结构
+function isSubTask(value: unknown): value is SubTask {
+  if (typeof value !== 'object' || value === null) return false
+  const obj = value as Record<string, unknown>
+  return (
+    typeof obj['id'] === 'string' &&
+    typeof obj['title'] === 'string' &&
+    typeof obj['description'] === 'string' &&
+    typeof obj['expertise'] === 'string'
+  )
+}
+
 async function orchestrate(userMessage: string): Promise<string> {
   console.log(`用户: ${userMessage}\n`)
 
   const messages: OpenAI.ChatCompletionMessageParam[] = [
+    {
+      role: 'system',
+      content: [
+        '你是一个任务编排器（Orchestrator）。你的职责是：',
+        '1. 分析用户的请求，将其拆解为多个独立的子任务',
+        '2. 使用 dispatch_workers 工具将子任务分派给专家 Worker',
+        '3. 收到 Worker 的结果后，综合整理为一份完整、连贯的最终回答',
+        '',
+        '拆解原则：',
+        '- 每个子任务应该是独立的，Worker 之间互不可见',
+        '- 子任务的 description 要包含足够的上下文，Worker 只能看到自己的任务描述',
+        '- 为每个子任务指定准确的 expertise，确保 Worker 聚焦于自己的专业领域',
+        '- 如果任务不需要拆解（太简单），直接回答即可，不必强行分派',
+        '',
+        '聚合原则：',
+        '- 不要简单拼接 Worker 的输出，要提炼和整合',
+        '- 如果多个 Worker 的发现有冲突，指出分歧并给出你的判断',
+        '- 最终回答应该是一份结构清晰的综合报告',
+      ].join('\n'),
+    },
     { role: 'user', content: userMessage },
   ]
-
-  const systemPrompt = [
-    '你是一个任务编排器（Orchestrator）。你的职责是：',
-    '1. 分析用户的请求，将其拆解为多个独立的子任务',
-    '2. 使用 dispatch_workers 工具将子任务分派给专家 Worker',
-    '3. 收到 Worker 的结果后，综合整理为一份完整、连贯的最终回答',
-    '',
-    '拆解原则：',
-    '- 每个子任务应该是独立的，Worker 之间互不可见',
-    '- 子任务的 description 要包含足够的上下文，Worker 只能看到自己的任务描述',
-    '- 为每个子任务指定准确的 expertise，确保 Worker 聚焦于自己的专业领域',
-    '- 如果任务不需要拆解（太简单），直接回答即可，不必强行分派',
-    '',
-    '聚合原则：',
-    '- 不要简单拼接 Worker 的输出，要提炼和整合',
-    '- 如果多个 Worker 的发现有冲突，指出分歧并给出你的判断',
-    '- 最终回答应该是一份结构清晰的综合报告',
-  ].join('\n')
 
   // Orchestrator 的 Agent 循环
   while (true) {
     const response = await client.chat.completions.create({
-      model: 'gpt-4o',
-      max_tokens: 4096,
-      system: systemPrompt,
+      model: process.env.OPENAI_MODEL || 'gpt-4o',
       tools: [dispatchToolSchema],
       messages,
     })
 
-    // 检查是否有工具调用
-    const toolUseBlocks = response.content.filter(
-      (b): b is OpenAI.ChatCompletionToolUseBlock => b.type === 'tool_use'
-    )
+    const message = response.choices[0].message
+    const toolCalls = message.tool_calls ?? []
 
-    if (response.stop_reason === 'end_turn' || toolUseBlocks.length === 0) {
+    if (response.choices[0].finish_reason === 'stop' || toolCalls.length === 0) {
       // 模型完成了聚合，返回最终文本
-      const finalText = response.content
-        .filter((b): b is OpenAI.ChatCompletionMessage => b.type === 'text')
-        .map(b => b.text)
-        .join('')
-      return finalText
+      return message.content ?? ''
     }
 
     // 将 assistant 消息加入历史
-    messages.push({ role: 'assistant', content: response.content })
+    messages.push(message)
 
     // 处理 dispatch_workers 工具调用
-    const toolResults: OpenAI.ChatCompletionToolResultBlockParam[] = []
-    for (const toolUse of toolUseBlocks) {
-      if (toolUse.name === 'dispatch_workers') {
-        const input = toolUse.input as { tasks: SubTask[] }
-        const result = await executeDispatch(input.tasks)
-        toolResults.push({
-          type: 'tool_result',
-          tool_use_id: toolUse.id,
-          content: result,
-        })
-      }
-    }
+    for (const toolCall of toolCalls) {
+      if (toolCall.type !== 'function' || toolCall.function.name !== 'dispatch_workers') continue
 
-    messages.push({ role: 'user', content: toolResults })
+      const input = JSON.parse(toolCall.function.arguments) as Record<string, unknown>
+      const tasksRaw = input['tasks']
+      const tasks = Array.isArray(tasksRaw) ? tasksRaw.filter((item) => isSubTask(item)) : []
+      const result = await executeDispatch(tasks)
+
+      messages.push({
+        role: 'tool',
+        tool_call_id: toolCall.id,
+        content: result,
+      })
+    }
   }
 }
 ```
@@ -358,7 +364,10 @@ function processUserData(data: any) {
   console.log(answer)
 }
 
-main().catch(console.error)
+main().catch((error) => {
+  console.error(error)
+  process.exitCode = 1
+})
 ```
 
 ### 运行结果
@@ -433,8 +442,8 @@ main().catch(console.error)
 async function runWorker(task: SubTask): Promise<WorkerResult> {
   // 根据任务类型选择模型
   const model = task.expertise.includes('代码')
-    ? 'gpt-4o'   // 代码任务示例：用 Sonnet
-    : 'gpt-4o-mini'  // 简单分析示例：用 Haiku
+    ? 'gpt-4o'       // 代码任务：用更强的模型
+    : 'gpt-4o-mini'  // 简单分析：用性价比模型
 
   const response = await client.chat.completions.create({
     model,
