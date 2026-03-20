@@ -1,7 +1,7 @@
 <template>
   <AnimationContainer title="多轮对话" @restart="handleRestart">
     <template #default="{ isVisible }">
-      <div class="multi-turn-dialog" :class="{ active: isVisible }">
+      <div :key="key" class="multi-turn-dialog" :class="{ active: isVisible && !isRestarting }">
         <!-- 第 1 轮对话 -->
         <div class="turn turn-1">
           <div class="message user">
@@ -47,9 +47,14 @@ import { ref } from 'vue'
 import AnimationContainer from '../core/AnimationContainer.vue'
 
 const key = ref(0)
+const isRestarting = ref(false)
 
 function handleRestart() {
+  isRestarting.value = true
   key.value++
+  setTimeout(() => {
+    isRestarting.value = false
+  }, 50)
 }
 </script>
 

@@ -1,0 +1,95 @@
+<h2>混合方案 — 动画技术分配</h2>
+<p class="subtitle">你选择了混合方案。现在需要决定：哪些动画用 CSS，哪些用 Lottie？</p>
+
+<div class="section">
+  <h3>分配原则</h3>
+  <ul style="list-style: none; padding: 0;">
+    <li style="padding: 8px; background: rgba(13, 148, 136, 0.05); border-left: 3px solid #0d9488; margin-bottom: 8px;">
+      <strong>CSS 适合：</strong>状态切换、流程演示、简单过渡、需要与数据绑定
+    </li>
+    <li style="padding: 8px; background: rgba(234, 88, 12, 0.05); border-left: 3px solid #ea580c;">
+      <strong>Lottie 适合：</strong>复杂路径、精细动效、视觉冲击力、独立播放
+    </li>
+  </ul>
+</div>
+
+<div class="section" style="margin-top: 32px;">
+  <h3>5 个动画的复杂度分析</h3>
+</div>
+
+<div class="cards">
+  <div class="card" data-choice="what-is-agent-css" onclick="toggleSelect(this)">
+    <div class="card-body">
+      <h3>1. 什么是 Agent</h3>
+      <p><strong>内容：</strong>LLM → Agent 的演进（单次调用 → 循环执行）</p>
+      <p><strong>复杂度：</strong>⭐⭐⭐ 中等</p>
+      <p><strong>建议：</strong><span style="background: #0d9488; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px;">CSS</span></p>
+      <p style="font-size: 12px; color: #666; margin-top: 8px;">理由：主要是状态切换和流程演示，CSS 足够</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="function-calling-lottie" onclick="toggleSelect(this)">
+    <div class="card-body">
+      <h3>2. 工具调用</h3>
+      <p><strong>内容：</strong>Function Calling 完整流程（注册 → 解析 → 执行 → 返回）</p>
+      <p><strong>复杂度：</strong>⭐⭐⭐⭐ 较高</p>
+      <p><strong>建议：</strong><span style="background: #ea580c; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px;">Lottie</span></p>
+      <p style="font-size: 12px; color: #666; margin-top: 8px;">理由：涉及数据流动、参数解析等复杂路径，Lottie 更直观</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="multi-turn-css" onclick="toggleSelect(this)">
+    <div class="card-body">
+      <h3>3. 多轮对话</h3>
+      <p><strong>内容：</strong>上下文在多轮对话中的传递和累积</p>
+      <p><strong>复杂度：</strong>⭐⭐ 简单</p>
+      <p><strong>建议：</strong><span style="background: #0d9488; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px;">CSS</span></p>
+      <p style="font-size: 12px; color: #666; margin-top: 8px;">理由：消息累积动画，类似 MessageAccumulator，CSS 即可</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="multi-agent-lottie" onclick="toggleSelect(this)">
+    <div class="card-body">
+      <h3>4. 多 Agent 协作</h3>
+      <p><strong>内容：</strong>Agent 间消息传递、任务分配、结果聚合</p>
+      <p><strong>复杂度：</strong>⭐⭐⭐⭐⭐ 最高</p>
+      <p><strong>建议：</strong><span style="background: #ea580c; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px;">Lottie</span></p>
+      <p style="font-size: 12px; color: #666; margin-top: 8px;">理由：多个 Agent 并行、消息路由、状态同步，视觉复杂度高</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="memory-system-lottie" onclick="toggleSelect(this)">
+    <div class="card-body">
+      <h3>5. 记忆系统</h3>
+      <p><strong>内容：</strong>短期记忆 → 长期记忆转换，向量检索</p>
+      <p><strong>复杂度：</strong>⭐⭐⭐⭐ 较高</p>
+      <p><strong>建议：</strong><span style="background: #ea580c; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px;">Lottie</span></p>
+      <p style="font-size: 12px; color: #666; margin-top: 8px;">理由：涉及向量空间、相似度计算等抽象概念，需要精细视觉表达</p>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top: 32px;">
+  <h3>我的推荐分配</h3>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+    <div style="padding: 16px; background: rgba(13, 148, 136, 0.08); border-radius: 8px; border-left: 4px solid #0d9488;">
+      <h4 style="margin-top: 0;">CSS 实现（2个）</h4>
+      <ul style="margin: 0; padding-left: 20px;">
+        <li>什么是 Agent</li>
+        <li>多轮对话</li>
+      </ul>
+    </div>
+    <div style="padding: 16px; background: rgba(234, 88, 12, 0.08); border-radius: 8px; border-left: 4px solid #ea580c;">
+      <h4 style="margin-top: 0;">Lottie 实现（3个）</h4>
+      <ul style="margin: 0; padding-left: 20px;">
+        <li>工具调用</li>
+        <li>多 Agent 协作</li>
+        <li>记忆系统</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top: 24px;">
+  <p class="subtitle">💡 如果你同意这个分配，直接在终端回复"同意"。如果想调整，点击上面的卡片重新选择。</p>
+</div>

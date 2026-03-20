@@ -1,0 +1,96 @@
+<h2>10个核心概念动画 — 优先级选择</h2>
+<p class="subtitle">你已经有 27 个组件（包括 ReActLoop、StreamingDemo 等）。现在要新增 10 个核心概念动画。</p>
+
+<div class="section">
+  <h3>问题 1：优先实现哪 5 个？</h3>
+  <p>从 10 个动画中选出最重要的 5 个，我们先做这些。</p>
+</div>
+
+<div class="options" data-multiselect>
+  <div class="option" data-choice="what-is-agent" onclick="toggleSelect(this)">
+    <div class="letter">1</div>
+    <div class="content">
+      <h3>什么是 Agent</h3>
+      <p>LLM → Agent 的演进过程，展示从单次调用到循环执行的转变</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="react-loop" onclick="toggleSelect(this)">
+    <div class="letter">2</div>
+    <div class="content">
+      <h3>ReAct Loop</h3>
+      <p>Thought → Action → Observation 循环，Agent 的核心执行模式</p>
+      <span class="label" style="background: #fbbf24; color: #78350f; padding: 2px 6px; border-radius: 3px; font-size: 11px;">已有组件</span>
+    </div>
+  </div>
+
+  <div class="option" data-choice="function-calling" onclick="toggleSelect(this)">
+    <div class="letter">3</div>
+    <div class="content">
+      <h3>工具调用</h3>
+      <p>Function Calling 完整流程：工具注册 → 参数解析 → 执行 → 结果返回</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="context-window" onclick="toggleSelect(this)">
+    <div class="letter">4</div>
+    <div class="content">
+      <h3>上下文窗口</h3>
+      <p>消息如何累积、压缩策略、滑动窗口机制</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="streaming" onclick="toggleSelect(this)">
+    <div class="letter">5</div>
+    <div class="content">
+      <h3>流式输出</h3>
+      <p>Token 逐个生成的过程，SSE 推送机制</p>
+      <span class="label" style="background: #fbbf24; color: #78350f; padding: 2px 6px; border-radius: 3px; font-size: 11px;">已有组件</span>
+    </div>
+  </div>
+
+  <div class="option" data-choice="multi-turn" onclick="toggleSelect(this)">
+    <div class="letter">6</div>
+    <div class="content">
+      <h3>多轮对话</h3>
+      <p>上下文如何在多轮对话中传递和累积</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="mcp-handshake" onclick="toggleSelect(this)">
+    <div class="letter">7</div>
+    <div class="content">
+      <h3>MCP 握手</h3>
+      <p>客户端-服务器握手协议，能力协商过程</p>
+      <span class="label" style="background: #fbbf24; color: #78350f; padding: 2px 6px; border-radius: 3px; font-size: 11px;">已有组件</span>
+    </div>
+  </div>
+
+  <div class="option" data-choice="provider-abstraction" onclick="toggleSelect(this)">
+    <div class="letter">8</div>
+    <div class="content">
+      <h3>Provider 抽象</h3>
+      <p>统一接口如何适配 Claude、OpenAI、Gemini 等多个模型</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="multi-agent" onclick="toggleSelect(this)">
+    <div class="letter">9</div>
+    <div class="content">
+      <h3>多 Agent 协作</h3>
+      <p>Agent 之间的消息传递、任务分配、结果聚合</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="memory-system" onclick="toggleSelect(this)">
+    <div class="letter">10</div>
+    <div class="content">
+      <h3>记忆系统</h3>
+      <p>短期记忆 → 长期记忆的转换，向量检索机制</p>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top: 32px;">
+  <p class="subtitle">💡 提示：已有组件（ReAct Loop、流式输出、MCP 握手）可以增强，也可以保持现状。选择你认为最重要的 5 个。</p>
+</div>

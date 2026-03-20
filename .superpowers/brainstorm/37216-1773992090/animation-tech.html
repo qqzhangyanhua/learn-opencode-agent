@@ -1,0 +1,117 @@
+<h2>动画实现方式选择</h2>
+<p class="subtitle">你选择了 5 个核心动画：什么是 Agent、工具调用、多轮对话、多 Agent 协作、记忆系统</p>
+
+<div class="section">
+  <h3>现有组件使用的技术</h3>
+  <ul style="list-style: none; padding: 0;">
+    <li style="padding: 8px; background: rgba(13, 148, 136, 0.05); border-left: 3px solid #0d9488; margin-bottom: 8px;">
+      <strong>ReActLoop.vue</strong> — CSS 动画 + Vue 响应式，使用 setTimeout 控制流程
+    </li>
+    <li style="padding: 8px; background: rgba(13, 148, 136, 0.05); border-left: 3px solid #0d9488; margin-bottom: 8px;">
+      <strong>StreamingDemo.vue</strong> — CSS 动画 + 打字机效果，模拟流式输出
+    </li>
+    <li style="padding: 8px; background: rgba(13, 148, 136, 0.05); border-left: 3px solid #0d9488;">
+      <strong>文件大小</strong> — ReActLoop 253 行，StreamingDemo 339 行（包含样式）
+    </li>
+  </ul>
+</div>
+
+<div class="section" style="margin-top: 32px;">
+  <h3>技术方案对比</h3>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="css-vue" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>纯 CSS + Vue（推荐）</h3>
+      <p><strong>优势：</strong>零依赖、性能最好、与现有组件一致、维护成本低</p>
+      <p><strong>劣势：</strong>复杂动画需要手写 CSS，开发时间稍长</p>
+      <div class="pros-cons" style="margin-top: 12px;">
+        <div class="pros">
+          <h4>适合场景</h4>
+          <ul>
+            <li>简单的过渡动画</li>
+            <li>状态驱动的动画</li>
+            <li>需要与 Vue 数据绑定</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>不适合</h4>
+          <ul>
+            <li>复杂的路径动画</li>
+            <li>需要设计师协作</li>
+            <li>需要频繁调整动画细节</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="lottie" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Lottie 动画库</h3>
+      <p><strong>优势：</strong>设计师友好（After Effects 导出）、动画质量高、体积小（JSON 格式）</p>
+      <p><strong>劣势：</strong>需要额外依赖（~50KB）、需要设计师制作动画、不易与 Vue 数据绑定</p>
+      <div class="pros-cons" style="margin-top: 12px;">
+        <div class="pros">
+          <h4>适合场景</h4>
+          <ul>
+            <li>复杂的矢量动画</li>
+            <li>需要设计师精细调整</li>
+            <li>动画独立于业务逻辑</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>不适合</h4>
+          <ul>
+            <li>需要实时数据驱动</li>
+            <li>没有设计师资源</li>
+            <li>需要频繁修改动画</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="hybrid" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>混合方案</h3>
+      <p><strong>策略：</strong>简单动画用 CSS，复杂动画用 Lottie</p>
+      <p><strong>优势：</strong>灵活性高，各取所长</p>
+      <p><strong>劣势：</strong>技术栈不统一，维护成本增加</p>
+      <div class="pros-cons" style="margin-top: 12px;">
+        <div class="pros">
+          <h4>适合场景</h4>
+          <ul>
+            <li>部分动画特别复杂</li>
+            <li>有设计师资源但不充足</li>
+            <li>追求最佳效果</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>不适合</h4>
+          <ul>
+            <li>团队规模小</li>
+            <li>追求技术栈统一</li>
+            <li>维护资源有限</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top: 32px;">
+  <h3>我的建议</h3>
+  <p style="padding: 16px; background: rgba(13, 148, 136, 0.08); border-radius: 8px; border-left: 4px solid #0d9488;">
+    <strong>推荐方案 A（纯 CSS + Vue）</strong><br><br>
+    理由：<br>
+    1. 你的 5 个动画都是"流程演示"类型，不需要复杂的矢量动画<br>
+    2. 现有 27 个组件都用这个方案，保持一致性<br>
+    3. 零依赖，构建速度快，性能好<br>
+    4. 可以直接参考 ReActLoop 和 StreamingDemo 的实现模式
+  </p>
+</div>

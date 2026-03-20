@@ -1,7 +1,7 @@
 <template>
   <AnimationContainer title="什么是 Agent" @restart="handleRestart">
     <template #default="{ isVisible }">
-      <div class="what-is-agent" :class="{ active: isVisible }">
+      <div :key="key" class="what-is-agent" :class="{ active: isVisible && !isRestarting }">
         <!-- 阶段 1: 传统 LLM -->
         <div class="stage stage-1">
           <div class="stage-label">传统 LLM</div>
@@ -47,9 +47,14 @@ import { ref } from 'vue'
 import AnimationContainer from '../core/AnimationContainer.vue'
 
 const key = ref(0)
+const isRestarting = ref(false)
 
 function handleRestart() {
+  isRestarting.value = true
   key.value++
+  setTimeout(() => {
+    isRestarting.value = false
+  }, 50)
 }
 </script>
 
@@ -66,11 +71,11 @@ function handleRestart() {
 }
 
 .what-is-agent.active .stage-1 {
-  animation: fadeInUp 0.6s ease forwards;
+  animation: fadeInUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
 .what-is-agent.active .stage-2 {
-  animation: fadeInUp 0.6s ease 2s forwards;
+  animation: fadeInUp 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) 2s forwards;
 }
 
 .stage-label {
@@ -105,7 +110,8 @@ function handleRestart() {
 }
 
 .node.highlight {
-  animation: pulse 2s ease-in-out infinite;
+  animation: pulse 1.5s ease-in-out infinite;
+  box-shadow: 0 4px 20px rgba(13, 148, 136, 0.4);
 }
 
 .arrow {
@@ -150,7 +156,8 @@ function handleRestart() {
   right: 20px;
   font-size: 2rem;
   color: var(--vp-c-brand-1);
-  animation: rotate 2s linear infinite;
+  animation: rotate 1.5s linear infinite;
+  filter: drop-shadow(0 2px 4px rgba(13, 148, 136, 0.3));
 }
 
 .note {
@@ -174,8 +181,8 @@ function handleRestart() {
     box-shadow: 0 2px 8px rgba(13, 148, 136, 0.2);
   }
   50% {
-    transform: scale(1.05);
-    box-shadow: 0 4px 16px rgba(13, 148, 136, 0.4);
+    transform: scale(1.1);
+    box-shadow: 0 8px 30px rgba(13, 148, 136, 0.6);
   }
 }
 

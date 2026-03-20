@@ -1,0 +1,134 @@
+<h2>动画交互设计</h2>
+<p class="subtitle">现在需要确定动画的交互方式。参考现有组件的设计模式。</p>
+
+<div class="section">
+  <h3>现有组件的交互模式</h3>
+  <ul style="list-style: none; padding: 0;">
+    <li style="padding: 8px; background: rgba(13, 148, 136, 0.05); border-left: 3px solid #0d9488; margin-bottom: 8px;">
+      <strong>ReActLoop：</strong>自动播放 → 完成后停止 → 提供"重新播放"按钮
+    </li>
+    <li style="padding: 8px; background: rgba(13, 148, 136, 0.05); border-left: 3px solid #0d9488;">
+      <strong>StreamingDemo：</strong>自动播放 → 完成后停止 → 提供"重新播放"按钮
+    </li>
+  </ul>
+</div>
+
+<div class="section" style="margin-top: 32px;">
+  <h3>交互方式选择</h3>
+  <p>选择你希望的交互模式（可以为不同动画选择不同模式）</p>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="auto-once" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>自动播放一次（推荐）</h3>
+      <p><strong>行为：</strong>页面加载后自动播放 → 完成后停止 → 提供"重新播放"按钮</p>
+      <div class="pros-cons" style="margin-top: 12px;">
+        <div class="pros">
+          <h4>优势</h4>
+          <ul>
+            <li>用户无需操作即可看到动画</li>
+            <li>不会干扰阅读（播放一次后停止）</li>
+            <li>与现有组件一致</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>劣势</h4>
+          <ul>
+            <li>用户可能错过动画（滚动太快）</li>
+            <li>无法暂停查看细节</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="manual-control" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>手动控制</h3>
+      <p><strong>行为：</strong>默认静止 → 用户点击"播放"按钮 → 提供暂停/继续/重播按钮</p>
+      <div class="pros-cons" style="margin-top: 12px;">
+        <div class="pros">
+          <h4>优势</h4>
+          <ul>
+            <li>用户完全控制播放时机</li>
+            <li>可以暂停查看细节</li>
+            <li>适合复杂动画</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>劣势</h4>
+          <ul>
+            <li>需要用户主动操作</li>
+            <li>UI 更复杂（多个按钮）</li>
+            <li>与现有组件不一致</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="scroll-trigger" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>滚动触发</h3>
+      <p><strong>行为：</strong>动画进入视口时自动播放 → 完成后停止 → 提供"重新播放"按钮</p>
+      <div class="pros-cons" style="margin-top: 12px;">
+        <div class="pros">
+          <h4>优势</h4>
+          <ul>
+            <li>用户不会错过动画</li>
+            <li>性能更好（只播放可见动画）</li>
+            <li>体验更流畅</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>劣势</h4>
+          <ul>
+            <li>需要实现 Intersection Observer</li>
+            <li>开发成本稍高</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="hybrid-interaction" onclick="toggleSelect(this)">
+    <div class="letter">D</div>
+    <div class="content">
+      <h3>混合模式</h3>
+      <p><strong>行为：</strong>简单动画自动播放，复杂动画手动控制</p>
+      <div class="pros-cons" style="margin-top: 12px;">
+        <div class="pros">
+          <h4>优势</h4>
+          <ul>
+            <li>灵活性最高</li>
+            <li>各取所长</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>劣势</h4>
+          <ul>
+            <li>交互不一致</li>
+            <li>用户需要学习不同模式</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top: 32px;">
+  <h3>我的建议</h3>
+  <p style="padding: 16px; background: rgba(13, 148, 136, 0.08); border-radius: 8px; border-left: 4px solid #0d9488;">
+    <strong>推荐方案 C（滚动触发）</strong><br><br>
+    理由：<br>
+    1. 用户不会错过动画（滚动到才播放）<br>
+    2. 性能更好（只播放可见的动画）<br>
+    3. 体验更流畅（自然融入阅读流程）<br>
+    4. 实现成本不高（Vue 3 有现成的 Intersection Observer 组合式函数）<br><br>
+    <strong>控制按钮：</strong>每个动画提供"重新播放"按钮（与现有组件一致）
+  </p>
+</div>

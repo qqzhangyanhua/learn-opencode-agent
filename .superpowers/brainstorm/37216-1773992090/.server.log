@@ -1,0 +1,16 @@
+{"type":"server-started","port":56004,"host":"127.0.0.1","url_host":"localhost","url":"http://localhost:56004","screen_dir":"/Users/zhangyanhua/AI/opencode/docs/book/.superpowers/brainstorm/37216-1773992090"}
+{"type":"screen-added","file":"/Users/zhangyanhua/AI/opencode/docs/book/.superpowers/brainstorm/37216-1773992090/animation-priority.html"}
+{"source":"user-event","type":"click","text":"1\n    \n      什么是 Agent\n      LLM → Agent 的演进过程，展示从单次调用到循环执行的转变","choice":"what-is-agent","id":null,"timestamp":1773992190520}
+{"source":"user-event","type":"click","text":"3\n    \n      工具调用\n      Function Calling 完整流程：工具注册 → 参数解析 → 执行 → 结果返回","choice":"function-calling","id":null,"timestamp":1773992193426}
+{"source":"user-event","type":"click","text":"6\n    \n      多轮对话\n      上下文如何在多轮对话中传递和累积","choice":"multi-turn","id":null,"timestamp":1773992195408}
+{"source":"user-event","type":"click","text":"9\n    \n      多 Agent 协作\n      Agent 之间的消息传递、任务分配、结果聚合","choice":"multi-agent","id":null,"timestamp":1773992198072}
+{"source":"user-event","type":"click","text":"10\n    \n      记忆系统\n      短期记忆 → 长期记忆的转换，向量检索机制","choice":"memory-system","id":null,"timestamp":1773992199264}
+{"type":"screen-added","file":"/Users/zhangyanhua/AI/opencode/docs/book/.superpowers/brainstorm/37216-1773992090/animation-tech.html"}
+{"source":"user-event","type":"click","text":"C\n    \n      混合方案\n      策略：简单动画用 CSS，复杂动画用 Lottie\n      优势：灵活性高，各取所长\n      劣势：技术栈不统一，维护成本增加\n      \n        \n          适合场景\n          \n            部分动画特别复杂\n            有设计师资源但不充足\n            追求最佳效果\n          \n        \n        \n          不适合\n          \n            团队规模小\n            追求技术栈统一\n            维护资源有限","choice":"hybrid","id":null,"timestamp":1773992298127}
+{"type":"screen-added","file":"/Users/zhangyanhua/AI/opencode/docs/book/.superpowers/brainstorm/37216-1773992090/animation-allocation.html"}
+{"source":"user-event","type":"click","text":"2. 工具调用\n      内容：Function Calling 完整流程（注册 → 解析 → 执行 → 返回）\n      复杂度：⭐⭐⭐⭐ 较高\n      建议：Lottie\n      理由：涉及数据流动、参数解析等复杂路径，Lottie 更直观","choice":"function-calling-lottie","id":null,"timestamp":1773992381698}
+{"source":"user-event","type":"click","text":"2. 工具调用\n      内容：Function Calling 完整流程（注册 → 解析 → 执行 → 返回）\n      复杂度：⭐⭐⭐⭐ 较高\n      建议：Lottie\n      理由：涉及数据流动、参数解析等复杂路径，Lottie 更直观","choice":"function-calling-lottie","id":null,"timestamp":1773992383061}
+{"type":"screen-added","file":"/Users/zhangyanhua/AI/opencode/docs/book/.superpowers/brainstorm/37216-1773992090/animation-interaction.html"}
+{"source":"user-event","type":"click","text":"C\n    \n      滚动触发\n      行为：动画进入视口时自动播放 → 完成后停止 → 提供\"重新播放\"按钮\n      \n        \n          优势\n          \n            用户不会错过动画\n            性能更好（只播放可见动画）\n            体验更流畅\n          \n        \n        \n          劣势\n          \n            需要实现 Intersection Observer\n            开发成本稍高","choice":"scroll-trigger","id":null,"timestamp":1773992458055}
+{"type":"screen-added","file":"/Users/zhangyanhua/AI/opencode/docs/book/.superpowers/brainstorm/37216-1773992090/waiting.html"}
+{"type":"server-stopped","reason":"idle timeout"}
