@@ -8,7 +8,7 @@ import SourceSnapshotCard from '../../../.vitepress/theme/components/SourceSnaps
 </script>
 
 > **对应路径**：`packages/opencode/src/session/instruction.ts`、`packages/opencode/src/session/system.ts`、`packages/opencode/src/session/prompt.ts`、`packages/opencode/src/session/llm.ts`、`packages/opencode/src/agent/agent.ts`、`docs/intermediate/examples/29-system-prompt-design/`
-> **前置阅读**：[第2章：AI Agent 的核心组件](/02-agent-core/)、[第5章：会话管理](/04-session-management/)、[第16章：高级主题与最佳实践](/15-advanced-topics/)
+> **前置阅读**：[第2章：AI Agent 的核心组件](/01-agent-basics/)、[第5章：会话管理](/04-session-management/)、[第16章：高级主题与最佳实践](/15-advanced-topics/)
 > **学习目标**：理解 System Prompt 为什么应该被写成“行为合同”而不是一句口号；掌握身份、能力边界、行为规则、安全约束四类信息如何进入一次真实会话；知道 Prompt 为什么必须和角色、权限、上下文装配一起设计。
 
 ---
@@ -170,7 +170,7 @@ Prompt 先约束默认行为
   -> 工具执行层决定是否真正落地
 ```
 
-这也是为什么本章需要回链到 [第3章：工具系统](/03-tool-system/) 和 [P19：Agent 安全与防注入](/practice/p19-security/)。
+这也是为什么本章需要回链到 [第4章：工具系统](/03-tool-system/) 和 [P19：Agent 安全与防注入](/practice/p19-security/)。
 
 ## OpenCode 源码映射
 
@@ -282,8 +282,8 @@ SAFETY = """
 
 ## 延伸阅读与回链
 
-- 如果你想先回到最基础的“Prompt 为什么属于 Agent 核心组件”，重读 [第2章：AI Agent 的核心组件](/02-agent-core/)。
+- 如果你想先回到最基础的“Prompt 为什么属于 Agent 核心组件”，重读 [第2章：AI Agent 的核心组件](/01-agent-basics/)。
 - 如果你想看 Prompt 最终怎样和历史消息、项目指令一起进入一次会话，回到 [第5章：会话管理](/04-session-management/)。
-- 如果你想看“光靠 Prompt 不够，必须有权限硬边界”这一层，接着读 [第3章：工具系统](/03-tool-system/) 和 [第16章：高级主题与最佳实践](/15-advanced-topics/)。
+- 如果你想看“光靠 Prompt 不够，必须有权限硬边界”这一层，接着读 [第4章：工具系统](/03-tool-system/) 和 [第16章：高级主题与最佳实践](/15-advanced-topics/)。
 - 如果你关心的是 Prompt 在攻击场景下如何失效、为什么还需要纵深防御，继续看 [P19：Agent 安全与防注入](/practice/p19-security/)。
 - 如果你想把本章放进更大的上下文装配视角里，建议和 [第28章：上下文工程实战](/intermediate/28-context-engineering/) 串读。

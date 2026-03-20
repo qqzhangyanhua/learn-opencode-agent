@@ -8,7 +8,7 @@ import SourceSnapshotCard from '../../../.vitepress/theme/components/SourceSnaps
 </script>
 
 > **对应路径**：`packages/opencode/src/agent/agent.ts`、`packages/opencode/src/permission/next.ts`、`packages/opencode/src/tool/registry.ts`、`packages/opencode/src/tool/bash.ts`、`docs/intermediate/examples/31-safety-boundaries/`
-> **前置阅读**：[第3章：工具系统](/03-tool-system/)、[第16章：高级主题与最佳实践](/15-advanced-topics/)、[P19：Agent 安全与防注入](/practice/p19-security/)
+> **前置阅读**：[第4章：工具系统](/03-tool-system/)、[第16章：高级主题与最佳实践](/15-advanced-topics/)、[P19：Agent 安全与防注入](/practice/p19-security/)
 > **学习目标**：理解为什么“高风险操作里的安全”首先是边界设计问题；掌握风险分级、人工确认、最小权限和渐进授权的基本思路；知道这些思路在 OpenCode 里分别由哪些运行时模块承担。
 
 ---
@@ -236,7 +236,7 @@ class HumanApprovalGate:
 
 ## 延伸阅读与回链
 
-- 如果你想从工具定义、权限规则和 `ctx.ask()` 的角度读懂这条链，回到 [第3章：工具系统](/03-tool-system/)。
+- 如果你想从工具定义、权限规则和 `ctx.ask()` 的角度读懂这条链，回到 [第4章：工具系统](/03-tool-system/)。
 - 如果你想把本章放进 OpenCode 更大的工程原则里理解，重读 [第16章：高级主题与最佳实践](/15-advanced-topics/)。
 - 如果你关心提示注入、输入清洗、输出验证和日志审计这套纵深防御，继续读 [P19：Agent 安全与防注入](/practice/p19-security/)。
 - 如果你想看确认请求在交互层怎样真正暂停执行，再补 [第8章：TUI 终端界面](/07-tui-interface/) 的权限弹窗一节。
