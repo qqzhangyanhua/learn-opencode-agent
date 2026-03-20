@@ -1,6 +1,9 @@
 import OpenAI from 'openai'
 
-const client = new OpenAI()
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  baseURL: process.env.OPENAI_BASE_URL,
+})
 
 interface ReflectionResult {
   passed: boolean

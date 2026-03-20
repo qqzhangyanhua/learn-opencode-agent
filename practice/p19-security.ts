@@ -1,7 +1,10 @@
 import OpenAI from 'openai'
 import { writeFile } from 'node:fs/promises'
 
-const client = new OpenAI()
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  baseURL: process.env.OPENAI_BASE_URL,
+})
 
 type RiskLevel = 'safe' | 'suspicious' | 'dangerous'
 type UserRole = 'viewer' | 'editor' | 'admin'
@@ -344,7 +347,7 @@ async function runSecureAgent(userMessage: string, role: UserRole): Promise<void
 
   for (let iteration = 1; iteration <= 8; iteration += 1) {
     const response = await client.chat.completions.create({
-      model: 'gpt-4o',
+      model: process.env.OPENAI_MODEL || 'gpt-4o',
       tools: TOOLS,
       messages,
     })

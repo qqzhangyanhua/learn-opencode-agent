@@ -111,7 +111,10 @@ class GraphRAGAgent {
   private readonly allEntityNames: string[]
 
   constructor(graph: KnowledgeGraph, entityNames: string[]) {
-    this.client = new OpenAI()
+    this.client = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+      baseURL: process.env.OPENAI_BASE_URL,
+    })
     this.graph = graph
     this.allEntityNames = entityNames
   }
@@ -187,7 +190,7 @@ class GraphRAGAgent {
 
     const userMessage = `${graphContext}\n\n问题: ${question}`
     const response = await this.client.chat.completions.create({
-      model: 'gpt-4o',
+      model: process.env.OPENAI_MODEL || 'gpt-4o',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userMessage },

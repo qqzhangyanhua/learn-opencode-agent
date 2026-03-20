@@ -1,6 +1,9 @@
 import OpenAI from 'openai'
 
-const client = new OpenAI()
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  baseURL: process.env.OPENAI_BASE_URL,
+})
 
 interface BlackboardEntry {
   value: string
@@ -98,7 +101,7 @@ async function runResearcher(topic: string, board: Blackboard, bus: MessageBus):
   console.log('\n[Researcher] 开始研究...')
 
   const response = await client.chat.completions.create({
-    model: 'gpt-4o',
+    model: process.env.OPENAI_MODEL || 'gpt-4o',
     messages: [
       {
         role: 'system',
@@ -145,7 +148,7 @@ async function runWriter(topic: string, board: Blackboard, bus: MessageBus): Pro
 
   const research = readAllFromBlackboard(board)
   const response = await client.chat.completions.create({
-    model: 'gpt-4o',
+    model: process.env.OPENAI_MODEL || 'gpt-4o',
     messages: [
       {
         role: 'system',
@@ -209,7 +212,7 @@ async function runEditor(handoff: HandoffPayload): Promise<string> {
   console.log(`  [Editor] 约束: ${handoff.constraints.length} 条`)
 
   const response = await client.chat.completions.create({
-    model: 'gpt-4o',
+    model: process.env.OPENAI_MODEL || 'gpt-4o',
     messages: [
       {
         role: 'system',

@@ -1,6 +1,9 @@
 import OpenAI from 'openai'
 
-const client = new OpenAI()
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  baseURL: process.env.OPENAI_BASE_URL,
+})
 
 interface FileChange {
   filePath: string
@@ -177,7 +180,7 @@ async function runSecurityReview(changes: FileChange[]): Promise<ReviewResult> {
   console.log('[SecurityReviewer] 开始安全审查...')
 
   const response = await client.chat.completions.create({
-    model: 'gpt-4o',
+    model: process.env.OPENAI_MODEL || 'gpt-4o',
     max_tokens: 4096,
     tools: [findingsTool],
     tool_choice: { type: 'function', function: { name: 'submit_findings' } },
@@ -208,7 +211,7 @@ async function runQualityReview(changes: FileChange[]): Promise<ReviewResult> {
   console.log('[QualityReviewer] 开始质量审查...')
 
   const response = await client.chat.completions.create({
-    model: 'gpt-4o',
+    model: process.env.OPENAI_MODEL || 'gpt-4o',
     max_tokens: 4096,
     tools: [findingsTool],
     tool_choice: { type: 'function', function: { name: 'submit_findings' } },
@@ -305,7 +308,7 @@ async function generateReport(
     .join('\n')
 
   const response = await client.chat.completions.create({
-    model: 'gpt-4o',
+    model: process.env.OPENAI_MODEL || 'gpt-4o',
     max_tokens: 1024,
     messages: [
       {

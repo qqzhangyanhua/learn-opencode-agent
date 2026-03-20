@@ -1,6 +1,9 @@
 import OpenAI from 'openai'
 
-const client = new OpenAI()
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  baseURL: process.env.OPENAI_BASE_URL,
+})
 
 interface PlanStep {
   id: string
@@ -112,7 +115,7 @@ function extractJsonBlock(text: string): string | null {
 class Planner {
   async createPlan(goal: string): Promise<PlanStep[]> {
     const response = await client.chat.completions.create({
-      model: 'gpt-4o',
+      model: process.env.OPENAI_MODEL || 'gpt-4o',
       messages: [
         {
           role: 'system',
@@ -148,7 +151,7 @@ class Planner {
       .join('\n')
 
     const response = await client.chat.completions.create({
-      model: 'gpt-4o',
+      model: process.env.OPENAI_MODEL || 'gpt-4o',
       messages: [
         {
           role: 'system',
@@ -243,7 +246,7 @@ TOOL_CALL: {"tool": "工具名", "input": {"参数名": "参数值"}}
     }当前步骤：${step.description}`
 
     const response = await client.chat.completions.create({
-      model: 'gpt-4o',
+      model: process.env.OPENAI_MODEL || 'gpt-4o',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userContent },

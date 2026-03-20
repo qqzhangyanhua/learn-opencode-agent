@@ -74,7 +74,10 @@ class MemoryAgent {
   private readonly baseSystemPrompt: string
 
   constructor(bank: MemoryBank, systemPrompt = '') {
-    this.client = new OpenAI()
+    this.client = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+      baseURL: process.env.OPENAI_BASE_URL,
+    })
     this.bank = bank
     this.baseSystemPrompt = systemPrompt
   }
@@ -105,7 +108,7 @@ class MemoryAgent {
     }
 
     const response = await this.client.chat.completions.create({
-      model: 'gpt-4o',
+      model: process.env.OPENAI_MODEL || 'gpt-4o',
       messages,
     })
 

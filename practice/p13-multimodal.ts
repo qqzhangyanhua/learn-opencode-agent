@@ -2,7 +2,10 @@ import OpenAI from 'openai'
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 
-const client = new OpenAI()
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  baseURL: process.env.OPENAI_BASE_URL,
+})
 
 type SupportedImageMediaType = 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp'
 

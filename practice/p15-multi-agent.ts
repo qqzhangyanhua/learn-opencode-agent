@@ -1,6 +1,9 @@
 import OpenAI from 'openai'
 
-const client = new OpenAI()
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  baseURL: process.env.OPENAI_BASE_URL,
+})
 
 interface SubTask {
   id: string
@@ -31,7 +34,7 @@ async function runWorker(task: SubTask): Promise<WorkerResult> {
   console.log(`[Worker:${task.id}] 开始执行: ${task.title}`)
 
   const response = await client.chat.completions.create({
-    model: 'gpt-4o',
+    model: process.env.OPENAI_MODEL || 'gpt-4o',
     messages: [
       {
         role: 'system',
@@ -135,7 +138,7 @@ async function orchestrate(userMessage: string): Promise<string> {
 
   while (true) {
     const response = await client.chat.completions.create({
-      model: 'gpt-4o',
+      model: process.env.OPENAI_MODEL || 'gpt-4o',
       tools: [dispatchToolSchema],
       messages,
     })

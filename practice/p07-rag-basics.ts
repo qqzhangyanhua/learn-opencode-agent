@@ -140,7 +140,10 @@ class RAGAgent {
   private readonly baseSystem: string
 
   constructor(store: DocumentStore, baseSystem = '') {
-    this.client = new OpenAI()
+    this.client = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+      baseURL: process.env.OPENAI_BASE_URL,
+    })
     this.store = store
     this.baseSystem = baseSystem
   }
@@ -172,7 +175,7 @@ class RAGAgent {
     }
 
     const response = await this.client.chat.completions.create({
-      model: 'gpt-4o',
+      model: process.env.OPENAI_MODEL || 'gpt-4o',
       messages,
     })
 

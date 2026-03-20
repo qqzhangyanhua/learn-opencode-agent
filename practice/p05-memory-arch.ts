@@ -89,7 +89,10 @@ class MemoryAgent {
   private readonly longTerm: LongTermMemory
 
   constructor(memoryFilePath?: string) {
-    this.client = new OpenAI()
+    this.client = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+      baseURL: process.env.OPENAI_BASE_URL,
+    })
     this.shortTerm = new ShortTermMemory()
     this.working = new WorkingMemory()
     this.longTerm = new LongTermMemory(memoryFilePath)
@@ -120,7 +123,7 @@ ${memoryLines}
     this.shortTerm.add('user', userMessage)
 
     const response = await this.client.chat.completions.create({
-      model: 'gpt-4o',
+      model: process.env.OPENAI_MODEL || 'gpt-4o',
       messages: [
         { role: 'system', content: this.buildSystemPrompt() },
         ...this.shortTerm.getAll(),

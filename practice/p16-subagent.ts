@@ -1,6 +1,9 @@
 import OpenAI from 'openai'
 
-const client = new OpenAI()
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  baseURL: process.env.OPENAI_BASE_URL,
+})
 
 interface ToolDefinition {
   schema: OpenAI.ChatCompletionTool
@@ -163,7 +166,7 @@ class SubAgent {
       iterations += 1
 
       const response = await client.chat.completions.create({
-        model: 'gpt-4o',
+        model: process.env.OPENAI_MODEL || 'gpt-4o',
         tools: toolSchemas,
         messages: this.messages,
       })
@@ -275,7 +278,7 @@ async function orchestrate(userMessage: string): Promise<string> {
   console.log(`用户: ${userMessage}\n`)
 
   const planResponse = await client.chat.completions.create({
-    model: 'gpt-4o',
+    model: process.env.OPENAI_MODEL || 'gpt-4o',
     messages: [
       {
         role: 'system',
@@ -354,7 +357,7 @@ async function orchestrate(userMessage: string): Promise<string> {
       : ''
 
   const synthesisResponse = await client.chat.completions.create({
-    model: 'gpt-4o',
+    model: process.env.OPENAI_MODEL || 'gpt-4o',
     messages: [
       {
         role: 'system',

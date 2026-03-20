@@ -1,7 +1,10 @@
 import OpenAI from 'openai'
 import { randomUUID } from 'node:crypto'
 
-const client = new OpenAI()
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  baseURL: process.env.OPENAI_BASE_URL,
+})
 
 type LogLevel = 'debug' | 'info' | 'warn' | 'error'
 type SpanStatus = 'ok' | 'error'
@@ -316,13 +319,13 @@ async function runObservableAgent(userMessage: string): Promise<void> {
   for (let iteration = 1; iteration <= 6; iteration += 1) {
     const llmSpanId = tracer.startSpan('llm_call', {
       iteration,
-      model: 'gpt-4o',
+      model: process.env.OPENAI_MODEL || 'gpt-4o',
     })
     const llmStart = Date.now()
 
     try {
       const response = await client.chat.completions.create({
-        model: 'gpt-4o',
+        model: process.env.OPENAI_MODEL || 'gpt-4o',
         tools: TOOLS,
         messages,
       })

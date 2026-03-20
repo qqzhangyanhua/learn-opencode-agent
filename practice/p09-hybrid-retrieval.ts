@@ -189,7 +189,10 @@ class HybridRAGAgent {
   private readonly retriever: HybridRetriever
 
   constructor(retriever: HybridRetriever) {
-    this.client = new OpenAI()
+    this.client = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+      baseURL: process.env.OPENAI_BASE_URL,
+    })
     this.retriever = retriever
   }
 
@@ -212,7 +215,7 @@ class HybridRAGAgent {
       : '你是一个技术助手，用中文简洁作答。'
 
     const response = await this.client.chat.completions.create({
-      model: 'gpt-4o',
+      model: process.env.OPENAI_MODEL || 'gpt-4o',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userMessage },

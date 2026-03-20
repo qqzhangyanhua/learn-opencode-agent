@@ -1,6 +1,9 @@
 import OpenAI from 'openai'
 
-const client = new OpenAI()
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  baseURL: process.env.OPENAI_BASE_URL,
+})
 
 const tools: OpenAI.ChatCompletionTool[] = [
   {
@@ -38,7 +41,7 @@ async function runAgent(userMessage: string): Promise<void> {
 
   while (true) {
     const response = await client.chat.completions.create({
-      model: 'gpt-4o',
+      model: process.env.OPENAI_MODEL || 'gpt-4o',
       tools,
       messages,
     })

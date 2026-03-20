@@ -4,7 +4,10 @@ import { StdioClientTransport } from '@modelcontextprotocol/sdk/client/stdio.js'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-const client = new OpenAI()
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  baseURL: process.env.OPENAI_BASE_URL,
+})
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 function hasTextContent(
@@ -79,7 +82,7 @@ async function runAgent(
 
   while (true) {
     const response = await client.chat.completions.create({
-      model: 'gpt-4o',
+      model: process.env.OPENAI_MODEL || 'gpt-4o',
       tools,
       messages,
     })

@@ -1,6 +1,9 @@
 import OpenAI from 'openai'
 
-const client = new OpenAI()
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  baseURL: process.env.OPENAI_BASE_URL,
+})
 
 interface DeterministicCheck {
   type: 'keyword' | 'regex' | 'json-valid'
@@ -163,7 +166,7 @@ ${agentOutput}
 请严格按 JSON 格式输出评审结果。`
 
   const response = await client.chat.completions.create({
-    model: 'gpt-4o',
+    model: process.env.OPENAI_MODEL || 'gpt-4o',
     messages: [
       { role: 'system', content: systemPrompt },
       { role: 'user', content: userPrompt },
@@ -434,13 +437,13 @@ function compareReports(a: EvalReport, b: EvalReport): void {
 async function main(): Promise<void> {
   const baselineConfig: AgentConfig = {
     name: 'A-基线配置',
-    model: 'gpt-4o',
+    model: process.env.OPENAI_MODEL || 'gpt-4o',
     systemPrompt: '你是一个通用 TypeScript 助手，请直接回答用户问题。',
   }
 
   const structuredConfig: AgentConfig = {
     name: 'B-结构化配置',
-    model: 'gpt-4o',
+    model: process.env.OPENAI_MODEL || 'gpt-4o',
     systemPrompt: [
       '你是一个高质量 TypeScript 助手。',
       '回答时优先保证技术准确性、结构清晰和格式遵循。',

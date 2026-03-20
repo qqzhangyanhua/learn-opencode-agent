@@ -1,6 +1,9 @@
 import OpenAI from 'openai'
 
-const client = new OpenAI()
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+  baseURL: process.env.OPENAI_BASE_URL,
+})
 
 function estimateTokens(text: string): number {
   return Math.ceil(text.length / 4)
@@ -58,7 +61,7 @@ class ChatSession {
     this.trimHistory(this.maxTokenEstimate)
 
     const response = await client.chat.completions.create({
-      model: 'gpt-4o-mini',
+      model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
       messages: [
         { role: 'system', content: this.systemPrompt },
         ...this.messages,
