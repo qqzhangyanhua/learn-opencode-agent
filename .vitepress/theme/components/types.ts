@@ -94,3 +94,29 @@ export interface PracticePreviewProps {
   practiceProjects?: number
   practicePhases?: number
 }
+
+// ===== 动画系统类型 =====
+
+export interface AnimationContainerProps {
+  title?: string
+  statusText?: string
+}
+
+export interface LottiePlayerProps {
+  animationData: object
+  autoplay?: boolean
+  loop?: boolean
+  speed?: number
+}
+
+export interface AnimationStage {
+  key: string
+  label: string
+  duration: number
+}
+
+export interface UseIntersectionObserverOptions {
+  threshold?: number
+  rootMargin?: string
+  triggerOnce?: boolean
+}
