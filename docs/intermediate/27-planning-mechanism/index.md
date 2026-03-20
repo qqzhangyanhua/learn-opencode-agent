@@ -3,10 +3,6 @@ title: 第27章：为什么智能体要先列清单再干活
 description: 从 ReAct 的局限出发，理解 Planning 为什么能提升复杂任务的完成率，并掌握 Plan-and-Execute 与动态重规划的工程权衡。
 ---
 
-<script setup>
-import SourceSnapshotCard from '../../../.vitepress/theme/components/SourceSnapshotCard.vue'
-</script>
-
 > **对应路径**：`packages/opencode/src/agent/agent.ts`、`packages/opencode/src/session/processor.ts`、`packages/opencode/src/tool/task.ts`、`docs/intermediate/examples/27-planning-mechanism/`
 > **前置阅读**：[P10：ReAct Loop](/practice/p10-react-loop/)、[P11：Planning 机制](/practice/p11-planning/)
 > **学习目标**：理解为什么复杂任务不能只靠“边想边做”，学会区分 ReAct、Plan-and-Execute、自适应规划三种执行方式，并知道它们各自的成本和边界。
@@ -147,45 +143,6 @@ def _execute_step(self, step: dict) -> str:
 - **任务长、外部信息不稳定、目标可能变动**：再考虑自适应规划
 
 不要一上来就上最重的方案。Planning 能提升成功率，但也一定增加调用次数、状态维护成本和调试复杂度。
-
-## OpenCode 源码映射
-
-OpenCode 当前并没有把“Planning”单独做成一套教学式 planner/executor 模块，但它在三个地方体现了非常接近的思想：
-
-- `agent/agent.ts` 里有独立的 `plan` 角色，这说明“先做规划再交给执行角色”是系统级能力，而不是 prompt 小技巧。
-- `session/processor.ts` 的主循环保证每一步都有明确状态推进，而不是一次性黑盒执行。
-- `tool/task.ts` 把任务委派显式化，使“先拆任务再执行”能跨代理成立。
-
-所以把本章和 OpenCode 放在一起看，最有价值的结论是：
-
-**Planning 不一定长成一个 Planner 类，但“把复杂目标拆成可推进的中间状态”一定会体现在系统骨架里。**
-
-<SourceSnapshotCard
-  title="第27章源码映射"
-  description="OpenCode 的 Planning 更像一种系统组织方式：角色分层、循环推进、任务委派共同构成“先想清楚再执行”的骨架。"
-  repo="anomalyco/opencode"
-  repo-url="https://github.com/anomalyco/opencode/tree/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
-  branch="dev"
-  commit="f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
-  verified-at="2026-03-17"
-  :entries="[
-    {
-      label: 'Agent 角色与模式',
-      path: 'packages/opencode/src/agent/agent.ts',
-      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/agent/agent.ts'
-    },
-    {
-      label: '执行循环核心',
-      path: 'packages/opencode/src/session/processor.ts',
-      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/session/processor.ts'
-    },
-    {
-      label: '任务委派工具',
-      path: 'packages/opencode/src/tool/task.ts',
-      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/tool/task.ts'
-    }
-  ]"
-/>
 
 ## 教学代码示例映射
 

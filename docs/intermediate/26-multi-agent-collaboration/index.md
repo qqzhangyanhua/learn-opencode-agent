@@ -3,10 +3,6 @@ title: 第26章：让多个 AI 协作起来
 description: 从主从、辩论、流水线三种模式切入，理解多智能体协作为什么能提升复杂任务的可控性，以及它的真实成本与边界。
 ---
 
-<script setup>
-import SourceSnapshotCard from '../../../.vitepress/theme/components/SourceSnapshotCard.vue'
-</script>
-
 > **对应路径**：`packages/opencode/src/agent/agent.ts`、`packages/opencode/src/tool/task.ts`、`packages/opencode/src/permission/next.ts`、`docs/intermediate/examples/26-multi-agent-collaboration/`
 > **前置阅读**：[P15：多 Agent 编排](/practice/p15-multi-agent/)、[P16：子 Agent 与任务分解](/practice/p16-subagent/)、[P17：Agent 间通信与状态共享](/practice/p17-agent-comm/)、[第16章：高级主题与最佳实践](/15-advanced-topics/)
 > **学习目标**：理解多智能体不是“多开几个模型窗口”，而是角色边界、信息流和成本预算的组合设计；掌握主从、辩论、流水线三种经典协作模式的适用场景。
@@ -140,51 +136,6 @@ class Pipeline:
 - 结果如何回流
 
 如果这些问题不先讲清楚，多智能体只会变成“更多调用、更贵成本、更多调试困难”。
-
-## OpenCode 源码映射
-
-OpenCode 最值得借鉴的，不是“多 Agent 很酷”，而是它把多 Agent 协作做成了显式协议，而不是口头约定。
-
-- `agent/agent.ts`：定义不同 Agent 的角色、模式和默认能力基线。
-- `tool/task.ts`：把子任务委派做成工具级能力，让协作有统一入口。
-- `permission/next.ts`：保证子代理不是无限能力扩散，而是仍受权限系统约束。
-
-这说明 OpenCode 的多 Agent 思路本质上是：
-
-```text
-先定义角色边界
-  -> 再暴露任务委派能力
-  -> 再用权限系统收口
-```
-
-这和示例里的三种模式刚好形成对照：示例重点在“协作结构”，OpenCode 重点在“协作约束”。
-
-<SourceSnapshotCard
-  title="第26章源码映射"
-  description="OpenCode 当前最值得学习的不是多智能体花样，而是角色、工具和权限三者如何形成正式协作协议。"
-  repo="anomalyco/opencode"
-  repo-url="https://github.com/anomalyco/opencode/tree/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
-  branch="dev"
-  commit="f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
-  verified-at="2026-03-17"
-  :entries="[
-    {
-      label: 'Agent 角色定义',
-      path: 'packages/opencode/src/agent/agent.ts',
-      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/agent/agent.ts'
-    },
-    {
-      label: '任务委派工具',
-      path: 'packages/opencode/src/tool/task.ts',
-      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/tool/task.ts'
-    },
-    {
-      label: '权限决策系统',
-      path: 'packages/opencode/src/permission/next.ts',
-      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/permission/next.ts'
-    }
-  ]"
-/>
 
 ## 教学代码示例映射
 

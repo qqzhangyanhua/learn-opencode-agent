@@ -3,10 +3,6 @@ title: 第30章：生产架构与部署
 description: 从“能跑的 Demo”到“可持续运行的产品”，理解 Agent 生产架构真正要补齐的是哪些边界、状态和闭环。
 ---
 
-<script setup>
-import SourceSnapshotCard from '../../../.vitepress/theme/components/SourceSnapshotCard.vue'
-</script>
-
 > **对应路径**：`packages/opencode/src/server/`、`packages/opencode/src/session/`、`packages/opencode/src/storage/`、`packages/opencode/src/provider/`、`packages/opencode/src/permission/`、`docs/intermediate/examples/30-production-architecture/`
 > **前置阅读**：[第9章：HTTP API 服务器](/08-http-api-server/)、[第10章：数据持久化](/09-data-persistence/)、[第14章：部署与基础设施](/13-deployment-infrastructure/)、[P23：生产部署清单](/practice/p23-production/)
 > **学习目标**：理解 Agent 从 Demo 走向生产时必须补齐的五层能力：接入层、会话层、模型与工具执行层、持久化层、风险与观测闭环；知道这些层在 OpenCode 里分别落在哪些明确模块。
@@ -144,61 +140,6 @@ permission/
 - [P23：生产部署清单](/practice/p23-production/)
 
 前者回答“怎么知道系统出了什么问题”，后者回答“上线前还缺哪些生产防护”。
-
-## OpenCode 源码映射
-
-这一章最重要的不是找一份“生产架构总入口”，而是看到 OpenCode 如何把产品化边界拆散到明确模块里。
-
-- `server/server.ts`：统一 HTTP 服务和中间件边界，是接入层入口。
-- `server/routes/session.ts`：把一次会话请求接入到 Agent 运行时主链。
-- `session/processor.ts`：真正推进一次执行循环，决定事件、消息和工具结果怎么流动。
-- `storage/db.ts`：把关键会话状态和结构化数据从内存带到持久层。
-- `provider/provider.ts`：把底层模型差异封装成统一抽象，避免上层直接绑死某个厂商。
-- `permission/next.ts`：把高风险操作收口成运行时协议，而不是“出了事再补规则”。
-
-这些文件分散，但合起来正好对应“从 Demo 到可上线”的那张架构图。
-
-<SourceSnapshotCard
-  title="第30章源码映射"
-  description="OpenCode 的生产化不是一个独立模块，而是 server、session、storage、provider、permission 五类边界共同组成的产品闭环。"
-  repo="anomalyco/opencode"
-  repo-url="https://github.com/anomalyco/opencode/tree/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
-  branch="dev"
-  commit="f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
-  verified-at="2026-03-20"
-  :entries="[
-    {
-      label: 'HTTP 服务入口',
-      path: 'packages/opencode/src/server/server.ts',
-      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/server/server.ts'
-    },
-    {
-      label: '会话路由',
-      path: 'packages/opencode/src/server/routes/session.ts',
-      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/server/routes/session.ts'
-    },
-    {
-      label: '执行循环核心',
-      path: 'packages/opencode/src/session/processor.ts',
-      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/session/processor.ts'
-    },
-    {
-      label: '数据库初始化',
-      path: 'packages/opencode/src/storage/db.ts',
-      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/storage/db.ts'
-    },
-    {
-      label: 'Provider 抽象',
-      path: 'packages/opencode/src/provider/provider.ts',
-      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/provider/provider.ts'
-    },
-    {
-      label: '权限决策',
-      path: 'packages/opencode/src/permission/next.ts',
-      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/permission/next.ts'
-    }
-  ]"
-/>
 
 ## 教学代码示例映射
 

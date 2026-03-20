@@ -3,10 +3,6 @@ title: 第31章：安全边界与高风险控制
 description: 把高风险 Agent 的安全问题拆成风险分级、确认机制、最小权限和运行时边界，而不是把一切都压给 Prompt。
 ---
 
-<script setup>
-import SourceSnapshotCard from '../../../.vitepress/theme/components/SourceSnapshotCard.vue'
-</script>
-
 > **对应路径**：`packages/opencode/src/agent/agent.ts`、`packages/opencode/src/permission/next.ts`、`packages/opencode/src/tool/registry.ts`、`packages/opencode/src/tool/bash.ts`、`docs/intermediate/examples/31-safety-boundaries/`
 > **前置阅读**：[第4章：工具系统](/03-tool-system/)、[第16章：高级主题与最佳实践](/15-advanced-topics/)、[P19：Agent 安全与防注入](/practice/p19-security/)
 > **学习目标**：理解为什么“高风险操作里的安全”首先是边界设计问题；掌握风险分级、人工确认、最小权限和渐进授权的基本思路；知道这些思路在 OpenCode 里分别由哪些运行时模块承担。
@@ -126,51 +122,6 @@ tool/registry.ts 先决定工具是否可见
 ```
 
 所以安全的关键，不是“把提示词写得更凶”，而是让越权操作即使被模型选中，也无法直接穿透系统边界。
-
-## OpenCode 源码映射
-
-这一章和 OpenCode 的映射非常直接，因为当前仓库里最值得学的安全经验，本来就集中在权限和工具执行主链上。
-
-- `agent/agent.ts`：定义不同 Agent 的默认能力边界，说明“角色”本身就是安全策略的一部分。
-- `permission/next.ts`：实现 `allow / deny / ask` 这类运行时决策，把确认机制做成正式协议。
-- `tool/registry.ts`：统一管理工具可见性与接入方式，是权限收口前的一道过滤层。
-- `tool/bash.ts`：高风险工具的典型代表，要求明确描述并走确认流程，体现“可见性 + 可控性”。
-
-如果把这四层串起来，你会更容易理解为什么本书一直强调：
-
-**先定义边界，再给能力。**
-
-<SourceSnapshotCard
-  title="第31章源码映射"
-  description="高风险 Agent 的安全边界，在 OpenCode 里主要落在角色默认权限、运行时确认协议、工具注册过滤和危险工具执行前确认四个位置。"
-  repo="anomalyco/opencode"
-  repo-url="https://github.com/anomalyco/opencode/tree/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
-  branch="dev"
-  commit="f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
-  verified-at="2026-03-20"
-  :entries="[
-    {
-      label: 'Agent 默认权限基线',
-      path: 'packages/opencode/src/agent/agent.ts',
-      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/agent/agent.ts'
-    },
-    {
-      label: '权限决策与确认',
-      path: 'packages/opencode/src/permission/next.ts',
-      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/permission/next.ts'
-    },
-    {
-      label: '工具注册表',
-      path: 'packages/opencode/src/tool/registry.ts',
-      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/tool/registry.ts'
-    },
-    {
-      label: '高风险命令工具',
-      path: 'packages/opencode/src/tool/bash.ts',
-      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/tool/bash.ts'
-    }
-  ]"
-/>
 
 ## 教学代码示例映射
 

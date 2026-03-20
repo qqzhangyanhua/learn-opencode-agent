@@ -3,10 +3,6 @@ title: 第25章：RAG 为什么总是答不准？
 description: 从五个高频翻车场景切入，理解 RAG 系统为何会答偏、漏答、编造，以及如何用工程手段逐个修复。
 ---
 
-<script setup>
-import SourceSnapshotCard from '../../../.vitepress/theme/components/SourceSnapshotCard.vue'
-</script>
-
 > **对应路径**：`packages/opencode/src/session/compaction.ts`、`packages/opencode/src/session/prompt.ts`、`packages/opencode/src/tool/truncation.ts`、`packages/opencode/src/session/processor.ts`、`docs/intermediate/examples/25-rag-failure-patterns/`
 > **前置阅读**：[P7：RAG 基础](/practice/p07-rag-basics/)、[P8：GraphRAG](/practice/p08-graphrag/)、[P9：混合检索策略](/practice/p09-hybrid-retrieval/)
 > **学习目标**：把“RAG 答不准”拆成分块、向量、召回、提示词、文档冲突五类具体故障，建立排查顺序，并理解这些问题为什么最终都会落到上下文组织与信息预算上。
@@ -190,49 +186,6 @@ meta_line = f"[来源: {chunk['source']} {chunk['version']} | 日期: {chunk['da
 ```
 
 这一步非常像数据库里的“排序规则”和“约束条件”。没有这些显式规则，模型只能自己猜。而模型最不适合做的，就是在冲突制度里拍脑袋决定谁优先。
-
-## OpenCode 源码映射
-
-OpenCode 原仓并没有内建一套通用 RAG 模块，但这章讲的五类故障，在 OpenCode 里会以另一种形式反复出现：都是“哪些信息该进上下文、哪些该裁掉、冲突时怎么收口”的问题。
-
-- `session/compaction.ts`：对应“上下文预算不够怎么办”，和 RAG 里的召回裁剪、本地压缩是同类问题。
-- `session/prompt.ts`：对应“检索结果和用户问题最终如何被组装进一轮会话”，这比把它解释成历史摘要更贴近本章的 RAG 注入主链。
-- `tool/truncation.ts`：对应“信息太长时不能全塞给模型”，和 RAG 检索结果只保留关键片段的思路一致。
-- `session/processor.ts`：对应“信息最后如何进入主循环”，它决定了模型到底看到了哪些消息。
-
-换句话说，RAG 不是独立知识点，它只是把 OpenCode 已经在做的“上下文治理”问题，换了一个检索增强的入口重新演了一遍。
-
-<SourceSnapshotCard
-  title="第25章源码映射"
-  description="OpenCode 没有原生 RAG 子系统，但上下文预算、消息组装、输出裁剪和主循环消息组织，本质都在解决同一类信息供给问题。"
-  repo="anomalyco/opencode"
-  repo-url="https://github.com/anomalyco/opencode/tree/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
-  branch="dev"
-  commit="f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
-  verified-at="2026-03-17"
-  :entries="[
-    {
-      label: '上下文预算控制',
-      path: 'packages/opencode/src/session/compaction.ts',
-      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/session/compaction.ts'
-    },
-    {
-      label: '消息组装入口',
-      path: 'packages/opencode/src/session/prompt.ts',
-      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/session/prompt.ts'
-    },
-    {
-      label: '工具输出裁剪',
-      path: 'packages/opencode/src/tool/truncation.ts',
-      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/tool/truncation.ts'
-    },
-    {
-      label: '主循环消息组织',
-      path: 'packages/opencode/src/session/processor.ts',
-      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/session/processor.ts'
-    }
-  ]"
-/>
 
 ## 教学代码示例映射
 

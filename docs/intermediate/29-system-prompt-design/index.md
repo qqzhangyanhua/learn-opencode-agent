@@ -3,10 +3,6 @@ title: 第29章：System Prompt 设计
 description: 理解 System Prompt 为什么是 Agent 的行为合同，而不是一句“你是一个助手”，并把它放回 OpenCode 的上下文装配主链里。
 ---
 
-<script setup>
-import SourceSnapshotCard from '../../../.vitepress/theme/components/SourceSnapshotCard.vue'
-</script>
-
 > **对应路径**：`packages/opencode/src/session/instruction.ts`、`packages/opencode/src/session/system.ts`、`packages/opencode/src/session/prompt.ts`、`packages/opencode/src/session/llm.ts`、`packages/opencode/src/agent/agent.ts`、`docs/intermediate/examples/29-system-prompt-design/`
 > **前置阅读**：[第2章：AI Agent 的核心组件](/01-agent-basics/)、[第5章：会话管理](/04-session-management/)、[第16章：高级主题与最佳实践](/15-advanced-topics/)
 > **学习目标**：理解 System Prompt 为什么应该被写成“行为合同”而不是一句口号；掌握身份、能力边界、行为规则、安全约束四类信息如何进入一次真实会话；知道 Prompt 为什么必须和角色、权限、上下文装配一起设计。
@@ -171,55 +167,6 @@ Prompt 先约束默认行为
 ```
 
 这也是为什么本章需要回链到 [第4章：工具系统](/03-tool-system/) 和 [P19：Agent 安全与防注入](/practice/p19-security/)。
-
-## OpenCode 源码映射
-
-这一章最适合抓五层映射关系：
-
-- `agent/agent.ts`：定义角色基线，说明 Prompt 从来不是脱离角色存在的。
-- `session/instruction.ts`：负责收集和整理项目级、用户级附加指令来源。
-- `session/system.ts`：负责生成系统层基线内容，也就是 Agent 的稳定行为框架。
-- `session/prompt.ts`：把用户输入、会话状态和运行时上下文组织到一次会话入口里。
-- `session/llm.ts`：把 system prompt、messages、tools 组装成真正发给模型的请求。
-
-如果只看 Prompt 文案而不看这五层，你会误以为“写提示词”是一个孤立动作；但在 OpenCode 里，它其实是**角色定义、指令收集、系统基线生成、会话入口装配和 LLM 调用**共同完成的。
-
-<SourceSnapshotCard
-  title="第29章源码映射"
-  description="System Prompt 在 OpenCode 里不是单独的文案文件，而是 Agent 角色、指令收集、系统基线生成、会话入口装配和 LLM 调用共同形成的运行时结果。"
-  repo="anomalyco/opencode"
-  repo-url="https://github.com/anomalyco/opencode/tree/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
-  branch="dev"
-  commit="f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
-  verified-at="2026-03-20"
-  :entries="[
-    {
-      label: '附加指令收集',
-      path: 'packages/opencode/src/session/instruction.ts',
-      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/session/instruction.ts'
-    },
-    {
-      label: 'System Prompt 装配',
-      path: 'packages/opencode/src/session/system.ts',
-      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/session/system.ts'
-    },
-    {
-      label: '会话入口与上下文收集',
-      path: 'packages/opencode/src/session/prompt.ts',
-      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/session/prompt.ts'
-    },
-    {
-      label: 'LLM 请求组装与调用',
-      path: 'packages/opencode/src/session/llm.ts',
-      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/session/llm.ts'
-    },
-    {
-      label: 'Agent 角色与默认能力',
-      path: 'packages/opencode/src/agent/agent.ts',
-      href: 'https://github.com/anomalyco/opencode/blob/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc/packages/opencode/src/agent/agent.ts'
-    }
-  ]"
-/>
 
 ## 教学代码示例映射
 
