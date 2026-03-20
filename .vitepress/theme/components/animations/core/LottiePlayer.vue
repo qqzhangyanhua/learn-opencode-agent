@@ -22,7 +22,17 @@ const containerRef = ref<HTMLElement | null>(null)
 let animation: AnimationItem | null = null
 
 onMounted(() => {
-  if (!containerRef.value) return
+  console.log('LottiePlayer mounted')
+  if (!containerRef.value) {
+    console.error('Container ref is null')
+    return
+  }
+
+  console.log('Loading animation with data:', {
+    layers: props.animationData.layers?.length,
+    frames: props.animationData.op,
+    autoplay: props.autoplay
+  })
 
   animation = lottie.loadAnimation({
     container: containerRef.value,
@@ -35,11 +45,25 @@ onMounted(() => {
   animation.setSpeed(props.speed)
 
   animation.addEventListener('complete', () => {
+    console.log('Animation complete event')
     emit('complete')
   })
 
   animation.addEventListener('loopComplete', () => {
+    console.log('Animation loop complete event')
     emit('loopComplete')
+  })
+
+  animation.addEventListener('DOMLoaded', () => {
+    console.log('Animation DOM loaded')
+  })
+
+  animation.addEventListener('data_ready', () => {
+    console.log('Animation data ready')
+  })
+
+  animation.addEventListener('error', (error) => {
+    console.error('Animation error:', error)
   })
 })
 
@@ -86,7 +110,8 @@ defineExpose({
 <style scoped>
 .lottie-player {
   width: 100%;
-  height: 100%;
-  min-height: 300px;
+  height: 500px;
+  min-height: 500px;
+  background: var(--vp-c-bg);
 }
 </style>
