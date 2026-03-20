@@ -9,6 +9,9 @@
 pip install openai
 ```
 
+## 必要环境变量
+- `DEEPSEEK_API_KEY`：脚本通过 DeepSeek OpenAI 接口调用模型，运行前必须设定（macOS/Linux: `export DEEPSEEK_API_KEY="your_key"`；Windows: `set DEEPSEEK_API_KEY=your_key`）。
+
 ## 建议先运行哪个文件
 ```bash
 python multi_agent.py

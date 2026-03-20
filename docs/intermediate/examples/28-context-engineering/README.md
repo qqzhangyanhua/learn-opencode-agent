@@ -9,6 +9,9 @@
 pip install openai tiktoken chromadb
 ```
 
+## 必要环境变量
+- `DEEPSEEK_API_KEY`：上下文工程示例会调用 DeepSeek Chat，务必在运行前导出（macOS/Linux: `export DEEPSEEK_API_KEY="your_key"`；Windows: `set DEEPSEEK_API_KEY=your_key`）。
+
 ## 建议先运行哪个文件
 ```bash
 python context_engine.py

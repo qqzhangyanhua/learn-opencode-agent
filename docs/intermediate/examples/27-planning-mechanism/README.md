@@ -9,6 +9,9 @@
 pip install openai
 ```
 
+## 必要环境变量
+- `DEEPSEEK_API_KEY`：用于所有演示的机器人调用接口，运行前请导出（macOS/Linux: `export DEEPSEEK_API_KEY="your_key"`；Windows: `set DEEPSEEK_API_KEY=your_key`）。
+
 ## 建议先运行哪个文件
 ```bash
 python plan_and_execute.py

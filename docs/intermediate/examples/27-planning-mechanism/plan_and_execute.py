@@ -1,6 +1,7 @@
 """
 Planning 机制：从 ReAct 到 Plan-and-Execute
-完整可运行示例 —— 对应文章第 10 篇
+原始来源：AI 智能体系列第 10 篇
+当前对应：中级篇第 27 章
 
 运行：
     export DEEPSEEK_API_KEY="your_key"
