@@ -183,12 +183,12 @@ const summaryToggleLabel = computed(() => (
 const summaryText = computed(() => [
   `章节：${props.chapterLabel}`,
   `模板：${props.templateLabel}`,
+  `模型：${configSummary.value?.model || '尚未运行'}`,
+  `耗时：${durationLabel.value}`,
   `配置来源：${props.configSourceLabel}`,
   `最近保存：${props.configSavedAtLabel}`,
-  `模型：${configSummary.value?.model || '尚未运行'}`,
   `接口地址：${configSummary.value?.baseURL || '尚未运行'}`,
   `密钥状态：${apiKeyStatusLabel.value}`,
-  `耗时：${durationLabel.value}`,
 ].join('\n'))
 
 watch(
@@ -488,25 +488,29 @@ function resolveDebugTone(line: string): 'error' | 'warning' | 'trace' | 'neutra
       </div>
 
       <dl class="summary-grid">
-        <div class="summary-item">
+        <div class="summary-item summary-item-core">
           <dt>章节</dt>
           <dd>{{ chapterLabel }}</dd>
         </div>
-        <div class="summary-item">
+        <div class="summary-item summary-item-core">
           <dt>模板</dt>
           <dd>{{ templateLabel }}</dd>
         </div>
-        <div class="summary-item">
+        <div class="summary-item summary-item-core">
+          <dt>模型</dt>
+          <dd>{{ configSummary?.model || '尚未运行' }}</dd>
+        </div>
+        <div class="summary-item summary-item-core">
+          <dt>耗时</dt>
+          <dd>{{ durationLabel }}</dd>
+        </div>
+        <div :class="['summary-item', 'summary-item-secondary', { visible: summaryDetailsExpanded }]">
           <dt>配置来源</dt>
           <dd>{{ configSourceLabel }}</dd>
         </div>
-        <div class="summary-item">
+        <div :class="['summary-item', 'summary-item-secondary', { visible: summaryDetailsExpanded }]">
           <dt>最近保存</dt>
           <dd>{{ configSavedAtLabel }}</dd>
-        </div>
-        <div :class="['summary-item', 'summary-item-secondary', { visible: summaryDetailsExpanded }]">
-          <dt>模型</dt>
-          <dd>{{ configSummary?.model || '尚未运行' }}</dd>
         </div>
         <div :class="['summary-item', 'summary-item-secondary', { visible: summaryDetailsExpanded }]">
           <dt>接口地址</dt>
@@ -515,10 +519,6 @@ function resolveDebugTone(line: string): 'error' | 'warning' | 'trace' | 'neutra
         <div :class="['summary-item', 'summary-item-secondary', { visible: summaryDetailsExpanded }]">
           <dt>密钥状态</dt>
           <dd>{{ apiKeyStatusLabel }}</dd>
-        </div>
-        <div :class="['summary-item', 'summary-item-secondary', { visible: summaryDetailsExpanded }]">
-          <dt>耗时</dt>
-          <dd>{{ durationLabel }}</dd>
         </div>
       </dl>
       <button
