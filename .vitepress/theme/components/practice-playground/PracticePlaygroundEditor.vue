@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import PracticePlaygroundJsonEditor from './PracticePlaygroundJsonEditor.vue'
 import PracticePlaygroundStructuredEditor from './PracticePlaygroundStructuredEditor.vue'
 import type {
@@ -22,6 +23,21 @@ const emit = defineEmits<{
   'update:editor-state': [state: PracticeTemplateEditorState]
   'update:view-mode': [mode: PracticePlaygroundTemplateViewMode]
 }>()
+
+const draftStatusLabel = computed(() => (
+  props.editorState.isDirty ? '草稿未保存' : '当前为默认草稿'
+))
+const draftStatusTone = computed(() => (
+  props.editorState.isDirty ? 'warning' : 'idle'
+))
+const lastEditedLabel = computed(() => {
+  return new Intl.DateTimeFormat('zh-CN', {
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(props.editorState.lastSyncedFromTemplateAt)
+})
 
 function handleViewModeChange(mode: PracticePlaygroundTemplateViewMode) {
   if (mode === props.viewMode) return
@@ -109,7 +125,8 @@ function handleFormatJson() {
       </div>
 
       <div class="editor-status">
-        <span>{{ editorState.isDirty ? '当前标签页草稿已修改' : '当前标签页草稿' }}</span>
+        <span :class="['status-pill', draftStatusTone]">{{ draftStatusLabel }}</span>
+        <span>最后修改：{{ lastEditedLabel }}</span>
         <span>改动仅在当前标签页有效</span>
       </div>
     </div>
@@ -182,6 +199,21 @@ function handleFormatJson() {
   text-align: right;
   font-size: 12px;
   color: var(--vp-c-text-2);
+  justify-items: end;
+}
+
+.status-pill {
+  border-radius: 999px;
+  padding: 5px 10px;
+  border: 1px solid var(--vp-c-divider);
+  background: color-mix(in srgb, var(--vp-c-bg) 92%, white);
+  color: var(--vp-c-text-2);
+}
+
+.status-pill.warning {
+  border-color: color-mix(in srgb, #f59e0b 40%, var(--vp-c-divider));
+  background: color-mix(in srgb, #f59e0b 10%, var(--vp-c-bg));
+  color: #92400e;
 }
 
 .warning-banner,
@@ -205,6 +237,7 @@ function handleFormatJson() {
 @media (max-width: 700px) {
   .editor-status {
     text-align: left;
+    justify-items: start;
   }
 }
 </style>
