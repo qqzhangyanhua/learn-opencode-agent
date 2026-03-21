@@ -12,12 +12,16 @@ const emit = defineEmits<{
   rerun: []
 }>()
 
-const copyStatus = ref('')
+const outputCopyStatus = ref('')
+const debugCopyStatus = ref('')
 const outputPanelRef = ref<HTMLElement | null>(null)
 let lastOutputLength = 0
 
 const configSummary = computed(() => props.runState.configSnapshot)
 const hasRunnableOutput = computed(() => Boolean(props.runState.outputText.trim()))
+const hasDebugContent = computed(() => {
+  return props.runState.debugLines.length > 0 || Boolean(props.runState.errorMessage.trim())
+})
 const hasRunArtifacts = computed(() => {
   return props.runState.status !== 'idle'
     || Boolean(props.runState.outputText.trim())
@@ -92,11 +96,13 @@ watch(
 )
 
 watch(
-  () => copyStatus.value,
-  (value) => {
+  () => [outputCopyStatus.value, debugCopyStatus.value],
+  ([outputValue, debugValue]) => {
+    const value = outputValue || debugValue
     if (!value) return
     const timer = window.setTimeout(() => {
-      copyStatus.value = ''
+      outputCopyStatus.value = ''
+      debugCopyStatus.value = ''
     }, 1800)
     return () => window.clearTimeout(timer)
   },
@@ -105,15 +111,35 @@ watch(
 async function handleCopyOutput() {
   const text = props.runState.outputText.trim()
   if (!text.trim() || typeof navigator === 'undefined' || !navigator.clipboard?.writeText) {
-    copyStatus.value = '当前环境不支持复制输出。'
+    outputCopyStatus.value = '当前环境不支持复制输出。'
     return
   }
 
   try {
     await navigator.clipboard.writeText(text)
-    copyStatus.value = '输出已复制。'
+    outputCopyStatus.value = '输出已复制。'
   } catch {
-    copyStatus.value = '复制失败，请手动复制。'
+    outputCopyStatus.value = '复制失败，请手动复制。'
+  }
+}
+
+async function handleCopyDebug() {
+  const lines = [
+    props.runState.errorMessage.trim(),
+    ...props.runState.debugLines,
+  ].filter(Boolean)
+  const text = lines.join('\n')
+
+  if (!text.trim() || typeof navigator === 'undefined' || !navigator.clipboard?.writeText) {
+    debugCopyStatus.value = '当前环境不支持复制调试信息。'
+    return
+  }
+
+  try {
+    await navigator.clipboard.writeText(text)
+    debugCopyStatus.value = '调试信息已复制。'
+  } catch {
+    debugCopyStatus.value = '复制失败，请手动复制。'
   }
 }
 
@@ -188,12 +214,20 @@ function resolveDebugTone(line: string): 'error' | 'warning' | 'trace' | 'neutra
       <pre ref="outputPanelRef" :class="['output-panel', { empty: !runState.outputText.trim() }]">
         {{ outputSummary }}
       </pre>
-      <p v-if="copyStatus" class="copy-status">{{ copyStatus }}</p>
+      <p v-if="outputCopyStatus" class="copy-status">{{ outputCopyStatus }}</p>
     </article>
 
     <article class="result-card debug-card">
       <div class="card-header">
         <h2>调试</h2>
+        <button
+          type="button"
+          class="ghost-button"
+          :disabled="!hasDebugContent"
+          @click="handleCopyDebug"
+        >
+          复制调试
+        </button>
       </div>
       <p v-if="runState.errorMessage" class="error-message">{{ runState.errorMessage }}</p>
       <ul class="debug-list">
@@ -205,6 +239,7 @@ function resolveDebugTone(line: string): 'error' | 'warning' | 'trace' | 'neutra
           {{ entry.line }}
         </li>
       </ul>
+      <p v-if="debugCopyStatus" class="copy-status">{{ debugCopyStatus }}</p>
     </article>
   </section>
 </template>
