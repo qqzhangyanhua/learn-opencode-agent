@@ -983,10 +983,14 @@ function resolveDebugTone(line: string): 'error' | 'warning' | 'trace' | 'neutra
   }
 
   .card-actions-secondary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     width: 100%;
   }
 
   .action-button {
+    padding: 8px 10px;
+    font-size: 12px;
     width: 100%;
     justify-content: center;
     text-align: center;
@@ -1006,6 +1010,10 @@ function resolveDebugTone(line: string): 'error' | 'warning' | 'trace' | 'neutra
 
   .card-title {
     width: 100%;
+  }
+
+  .card-meta {
+    font-size: 11px;
   }
 
   .card-actions-main {
