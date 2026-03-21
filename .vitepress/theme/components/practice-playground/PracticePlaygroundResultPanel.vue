@@ -852,6 +852,21 @@ function resolveDebugTone(line: string): 'error' | 'warning' | 'trace' | 'neutra
 .summary-grid dd {
   margin: 6px 0 0;
   word-break: break-word;
+  color: var(--vp-c-text-1);
+  font-weight: 600;
+}
+
+.summary-item-core dd {
+  font-size: 14px;
+}
+
+.summary-item-secondary dt {
+  color: color-mix(in srgb, var(--vp-c-text-2) 82%, transparent);
+}
+
+.summary-item-secondary dd {
+  color: var(--vp-c-text-2);
+  font-weight: 500;
 }
 
 .summary-toggle {
