@@ -32,6 +32,7 @@ import {
 } from './practicePlaygroundTypes'
 import {
   clearPracticePlaygroundConfig,
+  hasPracticePlaygroundStoredConfig,
   loadPracticePlaygroundConfig,
   savePracticePlaygroundConfig,
 } from './practicePlaygroundStorage'
@@ -50,6 +51,7 @@ type WorkspaceFeedbackTone = 'neutral' | 'running' | 'success' | 'warning' | 'er
 
 const selectedChapterId = ref<PracticePlaygroundChapterId>(DEFAULT_PRACTICE_PLAYGROUND_CHAPTER_ID)
 const playgroundConfig = ref<PracticePlaygroundConfig>(createDefaultPracticePlaygroundConfig())
+const hasStoredConfig = ref(false)
 const settingsModalOpen = ref(false)
 const runState = ref<PracticePlaygroundRunState>(createInitialPracticePlaygroundRunState())
 const workspaceFeedback = ref<{
@@ -73,6 +75,7 @@ const lastAppliedTemplate = ref<PracticePlaygroundTemplate | null>(null)
 const currentModelLabel = computed(() => playgroundConfig.value.model.trim() || '未设置')
 const currentChapterLabel = computed(() => `${selectedChapter.value.number} · ${selectedChapter.value.title}`)
 const currentTemplateLabel = computed(() => editorState.value.template.meta.title || '当前模板')
+const configSourceLabel = computed(() => hasStoredConfig.value ? '浏览器本地存储' : '当前会话')
 const hasApiKey = computed(() => Boolean(playgroundConfig.value.apiKey.trim()))
 const isConfigReady = computed(() => {
   return Boolean(
@@ -289,6 +292,7 @@ function handleSettingsClose() {
 function handleSettingsSave(nextConfig: PracticePlaygroundConfig) {
   playgroundConfig.value = nextConfig
   const didPersist = savePracticePlaygroundConfig(nextConfig)
+  hasStoredConfig.value = didPersist
   workspaceFeedback.value = didPersist
     ? {
         text: '配置已保存到当前浏览器。',
@@ -304,6 +308,7 @@ function handleSettingsSave(nextConfig: PracticePlaygroundConfig) {
 function handleSettingsClear() {
   const didClear = clearPracticePlaygroundConfig()
   playgroundConfig.value = createDefaultPracticePlaygroundConfig()
+  hasStoredConfig.value = false
   workspaceFeedback.value = didClear
     ? {
         text: '已清空本地配置并恢复默认值。',
@@ -386,6 +391,7 @@ function handleRun() {
 
 onMounted(() => {
   playgroundConfig.value = loadPracticePlaygroundConfig()
+  hasStoredConfig.value = hasPracticePlaygroundStoredConfig()
   syncChapterFromLocation()
   if (inBrowser) {
     window.addEventListener('popstate', handlePopState)
@@ -490,6 +496,7 @@ function findLastAbortLine(debugLines: string[]): string | null {
         <PracticePlaygroundResultPanel
           :can-rerun="canRun"
           :chapter-label="currentChapterLabel"
+          :config-source-label="configSourceLabel"
           :is-running="runState.status === 'running'"
           :run-state="runState"
           :template-label="currentTemplateLabel"

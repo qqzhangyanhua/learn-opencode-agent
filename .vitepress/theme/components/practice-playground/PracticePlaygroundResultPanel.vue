@@ -5,6 +5,7 @@ import type { PracticePlaygroundRunState } from './practicePlaygroundTypes'
 const props = defineProps<{
   canRerun: boolean
   chapterLabel: string
+  configSourceLabel: string
   isRunning: boolean
   runState: PracticePlaygroundRunState
   templateLabel: string
@@ -171,6 +172,10 @@ function resolveDebugTone(line: string): 'error' | 'warning' | 'trace' | 'neutra
         <div>
           <dt>模板</dt>
           <dd>{{ templateLabel }}</dd>
+        </div>
+        <div>
+          <dt>配置来源</dt>
+          <dd>{{ configSourceLabel }}</dd>
         </div>
         <div>
           <dt>模型</dt>

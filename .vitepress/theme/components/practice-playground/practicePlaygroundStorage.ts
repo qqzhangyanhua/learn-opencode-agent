@@ -45,6 +45,17 @@ export function loadPracticePlaygroundConfig(): PracticePlaygroundConfig {
   }
 }
 
+export function hasPracticePlaygroundStoredConfig(): boolean {
+  const storage = getStorageSafely()
+  if (!storage) return false
+
+  try {
+    return Boolean(storage.getItem(PRACTICE_PLAYGROUND_STORAGE_KEY))
+  } catch {
+    return false
+  }
+}
+
 export function savePracticePlaygroundConfig(config: PracticePlaygroundConfig): boolean {
   const storage = getStorageSafely()
   if (!storage) return false
