@@ -8,12 +8,15 @@ importers:
 
   .:
     dependencies:
-      '@anthropic-ai/sdk':
-        specifier: ^0.80.0
-        version: 0.80.0(zod@4.3.6)
       '@modelcontextprotocol/sdk':
         specifier: ^1.27.1
         version: 1.27.1(zod@4.3.6)
+      lottie-web:
+        specifier: ^5.13.0
+        version: 5.13.0
+      openai:
+        specifier: ^6.32.0
+        version: 6.32.0(zod@4.3.6)
     devDependencies:
       mermaid:
         specifier: ^11.13.0
@@ -109,15 +112,6 @@ packages:
   '@antfu/install-pkg@1.1.0':
     resolution: {integrity: sha512-MGQsmw10ZyI+EJo45CdSER4zEb+p31LpDAFp2Z3gkSd1yqVZGi0Ebx++YTEMonJy4oChEMLsxZ64j8FH6sSqtQ==}
 
-  '@anthropic-ai/sdk@0.80.0':
-    resolution: {integrity: sha512-WeXLn7zNVk3yjeshn+xZHvld6AoFUOR3Sep6pSoHho5YbSi6HwcirqgPA5ccFuW8QTVJAAU7N8uQQC6Wa9TG+g==}
-    hasBin: true
-    peerDependencies:
-      zod: ^3.25.0 || ^4.0.0
-    peerDependenciesMeta:
-      zod:
-        optional: true
-
   '@babel/helper-string-parser@7.27.1':
     resolution: {integrity: sha512-qMlSxKbpRlAridDExk92nSobyDdpPijUq2DW6oDnUqd0iOGxmQjyqhMIihI9+zv4LPyZdRje2cavWPbCbWm3eA==}
     engines: {node: '>=6.9.0'}
@@ -130,10 +124,6 @@ packages:
     resolution: {integrity: sha512-IyDgFV5GeDUVX4YdF/3CPULtVGSXXMLh1xVIgdCgxApktqnQV0r7/8Nqthg+8YLGaAtdyIlo2qIdZrbCv4+7ww==}
     engines: {node: '>=6.0.0'}
     hasBin: true
-
-  '@babel/runtime@7.29.2':
-    resolution: {integrity: sha512-JiDShH45zKHWyGe4ZNVRrCjBz8Nh9TMmZG1kh4QTK8hCBTWBi8Da+i7s1fJw7/lYpM4ccepSNfqzZ/QvABBi5g==}
-    engines: {node: '>=6.9.0'}
 
   '@babel/types@7.29.0':
     resolution: {integrity: sha512-LwdZHpScM4Qz8Xw2iKSzS+cfglZzJGvofQICy7W7v4caru4EaAmyUuO6BGrbyQ2mYV11W0U8j5mBhd14dd3B0A==}
@@ -1211,10 +1201,6 @@ packages:
   jose@6.2.2:
     resolution: {integrity: sha512-d7kPDd34KO/YnzaDOlikGpOurfF0ByC2sEV4cANCtdqLlTfBlw2p14O/5d/zv40gJPbIQxfES3nSx1/oYNyuZQ==}
 
-  json-schema-to-ts@3.1.1:
-    resolution: {integrity: sha512-+DWg8jCJG2TEnpy7kOm/7/AxaYoaRbjVB4LFZLySZlWn8exGs3A4OLJR966cVvU26N7X9TWxl+Jsw7dzAqKT6g==}
-    engines: {node: '>=16'}
-
   json-schema-traverse@1.0.0:
     resolution: {integrity: sha512-NM8/P9n3XjXhIZn1lLhkFaACTOURQXjWhV4BA/RnOv8xvgqtqpAX9IO4mRQxSx1Rlo4tqzeqb0sOlruaOy3dug==}
 
@@ -1240,6 +1226,9 @@ packages:
 
   lodash-es@4.17.23:
     resolution: {integrity: sha512-kVI48u3PZr38HdYz98UmfPnXl2DXrpdctLrFLCd3kOx1xUkOmpFPx7gCWWM5MPkL/fD8zb+Ph0QzjGFs4+hHWg==}
+
+  lottie-web@5.13.0:
+    resolution: {integrity: sha512-+gfBXl6sxXMPe8tKQm7qzLnUy5DUPJPKIyRHwtpCpyUEYjHYRJC/5gjUvdkuO2c3JllrPtHXH5UJJK8LRYl5yQ==}
 
   magic-string@0.30.21:
     resolution: {integrity: sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==}
@@ -1334,6 +1323,18 @@ packages:
 
   oniguruma-to-es@3.1.1:
     resolution: {integrity: sha512-bUH8SDvPkH3ho3dvwJwfonjlQ4R80vjyvrU8YpxuROddv55vAEJrTuCuCVUhhsHbtlD9tGGbaNApGQckXhS8iQ==}
+
+  openai@6.32.0:
+    resolution: {integrity: sha512-j3k+BjydAf8yQlcOI7WUQMQTbbF5GEIMAE2iZYCOzwwB3S2pCheaWYp+XZRNAch4jWVc52PMDGRRjutao3lLCg==}
+    hasBin: true
+    peerDependencies:
+      ws: ^8.18.0
+      zod: ^3.25 || ^4.0
+    peerDependenciesMeta:
+      ws:
+        optional: true
+      zod:
+        optional: true
 
   package-manager-detector@1.6.0:
     resolution: {integrity: sha512-61A5ThoTiDG/C8s8UMZwSorAGwMJ0ERVGj2OjoW5pAalsNOg15+iQiPzrLJ4jhZ1HJzmC2PIHT2oEiH3R5fzNA==}
@@ -1516,9 +1517,6 @@ packages:
 
   trim-lines@3.0.1:
     resolution: {integrity: sha512-kRj8B+YHZCc9kQYdWfJB2/oUl9rA99qbowYYBtr4ui4mZyAQ2JpvVBd/6U2YloATfqBhBTSMhTpgBHtU0Mf3Rg==}
-
-  ts-algebra@2.0.0:
-    resolution: {integrity: sha512-FPAhNPFMrkwz76P7cdjdmiShwMynZYN6SgOujD1urY4oNm80Ou9oMdmbR45LotcKOXoy7wSmHkRFE6Mxbrhefw==}
 
   ts-dedent@2.2.0:
     resolution: {integrity: sha512-q5W7tVM71e2xjHZTlgfTDoPF/SmqKG5hddq9SzR49CH2hayqRKJtQ4mtRlSxKaJlR/+9rEM+mnBHf7I2/BQcpQ==}
@@ -1784,12 +1782,6 @@ snapshots:
       package-manager-detector: 1.6.0
       tinyexec: 1.0.4
 
-  '@anthropic-ai/sdk@0.80.0(zod@4.3.6)':
-    dependencies:
-      json-schema-to-ts: 3.1.1
-    optionalDependencies:
-      zod: 4.3.6
-
   '@babel/helper-string-parser@7.27.1': {}
 
   '@babel/helper-validator-identifier@7.28.5': {}
@@ -1797,8 +1789,6 @@ snapshots:
   '@babel/parser@7.29.0':
     dependencies:
       '@babel/types': 7.29.0
-
-  '@babel/runtime@7.29.2': {}
 
   '@babel/types@7.29.0':
     dependencies:
@@ -2888,11 +2878,6 @@ snapshots:
 
   jose@6.2.2: {}
 
-  json-schema-to-ts@3.1.1:
-    dependencies:
-      '@babel/runtime': 7.29.2
-      ts-algebra: 2.0.0
-
   json-schema-traverse@1.0.0: {}
 
   json-schema-typed@8.0.2: {}
@@ -2916,6 +2901,8 @@ snapshots:
   layout-base@2.0.1: {}
 
   lodash-es@4.17.23: {}
+
+  lottie-web@5.13.0: {}
 
   magic-string@0.30.21:
     dependencies:
@@ -3027,6 +3014,10 @@ snapshots:
       emoji-regex-xs: 1.0.0
       regex: 6.1.0
       regex-recursion: 6.0.2
+
+  openai@6.32.0(zod@4.3.6):
+    optionalDependencies:
+      zod: 4.3.6
 
   package-manager-detector@1.6.0: {}
 
@@ -3255,8 +3246,6 @@ snapshots:
   toidentifier@1.0.1: {}
 
   trim-lines@3.0.1: {}
-
-  ts-algebra@2.0.0: {}
 
   ts-dedent@2.2.0: {}
 
