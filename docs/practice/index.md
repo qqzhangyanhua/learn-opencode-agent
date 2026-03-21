@@ -21,6 +21,7 @@ import PracticeTagCloud from '../../.vitepress/theme/components/PracticeTagCloud
 
 <div class="practice-actions">
   <a href="/practice/setup" class="btn-secondary">开始前先看</a>
+  <a href="/practice/setup#online-mode" class="btn-secondary">在线运行说明</a>
   <a href="/practice/p01-minimal-agent/" class="btn-primary">从 P1 开始</a>
   <a href="#phases" class="btn-secondary">课程大纲</a>
   <a href="#chapter-matrix" class="btn-secondary">章节总表</a>
@@ -28,7 +29,7 @@ import PracticeTagCloud from '../../.vitepress/theme/components/PracticeTagCloud
   <a href="/" class="btn-secondary">← 返回理论篇</a>
 </div>
 
-> 第一次进入实践篇，建议先看 [实践环境准备](/practice/setup)。当前实践篇已经覆盖 `P1-P23` 的仓库内示例文件，可直接按章节命令运行。
+> 第一次进入实践篇，建议先看 [实践环境准备](/practice/setup)。如果你想先在浏览器侧填写 `API Key / baseURL / model` 试跑，再决定要不要搭本地环境，可以直接跳到 [在线运行模式](/practice/setup#online-mode)。当前实践篇已经覆盖 `P1-P23` 的仓库内示例文件，可直接按章节命令运行。
 
 </div>
 
@@ -65,6 +66,8 @@ import PracticeTagCloud from '../../.vitepress/theme/components/PracticeTagCloud
 ## 运行索引 {#run-index}
 
 如果你已经完成环境准备，可以直接从这里复制命令进入任意章节：
+
+如果你当前走的是在线运行模式，建议先从 `P1-P4`、`P10`、`P18` 这类轻量章节开始；像 `P14` 这样的双进程章节，仍然优先使用本地运行模式。
 
 ### 先看依赖分组
 
@@ -180,7 +183,7 @@ import PracticeTagCloud from '../../.vitepress/theme/components/PracticeTagCloud
 - `P14` 章节除了 `p14-mcp.ts` 外，还需要 `practice/p14-mcp-server.ts` 配合运行，建议分两个终端分别执行：
   - `bun run p14-mcp-server.ts`
   - `bun run p14-mcp.ts`
-- 运行前仍建议先看 [实践环境准备](/practice/setup)，重点确认依赖和 `OPENAI_API_KEY`。
+- 运行前仍建议先看 [实践环境准备](/practice/setup)，重点确认依赖，以及 `API Key / baseURL / model` 是否已经准备好。
 
 <style scoped>
 .practice-hero-section {
