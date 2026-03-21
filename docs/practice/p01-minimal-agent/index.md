@@ -11,7 +11,7 @@ description: 用 80 行 TypeScript 构建你的第一个可运行 Agent，理解
   :tags="['OpenAI SDK', 'Tool Calling', 'TypeScript']"
 />
 
-> 开始前先看：[实践环境准备](/practice/setup)。如果你还不想先搭本地环境，也可以先打开 [本章在线 Playground](/practice/playground/?chapter=p01-minimal-agent)，在浏览器侧填写 `API Key / baseURL / model` 直接试跑；相关限制和安全提示见 [在线运行模式](/practice/setup#online-mode)。本章对应示例文件位于 `practice/` 目录，可直接按命令运行。
+> 开始前先看：[实践环境准备](/practice/setup)。如果你还不想先搭本地环境，也可以先打开 <a href="/practice/playground/?chapter=p01-minimal-agent" target="_blank" rel="noopener noreferrer">本章在线运行工作台</a>，在浏览器侧填写 `API Key / baseURL / model` 直接试跑；相关限制和安全提示见 [在线运行模式](/practice/setup#online-mode)。本章对应示例文件位于 `practice/` 目录，可直接按命令运行。
 
 ## 前置准备
 
@@ -62,7 +62,7 @@ const response = await client.chat.completions.create({
 ### 运行与验证
 
 - 先按前置准备完成依赖、运行参数和本章示例文件
-- 如果你走在线运行模式，先打开 [本章在线 Playground](/practice/playground/?chapter=p01-minimal-agent)，确认页面里的 `API Key / baseURL / model` 已填写正确
+- 如果你走在线运行模式，先打开 <a href="/practice/playground/?chapter=p01-minimal-agent" target="_blank" rel="noopener noreferrer">本章在线运行工作台</a>，确认页面里的 `API Key / baseURL / model` 已填写正确
 - 如果你走本地运行模式，再执行上面的推荐入口命令
 - 将输出与下文的“运行结果”或章节描述对照，确认主链路已经跑通
 - 如果遇到命令、依赖、环境变量或样例输入问题，先回到 [实践环境准备](/practice/setup) 排查

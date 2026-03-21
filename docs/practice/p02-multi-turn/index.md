@@ -11,7 +11,7 @@ description: 构建有记忆的对话助手，掌握 messages 历史管理与 To
   :tags="['OpenAI SDK', 'Context Management', 'TypeScript']"
 />
 
-> 开始前先看：[实践环境准备](/practice/setup)。如果你想先跳过本地安装，也可以直接打开 [本章在线 Playground](/practice/playground/?chapter=p02-multi-turn) 运行预置多轮示例；相关限制和安全提示见 [在线运行模式](/practice/setup#online-mode)。本章对应示例文件位于 `practice/` 目录，可直接按命令运行。
+> 开始前先看：[实践环境准备](/practice/setup)。如果你想先跳过本地安装，也可以直接打开 <a href="/practice/playground/?chapter=p02-multi-turn" target="_blank" rel="noopener noreferrer">本章在线运行工作台</a> 运行预置多轮示例；相关限制和安全提示见 [在线运行模式](/practice/setup#online-mode)。本章对应示例文件位于 `practice/` 目录，可直接按命令运行。
 
 ## 前置准备
 
@@ -115,7 +115,7 @@ function estimateTokens(text: string): number {
 ### 运行与验证
 
 - 先按前置准备完成依赖、环境变量和本章示例文件
-- 如果你走在线运行模式，先打开 [本章在线 Playground](/practice/playground/?chapter=p02-multi-turn) 并填写 `API Key / baseURL / model`
+- 如果你走在线运行模式，先打开 <a href="/practice/playground/?chapter=p02-multi-turn" target="_blank" rel="noopener noreferrer">本章在线运行工作台</a> 并填写 `API Key / baseURL / model`
 - 如果你走本地运行模式，再执行上面的推荐入口命令
 - 将输出与下文的“运行结果”或章节描述对照，确认主链路已经跑通
 - 如果遇到命令、依赖、环境变量或样例输入问题，先回到 [实践环境准备](/practice/setup) 排查
