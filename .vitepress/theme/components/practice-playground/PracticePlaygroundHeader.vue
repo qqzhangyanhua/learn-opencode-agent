@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { PracticePlaygroundChapter, PracticePlaygroundChapterId } from './practicePlaygroundTypes'
 
 const props = defineProps<{
@@ -22,6 +23,15 @@ const emit = defineEmits<{
   'reset-template': []
   run: []
 }>()
+
+const resetButtonTitle = computed(() => (
+  props.isResetDisabled ? '当前没有可重置的模板改动或运行结果。' : '恢复当前章节的默认模板并清空运行。'
+))
+const runButtonTitle = computed(() => {
+  if (props.isRunning) return '当前请求仍在运行。'
+  if (props.isRunBlocked) return props.workStatusHint
+  return '立即运行当前模板。快捷键：Ctrl / ⌘ + Enter'
+})
 </script>
 
 <template>
@@ -65,6 +75,7 @@ const emit = defineEmits<{
         type="button"
         class="ghost-button"
         :disabled="isResetDisabled"
+        :title="resetButtonTitle"
         @click="emit('reset-template')"
       >
         重置
@@ -73,7 +84,7 @@ const emit = defineEmits<{
         type="button"
         class="run-button"
         :disabled="isRunning || isRunBlocked"
-        title="快捷键：Ctrl / ⌘ + Enter"
+        :title="runButtonTitle"
         @click="emit('run')"
       >
         {{ isRunning ? '运行中…' : '运行' }}

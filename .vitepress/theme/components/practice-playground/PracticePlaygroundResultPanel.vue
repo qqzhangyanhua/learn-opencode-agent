@@ -86,6 +86,20 @@ const durationLabel = computed(() => {
   if (props.runState.durationMs === null) return '尚无'
   return `${props.runState.durationMs} ms`
 })
+const rerunButtonTitle = computed(() => {
+  if (props.isRunning) return '当前请求仍在运行。'
+  if (!props.canRerun) return '先补齐配置并修复模板问题后，才能再次运行。'
+  return '沿用当前模板再次发起运行。'
+})
+const clearButtonTitle = computed(() => (
+  hasRunArtifacts.value ? '清空当前输出、调试信息和运行摘要。' : '当前没有可清空的运行结果。'
+))
+const copyOutputButtonTitle = computed(() => (
+  hasRunnableOutput.value ? '复制当前输出内容。' : '当前还没有可复制的输出内容。'
+))
+const copyDebugButtonTitle = computed(() => (
+  hasDebugContent.value ? '复制当前调试信息。' : '当前还没有可复制的调试信息。'
+))
 const summaryText = computed(() => [
   `章节：${props.chapterLabel}`,
   `模板：${props.templateLabel}`,
@@ -245,6 +259,7 @@ function resolveDebugTone(line: string): 'error' | 'warning' | 'trace' | 'neutra
           <button
             type="button"
             class="ghost-button"
+            :title="rerunButtonTitle"
             :disabled="!canRerun || isRunning"
             @click="emit('rerun')"
           >
@@ -253,6 +268,7 @@ function resolveDebugTone(line: string): 'error' | 'warning' | 'trace' | 'neutra
           <button
             type="button"
             class="ghost-button"
+            :title="clearButtonTitle"
             :disabled="!hasRunArtifacts"
             @click="emit('clear')"
           >
@@ -261,6 +277,7 @@ function resolveDebugTone(line: string): 'error' | 'warning' | 'trace' | 'neutra
           <button
             type="button"
             class="ghost-button"
+            :title="copyOutputButtonTitle"
             :disabled="!hasRunnableOutput"
             @click="handleCopyOutput"
           >
@@ -280,6 +297,7 @@ function resolveDebugTone(line: string): 'error' | 'warning' | 'trace' | 'neutra
         <button
           type="button"
           class="ghost-button"
+          :title="copyDebugButtonTitle"
           :disabled="!hasDebugContent"
           @click="handleCopyDebug"
         >
