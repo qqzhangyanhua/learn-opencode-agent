@@ -22,11 +22,13 @@ const summaryCopyStatus = ref('')
 const outputCardRef = ref<HTMLElement | null>(null)
 const debugCardRef = ref<HTMLElement | null>(null)
 const outputPanelRef = ref<HTMLElement | null>(null)
+const debugListRef = ref<HTMLElement | null>(null)
 const liveDurationMs = ref<number | null>(null)
 const outputExpanded = ref(false)
 const debugExpanded = ref(false)
 let liveDurationTimer: number | null = null
 let lastOutputLength = 0
+let lastDebugItemCount = 0
 
 const configSummary = computed(() => props.runState.configSnapshot)
 const hasRunnableOutput = computed(() => Boolean(props.runState.outputText.trim()))
@@ -153,6 +155,19 @@ watch(
     await nextTick()
     if (!outputPanelRef.value) return
     outputPanelRef.value.scrollTop = outputPanelRef.value.scrollHeight
+  },
+)
+
+watch(
+  () => [props.runState.debugLines.length, props.runState.errorMessage] as const,
+  async ([debugLineCount, errorMessage]) => {
+    const nextDebugItemCount = debugLineCount + (errorMessage.trim() ? 1 : 0)
+    const shouldAutoScroll = nextDebugItemCount > lastDebugItemCount
+    lastDebugItemCount = nextDebugItemCount
+    if (!shouldAutoScroll) return
+    await nextTick()
+    if (!debugListRef.value) return
+    debugListRef.value.scrollTop = debugListRef.value.scrollHeight
   },
 )
 
@@ -440,7 +455,7 @@ function resolveDebugTone(line: string): 'error' | 'warning' | 'trace' | 'neutra
         </div>
       </div>
       <p v-if="runState.errorMessage" class="error-message">{{ runState.errorMessage }}</p>
-      <ul :class="['debug-list', { expanded: debugExpanded }]">
+      <ul ref="debugListRef" :class="['debug-list', { expanded: debugExpanded }]">
         <li
           v-for="entry in debugEntries"
           :key="entry.id"
