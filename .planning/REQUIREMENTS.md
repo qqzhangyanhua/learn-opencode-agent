@@ -64,27 +64,27 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| IA-01 | Unassigned | Pending |
-| IA-02 | Unassigned | Pending |
-| IA-03 | Unassigned | Pending |
-| HOME-01 | Unassigned | Pending |
-| HOME-02 | Unassigned | Pending |
-| HOME-03 | Unassigned | Pending |
-| CHAP-01 | Unassigned | Pending |
-| CHAP-02 | Unassigned | Pending |
-| CHAP-03 | Unassigned | Pending |
-| CHAP-04 | Unassigned | Pending |
-| PRAC-01 | Unassigned | Pending |
-| PRAC-02 | Unassigned | Pending |
-| PRAC-03 | Unassigned | Pending |
-| DISC-01 | Unassigned | Pending |
-| DISC-02 | Unassigned | Pending |
-| DISC-03 | Unassigned | Pending |
+| IA-01 | Phase 2 | Pending |
+| IA-02 | Phase 1 | Pending |
+| IA-03 | Phase 1 | Pending |
+| HOME-01 | Phase 2 | Pending |
+| HOME-02 | Phase 2 | Pending |
+| HOME-03 | Phase 2 | Pending |
+| CHAP-01 | Phase 3 | Pending |
+| CHAP-02 | Phase 3 | Pending |
+| CHAP-03 | Phase 3 | Pending |
+| CHAP-04 | Phase 3 | Pending |
+| PRAC-01 | Phase 4 | Pending |
+| PRAC-02 | Phase 4 | Pending |
+| PRAC-03 | Phase 4 | Pending |
+| DISC-01 | Phase 5 | Pending |
+| DISC-02 | Phase 1 | Pending |
+| DISC-03 | Phase 5 | Pending |
 
 **Coverage:**
 - v1 requirements: 16 total
-- Mapped to phases: 0
-- Unmapped: 16 ⚠️
+- Mapped to phases: 16
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-21*

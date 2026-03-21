@@ -439,3 +439,226 @@ docs/book/
 - **查看 Props 类型**：阅读 `.vitepress/theme/components/types.ts`
 - **更新源码快照版本**：修改 `docs/version-notes.md` 的 `SourceSnapshotCard` props 及各章节的快照卡
 - **实践篇环境配置**：查看 `docs/practice/setup.md`
+
+<!-- GSD:project-start source:PROJECT.md -->
+## Project
+
+**AI Agent 产品化学习站**
+
+这是一个面向中文开发者的 AI Agent 学习站，基于现有 VitePress 电子书仓库继续演进。它不再只是“章节文档集合”，而是要逐步成为一个更像课程产品的学习入口，让用户能快速选路线、理解当前阶段该学什么，并边学边做项目。
+
+当前仓库已经具备理论篇、实践篇、中级篇、交互演示组件和可运行示例代码，下一步重点不是从零搭内容，而是把这些内容组织成更强的信息架构、学习路径和实践闭环。
+
+**Core Value:** 让想系统学习 AI Agent 的中文开发者在 30 秒内知道从哪里开始，并能沿着清晰路径持续学下去。
+
+### Constraints
+
+- **Tech stack**: 继续基于 VitePress、Vue 组件和现有 Markdown 内容体系演进 — 避免推倒重来
+- **Product scope**: v1 只做内容产品化和学习路径升级 — 控制复杂度，优先验证核心价值
+- **No auth**: 不做登录、云端进度和账号相关能力 — 避免过早引入后端系统
+- **Brownfield**: 需要兼容现有章节、实践脚本和导航资产 — 变更必须考虑存量内容迁移成本
+- **Audience**: 明确服务中文开发者 — 内容、导航和命名应保持中文优先
+<!-- GSD:project-end -->
+
+<!-- GSD:stack-start source:codebase/STACK.md -->
+## Technology Stack
+
+## Languages
+- TypeScript - 站点主题、交互组件、实践脚本与根目录辅助脚本，集中在 `.vitepress/`、`practice/*.ts`、根目录 `*.ts`
+- Markdown - 章节内容与项目文档，集中在 `docs/**/index.md`、`README.md`、`docs/superpowers/**/*.md`
+- Vue Single File Components - VitePress 自定义组件，集中在 `.vitepress/theme/components/*.vue`
+- CSS - 主题样式与组件局部样式，集中在 `.vitepress/theme/custom.css` 和各组件 `<style scoped>`
+- JavaScript ESM - 内容校验脚本，集中在 `scripts/*.mjs`
+- Python - 仅作为教学示例，位于 `docs/intermediate/examples/**/*.py`
+## Runtime
+- Node.js 运行时 - 用于 `vitepress`、`tsc`、校验脚本和绝大多数开发命令
+- 浏览器运行时 - 承载 VitePress 页面与交互组件，例如 `.vitepress/theme/components/RunCommand.vue`
+- Caddy - 生产静态文件服务，入口在 `Caddyfile`
+- 仓库同时保留 `bun.lockb` 与 `pnpm-lock.yaml`
+- README 主要使用 `bun dev`、`bun build`、`bun preview`
+- `railpack.toml` 的构建命令是 `pnpm run build`
+- 现状是“Bun 本地开发 + pnpm/Node 兼容部署”的混合模式，需要改动时先确认目标环境
+## Frameworks
+- VitePress `^1.5.0` - 文档站点框架，主配置在 `.vitepress/config.mts`
+- Vue 3（由 VitePress 提供）- 自定义交互组件与 composable，入口在 `.vitepress/theme/index.ts`
+- `vitepress-plugin-mermaid` `^2.0.17` - Mermaid 图表支持，接入点在 `.vitepress/config.mts`
+- `mermaid` `^11.13.0` - 图表渲染
+- `lottie-web` `^5.13.0` - 动画类组件依赖，见 `.vitepress/theme/index.ts`
+- `openai` `^6.32.0` - 实践脚本默认模型客户端，广泛用于 `practice/*.ts`
+- `@modelcontextprotocol/sdk` `^1.27.1` - MCP 相关实践内容依赖
+- TypeScript `^5.8.2` - 类型检查，入口命令 `npm run typecheck`
+- Node 原生 `fs/promises`、`path`、`url` - 内容校验脚本基础设施，见 `scripts/check-content.mjs`
+## Key Dependencies
+- `vitepress` - 负责文档站点生成、导航、搜索与主题系统
+- `openai` - 驱动实践篇脚本里的 Agent 示例
+- `@modelcontextprotocol/sdk` - 支持实践篇 MCP 章节
+- `vitepress-plugin-mermaid` - 支持教程内 Mermaid 结构图
+- `lottie-web` - 支撑动态图解组件
+- `typescript` - 约束 `.vitepress` 与根目录 TypeScript 脚本
+- Caddy - 静态部署服务，读取 `.vitepress/dist`
+## Configuration
+- `.env` / `.env.example` - 主要提供 `OPENAI_API_KEY`、`OPENAI_BASE_URL`、`OPENAI_MODEL`
+- 实践脚本统一通过 `process.env` 读取 OpenAI 兼容配置，例如 `practice/p01-minimal-agent.ts`
+- `.vitepress/config.mts` - 站点导航、侧边栏、OG 信息、Mermaid 与 Vite 配置
+- `tsconfig.json` - TypeScript 编译范围与 `Bundler` 解析策略
+- `package.json` - 开发、构建、预览、校验命令
+- `railpack.toml` - 部署平台构建/启动命令
+- `Caddyfile` - 生产静态文件根目录与 SPA fallback
+## Platform Requirements
+- 需要可运行 Node.js 的环境
+- 本地推荐按 README 使用 Bun 命令；若使用 pnpm，也要确认锁文件与脚本行为一致
+- 若要运行实践脚本，需要可用的 OpenAI 兼容 API 凭据
+- 产物是静态站点 `.vitepress/dist`
+- 生产服务基于 Caddy，从 `/app/.vitepress/dist` 提供静态内容
+- 适合部署到支持 Node 构建 + 静态托管的环境，例如 Railpack
+<!-- GSD:stack-end -->
+
+<!-- GSD:conventions-start source:CONVENTIONS.md -->
+## Conventions
+
+## Naming Patterns
+- Markdown 章节使用 `index.md` 作为目录入口，目录名承担路由语义，例如 `docs/08-http-api-server/index.md`
+- Vue 组件使用 `PascalCase.vue`，例如 `RunCommand.vue`、`PlanningTreeDemo.vue`
+- composable 使用 `useXxx.ts`
+- 实践脚本使用 `pNN-topic.ts`，按教程顺序编号
+- TypeScript/Vue 内部函数统一 `camelCase`
+- 事件处理/交互函数偏好动词命名，如 `copy()`、`play()`、`restart()`
+- 异步函数不额外加 `async` 前缀，例如 `runAgent`
+- 普通变量与常量多数使用 `camelCase`
+- 真正常量会使用 `UPPER_SNAKE_CASE`，例如实践脚本中配置类常量
+- 组件 props 常命名为 `props`，响应式状态常用 `ref(...)`
+- TypeScript interface/type 采用 `PascalCase`
+- Props 类型集中到 `.vitepress/theme/components/types.ts`
+- 不使用 `IUser` 这类 `I` 前缀接口命名
+## Code Style
+- 全仓库 TypeScript/Vue 普遍使用单引号、无分号、2 空格缩进
+- 对象/数组/参数尾逗号常见于多行结构
+- 代码风格更接近 Prettier 默认输出，但仓库中未发现显式 `.prettierrc`
+- 未发现 ESLint 配置文件
+- 现有质量门槛主要依赖 `tsc` 和自定义内容检查脚本
+- 构建前严格检查入口是 `package.json` 中的 `build:strict`
+## Import Organization
+- 通常按逻辑分组，但没有强制的排序工具痕迹
+- `import type` 被实际使用，例如 `.vitepress/theme/index.ts`
+- 未发现自定义路径别名
+- 主要使用相对路径，如 `./components/RunCommand.vue`、`../components/types`
+## Error Handling
+- CLI/脚本层以 fail-fast 为主，错误通过 `console.error` 输出并设置退出码
+- 交互组件对非关键失败做静默降级，例如复制失败时仅忽略
+- 实践脚本常在最外层 `.catch(...)` 中统一处理异常
+- 未发现自定义 Error 类体系
+- 大部分代码直接抛出原生异常或依赖 Promise rejection
+- 校验脚本在检测失败时直接 `process.exit(1)`
+## Logging
+- 仓库级日志工具不存在
+- 主要使用 `console.log` / `console.error`
+- 构建与校验脚本输出中文、面向作者可读的诊断信息
+- 实践脚本输出教学型日志，例如 `Tool call:`、`Tool result:`
+- 文档站组件很少做运行时日志打印
+## Comments
+- 组件和脚本里会写“为什么要这样做”的注释
+- 注释语言以中文为主，偶尔有英文技术说明
+- 明显逻辑通常不写冗余注释
+- 未形成统一的 JSDoc 体系
+- 类型定义更多依赖 TypeScript interface 直接表达
+- 仓库通过 `scripts/check-content.mjs` 明确阻止 `TODO` / `FIXME` / `TBD` 残留进入文档
+- 这说明项目对“未收口内容”有硬性约束
+## Function Design
+- 组件与 composable 倾向中小函数，复杂页面逻辑拆为多个独立组件
+- 实践脚本允许出现较长教学型函数，但仍以“单文件可读”为目标
+- 参数较少时直接列出；结构复杂时使用对象与类型注解
+- 组件 props 用 `defineProps` + `withDefaults`
+- 常用早返回降低嵌套深度
+- composable 以对象形式返回状态和方法，例如 `useDemoPlayer`
+## Module Design
+- Vue 组件多为默认导出
+- TypeScript 工具和 composable 更偏好命名导出
+- 类型定义集中导出，供多个组件共享
+- 未见大规模 barrel file 体系
+- 主题层通过 `.vitepress/theme/index.ts` 做集中注册，而不是目录级 re-export
+<!-- GSD:conventions-end -->
+
+<!-- GSD:architecture-start source:ARCHITECTURE.md -->
+## Architecture
+
+## Pattern Overview
+- 以 Markdown 章节为主体，交互能力通过 VitePress 主题层注入
+- 站点本身是静态输出，动态行为仅存在于浏览器端组件
+- 实践篇代码与文档共存于同一仓库，形成“文档解释 + 代码示例”双轨结构
+- 缺少传统后端服务层，主要是内容编排与前端展示工程
+## Layers
+- Purpose: 承载理论篇、实践篇、中级篇和补充页面的实际内容
+- Contains: Markdown 章节、frontmatter、源码链接、Mermaid 图、内嵌组件引用
+- Location: `docs/**`, `README.md`, `practice/README.md`
+- Depends on: 主题组件层提供展示能力
+- Used by: VitePress 构建流程
+- Purpose: 提供站点视觉系统、交互组件、全局注册和 composable
+- Contains: Vue 组件、TypeScript 类型、全局样式、辅助 hooks
+- Location: `.vitepress/theme/index.ts`, `.vitepress/theme/components/*`, `.vitepress/theme/composables/*`, `.vitepress/theme/custom.css`
+- Depends on: Vue/VitePress 运行时和组件 props 类型
+- Used by: Markdown 页面中的自定义标签与首页布局
+- Purpose: 保证内容完整性、实践入口一致性和部署可运行
+- Contains: 内容校验脚本、练习入口校验脚本、构建配置、部署配置
+- Location: `scripts/*.mjs`, `package.json`, `tsconfig.json`, `railpack.toml`, `Caddyfile`
+- Depends on: Node.js、TypeScript、VitePress CLI
+- Used by: 本地开发、发布前检查、部署平台
+- Purpose: 提供与文档配套的可运行示例和教学样例
+- Contains: `practice/*.ts` 项目、`docs/intermediate/examples/**` Python/README 示例
+- Depends on: OpenAI 兼容 API、Node.js 执行环境
+- Used by: 实践篇读者、文档作者验证示例
+## Data Flow
+- 站点无统一后端状态
+- 交互组件多采用局部响应式状态，例如 `.vitepress/theme/composables/useDemoPlayer.ts`
+- 构建状态体现在本地缓存目录 `.vitepress/cache`
+## Key Abstractions
+- Purpose: 每个章节目录都是独立内容单元
+- Examples: `docs/02-agent-core/index.md`, `docs/intermediate/27-planning-mechanism/index.md`
+- Pattern: 目录即路由，`index.md` 作为页面入口
+- Purpose: 把复杂示意图、动画、交互演示从 Markdown 正文中解耦出来
+- Examples: `RunCommand`, `RuntimeLifecycleDiagram`, `PlanningTreeDemo`
+- Pattern: 在 `.vitepress/theme/index.ts` 中全局注册后，由 Markdown 直接使用
+- Purpose: 给每个实践项目一个可直接运行的入口
+- Examples: `practice/p01-minimal-agent.ts`, `practice/p22-project.ts`
+- Pattern: 单文件脚本，对应单个教程主题
+## Entry Points
+- Location: `.vitepress/config.mts`
+- Triggers: `vitepress dev/build/preview`
+- Responsibilities: 定义站点元数据、导航、侧边栏、Vite 行为与 Mermaid 集成
+- Location: `.vitepress/theme/index.ts`
+- Triggers: VitePress 启动主题时
+- Responsibilities: 扩展默认主题、注册全局组件、加载全局样式
+- Location: `scripts/check-content.mjs`, `scripts/check-practice-entries.mjs`
+- Triggers: `build:strict` 或手动执行
+- Responsibilities: 防止遗漏页面、未收口文案和无效实践入口引用
+- Location: `practice/*.ts`
+- Triggers: 用户按文档命令执行脚本
+- Responsibilities: 演示各章节的 Agent 能力或工程模式
+## Error Handling
+- 校验脚本在发现问题时 `process.exit(1)`，例如 `scripts/check-content.mjs`
+- Vue 组件常用早返回和 Promise `catch` 做局部兜底，例如 `.vitepress/theme/components/RunCommand.vue`
+- 实践脚本通常在入口 `.catch` 中设置 `process.exitCode = 1`
+## Cross-Cutting Concerns
+- frontmatter、导航、阅读地图和实践入口需要同步维护
+- 一切最终都要可编译为静态产物 `.vitepress/dist`
+- 文档、示意图与示例代码三者必须相互对齐，否则读者会在“能读不能跑”和“能跑但看不懂”之间失衡
+<!-- GSD:architecture-end -->
+
+<!-- GSD:workflow-start source:GSD defaults -->
+## GSD Workflow Enforcement
+
+Before using Edit, Write, or other file-changing tools, start work through a GSD command so planning artifacts and execution context stay in sync.
+
+Use these entry points:
+- `/gsd:quick` for small fixes, doc updates, and ad-hoc tasks
+- `/gsd:debug` for investigation and bug fixing
+- `/gsd:execute-phase` for planned phase work
+
+Do not make direct repo edits outside a GSD workflow unless the user explicitly asks to bypass it.
+<!-- GSD:workflow-end -->
+
+<!-- GSD:profile-start -->
+## Developer Profile
+
+> Profile not yet configured. Run `/gsd:profile-user` to generate your developer profile.
+> This section is managed by `generate-claude-profile` -- do not edit manually.
+<!-- GSD:profile-end -->
