@@ -83,6 +83,41 @@ const runValidationMessage = computed(() => {
 
   return ''
 })
+const workStatus = computed<{
+  hint: string
+  label: string
+  tone: 'idle' | 'warning' | 'running' | 'ready'
+}>(() => {
+  if (runState.value.status === 'running') {
+    return {
+      label: '运行中',
+      hint: '请求已发出，右侧结果区会持续更新。',
+      tone: 'running',
+    }
+  }
+
+  if (!isConfigReady.value) {
+    return {
+      label: '待配置',
+      hint: '先在设置中补齐 API Key、baseURL 和 model。',
+      tone: 'idle',
+    }
+  }
+
+  if (runValidationMessage.value) {
+    return {
+      label: '需修复',
+      hint: '先修复当前模板问题，再发起运行。',
+      tone: 'warning',
+    }
+  }
+
+  return {
+    label: '可运行',
+    hint: '左侧改完模板后可以直接运行。',
+    tone: 'ready',
+  }
+})
 const runnerInput = computed(() =>
   adaptPracticeTemplateToRunnerInput(
     selectedChapter.value,
@@ -261,6 +296,9 @@ function getLockedToolIssue(
       :selected-chapter-id="selectedChapterId"
       :title="selectedChapter.playground.title"
       :model-label="currentModelLabel"
+      :work-status-hint="workStatus.hint"
+      :work-status-label="workStatus.label"
+      :work-status-tone="workStatus.tone"
       :has-api-key="hasApiKey"
       :is-config-ready="isConfigReady"
       :is-run-blocked="Boolean(runValidationMessage)"

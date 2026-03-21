@@ -6,6 +6,9 @@ const props = defineProps<{
   selectedChapterId: PracticePlaygroundChapterId
   title: string
   modelLabel: string
+  workStatusHint: string
+  workStatusLabel: string
+  workStatusTone: 'idle' | 'warning' | 'running' | 'ready'
   hasApiKey: boolean
   isConfigReady: boolean
   isRunBlocked: boolean
@@ -48,6 +51,10 @@ const emit = defineEmits<{
           <span>{{ isConfigReady ? '配置完整' : '配置不完整' }}</span>
           <span>{{ hasApiKey ? 'API Key 已配置' : 'API Key 未配置' }}</span>
         </p>
+        <div class="header-status">
+          <span :class="['status-pill', workStatusTone]">{{ workStatusLabel }}</span>
+          <span class="status-hint">{{ workStatusHint }}</span>
+        </div>
       </div>
     </div>
 
@@ -129,6 +136,50 @@ const emit = defineEmits<{
   gap: 8px;
   flex-wrap: wrap;
   justify-content: flex-end;
+}
+
+.header-status {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.status-pill {
+  border-radius: 999px;
+  padding: 5px 10px;
+  border: 1px solid var(--vp-c-divider);
+  background: var(--vp-c-bg);
+  font-size: 12px;
+  line-height: 1;
+}
+
+.status-pill.idle {
+  color: var(--vp-c-text-2);
+}
+
+.status-pill.warning {
+  border-color: color-mix(in srgb, #f59e0b 40%, var(--vp-c-divider));
+  background: color-mix(in srgb, #f59e0b 10%, var(--vp-c-bg));
+  color: #92400e;
+}
+
+.status-pill.running {
+  border-color: color-mix(in srgb, var(--vp-c-brand-1) 40%, var(--vp-c-divider));
+  background: color-mix(in srgb, var(--vp-c-brand-1) 10%, var(--vp-c-bg));
+  color: var(--vp-c-brand-1);
+}
+
+.status-pill.ready {
+  border-color: color-mix(in srgb, #16a34a 40%, var(--vp-c-divider));
+  background: color-mix(in srgb, #16a34a 10%, var(--vp-c-bg));
+  color: #166534;
+}
+
+.status-hint {
+  font-size: 12px;
+  color: var(--vp-c-text-2);
 }
 
 .ghost-button,
