@@ -63,13 +63,10 @@ export default withMermaid(defineConfig({
     nav: [
       { text: '首页', link: '/' },
       { text: '实践篇', link: '/practice/', activeMatch: '/practice/' },
-      { text: '中级篇', link: '/intermediate/' },
       { text: '阅读地图', link: '/reading-map' },
-      { text: '版本说明', link: '/version-notes' },
       { text: '术语表', link: '/glossary' },
       { text: '本书仓库', link: bookRepository },
       { text: 'OpenCode 源码基线', link: sourceRepository },
-      { text: 'OpenCode 最新 dev', link: sourceRepositoryLatest }
     ],
 
     sidebar: {

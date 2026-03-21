@@ -4,96 +4,50 @@ layout: home
 hero:
   name: 从零构建 AI Coding Agent
   text: OpenCode 源码剖析与实战
-  tagline: 面向中文开发者的 Agent 工程学习站，覆盖源码带读、可运行实践与工程专题
+  tagline: 面向开发者的实战学习站：系统化构建 Agent 知识体系，深入剖析真实生产级框架。
   actions:
     - theme: brand
-      text: 开始阅读理论篇
+      text: 理论篇：系统构建体系
       link: /00-what-is-ai-agent/index
-    - theme: brand
-      text: 动手实践 23 个项目
+    - theme: alt
+      text: 实践篇：动手写 23 个 Agent
       link: /practice/
-    - theme: alt
-      text: 阅读地图
-      link: /reading-map
-    - theme: alt
-      text: 阅读中级篇
-      link: /intermediate/
-    - theme: alt
-      text: Star 支持本书
-      link: https://github.com/qqzhangyanhua/learn-opencode-agent
-    - theme: alt
-      text: 查看源码基线
-      link: https://github.com/anomalyco/opencode/tree/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc
+
+features:
+  - title: 理论篇：源码剖析
+    icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>'
+    details: 基于真实生产级仓库，按主链路深剖源码实现，掌握 Agent 核心运行机制。
+    link: /01-agent-basics/index
+  - title: 实践篇：动手演进
+    icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>'
+    details: 提供 23 个可运行的渐进式项目，从 0 搭建基础环境，手写 Agent 核心循环。
+    link: /practice/
+  - title: 中级篇：工程落地
+    icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>'
+    details: 解决 RAG 失效、安全边界、性能与成本、多智能体协作等真实生产环境工程挑战。
+    link: /intermediate/
 ---
 
 <script setup>
 import LearningPath from '../.vitepress/theme/components/LearningPath.vue'
-import RuntimeLifecycleDiagram from '../.vitepress/theme/components/RuntimeLifecycleDiagram.vue'
-import TechStackGrid from '../.vitepress/theme/components/TechStackGrid.vue'
 import PracticePreview from '../.vitepress/theme/components/PracticePreview.vue'
 </script>
 
-## 这三条线分别回答什么
+## 三线学习体系
 
-- **理论篇**：回答“OpenCode 这类 AI Coding Agent 是怎么实现的”，重点是看懂真实源码的主链路与工程边界。
-- **实践篇**：回答“如果你自己来做，最小可运行版本该怎么搭起来”，重点是把核心模式落到可执行 TypeScript 示例。
-- **中级篇**：回答“当你开始碰到稳定性、协作、成本、安全这些工程问题时，应该按什么专题继续深化”。
+本书提供清晰的三条主线：理解机制的**理论与源码剖析**，真实落地的**工程实战**，以及面向生产环境的**工程进阶**。
 
-## 学习方式
+<PracticePreview :theoryChapters="24" :practiceProjects="23" :practicePhases="7" :intermediateChapters="8" />
 
-本书提供**理论篇 + 实践篇 + 中级篇**三条互相衔接的学习路径：
+## 学习路径图
 
-- **理论篇**（第 1-16 章）：深入剖析 OpenCode 源码架构，理解 Agent 系统设计原理
-- **实践篇**（P1-P23）：23 个可运行项目，从最小 Agent 到生产部署全覆盖
-- **中级篇**（第 25-32 章）：围绕 RAG、多智能体、Planning、上下文工程、安全与成本等工程专题继续深化
-
-建议**理论与实践穿插学习**：看完理论篇第 1-4 章后，先跑通实践篇 P1-P4，建立感性认知后再深入后续章节。
-
-当你完成基础理解，想把理论转向更具体的工程专题，可以通过“阅读中级篇”这一入口继续深化。
-
-## 双轨学习体系
-
-<PracticePreview :theoryChapters="16" :practiceProjects="23" :practicePhases="7" />
-
-## 核心学习路径
+直观了解从基础理论、可运行实践、源码带读到工程专题进阶的整体知识结构。这其中包含了我们为你准备的完整实战路径。
 
 <LearningPath />
 
-## 先记住这条主链路
+## 进一步探索
 
-<RuntimeLifecycleDiagram />
-
-## 辅助阅读入口
-
-- [阅读地图](/reading-map)：先选路线，再决定按哪条主链路进入全书。
-- [版本说明](/version-notes)：确认本书基于哪份源码、写到什么边界。
-- [术语表](/glossary)：统一理解 `Agent`、`Subagent`、`Primary Agent`、`运行时`、`工作台` 等高频概念。
-- [封版清单](/release-checklist)：查看当前版本完成度、已知非阻塞项和发布前检查项。
-
-> **阅读边界**：本书默认以 commit 锚定的源码基线为准，重点解释已经落在仓库里的结构、主链路和工程约束；只有在明确说明“追踪最新实现”时，才额外回到 `dev` 分支对照差异。若文档与代码不一致，以当前仓库给出的源码快照与入口文件为准。
-
-## 这本书怎么读
-
-- 如果你是第一次系统学习 Agent 开发，先按**阶段 1**的 `01 -> 02 -> 03 -> 04` 建立最小运行时闭环。
-- 如果你更关心产品化落地，再进入**阶段 2**，优先看 `05、06、08、09`。
-- 如果你更关心界面、IDE 集成和扩展生态，再进入**阶段 3**，优先看 `07、10、11、12`。
-- `13、14、15` 对应**阶段 4**，回答部署、质量与长期演进问题。
-- **阶段 5** 是扩展篇，以 oh-my-openagent 插件为案例，深入多 Agent 编排、Hook 分层架构和工具扩展的工程实现（第17-24章）。
-
-## 技术栈
-
-<TechStackGrid />
-
-## 你会得到什么
-
-- 一张真实 AI Coding Agent 的系统总图，而不是零散功能点列表。
-- 一套按“入口文件 -> 主链路 -> 关键边界”阅读大型源码仓库的方法。
-- 对模型抽象、工具系统、会话系统、MCP、多端 UI 和扩展体系的工程直觉。
-- 一组能迁移到自己项目里的设计原则，而不只是对 OpenCode 的局部记忆。
-
-## 适合人群
-
-- 想要深入理解 AI Coding Agent 架构的开发者
-- 希望学习大型 TypeScript 项目工程实践的工程师
-- 对 AI 辅助开发工具感兴趣的技术爱好者
-- 想要为 OpenCode 贡献代码的开源贡献者
+- **全书学习地图**：[阅读地图](/reading-map) —— 规划属于你的学习主线路线。
+- **专业概念拉齐**：[术语表](/glossary) —— 统一对各项高频 AI Agent 领域词汇的理解。
+- **源码基线锚点**：[版本说明](/version-notes) —— 确认本书代码参考了哪份源码截面以及它的演进边界。
+- **开源发布进度**：[封版清单](/release-checklist) —— 获悉当前书籍的编写完整度。

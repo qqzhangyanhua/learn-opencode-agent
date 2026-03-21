@@ -490,35 +490,35 @@ function resolveDebugTone(line: string): 'error' | 'warning' | 'trace' | 'neutra
       <dl class="summary-grid">
         <div class="summary-item summary-item-core">
           <dt>章节</dt>
-          <dd>{{ chapterLabel }}</dd>
+          <dd :title="chapterLabel">{{ chapterLabel }}</dd>
         </div>
         <div class="summary-item summary-item-core">
           <dt>模板</dt>
-          <dd>{{ templateLabel }}</dd>
+          <dd :title="templateLabel">{{ templateLabel }}</dd>
         </div>
         <div class="summary-item summary-item-core">
           <dt>模型</dt>
-          <dd>{{ configSummary?.model || '尚未运行' }}</dd>
+          <dd :title="configSummary?.model || '尚未运行'">{{ configSummary?.model || '尚未运行' }}</dd>
         </div>
         <div class="summary-item summary-item-core">
           <dt>耗时</dt>
-          <dd>{{ durationLabel }}</dd>
+          <dd :title="durationLabel">{{ durationLabel }}</dd>
         </div>
         <div :class="['summary-item', 'summary-item-secondary', { visible: summaryDetailsExpanded }]">
           <dt>配置来源</dt>
-          <dd>{{ configSourceLabel }}</dd>
+          <dd :title="configSourceLabel">{{ configSourceLabel }}</dd>
         </div>
         <div :class="['summary-item', 'summary-item-secondary', { visible: summaryDetailsExpanded }]">
           <dt>最近保存</dt>
-          <dd>{{ configSavedAtLabel }}</dd>
+          <dd :title="configSavedAtLabel">{{ configSavedAtLabel }}</dd>
         </div>
         <div :class="['summary-item', 'summary-item-secondary', { visible: summaryDetailsExpanded }]">
           <dt>接口地址</dt>
-          <dd>{{ configSummary?.baseURL || '尚未运行' }}</dd>
+          <dd :title="configSummary?.baseURL || '尚未运行'">{{ configSummary?.baseURL || '尚未运行' }}</dd>
         </div>
         <div :class="['summary-item', 'summary-item-secondary', { visible: summaryDetailsExpanded }]">
           <dt>密钥状态</dt>
-          <dd>{{ apiKeyStatusLabel }}</dd>
+          <dd :title="apiKeyStatusLabel">{{ apiKeyStatusLabel }}</dd>
         </div>
       </dl>
       <button
@@ -854,6 +854,9 @@ function resolveDebugTone(line: string): 'error' | 'warning' | 'trace' | 'neutra
   word-break: break-word;
   color: var(--vp-c-text-1);
   font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .summary-item-core dd {

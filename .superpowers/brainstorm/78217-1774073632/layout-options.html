@@ -1,0 +1,71 @@
+<h2>在线运行模块改版方向</h2>
+<p class="subtitle">目标：新开独立页面，顶部操作栏，左侧可编辑请求模板，右侧运行结果</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>文档感编辑器</h3>
+      <p>保留章节列表，右侧进入单页工作台。顶部是设置 / 运行，主体左右分栏：左编辑，右结果。</p>
+    </div>
+  </div>
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>IDE 感工作台</h3>
+      <p>更像轻量 Playground。顶部工具栏固定，左侧代码编辑器更大，右侧结果面板更像控制台。</p>
+    </div>
+  </div>
+</div>
+
+<div class="split section" style="margin-top: 24px;">
+  <div class="mockup">
+    <div class="mockup-header">A. 文档感编辑器</div>
+    <div class="mockup-body">
+      <div class="mock-nav">P1 / P2 / P3 / P10 / P18</div>
+      <div style="display:flex; gap:12px; margin-top:12px;">
+        <div class="mock-sidebar" style="width: 180px;">章节列表</div>
+        <div class="mock-content" style="flex:1;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <strong>P10 · ReAct Playground</strong>
+            <div style="display:flex; gap:8px;">
+              <button class="mock-button">设置</button>
+              <button class="mock-button">运行</button>
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns: 1.1fr 0.9fr; gap:12px;">
+            <div class="placeholder" style="min-height:260px;">左：可编辑请求模板</div>
+            <div class="placeholder" style="min-height:260px;">右：运行输出 / 调试信息</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">B. IDE 感工作台</div>
+    <div class="mockup-body">
+      <div class="mock-nav">Playground / Chapter / Status</div>
+      <div style="display:flex; justify-content:space-between; align-items:center; margin:12px 0;">
+        <div style="display:flex; gap:8px;">
+          <button class="mock-button">设置</button>
+          <button class="mock-button">重置</button>
+        </div>
+        <button class="mock-button">运行</button>
+      </div>
+      <div style="display:grid; grid-template-columns: 1.3fr 0.7fr; gap:12px;">
+        <div class="placeholder" style="min-height:300px;">左：大编辑器（messages / tools / body）</div>
+        <div style="display:grid; gap:12px;">
+          <div class="placeholder" style="min-height:144px;">右上：输出</div>
+          <div class="placeholder" style="min-height:144px;">右下：调试 / 请求摘要</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top: 24px;">
+  <div class="label">本轮只确定</div>
+  <h3>整体页面气质</h3>
+  <p class="subtitle">选更像“文档增强页”，还是更像“轻量 IDE 工作台”。</p>
+</div>

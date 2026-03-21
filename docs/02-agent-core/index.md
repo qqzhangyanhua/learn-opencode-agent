@@ -5,6 +5,8 @@ description: 建立 OpenCode 源码地图——从项目定位到代码路径，
 
 <script setup>
 import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshotCard.vue'
+import RuntimeLifecycleDiagram from '../../.vitepress/theme/components/RuntimeLifecycleDiagram.vue'
+import TechStackGrid from '../../.vitepress/theme/components/TechStackGrid.vue'
 </script>
 
 > **学习目标**：建立 OpenCode 的整体代码地图，把第2章的5个概念组件对应到真实源码位置
@@ -357,7 +359,15 @@ sequenceDiagram
 
 ---
 
-## 3.5 客户端/服务器分离：为什么这样设计
+## 3.5 核心系统生命周期架构图
+
+为了让你更直观地理解各模块（CLI、API Server、LLM Provider、工具与权限等）如何在系统中协同运转，这里提供一张完整的生命周期交互图：
+
+<RuntimeLifecycleDiagram />
+
+---
+
+## 3.6 客户端/服务器分离：为什么这样设计
 
 很多人第一次看 OpenCode 会困惑：为什么本地 CLI 还要启动一个 HTTP 服务器？
 
@@ -412,6 +422,8 @@ Desktop：HTTP 客户端 + 原生渲染
 - 类型安全的 SQL，查询结果有完整 TypeScript 类型
 - 轻量，无运行时依赖注入
 - 支持 SQLite（本地）和 PostgreSQL/MySQL（云端）
+
+<TechStackGrid />
 
 ---
 

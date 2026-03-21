@@ -1,0 +1,96 @@
+<h2>Practice Playground 组件接法</h2>
+<p class="subtitle">目标：浏览器直连请求，复用到 P1 / P2 / P3 / P10 / P18，用户填写 API Key / baseURL / model 后一键运行</p>
+
+<div class="cards">
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup">
+        <div class="mockup-header">方案 A：独立 Playground 组件</div>
+        <div class="mockup-body">
+          <div class="mock-nav">P1 页面正文</div>
+          <div class="placeholder" style="margin-top:12px;">ProjectCard / 章节介绍</div>
+          <div class="placeholder" style="margin-top:12px;">RunCommand 命令块</div>
+          <div class="mock-content" style="margin-top:12px;">
+            Playground 配置卡片
+            <div class="mock-input" style="margin-top:8px;">API Key</div>
+            <div class="mock-input" style="margin-top:8px;">baseURL</div>
+            <div class="mock-input" style="margin-top:8px;">model</div>
+            <button class="mock-button" style="margin-top:10px;">一键运行</button>
+          </div>
+          <div class="placeholder" style="margin-top:12px;">结果区：摘要 / 输出 / 调试</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>方案 A：新增独立组件</h3>
+      <p>保留现有 RunCommand，只新增 PracticePlayground 一类组件，按章节传入预置示例配置。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup">
+        <div class="mockup-header">方案 B：扩展 RunCommand</div>
+        <div class="mockup-body">
+          <div class="mock-content">
+            RunCommand
+            <div class="placeholder" style="margin-top:10px;">命令显示</div>
+            <div class="placeholder" style="margin-top:10px;">Playground 表单</div>
+            <div class="placeholder" style="margin-top:10px;">结果面板</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>方案 B：在 RunCommand 上继续加能力</h3>
+      <p>命令展示和在线运行都塞进一个组件，页面改动最少，但组件职责会明显变重。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup">
+        <div class="mockup-header">方案 C：独立 Playground 页面</div>
+        <div class="mockup-body">
+          <div class="mock-nav">文档页 → 跳转 → Playground 页</div>
+          <div class="mock-content" style="margin-top:12px;">
+            左侧：章节选择
+            <div class="placeholder" style="margin-top:8px;">P1 / P2 / P3 / P10 / P18</div>
+          </div>
+          <div class="mock-content" style="margin-top:12px;">
+            右侧：配置 + 运行结果
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>方案 C：独立入口页</h3>
+      <p>体验集中，但会把“边读边跑”的上下文拆开，读者需要在页面之间切换。</p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">推荐</div>
+  <div class="pros-cons">
+    <div class="pros">
+      <h4>我推荐方案 A</h4>
+      <ul>
+        <li>和当前文档结构最兼容，不破坏 RunCommand 的单一职责</li>
+        <li>复用边界清晰，后面新增章节只需要传预置配置</li>
+        <li>读者能在同一页内同时看到命令行入口和在线运行入口</li>
+      </ul>
+    </div>
+    <div class="cons">
+      <h4>方案 A 的代价</h4>
+      <ul>
+        <li>需要新增组件、类型和章节接线</li>
+        <li>首版要先定义一套统一的预置示例数据结构</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <p class="subtitle">请点击你偏好的方案。如果你认可推荐方案，也可以直接在终端回复“按 A 走”。</p>
+</div>

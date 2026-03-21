@@ -3,17 +3,19 @@ interface Props {
   theoryChapters?: number
   practiceProjects?: number
   practicePhases?: number
+  intermediateChapters?: number
 }
 
 withDefaults(defineProps<Props>(), {
   theoryChapters: 16,
   practiceProjects: 23,
-  practicePhases: 7
+  practicePhases: 7,
+  intermediateChapters: 8
 })
 </script>
 
 <template>
-  <div class="dual-track-container">
+  <div class="multi-track-container">
     <div class="track-card theory">
       <div class="track-header">
         <div class="track-icon">
@@ -55,13 +57,35 @@ withDefaults(defineProps<Props>(), {
       </ul>
       <a href="/practice/" class="track-btn primary">立即动手 →</a>
     </div>
+
+    <div class="track-card intermediate">
+      <div class="track-header">
+        <div class="track-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L2 7l10 5 10-5-10-5Z"></path>
+            <path d="M2 17l10 5 10-5"></path>
+            <path d="M2 12l10 5 10-5"></path>
+          </svg>
+        </div>
+        <h3>中级篇：工程落地</h3>
+      </div>
+      <p class="track-subtitle">{{ intermediateChapters }} 个生产环境实战专题</p>
+      <ul class="track-highlights">
+        <li>RAG 失效模式应对</li>
+        <li>多智能体协作机制</li>
+        <li>System Prompt 设计</li>
+        <li>安全防注入与沙箱设计</li>
+        <li>性能优化与成本控制</li>
+      </ul>
+      <a href="/intermediate/" class="track-btn intermediate-btn">深入架构 →</a>
+    </div>
   </div>
 </template>
 
 <style scoped>
-.dual-track-container {
+.multi-track-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: 24px;
   margin: 32px 0;
 }
@@ -84,6 +108,10 @@ withDefaults(defineProps<Props>(), {
   border-color: #ea580c;
 }
 
+.track-card.intermediate:hover {
+  border-color: #8b5cf6;
+}
+
 .track-header {
   display: flex;
   align-items: center;
@@ -100,6 +128,10 @@ withDefaults(defineProps<Props>(), {
 
 .track-card.practice .track-icon {
   color: #ea580c;
+}
+
+.track-card.intermediate .track-icon {
+  color: #8b5cf6;
 }
 
 .track-card h3 {
@@ -143,6 +175,10 @@ withDefaults(defineProps<Props>(), {
   color: #ea580c;
 }
 
+.track-card.intermediate .track-highlights li::before {
+  color: #8b5cf6;
+}
+
 .track-btn {
   display: inline-block;
   padding: 10px 20px;
@@ -174,8 +210,20 @@ withDefaults(defineProps<Props>(), {
   transform: translateX(2px);
 }
 
+.track-btn.intermediate-btn {
+  background: #8b5cf6;
+  color: white;
+  border-color: #8b5cf6;
+}
+
+.track-btn.intermediate-btn:hover {
+  background: #7c3aed;
+  border-color: #7c3aed;
+  transform: translateX(2px);
+}
+
 @media (max-width: 768px) {
-  .dual-track-container {
+  .multi-track-container {
     grid-template-columns: 1fr;
   }
 

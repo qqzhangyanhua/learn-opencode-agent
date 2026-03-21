@@ -1,0 +1,63 @@
+<h2>独立 Playground 页布局</h2>
+<p class="subtitle">都基于“浏览器直连请求 + 本地存储配置 + 预置示例一键运行”</p>
+
+<div class="split">
+  <div class="mockup">
+    <div class="mockup-header">方案 C1：左侧章节列表 + 右侧运行区</div>
+    <div class="mockup-body">
+      <div style="display:flex; gap:12px;">
+        <div class="mock-sidebar" style="width:180px; min-height:340px;">
+          章节列表
+          <div class="placeholder" style="margin-top:10px;">P1 最小 Agent</div>
+          <div class="placeholder" style="margin-top:10px;">P2 多轮对话</div>
+          <div class="placeholder" style="margin-top:10px;">P3 流式输出</div>
+          <div class="placeholder" style="margin-top:10px;">P10 ReAct</div>
+          <div class="placeholder" style="margin-top:10px;">P18 路由</div>
+        </div>
+        <div class="mock-content" style="flex:1; min-height:340px;">
+          右侧主区
+          <div class="placeholder" style="margin-top:10px;">章节简介 + 返回原文章</div>
+          <div class="placeholder" style="margin-top:10px;">配置区：API Key / baseURL / model</div>
+          <div class="placeholder" style="margin-top:10px;">输入区：预置问题 / 一键运行</div>
+          <div class="placeholder" style="margin-top:10px;">结果区：摘要 / 输出 / 调试</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mockup">
+    <div class="mockup-header">方案 C2：顶部章节切换 + 单列运行区</div>
+    <div class="mockup-body">
+      <div class="mock-nav">P1 | P2 | P3 | P10 | P18</div>
+      <div class="mock-content" style="margin-top:12px; min-height:340px;">
+        单列主区
+        <div class="placeholder" style="margin-top:10px;">章节简介 + 返回原文章</div>
+        <div class="placeholder" style="margin-top:10px;">配置区：API Key / baseURL / model</div>
+        <div class="placeholder" style="margin-top:10px;">输入区：预置问题 / 一键运行</div>
+        <div class="placeholder" style="margin-top:10px;">结果区：摘要 / 输出 / 调试</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="options">
+  <div class="option" data-choice="c1" onclick="toggleSelect(this)">
+    <div class="letter">C1</div>
+    <div class="content">
+      <h3>左侧列表布局</h3>
+      <p>更像“练习控制台”，后续扩章节更自然，桌面端信息层次更稳。</p>
+    </div>
+  </div>
+  <div class="option" data-choice="c2" onclick="toggleSelect(this)">
+    <div class="letter">C2</div>
+    <div class="content">
+      <h3>顶部切换布局</h3>
+      <p>移动端更顺，页面更轻，但章节数一多容易拥挤。</p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="label">推荐</div>
+  <p class="subtitle">我更推荐 <strong>C1</strong>：第一版虽然只有 5 章，但后面大概率会继续扩，左侧列表更利于增长，也更符合“独立入口页”的心智。</p>
+</div>
