@@ -24,6 +24,7 @@ export const PRACTICE_PLAYGROUND_CHAPTERS = [
     runner: 'tool-call',
     playground: {
       status: 'ready',
+      title: 'P1 最小 Agent',
       description: '使用预置天气问题演示最小工具调用闭环：首次请求、工具执行、二次整合。',
       prompt: '北京今天天气怎么样？适合出去跑步吗？',
       mode: '单次请求 + 本地工具调用',
@@ -42,6 +43,7 @@ export const PRACTICE_PLAYGROUND_CHAPTERS = [
     runner: 'multi-turn',
     playground: {
       status: 'ready',
+      title: 'P2 多轮对话',
       description: '内置一段 messages 历史，让你直接观察“继续追问”如何被已有上下文约束。',
       prompt: '把刚才的平均值函数改成支持加权平均，并保留口语化解释风格。',
       mode: '预置多轮 messages 历史',
@@ -60,6 +62,7 @@ export const PRACTICE_PLAYGROUND_CHAPTERS = [
     runner: 'streaming',
     playground: {
       status: 'ready',
+      title: 'P3 流式输出',
       description: '使用浏览器直连流式响应，结果区会随着文本 delta 逐步增长。',
       prompt: '请分段解释为什么流式输出更适合交互式界面。',
       mode: '浏览器 SSE 文本流式解析',
@@ -78,6 +81,7 @@ export const PRACTICE_PLAYGROUND_CHAPTERS = [
     runner: 'react-lite',
     playground: {
       status: 'ready',
+      title: 'P10 ReAct Loop',
       description: '使用教学型简化 ReAct 链路，让你在调试区看到 Thought、Action、Observation 的关键步骤。',
       prompt: '北京和上海今天哪个城市更适合户外跑步？请说明依据。',
       mode: '文本格式 ReAct 教学链路',
@@ -96,6 +100,7 @@ export const PRACTICE_PLAYGROUND_CHAPTERS = [
     runner: 'model-routing',
     playground: {
       status: 'ready',
+      title: 'P18 多模型路由与成本控制',
       description: '先做轻量启发式路由判断，再用你当前配置的 model 发起实际请求，重点看“为什么这样选”。',
       prompt: '请比较 ReAct 和普通工具调用在可观测性、实现复杂度、成本上的差异，并给出落地建议。',
       mode: '启发式模型路由演示',
@@ -114,6 +119,7 @@ export const PRACTICE_PLAYGROUND_CHAPTERS = [
   runner: PracticePlaygroundRunnerType
   playground: {
     status: PracticePlaygroundImplementationStatus
+    title: string
     description: string
     prompt: string
     mode: string
