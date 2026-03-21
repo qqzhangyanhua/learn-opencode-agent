@@ -3,6 +3,7 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { inBrowser } from 'vitepress'
 import PracticePlaygroundEditor from './PracticePlaygroundEditor.vue'
 import PracticePlaygroundHeader from './PracticePlaygroundHeader.vue'
+import PracticePlaygroundResultPanel from './PracticePlaygroundResultPanel.vue'
 import PracticePlaygroundRunner from './PracticePlaygroundRunner.vue'
 import PracticePlaygroundSettingsModal from './PracticePlaygroundSettingsModal.vue'
 import {
@@ -291,21 +292,12 @@ function getLockedToolIssue(
 
       <article class="workspace-pane result-pane">
         <div class="pane-label">右侧结果区</div>
-        <h2>输出 / 调试 双面板占位</h2>
+        <h2>输出 / 调试</h2>
         <p>{{ workspaceMessage }}</p>
         <p v-if="lastAppliedTemplate" class="placeholder-note">
           最近一次触发运行的模板：{{ lastAppliedTemplate.meta.title }}
         </p>
-        <div class="result-split">
-          <section>
-            <h3>输出面板</h3>
-            <p>后续任务会在这里接入运行输出。</p>
-          </section>
-          <section>
-            <h3>调试面板</h3>
-            <p>后续任务会在这里接入请求摘要与 debug 日志。</p>
-          </section>
-        </div>
+        <PracticePlaygroundResultPanel :run-state="runState" />
       </article>
     </section>
 
@@ -363,24 +355,6 @@ function getLockedToolIssue(
 
 .workspace-pane p {
   color: var(--vp-c-text-2);
-}
-
-.result-split {
-  display: grid;
-  gap: 12px;
-  margin-top: 18px;
-}
-
-.result-split section {
-  border: 1px dashed var(--vp-c-divider);
-  border-radius: 12px;
-  padding: 14px;
-  background: var(--vp-c-bg);
-}
-
-.result-split h3 {
-  margin: 0;
-  font-size: 16px;
 }
 
 .placeholder-note {
