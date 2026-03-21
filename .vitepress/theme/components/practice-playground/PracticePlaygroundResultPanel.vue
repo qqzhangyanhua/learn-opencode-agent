@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from 'vue'
+import { computed, nextTick, onUnmounted, ref, watch } from 'vue'
 import type { PracticePlaygroundRunState } from './practicePlaygroundTypes'
 
 const props = defineProps<{
@@ -20,6 +20,8 @@ const outputCopyStatus = ref('')
 const debugCopyStatus = ref('')
 const summaryCopyStatus = ref('')
 const outputPanelRef = ref<HTMLElement | null>(null)
+const liveDurationMs = ref<number | null>(null)
+let liveDurationTimer: number | null = null
 let lastOutputLength = 0
 
 const configSummary = computed(() => props.runState.configSnapshot)
@@ -83,6 +85,9 @@ const apiKeyStatusLabel = computed(() => {
   return configSummary.value.hasApiKey ? '已配置' : '未配置'
 })
 const durationLabel = computed(() => {
+  if (props.runState.status === 'running' && liveDurationMs.value !== null) {
+    return `${liveDurationMs.value} ms（进行中）`
+  }
   if (props.runState.durationMs === null) return '尚无'
   return `${props.runState.durationMs} ms`
 })
@@ -137,6 +142,39 @@ watch(
     return () => window.clearTimeout(timer)
   },
 )
+
+watch(
+  () => [props.runState.status, props.runState.startedAt] as const,
+  ([status, startedAt]) => {
+    stopLiveDurationTimer()
+
+    if (status !== 'running' || startedAt === null) {
+      liveDurationMs.value = null
+      return
+    }
+
+    const syncLiveDuration = () => {
+      liveDurationMs.value = Math.max(0, Date.now() - startedAt)
+    }
+
+    syncLiveDuration()
+    if (typeof window === 'undefined') return
+    liveDurationTimer = window.setInterval(syncLiveDuration, 250)
+  },
+  { immediate: true },
+)
+
+onUnmounted(() => {
+  stopLiveDurationTimer()
+})
+
+function stopLiveDurationTimer() {
+  if (typeof window === 'undefined') return
+  if (liveDurationTimer !== null) {
+    window.clearInterval(liveDurationTimer)
+    liveDurationTimer = null
+  }
+}
 
 async function handleCopySummary() {
   const text = summaryText.value.trim()
