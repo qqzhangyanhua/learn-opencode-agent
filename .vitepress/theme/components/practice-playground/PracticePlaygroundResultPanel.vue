@@ -1026,6 +1026,10 @@ function resolveDebugTone(line: string): 'error' | 'warning' | 'trace' | 'neutra
 }
 
 @media (max-width: 520px) {
+  .summary-header {
+    align-items: flex-start;
+  }
+
   .summary-item-secondary {
     display: none;
   }
@@ -1043,7 +1047,12 @@ function resolveDebugTone(line: string): 'error' | 'warning' | 'trace' | 'neutra
   .summary-actions {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
-    justify-items: start;
+    justify-items: stretch;
+    gap: 6px;
+  }
+
+  .summary-actions .status-chip {
+    justify-self: start;
   }
 
   .card-title {
