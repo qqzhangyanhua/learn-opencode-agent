@@ -19,6 +19,8 @@ const emit = defineEmits<{
 const outputCopyStatus = ref('')
 const debugCopyStatus = ref('')
 const summaryCopyStatus = ref('')
+const outputCardRef = ref<HTMLElement | null>(null)
+const debugCardRef = ref<HTMLElement | null>(null)
 const outputPanelRef = ref<HTMLElement | null>(null)
 const liveDurationMs = ref<number | null>(null)
 const outputExpanded = ref(false)
@@ -189,9 +191,43 @@ watch(
   { immediate: true },
 )
 
+watch(
+  () => [props.runState.status, props.runState.requestToken] as const,
+  async ([status], [previousStatus, previousToken]) => {
+    if (typeof window === 'undefined') return
+    if (status !== 'success' && status !== 'error') return
+    if (status === previousStatus && props.runState.requestToken === previousToken) return
+
+    await nextTick()
+
+    if (status === 'error') {
+      scrollCardIntoView(debugCardRef.value)
+      return
+    }
+
+    if (hasRunnableOutput.value) {
+      scrollCardIntoView(outputCardRef.value)
+      return
+    }
+
+    if (hasDebugContent.value) {
+      scrollCardIntoView(debugCardRef.value)
+    }
+  },
+)
+
 onUnmounted(() => {
   stopLiveDurationTimer()
 })
+
+function scrollCardIntoView(target: HTMLElement | null) {
+  if (!target) return
+  target.scrollIntoView({
+    behavior: 'smooth',
+    block: 'nearest',
+    inline: 'nearest',
+  })
+}
 
 function stopLiveDurationTimer() {
   if (typeof window === 'undefined') return
@@ -325,7 +361,7 @@ function resolveDebugTone(line: string): 'error' | 'warning' | 'trace' | 'neutra
       <p v-if="summaryCopyStatus" class="copy-status" role="status" aria-live="polite">{{ summaryCopyStatus }}</p>
     </article>
 
-    <article class="result-card output-card">
+    <article ref="outputCardRef" class="result-card output-card">
       <div class="card-header">
         <div class="card-title">
           <h2>输出</h2>
@@ -376,7 +412,7 @@ function resolveDebugTone(line: string): 'error' | 'warning' | 'trace' | 'neutra
       <p v-if="outputCopyStatus" class="copy-status" role="status" aria-live="polite">{{ outputCopyStatus }}</p>
     </article>
 
-    <article class="result-card debug-card">
+    <article ref="debugCardRef" class="result-card debug-card">
       <div class="card-header">
         <div class="card-title">
           <h2>调试</h2>
