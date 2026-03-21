@@ -171,19 +171,20 @@ function resolveDebugTone(line: string): 'error' | 'warning' | 'trace' | 'neutra
 }
 
 .result-card {
-  border: 1px solid var(--vp-c-divider);
-  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--vp-c-brand-1) 10%, var(--vp-c-divider));
+  border-radius: 16px;
   padding: 14px;
-  background: var(--vp-c-bg);
+  background: color-mix(in srgb, var(--vp-c-bg) 94%, white);
   display: grid;
   gap: 10px;
   min-height: 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
 }
 
 .summary-card {
   background:
-    linear-gradient(135deg, color-mix(in srgb, var(--vp-c-brand-1) 8%, transparent), transparent 68%),
-    var(--vp-c-bg);
+    linear-gradient(135deg, color-mix(in srgb, var(--vp-c-brand-1) 12%, transparent), transparent 68%),
+    color-mix(in srgb, var(--vp-c-bg) 94%, white);
 }
 
 .summary-header,
@@ -253,11 +254,12 @@ function resolveDebugTone(line: string): 'error' | 'warning' | 'trace' | 'neutra
 }
 
 .ghost-button {
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 9px 12px;
-  border: 1px solid var(--vp-c-divider);
-  background: var(--vp-c-bg-soft);
+  border: 1px solid color-mix(in srgb, var(--vp-c-brand-1) 8%, var(--vp-c-divider));
+  background: color-mix(in srgb, var(--vp-c-bg) 94%, white);
   cursor: pointer;
+  font-weight: 600;
 }
 
 .output-panel {
@@ -265,10 +267,10 @@ function resolveDebugTone(line: string): 'error' | 'warning' | 'trace' | 'neutra
   min-height: 0;
   height: 100%;
   overflow: auto;
-  border-radius: 12px;
+  border-radius: 14px;
   padding: 14px;
-  border: 1px solid var(--vp-c-divider);
-  background: var(--vp-c-bg-soft);
+  border: 1px solid color-mix(in srgb, var(--vp-c-brand-1) 8%, var(--vp-c-divider));
+  background: color-mix(in srgb, var(--vp-c-bg-soft) 88%, white);
   white-space: pre-wrap;
   word-break: break-word;
   font-family: 'SFMono-Regular', 'JetBrains Mono', 'Fira Code', monospace;
@@ -305,10 +307,10 @@ function resolveDebugTone(line: string): 'error' | 'warning' | 'trace' | 'neutra
 }
 
 .debug-item {
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 10px 12px;
-  border: 1px solid var(--vp-c-divider);
-  background: var(--vp-c-bg-soft);
+  border: 1px solid color-mix(in srgb, var(--vp-c-brand-1) 8%, var(--vp-c-divider));
+  background: color-mix(in srgb, var(--vp-c-bg-soft) 88%, white);
   font-size: 13px;
   line-height: 1.5;
   word-break: break-word;

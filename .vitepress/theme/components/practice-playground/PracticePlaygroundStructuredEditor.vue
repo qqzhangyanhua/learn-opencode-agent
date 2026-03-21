@@ -439,6 +439,11 @@ function updateToolChoice(value: string) {
 }
 
 .editor-block {
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 16px;
+  padding: 14px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--vp-c-bg-soft) 92%, white), var(--vp-c-bg-soft));
   display: grid;
   gap: 12px;
 }
@@ -456,15 +461,17 @@ function updateToolChoice(value: string) {
 .card-toolbar strong {
   margin: 0;
   font-size: 16px;
+  letter-spacing: -0.01em;
 }
 
 .card {
-  border: 1px solid var(--vp-c-divider);
-  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--vp-c-brand-1) 10%, var(--vp-c-divider));
+  border-radius: 16px;
   padding: 14px;
-  background: var(--vp-c-bg);
+  background: color-mix(in srgb, var(--vp-c-bg) 94%, white);
   display: grid;
   gap: 12px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
 }
 
 .field {
@@ -481,9 +488,9 @@ function updateToolChoice(value: string) {
 .field select,
 .field textarea {
   width: 100%;
-  border-radius: 10px;
-  border: 1px solid var(--vp-c-divider);
-  background: var(--vp-c-bg-soft);
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--vp-c-brand-1) 8%, var(--vp-c-divider));
+  background: color-mix(in srgb, var(--vp-c-bg-soft) 88%, white);
   padding: 10px 12px;
 }
 
@@ -498,11 +505,12 @@ function updateToolChoice(value: string) {
 }
 
 .ghost-button {
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 8px 12px;
-  border: 1px solid var(--vp-c-divider);
-  background: var(--vp-c-bg);
+  border: 1px solid color-mix(in srgb, var(--vp-c-brand-1) 8%, var(--vp-c-divider));
+  background: color-mix(in srgb, var(--vp-c-bg) 94%, white);
   cursor: pointer;
+  font-weight: 600;
 }
 
 .ghost-button:disabled {

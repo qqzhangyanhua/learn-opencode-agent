@@ -143,6 +143,11 @@ function handleFormatJson() {
 }
 
 .editor-topbar {
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 16px;
+  padding: 12px 14px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--vp-c-bg-soft) 90%, white), var(--vp-c-bg-soft));
   display: flex;
   gap: 12px;
   justify-content: space-between;
@@ -158,10 +163,11 @@ function handleFormatJson() {
 
 .tab-button {
   border-radius: 999px;
-  padding: 8px 14px;
-  border: 1px solid var(--vp-c-divider);
-  background: var(--vp-c-bg);
+  padding: 8px 15px;
+  border: 1px solid color-mix(in srgb, var(--vp-c-brand-1) 8%, var(--vp-c-divider));
+  background: color-mix(in srgb, var(--vp-c-bg) 94%, white);
   cursor: pointer;
+  font-weight: 600;
 }
 
 .tab-button.active {

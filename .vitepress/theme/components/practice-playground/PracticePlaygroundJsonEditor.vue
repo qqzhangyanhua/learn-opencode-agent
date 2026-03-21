@@ -36,6 +36,11 @@ const emit = defineEmits<{
 }
 
 .editor-toolbar {
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 16px;
+  padding: 12px 14px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--vp-c-bg-soft) 92%, white), var(--vp-c-bg-soft));
   display: flex;
   gap: 12px;
   justify-content: space-between;
@@ -50,24 +55,26 @@ const emit = defineEmits<{
 }
 
 .ghost-button {
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 9px 12px;
-  border: 1px solid var(--vp-c-divider);
-  background: var(--vp-c-bg);
+  border: 1px solid color-mix(in srgb, var(--vp-c-brand-1) 8%, var(--vp-c-divider));
+  background: color-mix(in srgb, var(--vp-c-bg) 94%, white);
   cursor: pointer;
+  font-weight: 600;
 }
 
 .json-textarea {
   min-height: 520px;
   width: 100%;
-  border-radius: 14px;
-  border: 1px solid var(--vp-c-divider);
-  background: var(--vp-c-bg);
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--vp-c-brand-1) 10%, var(--vp-c-divider));
+  background: color-mix(in srgb, var(--vp-c-bg-soft) 86%, white);
   padding: 14px 16px;
   font-family: 'SFMono-Regular', 'JetBrains Mono', 'Fira Code', monospace;
   font-size: 13px;
   line-height: 1.6;
   resize: vertical;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
 }
 
 .json-error,

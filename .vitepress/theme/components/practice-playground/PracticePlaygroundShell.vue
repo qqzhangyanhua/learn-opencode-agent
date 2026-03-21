@@ -362,11 +362,13 @@ function getLockedToolIssue(
 }
 
 .workspace-pane {
-  border: 1px solid var(--vp-c-divider);
-  border-radius: 16px;
-  padding: 18px;
-  background: var(--vp-c-bg-soft);
+  border: 1px solid color-mix(in srgb, var(--vp-c-brand-1) 10%, var(--vp-c-divider));
+  border-radius: 20px;
+  padding: 20px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--vp-c-bg-soft) 92%, white), var(--vp-c-bg-soft));
   min-width: 0;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.05);
 }
 
 .pane-label {
@@ -379,7 +381,8 @@ function getLockedToolIssue(
 
 .workspace-pane h2 {
   margin: 0;
-  font-size: 20px;
+  font-size: 21px;
+  letter-spacing: -0.02em;
 }
 
 .workspace-pane p {
