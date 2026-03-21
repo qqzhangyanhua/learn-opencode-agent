@@ -50,7 +50,6 @@ const selectedChapterId = ref<PracticePlaygroundChapterId>(DEFAULT_PRACTICE_PLAY
 const playgroundConfig = ref<PracticePlaygroundConfig>(createDefaultPracticePlaygroundConfig())
 const settingsModalOpen = ref(false)
 const runState = ref<PracticePlaygroundRunState>(createInitialPracticePlaygroundRunState())
-const configStatusMessage = ref('')
 const workspaceMessage = ref('在左侧调整请求模板后，可以直接在右侧查看输出和调试信息。')
 const editorViewMode = ref<PracticePlaygroundTemplateViewMode>('structured')
 
@@ -193,7 +192,7 @@ function handleSettingsClose() {
 function handleSettingsSave(nextConfig: PracticePlaygroundConfig) {
   playgroundConfig.value = nextConfig
   const didPersist = savePracticePlaygroundConfig(nextConfig)
-  configStatusMessage.value = didPersist
+  workspaceMessage.value = didPersist
     ? '配置已保存到当前浏览器。'
     : '配置已更新；当前浏览器策略不允许写入本地存储。'
   settingsModalOpen.value = false
@@ -202,7 +201,7 @@ function handleSettingsSave(nextConfig: PracticePlaygroundConfig) {
 function handleSettingsClear() {
   const didClear = clearPracticePlaygroundConfig()
   playgroundConfig.value = createDefaultPracticePlaygroundConfig()
-  configStatusMessage.value = didClear
+  workspaceMessage.value = didClear
     ? '已清空本地配置并恢复默认值。'
     : '已恢复默认值；当前浏览器策略不允许清理本地存储。'
   settingsModalOpen.value = false
@@ -309,8 +308,6 @@ function getLockedToolIssue(
       @run="handleRun"
     />
 
-    <p v-if="configStatusMessage" class="config-status">{{ configStatusMessage }}</p>
-
     <section class="workspace-main">
       <article class="workspace-pane editor-pane">
         <div class="pane-label">左侧编辑区</div>
@@ -356,12 +353,6 @@ function getLockedToolIssue(
   display: grid;
   gap: 14px;
   margin: 24px 0 8px;
-}
-
-.config-status {
-  margin: 0;
-  font-size: 13px;
-  color: var(--vp-c-text-2);
 }
 
 .workspace-main {
