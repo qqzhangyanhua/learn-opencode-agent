@@ -1,22 +1,14 @@
 <script setup lang="ts">
-import { onUnmounted, ref, watch } from 'vue'
-import {
-  getPracticePlaygroundRunnerNotice,
-  isPracticePlaygroundRunnerReady,
-  runPracticePlaygroundChapter,
-} from './practicePlaygroundRunners'
+import { onUnmounted, ref } from 'vue'
+import { runPracticePlaygroundChapter } from './practicePlaygroundRunners'
 import {
   createInitialPracticePlaygroundRunState,
-  type PracticePlaygroundConfigSnapshot,
   type PracticePlaygroundChapter,
   type PracticePlaygroundConfig,
+  type PracticePlaygroundConfigSnapshot,
+  type PracticePlaygroundRunnerInput,
   type PracticePlaygroundRunState,
 } from './practicePlaygroundTypes'
-
-const props = defineProps<{
-  chapter: PracticePlaygroundChapter
-  config: PracticePlaygroundConfig
-}>()
 
 const emit = defineEmits<{
   'update:runState': [state: PracticePlaygroundRunState]
@@ -25,6 +17,7 @@ const emit = defineEmits<{
 const runState = ref<PracticePlaygroundRunState>(createInitialPracticePlaygroundRunState())
 const activeRequestToken = ref(0)
 const activeAbortController = ref<AbortController | null>(null)
+const lastAbortReason = ref('请求已取消。')
 
 function isAbortError(error: unknown): boolean {
   return error instanceof DOMException && error.name === 'AbortError'
@@ -39,10 +32,7 @@ function updateRunStateSafely(
   requestToken: number,
   updater: (currentState: PracticePlaygroundRunState) => PracticePlaygroundRunState,
 ) {
-  if (requestToken !== activeRequestToken.value) {
-    return
-  }
-
+  if (requestToken !== activeRequestToken.value) return
   syncRunState(updater(runState.value))
 }
 
@@ -55,26 +45,37 @@ function appendDebugLine(requestToken: number, line: string) {
 
 function createConfigSnapshot(config: PracticePlaygroundConfig): PracticePlaygroundConfigSnapshot {
   return {
-    baseURL: config.baseURL,
-    model: config.model,
+    baseURL: config.baseURL.trim(),
+    model: config.model.trim(),
     hasApiKey: Boolean(config.apiKey.trim()),
   }
 }
 
-function abortActiveRequest() {
+function invalidateActiveRequest() {
+  activeRequestToken.value += 1
   activeAbortController.value?.abort()
   activeAbortController.value = null
 }
 
-function resetRunState() {
-  abortActiveRequest()
-  activeRequestToken.value += 1
+function abort(reason = '请求已取消。') {
+  if (!activeAbortController.value) return
+  lastAbortReason.value = reason
+  activeAbortController.value.abort()
+}
+
+function reset() {
+  invalidateActiveRequest()
+  lastAbortReason.value = '请求已取消。'
   syncRunState(createInitialPracticePlaygroundRunState())
 }
 
-async function handleRun() {
-  if (!isPracticePlaygroundRunnerReady(props.chapter) || runState.value.status === 'running') {
-    return
+async function run(payload: {
+  chapter: PracticePlaygroundChapter
+  config: PracticePlaygroundConfig
+  runnerInput: PracticePlaygroundRunnerInput
+}) {
+  if (activeAbortController.value) {
+    invalidateActiveRequest()
   }
 
   const requestToken = activeRequestToken.value + 1
@@ -82,23 +83,24 @@ async function handleRun() {
   const abortController = new AbortController()
   activeAbortController.value = abortController
   const startedAt = Date.now()
-  const configSnapshot = createConfigSnapshot({ ...props.config })
+
   syncRunState({
     status: 'running',
     startedAt,
     finishedAt: null,
     durationMs: null,
     outputText: '',
-    debugLines: [],
+    debugLines: [...payload.runnerInput.adapterNotes],
     errorMessage: '',
     requestToken,
-    configSnapshot,
+    configSnapshot: createConfigSnapshot(payload.config),
   })
 
   try {
     await runPracticePlaygroundChapter({
-      chapter: props.chapter,
-      config: { ...props.config },
+      chapter: payload.chapter,
+      config: { ...payload.config },
+      runnerInput: payload.runnerInput,
       signal: abortController.signal,
       onDebug: (line) => appendDebugLine(requestToken, line),
       onOutput: (text) => {
@@ -123,7 +125,7 @@ async function handleRun() {
         finishedAt: Date.now(),
         durationMs: Date.now() - startedAt,
       }))
-      appendDebugLine(requestToken, '请求已取消：旧请求已被中断。')
+      appendDebugLine(requestToken, lastAbortReason.value)
       return
     }
 
@@ -140,202 +142,17 @@ async function handleRun() {
     if (activeAbortController.value === abortController) {
       activeAbortController.value = null
     }
+    lastAbortReason.value = '请求已取消。'
   }
 }
 
-watch(
-  () => props.chapter.id,
-  () => {
-    resetRunState()
-  },
-  { immediate: true },
-)
+defineExpose({
+  abort,
+  reset,
+  run,
+})
 
 onUnmounted(() => {
-  abortActiveRequest()
-  activeRequestToken.value += 1
+  invalidateActiveRequest()
 })
 </script>
-
-<template>
-  <section class="runner-card">
-    <header class="runner-header">
-      <div>
-        <h2>运行区</h2>
-        <p>{{ getPracticePlaygroundRunnerNotice(chapter) }}</p>
-      </div>
-      <button
-        type="button"
-        class="run-button"
-        :disabled="!isPracticePlaygroundRunnerReady(chapter) || runState.status === 'running'"
-        @click="handleRun"
-      >
-        {{ runState.status === 'running' ? '运行中...' : '一键运行' }}
-      </button>
-    </header>
-
-    <div class="example-block">
-      <h3>预置示例</h3>
-      <p>{{ chapter.playground.description }}</p>
-      <dl class="example-grid">
-        <div>
-          <dt>运行模式</dt>
-          <dd>{{ chapter.playground.mode }}</dd>
-        </div>
-        <div>
-          <dt>预置问题</dt>
-          <dd>{{ chapter.playground.prompt }}</dd>
-        </div>
-        <div>
-          <dt>输出方式</dt>
-          <dd>{{ chapter.playground.outputMode }}</dd>
-        </div>
-        <div>
-          <dt>本地工具</dt>
-          <dd>
-            <span v-if="chapter.playground.tools.length > 0">
-              {{ chapter.playground.tools.join('、') }}
-            </span>
-            <span v-else>当前示例不依赖本地工具</span>
-          </dd>
-        </div>
-      </dl>
-      <div class="highlight-block">
-        <h4>本章运行提示</h4>
-        <ul>
-          <li v-for="item in chapter.playground.highlights" :key="item">
-            {{ item }}
-          </li>
-        </ul>
-      </div>
-      <p v-if="!isPracticePlaygroundRunnerReady(chapter)" class="pending-tip">
-        当前章节暂未接入，将在后续任务实现。
-      </p>
-    </div>
-  </section>
-</template>
-
-<style scoped>
-.runner-card {
-  border: 1px solid var(--vp-c-divider);
-  border-radius: 12px;
-  padding: 16px;
-  background: var(--vp-c-bg-soft);
-  display: grid;
-  gap: 14px;
-}
-
-.runner-header {
-  display: flex;
-  gap: 12px;
-  justify-content: space-between;
-  align-items: flex-start;
-}
-
-.runner-header h2 {
-  margin: 0;
-  font-size: 18px;
-}
-
-.runner-header p {
-  margin: 6px 0 0;
-  color: var(--vp-c-text-2);
-  max-width: 720px;
-}
-
-.run-button {
-  border-radius: 10px;
-  border: 1px solid var(--vp-c-brand-1);
-  background: var(--vp-c-brand-soft);
-  color: var(--vp-c-brand-1);
-  padding: 10px 14px;
-  cursor: pointer;
-  white-space: nowrap;
-  font-weight: 600;
-}
-
-.run-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.55;
-}
-
-.example-block {
-  border: 1px dashed var(--vp-c-divider);
-  border-radius: 10px;
-  padding: 14px;
-  background: var(--vp-c-bg);
-  display: grid;
-  gap: 10px;
-}
-
-.example-block h3 {
-  margin: 0;
-  font-size: 16px;
-}
-
-.example-block p {
-  margin: 0;
-  color: var(--vp-c-text-2);
-}
-
-.highlight-block {
-  display: grid;
-  gap: 8px;
-}
-
-.highlight-block h4 {
-  margin: 0;
-  font-size: 14px;
-}
-
-.highlight-block ul {
-  margin: 0;
-  padding-left: 18px;
-  color: var(--vp-c-text-2);
-}
-
-.highlight-block li + li {
-  margin-top: 4px;
-}
-
-.example-grid {
-  margin: 0;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-
-.example-grid div {
-  min-width: 0;
-}
-
-.example-grid dt {
-  font-size: 13px;
-  color: var(--vp-c-text-2);
-}
-
-.example-grid dd {
-  margin: 6px 0 0;
-  word-break: break-word;
-}
-
-.pending-tip {
-  color: var(--vp-c-text-1);
-  font-size: 14px;
-}
-
-@media (max-width: 700px) {
-  .runner-header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .run-button {
-    width: 100%;
-  }
-
-  .example-grid {
-    grid-template-columns: 1fr;
-  }
-}
-</style>

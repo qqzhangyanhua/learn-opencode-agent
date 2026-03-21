@@ -81,84 +81,11 @@ type PracticePlaygroundReActResult =
 
 type PracticePlaygroundModelTier = 'mini' | 'standard' | 'large'
 
-const P1_TOOLS = [
-  {
-    type: 'function',
-    function: {
-      name: 'get_weather',
-      description: '查询指定城市的当前天气',
-      parameters: {
-        type: 'object',
-        properties: {
-          city: {
-            type: 'string',
-            description: '城市名称，如“北京”“上海”',
-          },
-        },
-        required: ['city'],
-      },
-    },
-  },
-] as const
-
 const P1_WEATHER_DATA: Record<string, string> = {
   北京: '晴，22°C，东南风 3 级',
   上海: '多云，18°C，东风 2 级',
   广州: '小雨，26°C，南风 2 级',
 }
-
-const P2_PRESET_MESSAGES: PracticePlaygroundChatMessage[] = [
-  {
-    role: 'system',
-    content: '你是一名简洁的编程助手，回答控制在 120 字以内，并保留口语化解释。',
-  },
-  {
-    role: 'user',
-    content: '用 TypeScript 写一个计算数组平均值的函数。',
-  },
-  {
-    role: 'assistant',
-    content:
-      '可以先用 reduce 把数字累加，再除以数组长度；如果数组为空，最好显式返回 null 或抛出错误，避免除以 0。',
-  },
-  {
-    role: 'user',
-    content: '现在改成支持忽略 undefined 值，并继续保持口语化解释。',
-  },
-  {
-    role: 'assistant',
-    content:
-      '可以先过滤掉 undefined，再做累加。这样调用方就不用先手动清洗数组，函数本身更稳一点。',
-  },
-  {
-    role: 'user',
-    content: '把刚才的平均值函数改成支持加权平均，并保留口语化解释风格。',
-  },
-]
-
-const REACT_SYSTEM_PROMPT = `你是一个教学型 ReAct 助手。
-
-你每次必须只输出以下两种格式之一，不要添加额外段落：
-
-格式 A：当你还需要工具时
-Thought: 说明下一步为什么要这样做
-Action: 工具名称
-Action Input: {"key":"value"}
-
-格式 B：当你已经可以结束时
-Thought: 基于 Observation 的简短推理
-Final Answer: 给出最终回答
-
-规则：
-1. 每次只能选择一个 Action。
-2. Action Input 必须是合法 JSON 对象。
-3. 看到 Observation 后再决定下一步。
-4. 最多思考几步后就要收敛到 Final Answer。`
-
-const REACT_TOOLS_DESCRIPTION = `可用工具：
-1. get_weather，参数：{"city":"城市名"}
-2. search_web，参数：{"query":"搜索关键词"}
-3. calculate，参数：{"expression":"数学表达式"}`
 
 const REACT_WEATHER_DATA: Record<string, string> = {
   北京: '晴，22°C，东南风 3 级，空气质量良',
@@ -309,6 +236,35 @@ async function createChatCompletionResponse(
   return response
 }
 
+function createRequestBody(
+  context: PracticePlaygroundRunnerContext,
+  overrides: Partial<PracticePlaygroundRunnerContext['runnerInput']['requestBody']> = {},
+): Record<string, unknown> {
+  return {
+    ...context.runnerInput.requestBody,
+    ...overrides,
+  }
+}
+
+function createChatMessages(
+  messages: PracticePlaygroundRunnerContext['runnerInput']['requestBody']['messages'],
+): PracticePlaygroundChatMessage[] {
+  return messages.map((message) => {
+    if (message.role === 'tool') {
+      return {
+        role: 'tool',
+        content: message.content,
+        ...(message.tool_call_id ? { tool_call_id: message.tool_call_id } : {}),
+      }
+    }
+
+    return {
+      role: message.role,
+      content: message.content,
+    }
+  })
+}
+
 function getWeather(city: string): string {
   return P1_WEATHER_DATA[city] ?? `暂无 ${city} 的天气数据`
 }
@@ -384,20 +340,13 @@ function getFirstChoice(
 }
 
 async function runP1MinimalAgent(context: PracticePlaygroundRunnerContext): Promise<void> {
-  const messages: PracticePlaygroundChatMessage[] = [
-    {
-      role: 'user',
-      content: context.chapter.playground.prompt,
-    },
-  ]
+  const messages = createChatMessages(context.runnerInput.requestBody.messages)
 
-  context.onDebug('请求开始：准备发送带 tools 的第一次请求。')
+  context.onDebug(`请求开始：准备发送带 tools 的第一次请求，共 ${messages.length} 条消息。`)
 
-  const firstResponse = await createChatCompletion(context, {
-    model: context.config.model.trim(),
+  const firstResponse = await createChatCompletion(context, createRequestBody(context, {
     messages,
-    tools: P1_TOOLS,
-  })
+  }))
 
   const firstChoice = getFirstChoice(firstResponse)
   throwIfAborted(context.signal)
@@ -434,11 +383,9 @@ async function runP1MinimalAgent(context: PracticePlaygroundRunnerContext): Prom
 
   context.onDebug('请求继续：工具结果已回写，准备发起第二次请求。')
 
-  const secondResponse = await createChatCompletion(context, {
-    model: context.config.model.trim(),
+  const secondResponse = await createChatCompletion(context, createRequestBody(context, {
     messages,
-    tools: P1_TOOLS,
-  })
+  }))
 
   const secondChoice = getFirstChoice(secondResponse)
   throwIfAborted(context.signal)
@@ -448,13 +395,11 @@ async function runP1MinimalAgent(context: PracticePlaygroundRunnerContext): Prom
 }
 
 async function runP2MultiTurn(context: PracticePlaygroundRunnerContext): Promise<void> {
-  context.onDebug(`多轮请求开始：已注入 ${P2_PRESET_MESSAGES.length} 条预置消息。`)
+  const messages = context.runnerInput.requestBody.messages
+  context.onDebug(`多轮请求开始：当前模板共 ${messages.length} 条消息。`)
   context.onDebug('多轮请求说明：本示例不会触发工具调用，只观察上下文如何影响最终回答。')
 
-  const response = await createChatCompletion(context, {
-    model: context.config.model.trim(),
-    messages: P2_PRESET_MESSAGES,
-  })
+  const response = await createChatCompletion(context, createRequestBody(context))
 
   const finalChoice = getFirstChoice(response)
   throwIfAborted(context.signal)
@@ -540,20 +485,7 @@ function parseStreamingEventBlock(
 async function runP3Streaming(context: PracticePlaygroundRunnerContext): Promise<void> {
   context.onDebug('流式请求开始：准备以 stream=true 发起浏览器直连请求。')
 
-  const response = await createChatCompletionResponse(context, {
-    model: context.config.model.trim(),
-    stream: true,
-    messages: [
-      {
-        role: 'system',
-        content: '你是一名擅长解释交互体验的助手，请分 3 段短文回答。',
-      },
-      {
-        role: 'user',
-        content: context.chapter.playground.prompt,
-      },
-    ],
-  })
+  const response = await createChatCompletionResponse(context, createRequestBody(context))
 
   const reader = response.body?.getReader()
   if (!reader) {
@@ -706,26 +638,16 @@ function parseReActOutput(text: string): PracticePlaygroundReActResult {
 }
 
 async function runP10ReactLite(context: PracticePlaygroundRunnerContext): Promise<void> {
-  const messages: PracticePlaygroundChatMessage[] = [
-    {
-      role: 'system',
-      content: `${REACT_SYSTEM_PROMPT}\n\n${REACT_TOOLS_DESCRIPTION}`,
-    },
-    {
-      role: 'user',
-      content: context.chapter.playground.prompt,
-    },
-  ]
+  const messages = createChatMessages(context.runnerInput.requestBody.messages)
 
   context.onDebug('ReAct 请求开始：这是教学型简化链路，最多循环 3 次。')
 
   for (let step = 1; step <= 3; step += 1) {
     context.onDebug(`第 ${step} 轮：发送 ReAct 推理请求。`)
 
-    const response = await createChatCompletion(context, {
-      model: context.config.model.trim(),
+    const response = await createChatCompletion(context, createRequestBody(context, {
       messages,
-    })
+    }))
 
     throwIfAborted(context.signal)
     const choice = getFirstChoice(response)
@@ -827,8 +749,14 @@ function chooseModelRoute(
 }
 
 async function runP18ModelRouting(context: PracticePlaygroundRunnerContext): Promise<void> {
-  const toolCount = 3
-  const routeDecision = chooseModelRoute(context.chapter.playground.prompt, toolCount)
+  const prompt =
+    [...context.runnerInput.templateSnapshot.messages]
+      .reverse()
+      .find((message) => message.role === 'user')
+      ?.content
+      ?? context.chapter.playground.prompt
+  const toolCount = context.runnerInput.requestBody.tools?.length ?? 0
+  const routeDecision = chooseModelRoute(prompt, toolCount)
 
   context.onDebug(`路由判断：推荐使用 ${routeDecision.tier} 层级。`)
   context.onDebug(`路由评分：${routeDecision.score >= 0 ? '+' : ''}${routeDecision.score}`)
@@ -837,19 +765,7 @@ async function runP18ModelRouting(context: PracticePlaygroundRunnerContext): Pro
   }
   context.onDebug(`演示说明：实际请求仍使用当前配置模型 ${context.config.model.trim()}。`)
 
-  const response = await createChatCompletion(context, {
-    model: context.config.model.trim(),
-    messages: [
-      {
-        role: 'system',
-        content: `你是一名成本感知助手。本次任务被启发式地判定为 ${routeDecision.tier} 层级，但实际调用仍使用用户当前配置模型。请先用一句话解释为什么这类任务适合该层级，再给出正式回答。`,
-      },
-      {
-        role: 'user',
-        content: context.chapter.playground.prompt,
-      },
-    ],
-  })
+  const response = await createChatCompletion(context, createRequestBody(context))
 
   throwIfAborted(context.signal)
   const choice = getFirstChoice(response)

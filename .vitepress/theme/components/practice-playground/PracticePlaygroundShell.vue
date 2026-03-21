@@ -3,6 +3,7 @@ import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { inBrowser } from 'vitepress'
 import PracticePlaygroundEditor from './PracticePlaygroundEditor.vue'
 import PracticePlaygroundHeader from './PracticePlaygroundHeader.vue'
+import PracticePlaygroundRunner from './PracticePlaygroundRunner.vue'
 import PracticePlaygroundSettingsModal from './PracticePlaygroundSettingsModal.vue'
 import {
   DEFAULT_PRACTICE_PLAYGROUND_CHAPTER_ID,
@@ -10,10 +11,13 @@ import {
   isPracticePlaygroundChapterId,
   PRACTICE_PLAYGROUND_CHAPTERS,
 } from './practicePlaygroundCatalog'
+import { adaptPracticeTemplateToRunnerInput } from './practicePlaygroundTemplateAdapters'
 import { createPracticePlaygroundTemplate } from './practicePlaygroundTemplates'
 import type {
+  PracticePlaygroundChapter,
   PracticePlaygroundChapterId,
   PracticePlaygroundConfig,
+  PracticePlaygroundRunnerInput,
   PracticePlaygroundRunState,
   PracticePlaygroundTemplate,
   PracticePlaygroundTemplateViewMode,
@@ -31,6 +35,16 @@ import {
   savePracticePlaygroundConfig,
 } from './practicePlaygroundStorage'
 
+interface PracticePlaygroundRunnerHandle {
+  abort: (reason?: string) => void
+  reset: () => void
+  run: (payload: {
+    chapter: PracticePlaygroundChapter
+    config: PracticePlaygroundConfig
+    runnerInput: PracticePlaygroundRunnerInput
+  }) => Promise<void>
+}
+
 const selectedChapterId = ref<PracticePlaygroundChapterId>(DEFAULT_PRACTICE_PLAYGROUND_CHAPTER_ID)
 const playgroundConfig = ref<PracticePlaygroundConfig>(createDefaultPracticePlaygroundConfig())
 const settingsModalOpen = ref(false)
@@ -41,6 +55,7 @@ const editorViewMode = ref<PracticePlaygroundTemplateViewMode>('structured')
 
 const selectedChapter = computed(() => getPracticePlaygroundChapterById(selectedChapterId.value))
 const defaultTemplate = computed(() => createPracticePlaygroundTemplate(selectedChapter.value))
+const runnerRef = ref<PracticePlaygroundRunnerHandle | null>(null)
 
 const editorState = ref<PracticeTemplateEditorState>(
   createPracticeTemplateEditorState(createPracticePlaygroundTemplate(selectedChapter.value)),
@@ -67,6 +82,13 @@ const runValidationMessage = computed(() => {
 
   return ''
 })
+const runnerInput = computed(() =>
+  adaptPracticeTemplateToRunnerInput(
+    selectedChapter.value,
+    editorState.value.template,
+    playgroundConfig.value,
+  ),
+)
 
 function syncEditorStateForChapter(chapterId: PracticePlaygroundChapterId) {
   const chapter = getPracticePlaygroundChapterById(chapterId)
@@ -103,6 +125,7 @@ function pushChapterQuery(id: PracticePlaygroundChapterId) {
 
 function syncChapterFromLocation() {
   const resolvedId = resolveChapterIdFromLocation()
+  runnerRef.value?.reset()
   selectedChapterId.value = resolvedId
   syncEditorStateForChapter(resolvedId)
   runState.value = createInitialPracticePlaygroundRunState()
@@ -111,10 +134,10 @@ function syncChapterFromLocation() {
 
 function handleChapterSelect(id: PracticePlaygroundChapterId) {
   if (id === selectedChapterId.value) return
+  runnerRef.value?.reset()
   selectedChapterId.value = id
   syncEditorStateForChapter(id)
-  runState.value = createInitialPracticePlaygroundRunState()
-  workspaceMessage.value = `已切换到 ${getPracticePlaygroundChapterById(id).playground.title}，工作台骨架已更新。`
+  workspaceMessage.value = `已切换到 ${getPracticePlaygroundChapterById(id).playground.title}，请求状态已重置。`
   pushChapterQuery(id)
 }
 
@@ -157,9 +180,13 @@ function handleEditorViewModeUpdate(nextMode: PracticePlaygroundTemplateViewMode
 }
 
 function handleResetTemplate() {
+  runnerRef.value?.reset()
   syncEditorStateForChapter(selectedChapterId.value)
-  runState.value = createInitialPracticePlaygroundRunState()
   workspaceMessage.value = `已重置 ${selectedChapter.value.playground.title} 的模板草稿。`
+}
+
+function handleRunStateUpdate(nextState: PracticePlaygroundRunState) {
+  runState.value = nextState
 }
 
 function handleRun() {
@@ -176,25 +203,14 @@ function handleRun() {
 
   const startedAt = Date.now()
   const appliedTemplate = clonePracticePlaygroundTemplate(editorState.value.template)
-  const nextRequestToken = runState.value.requestToken + 1
 
   lastAppliedTemplate.value = appliedTemplate
-  runState.value = {
-    status: 'success',
-    startedAt,
-    finishedAt: startedAt,
-    durationMs: 0,
-    outputText: '',
-    debugLines: ['Task 2 占位运行：真实 runner 将在后续任务接入。'],
-    errorMessage: '',
-    requestToken: nextRequestToken,
-    configSnapshot: {
-      baseURL: playgroundConfig.value.baseURL.trim(),
-      model: playgroundConfig.value.model.trim(),
-      hasApiKey: hasApiKey.value,
-    },
-  }
-  workspaceMessage.value = '编辑器链路已接通；真实 runner 与结果面板将在后续任务接入。'
+  void runnerRef.value?.run({
+    chapter: selectedChapter.value,
+    config: { ...playgroundConfig.value },
+    runnerInput: runnerInput.value,
+  })
+  workspaceMessage.value = `已开始运行 ${selectedChapter.value.playground.title}。`
 }
 
 onMounted(() => {
@@ -206,6 +222,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  runnerRef.value?.abort('请求已取消：页面已卸载。')
   if (inBrowser) {
     window.removeEventListener('popstate', handlePopState)
   }
@@ -299,6 +316,8 @@ function getLockedToolIssue(
       @save="handleSettingsSave"
       @clear="handleSettingsClear"
     />
+
+    <PracticePlaygroundRunner ref="runnerRef" @update:runState="handleRunStateUpdate" />
   </div>
 </template>
 

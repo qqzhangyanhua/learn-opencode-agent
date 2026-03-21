@@ -141,6 +141,7 @@ export interface PracticePlaygroundRunState {
 export interface PracticePlaygroundRunnerContext {
   chapter: PracticePlaygroundChapter
   config: PracticePlaygroundConfig
+  runnerInput: PracticePlaygroundRunnerInput
   signal: AbortSignal
   onDebug: (line: string) => void
   onOutput: (text: string) => void
