@@ -90,16 +90,56 @@ const runValidationMessage = computed(() => {
 
   return ''
 })
-const workStatus = computed<{
+const headerStatus = computed<{
   hint: string
   label: string
-  tone: 'idle' | 'warning' | 'running' | 'ready'
+  tone: 'idle' | 'warning' | 'running' | 'ready' | 'success' | 'error'
 }>(() => {
   if (runState.value.status === 'running') {
     return {
       label: '运行中',
-      hint: '请求已发出，右侧结果区会持续更新。',
+      hint: currentWorkspaceFeedback.value.text,
       tone: 'running',
+    }
+  }
+
+  if (runState.value.status === 'success') {
+    return {
+      label: '已完成',
+      hint: currentWorkspaceFeedback.value.text,
+      tone: 'success',
+    }
+  }
+
+  if (runState.value.status === 'error') {
+    return {
+      label: '运行失败',
+      hint: currentWorkspaceFeedback.value.text,
+      tone: 'error',
+    }
+  }
+
+  if (runState.value.finishedAt && isAbortSummary(runState.value.debugLines)) {
+    return {
+      label: '已取消',
+      hint: currentWorkspaceFeedback.value.text,
+      tone: 'warning',
+    }
+  }
+
+  if (workspaceFeedback.value.tone === 'success') {
+    return {
+      label: '已更新',
+      hint: workspaceFeedback.value.text,
+      tone: 'success',
+    }
+  }
+
+  if (workspaceFeedback.value.tone === 'warning') {
+    return {
+      label: '已变更',
+      hint: workspaceFeedback.value.text,
+      tone: 'warning',
     }
   }
 
@@ -397,9 +437,9 @@ function findLastAbortLine(debugLines: string[]): string | null {
       :selected-chapter-id="selectedChapterId"
       :title="selectedChapter.playground.title"
       :model-label="currentModelLabel"
-      :work-status-hint="workStatus.hint"
-      :work-status-label="workStatus.label"
-      :work-status-tone="workStatus.tone"
+      :work-status-hint="headerStatus.hint"
+      :work-status-label="headerStatus.label"
+      :work-status-tone="headerStatus.tone"
       :has-api-key="hasApiKey"
       :is-config-ready="isConfigReady"
       :is-run-blocked="!isConfigReady || Boolean(runValidationMessage)"

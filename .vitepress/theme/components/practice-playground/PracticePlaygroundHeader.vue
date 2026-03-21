@@ -8,7 +8,7 @@ const props = defineProps<{
   modelLabel: string
   workStatusHint: string
   workStatusLabel: string
-  workStatusTone: 'idle' | 'warning' | 'running' | 'ready'
+  workStatusTone: 'idle' | 'warning' | 'running' | 'ready' | 'success' | 'error'
   hasApiKey: boolean
   isConfigReady: boolean
   isRunBlocked: boolean
@@ -194,6 +194,18 @@ const emit = defineEmits<{
   border-color: color-mix(in srgb, #16a34a 40%, var(--vp-c-divider));
   background: color-mix(in srgb, #16a34a 10%, var(--vp-c-bg));
   color: #166534;
+}
+
+.status-pill.success {
+  border-color: color-mix(in srgb, #16a34a 40%, var(--vp-c-divider));
+  background: color-mix(in srgb, #16a34a 10%, var(--vp-c-bg));
+  color: #166534;
+}
+
+.status-pill.error {
+  border-color: color-mix(in srgb, #ef4444 40%, var(--vp-c-divider));
+  background: color-mix(in srgb, #ef4444 10%, var(--vp-c-bg));
+  color: #b42318;
 }
 
 .status-hint {
