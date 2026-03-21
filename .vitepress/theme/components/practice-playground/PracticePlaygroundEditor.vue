@@ -13,13 +13,16 @@ import {
 } from './practicePlaygroundTypes'
 
 const props = defineProps<{
+  canRestoreLastRunTemplate: boolean
   defaultTemplate: PracticePlaygroundTemplate
   editorState: PracticeTemplateEditorState
+  lastRunTemplateLabel: string
   viewMode: PracticePlaygroundTemplateViewMode
   runValidationMessage: string
 }>()
 
 const emit = defineEmits<{
+  'restore-last-run-template': []
   'update:editor-state': [state: PracticeTemplateEditorState]
   'update:view-mode': [mode: PracticePlaygroundTemplateViewMode]
 }>()
@@ -122,6 +125,15 @@ function handleFormatJson() {
         >
           原始 JSON
         </button>
+        <button
+          type="button"
+          class="tab-button secondary-action"
+          :disabled="!canRestoreLastRunTemplate"
+          :title="lastRunTemplateLabel ? `恢复到最近运行模板：${lastRunTemplateLabel}` : '当前没有可恢复的最近运行模板'"
+          @click="emit('restore-last-run-template')"
+        >
+          恢复最近运行模板
+        </button>
       </div>
 
       <div class="editor-status">
@@ -191,6 +203,15 @@ function handleFormatJson() {
   border-color: var(--vp-c-brand-1);
   color: var(--vp-c-brand-1);
   background: var(--vp-c-brand-soft);
+}
+
+.tab-button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.secondary-action {
+  color: var(--vp-c-text-2);
 }
 
 .editor-status {

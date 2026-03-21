@@ -29,6 +29,7 @@ import {
   createDefaultPracticePlaygroundConfig,
   createInitialPracticePlaygroundRunState,
   createPracticeTemplateEditorState,
+  serializePracticePlaygroundTemplate,
 } from './practicePlaygroundTypes'
 import {
   clearPracticePlaygroundConfig,
@@ -183,11 +184,20 @@ const headerStatus = computed<{
   }
 })
 const isResetDisabled = computed(() => {
-  return !editorState.value.isDirty
-    && runState.value.status === 'idle'
-    && lastAppliedTemplate.value === null
+  return !editorState.value.isDirty && !hasRunArtifacts.value
 })
 const canRun = computed(() => isConfigReady.value && !runValidationMessage.value)
+const hasRunArtifacts = computed(() => {
+  return runState.value.status !== 'idle'
+    || Boolean(runState.value.outputText.trim())
+    || runState.value.debugLines.length > 0
+    || runState.value.configSnapshot !== null
+})
+const canRestoreLastRunTemplate = computed(() => {
+  if (!lastAppliedTemplate.value) return false
+  return serializePracticePlaygroundTemplate(lastAppliedTemplate.value)
+    !== serializePracticePlaygroundTemplate(editorState.value.template)
+})
 const derivedWorkspaceFeedback = computed<{
   text: string
   tone: WorkspaceFeedbackTone
@@ -355,10 +365,28 @@ function handleResetTemplate() {
 function handleClearResult() {
   runnerRef.value?.reset('请求已取消：你清空了结果面板。')
   runState.value = createInitialPracticePlaygroundRunState()
-  lastAppliedTemplate.value = null
   workspaceFeedback.value = {
-    text: '已清空结果面板。',
+    text: lastAppliedTemplate.value
+      ? '已清空结果面板，最近一次运行模板仍可恢复。'
+      : '已清空结果面板。',
     tone: 'warning',
+  }
+}
+
+function handleRestoreLastRunTemplate() {
+  if (!lastAppliedTemplate.value) return
+
+  const restoredTemplate = clonePracticePlaygroundTemplate(lastAppliedTemplate.value)
+  editorState.value = {
+    template: restoredTemplate,
+    jsonText: serializePracticePlaygroundTemplate(restoredTemplate),
+    jsonError: '',
+    isDirty: true,
+    lastSyncedFromTemplateAt: Date.now(),
+  }
+  workspaceFeedback.value = {
+    text: `已恢复到最近一次运行模板：${restoredTemplate.meta.title}。`,
+    tone: 'success',
   }
 }
 
@@ -493,10 +521,13 @@ function findLastAbortLine(debugLines: string[]): string | null {
           当前章节：{{ selectedChapter.number }} · {{ selectedChapter.title }}
         </p>
         <PracticePlaygroundEditor
+          :can-restore-last-run-template="canRestoreLastRunTemplate"
           :default-template="defaultTemplate"
           :editor-state="editorState"
+          :last-run-template-label="lastAppliedTemplate?.meta.title || ''"
           :view-mode="editorViewMode"
           :run-validation-message="runValidationMessage"
+          @restore-last-run-template="handleRestoreLastRunTemplate"
           @update:editor-state="handleEditorStateUpdate"
           @update:view-mode="handleEditorViewModeUpdate"
         />
