@@ -73,10 +73,12 @@ const emit = defineEmits<{
         type="button"
         class="run-button"
         :disabled="isRunning || isRunBlocked"
+        title="快捷键：Ctrl / ⌘ + Enter"
         @click="emit('run')"
       >
         {{ isRunning ? '运行中…' : '运行' }}
       </button>
+      <span class="action-hint">快捷键：Ctrl / ⌘ + Enter</span>
     </div>
   </header>
 </template>
@@ -154,6 +156,7 @@ const emit = defineEmits<{
   gap: 10px;
   flex-wrap: wrap;
   justify-content: flex-end;
+  align-items: center;
 }
 
 .header-status {
@@ -234,6 +237,12 @@ const emit = defineEmits<{
 .run-button:disabled {
   opacity: 0.55;
   cursor: not-allowed;
+}
+
+.action-hint {
+  font-size: 12px;
+  color: var(--vp-c-text-2);
+  white-space: nowrap;
 }
 
 @media (max-width: 900px) {

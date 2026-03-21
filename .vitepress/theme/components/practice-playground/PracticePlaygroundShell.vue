@@ -431,6 +431,17 @@ function handleRun() {
   })
 }
 
+function handleWindowKeydown(event: KeyboardEvent) {
+  if (settingsModalOpen.value || runState.value.status === 'running') return
+  if (event.isComposing || event.defaultPrevented) return
+  if (event.altKey || event.shiftKey) return
+  if (!(event.metaKey || event.ctrlKey) || event.key !== 'Enter') return
+  if (!canRun.value) return
+
+  event.preventDefault()
+  handleRun()
+}
+
 onMounted(() => {
   playgroundConfig.value = loadPracticePlaygroundConfig()
   hasStoredConfig.value = hasPracticePlaygroundStoredConfig()
@@ -438,6 +449,7 @@ onMounted(() => {
   syncChapterFromLocation()
   if (inBrowser) {
     window.addEventListener('popstate', handlePopState)
+    window.addEventListener('keydown', handleWindowKeydown)
   }
 })
 
@@ -445,6 +457,7 @@ onUnmounted(() => {
   runnerRef.value?.abort('请求已取消：页面已卸载。')
   if (inBrowser) {
     window.removeEventListener('popstate', handlePopState)
+    window.removeEventListener('keydown', handleWindowKeydown)
   }
 })
 
