@@ -550,6 +550,15 @@ function resolveDebugTone(line: string): 'error' | 'warning' | 'trace' | 'neutra
   flex-wrap: wrap;
 }
 
+.card-header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  margin: -2px -2px 0;
+  padding: 2px 2px 8px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--vp-c-bg) 96%, white), transparent);
+}
+
 .summary-header h2,
 .card-header h2 {
   margin: 0;
