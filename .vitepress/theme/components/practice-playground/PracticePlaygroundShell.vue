@@ -38,7 +38,7 @@ import {
 
 interface PracticePlaygroundRunnerHandle {
   abort: (reason?: string) => void
-  reset: () => void
+  reset: (reason?: string) => void
   run: (payload: {
     chapter: PracticePlaygroundChapter
     config: PracticePlaygroundConfig
@@ -161,7 +161,7 @@ function pushChapterQuery(id: PracticePlaygroundChapterId) {
 
 function syncChapterFromLocation() {
   const resolvedId = resolveChapterIdFromLocation()
-  runnerRef.value?.reset()
+  runnerRef.value?.reset('请求已取消：浏览器前进或后退后，已切换章节。')
   selectedChapterId.value = resolvedId
   syncEditorStateForChapter(resolvedId)
   runState.value = createInitialPracticePlaygroundRunState()
@@ -170,10 +170,10 @@ function syncChapterFromLocation() {
 
 function handleChapterSelect(id: PracticePlaygroundChapterId) {
   if (id === selectedChapterId.value) return
-  runnerRef.value?.reset()
+  runnerRef.value?.reset('请求已取消：你切换了章节，当前运行已中断。')
   selectedChapterId.value = id
   syncEditorStateForChapter(id)
-  workspaceMessage.value = `已切换到 ${getPracticePlaygroundChapterById(id).playground.title}，请求状态已重置。`
+  workspaceMessage.value = `已切换到 ${getPracticePlaygroundChapterById(id).playground.title}。`
   pushChapterQuery(id)
 }
 
@@ -217,7 +217,7 @@ function handleEditorViewModeUpdate(nextMode: PracticePlaygroundTemplateViewMode
 }
 
 function handleResetTemplate() {
-  runnerRef.value?.reset()
+  runnerRef.value?.reset('请求已取消：你重置了模板，当前运行已中断。')
   syncEditorStateForChapter(selectedChapterId.value)
   workspaceMessage.value = `已恢复 ${selectedChapter.value.playground.title} 的默认模板。`
 }

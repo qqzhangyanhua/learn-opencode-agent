@@ -63,7 +63,13 @@ function abort(reason = '请求已取消。') {
   activeAbortController.value.abort()
 }
 
-function reset() {
+function reset(reason = '请求已重置。') {
+  if (activeAbortController.value) {
+    lastAbortReason.value = reason
+    activeAbortController.value.abort()
+    return
+  }
+
   invalidateActiveRequest()
   lastAbortReason.value = '请求已取消。'
   syncRunState(createInitialPracticePlaygroundRunState())
