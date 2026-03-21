@@ -238,7 +238,7 @@ async function createChatCompletionResponse(
 
 function createRequestBody(
   context: PracticePlaygroundRunnerContext,
-  overrides: Partial<PracticePlaygroundRunnerContext['runnerInput']['requestBody']> = {},
+  overrides: Record<string, unknown> = {},
 ): Record<string, unknown> {
   return {
     ...context.runnerInput.requestBody,
