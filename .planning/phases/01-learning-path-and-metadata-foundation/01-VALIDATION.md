@@ -2,7 +2,7 @@
 phase: 1
 slug: learning-path-and-metadata-foundation
 status: draft
-nyquist_compliant: false
+nyquist_compliant: true
 wave_0_complete: false
 created: 2026-03-21
 ---
@@ -27,8 +27,8 @@ created: 2026-03-21
 
 ## Sampling Rate
 
-- **After every task commit:** Run `bun run typecheck`
-- **After every plan wave:** Run `bun run build:strict`
+- **After every task commit:** 运行该 task 自己声明的 `<automated>` 命令，不再只跑统一的 `bun run typecheck`
+- **After every plan wave:** 运行该 wave 的收敛命令，Wave 1 用 `node scripts/check-learning-metadata.mjs && bun run typecheck`，Wave 2/3 用 `bun run build:strict`
 - **Before `$gsd-verify-work`:** `bun run build:strict` must be green
 - **Max feedback latency:** 30 seconds
 
@@ -38,11 +38,25 @@ created: 2026-03-21
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 01-01-01 | 01 | 1 | IA-02 | static validation | `bun run typecheck` | ❌ W0 | ⬜ pending |
-| 01-02-01 | 02 | 1 | IA-03 | smoke + build | `bun run build:strict` | ✅ | ⬜ pending |
-| 01-03-01 | 03 | 2 | DISC-02 | smoke + build | `bun run build:strict` | ✅ | ⬜ pending |
+| 01-01-01 | 01 | 1 | IA-02, IA-03 | contract typecheck | `bun run typecheck` | ✅ | ⬜ pending |
+| 01-01-02 | 01 | 1 | IA-02, IA-03 | metadata validator + typecheck | `node scripts/check-learning-metadata.mjs && bun run typecheck` | ✅ | ⬜ pending |
+| 01-01-03 | 01 | 1 | IA-02, IA-03 | seed metadata validation | `node scripts/check-learning-metadata.mjs && bun run typecheck` | ✅ | ⬜ pending |
+| 01-02-01 | 02 | 2 | IA-02, DISC-02 | path data validation | `node scripts/check-learning-paths.mjs && bun run typecheck` | ✅ | ⬜ pending |
+| 01-02-02 | 02 | 2 | IA-02, IA-03, DISC-02 | full strict build | `bun run build:strict` | ✅ | ⬜ pending |
+| 01-03-01 | 03 | 3 | IA-02, IA-03 | entry integration build | `bun run build:strict` | ✅ | ⬜ pending |
+| 01-03-02 | 03 | 3 | IA-03, DISC-02 | navigation + landing build | `bun run build:strict` | ✅ | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
+
+---
+
+## Wave Verification Rhythm
+
+| Wave | Plans | Tasks | Required command after each task | Wave close command |
+|------|-------|-------|----------------------------------|--------------------|
+| 1 | `01-01` | `01-01-01` ~ `01-01-03` | 按 task map 执行；Task 2、Task 3 都必须跑 `node scripts/check-learning-metadata.mjs && bun run typecheck` | `node scripts/check-learning-metadata.mjs && bun run typecheck` |
+| 2 | `01-02` | `01-02-01` ~ `01-02-02` | 先跑 `node scripts/check-learning-paths.mjs && bun run typecheck`，再跑 `bun run build:strict` | `bun run build:strict` |
+| 3 | `01-03` | `01-03-01` ~ `01-03-02` | 每个 task 都跑 `bun run build:strict` | `bun run build:strict` |
 
 ---
 
@@ -51,7 +65,9 @@ created: 2026-03-21
 - [ ] `scripts/check-learning-metadata.mjs` — 校验核心 frontmatter 字段完整性、枚举值与引用格式
 - [ ] `scripts/check-learning-paths.mjs` — 校验路径步骤引用存在、顺序合法、无循环依赖
 - [ ] 元数据字段清单文档或 schema 常量 — 至少覆盖 `contentType`、`series`、`learningGoals`、`prerequisites`、`recommendedNext`、`practiceLinks`
-- [ ] Phase 1 计划中必须明确哪些页面先接入元数据层，避免“先改首页后补真源”
+- [x] Phase 1 计划中必须明确哪些页面先接入元数据层，避免“先改首页后补真源”
+- [x] Phase 1 计划中必须写清 `sectionIndex` 与 `sectionById` 的双导出契约，避免数组式和对象式访问混用
+- [x] `PracticePhaseSummary` 字段必须在计划中写实，不允许“执行时再推断”
 
 *当前仓库没有现成的元数据正确性校验基础设施，Wave 0 必须先补。*
 
@@ -75,6 +91,6 @@ created: 2026-03-21
 - [ ] Wave 0 covers all MISSING references
 - [ ] No watch-mode flags
 - [ ] Feedback latency < 30s
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] `nyquist_compliant: true` set in frontmatter
 
 **Approval:** pending
