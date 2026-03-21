@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import PracticePlaygroundJsonEditor from './PracticePlaygroundJsonEditor.vue'
 import PracticePlaygroundStructuredEditor from './PracticePlaygroundStructuredEditor.vue'
 import type {
@@ -27,6 +27,7 @@ const emit = defineEmits<{
   'update:view-mode': [mode: PracticePlaygroundTemplateViewMode]
 }>()
 
+const copyStatus = ref('')
 const draftStatusLabel = computed(() => (
   props.editorState.isDirty ? '草稿未保存' : '当前为默认草稿'
 ))
@@ -41,6 +42,17 @@ const lastEditedLabel = computed(() => {
     minute: '2-digit',
   }).format(props.editorState.lastSyncedFromTemplateAt)
 })
+
+watch(
+  () => copyStatus.value,
+  (value) => {
+    if (!value) return
+    const timer = window.setTimeout(() => {
+      copyStatus.value = ''
+    }, 1800)
+    return () => window.clearTimeout(timer)
+  },
+)
 
 function handleViewModeChange(mode: PracticePlaygroundTemplateViewMode) {
   if (mode === props.viewMode) return
@@ -105,6 +117,21 @@ function handleFormatJson() {
     })
   }
 }
+
+async function handleCopyTemplateJson() {
+  const text = props.editorState.jsonText.trim()
+  if (!text || typeof navigator === 'undefined' || !navigator.clipboard?.writeText) {
+    copyStatus.value = '当前环境不支持复制模板。'
+    return
+  }
+
+  try {
+    await navigator.clipboard.writeText(props.editorState.jsonText)
+    copyStatus.value = '模板 JSON 已复制。'
+  } catch {
+    copyStatus.value = '复制失败，请手动复制。'
+  }
+}
 </script>
 
 <template>
@@ -128,6 +155,13 @@ function handleFormatJson() {
         <button
           type="button"
           class="tab-button secondary-action"
+          @click="handleCopyTemplateJson"
+        >
+          复制当前模板 JSON
+        </button>
+        <button
+          type="button"
+          class="tab-button secondary-action"
           :disabled="!canRestoreLastRunTemplate"
           :title="lastRunTemplateLabel ? `恢复到最近运行模板：${lastRunTemplateLabel}` : '当前没有可恢复的最近运行模板'"
           @click="emit('restore-last-run-template')"
@@ -140,6 +174,7 @@ function handleFormatJson() {
         <span :class="['status-pill', draftStatusTone]">{{ draftStatusLabel }}</span>
         <span>最后修改：{{ lastEditedLabel }}</span>
         <span>改动仅在当前标签页有效</span>
+        <span v-if="copyStatus">{{ copyStatus }}</span>
       </div>
     </div>
 
