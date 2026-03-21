@@ -2,6 +2,13 @@
 
 本目录包含 23 个可运行的 AI Agent 实践示例，涵盖从基础到生产的完整技术栈。
 
+它和站内理论篇的关系可以这样理解：
+
+- 理论篇回答“OpenCode 这类 Agent 系统是怎么实现的”
+- 实践篇回答“如果你自己从零搭，一个可运行版本应该怎么逐步做出来”
+
+建议先阅读站内 [实践环境准备](/practice/setup)，再按 `P1 -> P23` 的顺序逐步推进。
+
 ## 环境配置
 
 ### 1. 安装依赖
@@ -35,9 +42,11 @@ OPENAI_MODEL=gpt-4o
 
 ```bash
 # 运行任意示例
-bun p01-minimal-agent.ts
-bun p15-multi-agent.ts
+bun run p01-minimal-agent.ts
+bun run p15-multi-agent.ts
 ```
+
+标准约定：全书统一使用 `bun run pxx-*.ts` 作为示例运行格式。
 
 ## 配置说明
 
@@ -125,6 +134,22 @@ OPENAI_MODEL=llama3
 2. 部分示例可能需要额外的依赖或配置
 3. 建议按顺序学习，从 P1 开始
 4. 生产环境使用时请参考 P23 的最佳实践
+
+## 特殊章节说明
+
+### P14：MCP 协议接入
+
+这一章不是单脚本示例，除了 `p14-mcp.ts` 外，还需要先启动 `p14-mcp-server.ts`。
+
+推荐顺序：
+
+```bash
+# 终端 1
+bun run p14-mcp-server.ts
+
+# 终端 2
+bun run p14-mcp.ts
+```
 
 ## 故障排查
 

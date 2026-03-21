@@ -4,7 +4,9 @@ import { defineConfig } from 'vitepress'
 const siteTitle = '从零构建 AI Coding Agent'
 const siteDescription = 'OpenCode 源码剖析与实战'
 const bookRepository = 'https://github.com/qqzhangyanhua/learn-opencode-agent'
-const sourceRepository = 'https://github.com/anomalyco/opencode/tree/dev'
+const sourceCommit = 'f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc'
+const sourceRepository = `https://github.com/anomalyco/opencode/tree/${sourceCommit}`
+const sourceRepositoryLatest = 'https://github.com/anomalyco/opencode/tree/dev'
 
 export default withMermaid(defineConfig({
   srcDir: 'docs',
@@ -38,9 +40,7 @@ export default withMermaid(defineConfig({
     esbuild: {
       tsconfigRaw: {
         compilerOptions: {
-          target: 'ES2022',
-          module: 'ESNext',
-          moduleResolution: 'Bundler'
+          target: 'ES2022'
         }
       }
     },
@@ -49,9 +49,7 @@ export default withMermaid(defineConfig({
       esbuildOptions: {
         tsconfigRaw: {
           compilerOptions: {
-            target: 'ES2022',
-            module: 'ESNext',
-            moduleResolution: 'Bundler'
+            target: 'ES2022'
           }
         }
       }
@@ -70,7 +68,8 @@ export default withMermaid(defineConfig({
       { text: '版本说明', link: '/version-notes' },
       { text: '术语表', link: '/glossary' },
       { text: '本书仓库', link: bookRepository },
-      { text: 'OpenCode 源码', link: sourceRepository }
+      { text: 'OpenCode 源码基线', link: sourceRepository },
+      { text: 'OpenCode 最新 dev', link: sourceRepositoryLatest }
     ],
 
     sidebar: {

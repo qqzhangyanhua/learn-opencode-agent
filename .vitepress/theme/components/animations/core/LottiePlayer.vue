@@ -4,8 +4,9 @@
 
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch } from 'vue'
-import lottie, { type AnimationItem } from 'lottie-web'
 import type { LottiePlayerProps } from '../../types'
+
+type AnimationItem = import('lottie-web').AnimationItem
 
 const props = withDefaults(defineProps<LottiePlayerProps>(), {
   autoplay: false,
@@ -20,21 +21,16 @@ const emit = defineEmits<{
 
 const containerRef = ref<HTMLElement | null>(null)
 let animation: AnimationItem | null = null
+let observer: IntersectionObserver | null = null
+let hasInitialized = false
 
-onMounted(() => {
-  console.log('LottiePlayer mounted')
-  if (!containerRef.value) {
-    console.error('Container ref is null')
-    return
-  }
+async function initAnimation() {
+  if (hasInitialized || !containerRef.value) return
 
-  console.log('Loading animation with data:', {
-    layers: props.animationData.layers?.length,
-    frames: props.animationData.op,
-    autoplay: props.autoplay
-  })
+  hasInitialized = true
+  const lottie = await import('lottie-web')
 
-  animation = lottie.loadAnimation({
+  animation = lottie.default.loadAnimation({
     container: containerRef.value,
     renderer: 'svg',
     loop: props.loop,
@@ -45,29 +41,39 @@ onMounted(() => {
   animation.setSpeed(props.speed)
 
   animation.addEventListener('complete', () => {
-    console.log('Animation complete event')
     emit('complete')
   })
 
   animation.addEventListener('loopComplete', () => {
-    console.log('Animation loop complete event')
     emit('loopComplete')
   })
+}
 
-  animation.addEventListener('DOMLoaded', () => {
-    console.log('Animation DOM loaded')
+onMounted(() => {
+  if (!containerRef.value) {
+    return
+  }
+
+  if (typeof IntersectionObserver === 'undefined') {
+    void initAnimation()
+    return
+  }
+
+  observer = new IntersectionObserver((entries) => {
+    if (!entries.some((entry) => entry.isIntersecting)) return
+    void initAnimation()
+    observer?.disconnect()
+    observer = null
+  }, {
+    threshold: 0.2
   })
 
-  animation.addEventListener('data_ready', () => {
-    console.log('Animation data ready')
-  })
-
-  animation.addEventListener('error', (error) => {
-    console.error('Animation error:', error)
-  })
+  observer.observe(containerRef.value)
 })
 
 onUnmounted(() => {
+  observer?.disconnect()
+  observer = null
   if (animation) {
     animation.destroy()
     animation = null

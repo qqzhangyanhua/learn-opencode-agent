@@ -2,8 +2,10 @@
 
 基于 VitePress 构建的电子书站点，包含两条主线：
 
-- 理论篇：系统剖析 [OpenCode](https://github.com/anomalyco/opencode/tree/dev) 源码，涵盖 AI Agent 基础架构、工具系统、多模型支持、TUI 界面等 24 个章节，以及 oh-my-openagent 插件系统实战
+- 理论篇：系统剖析基于 commit 快照的 [OpenCode 源码基线](https://github.com/anomalyco/opencode/tree/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc)，涵盖 AI Agent 基础架构、工具系统、多模型支持、TUI 界面等 24 个章节，以及 oh-my-openagent 插件系统实战
 - 实践篇：23 个项目，按章节拆解 TypeScript Agent 实现，从工具调用到生产部署逐步展开
+
+默认阅读入口以 commit 锚定源码为准，只有在需要追踪 OpenCode 最新实现时，才额外回到 [`dev` 分支](https://github.com/anomalyco/opencode/tree/dev) 对照差异。
 
 ## 先说明实践篇的当前定位
 
@@ -222,5 +224,5 @@ caddy run --config /Caddyfile --adapter caddyfile
 - 每个章节页必须有 frontmatter（`title` + `description`），正文不重复一级标题。
 - 图表使用 Mermaid（由 `vitepress-plugin-mermaid` 提供），交互动画使用 `.vitepress/theme/components/` 中的 Vue 组件。
 - 所有组件 Props 类型集中定义在 `components/types.ts`，不放在 `.vue` 文件内。
-- 文中引用的源码路径应与 [OpenCode 仓库](https://github.com/anomalyco/opencode/tree/dev) 真实结构一致。
+- 文中引用的源码路径默认应与 [OpenCode 源码基线](https://github.com/anomalyco/opencode/tree/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc) 一致；只有在明确说明“追踪最新实现”时才引用 [`dev` 分支](https://github.com/anomalyco/opencode/tree/dev)。
 - 修改正文结构时同步检查辅助页面（阅读地图、术语表）是否仍然成立。

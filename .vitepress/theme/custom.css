@@ -299,6 +299,7 @@ html {
   border-radius: 10px;
   margin: 1.5em 0;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  overflow-x: auto;
 }
 
 .dark .VPDoc .vp-doc div[class*='language-'] {
@@ -313,10 +314,13 @@ html {
 
 /* 表格 */
 .VPDoc .vp-doc table {
+  display: block;
   width: 100%;
   border-collapse: collapse;
   margin: 1.5em 0;
   font-size: 0.95em;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .VPDoc .vp-doc th {
@@ -443,6 +447,25 @@ html {
   .VPButton {
     padding: 10px 22px;
     font-size: 14px;
+  }
+
+  .VPHero .actions {
+    justify-content: center;
+  }
+
+  .VPDoc .vp-doc table {
+    font-size: 0.9em;
+  }
+
+  .VPDoc .vp-doc th,
+  .VPDoc .vp-doc td {
+    padding: 8px 12px;
+  }
+
+  .VPDoc .vp-doc div[class*='language-'] {
+    margin-left: -12px;
+    margin-right: -12px;
+    border-radius: 0;
   }
 }
 

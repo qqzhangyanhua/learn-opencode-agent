@@ -134,6 +134,12 @@ OpenCode 的记忆机制：
 
 在 OpenCode 当前实现里，`build`、`plan` 这类角色更接近 `primary` 模式。
 
+如果只记一条关系，可以先记成：
+
+- `Agent` 是总称
+- `Primary Agent` 是直接面向用户的主入口
+- `Subagent` 是被主入口调度、职责更收紧的子角色
+
 ## Subagent
 
 `Subagent` 指由主 Agent 调度的子角色，重点不是“更弱”，而是“职责更收紧”。

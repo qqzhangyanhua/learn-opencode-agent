@@ -44,6 +44,27 @@ import RuntimeLifecycleDiagram from '../.vitepress/theme/components/RuntimeLifec
   description="阅读地图不是另一套解释，它只是把同一条运行时主链路拆成更适合初学者执行的章节顺序。"
 />
 
+## 三条主线怎么配合
+
+如果把全书看成一套完整学习系统，可以先把三条线理解成三种不同问题：
+
+- **理论篇**：帮助你看懂“别人已经做出来的 Agent 系统为什么这样组织”。
+- **实践篇**：帮助你练会“如果自己从零搭，应该先把哪些能力做出来”。
+- **中级篇**：帮助你处理“当系统开始进入真实工程场景后，会遇到哪些专题问题”。
+
+最推荐的阅读顺序不是三条线各读一遍，而是沿着“理论建立骨架 -> 实践补手感 -> 中级篇补工程判断”往前推进。
+
+## 理论 / 实践 / 中级篇映射总表
+
+| 理论篇 | 对应实践篇 | 对应中级篇 | 说明 |
+| --- | --- | --- | --- |
+| [第 1-4 章：基础闭环](/00-what-is-ai-agent/) | [P1-P4：最小 Agent 到错误处理](/practice/p01-minimal-agent/) | [第 27 章：Planning](/intermediate/27-planning-mechanism/) | 先建立最小闭环，再进入计划与执行的工程讨论。 |
+| [第 4-5 章：会话与记忆](/04-session-management/) | [P5-P6：记忆系统与检索](/practice/p05-memory-arch/) | [第 28 章：上下文工程](/intermediate/28-context-engineering/) | 把抽象的上下文管理落到具体记忆策略。 |
+| [第 3 章：工具系统](/03-tool-system/) | [P10-P12：ReAct / Planning / Reflection](/practice/p10-react-loop/) | [第 31 章：安全与边界](/intermediate/31-safety-boundaries/) | 从工具调用走到计划控制，再走到高风险约束。 |
+| [第 6-9 章：模型、协议、服务与持久化](/05-provider-system/) | [P14、P18、P20：MCP、模型路由、可观测性](/practice/p14-mcp/) | [第 30 章：生产架构](/intermediate/30-production-architecture/) | 把运行时能力延伸到服务化和生产环境。 |
+| [第 15-16 章：高级主题与最佳实践](/14-testing-quality/) | [P15-P17：多 Agent 协作](/practice/p15-multi-agent/) | [第 26 章：多智能体协作](/intermediate/26-multi-agent-collaboration/) | 理论、实践和专题都围绕协作边界与分工展开。 |
+| [第 6、9、14 章：模型、数据与质量](/05-provider-system/) | [P18-P21：路由、安全、可观测、评估](/practice/p18-model-routing/) | [第 25、32 章：RAG 稳定性与性能成本](/intermediate/25-rag-failure-patterns/) | 把“能跑”推进到“可测、可控、可优化”。 |
+
 ## 四阶段课程分级
 
 ```text

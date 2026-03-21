@@ -33,38 +33,44 @@ import MemorySystem from './components/animations/lottie/MemorySystem.vue'
 import MemorySystemCss from './components/animations/css/MemorySystemCss.vue'
 import './custom.css'
 
+const globalComponents = [
+  ['ReActLoop', ReActLoop],
+  ['StreamingDemo', StreamingDemo],
+  ['MessageAccumulator', MessageAccumulator],
+  ['PermissionFlow', PermissionFlow],
+  ['McpHandshake', McpHandshake],
+  ['SseBroadcast', SseBroadcast],
+  ['ContextCompaction', ContextCompaction],
+  ['ProviderFallback', ProviderFallback],
+  ['WorkflowVsAgent', WorkflowVsAgent],
+  ['LspHover', LspHover],
+  ['ConnectionGate', ConnectionGate],
+  ['StarCTA', StarCTA],
+  ['AgentDispatchDemo', AgentDispatchDemo],
+  ['BackgroundTaskDemo', BackgroundTaskDemo],
+  ['RuntimeFallbackDemo', RuntimeFallbackDemo],
+  ['HashlineEditDemo', HashlineEditDemo],
+  ['TaskDelegationDemo', TaskDelegationDemo],
+  ['PracticeTerminalHero', PracticeTerminalHero],
+  ['PracticePhaseGrid', PracticePhaseGrid],
+  ['PracticeTagCloud', PracticeTagCloud],
+  ['ProjectCard', ProjectCard],
+  ['RunCommand', RunCommand],
+  ['PracticePreview', PracticePreview],
+  ['WhatIsAgent', WhatIsAgent],
+  ['MultiTurnDialog', MultiTurnDialog],
+  ['FunctionCalling', FunctionCalling],
+  ['FunctionCallingCss', FunctionCallingCss],
+  ['MultiAgentCollab', MultiAgentCollab],
+  ['MemorySystem', MemorySystem],
+  ['MemorySystemCss', MemorySystemCss],
+] as const
+
 export default {
   extends: DefaultTheme,
   enhanceApp({ app }) {
-    app.component('ReActLoop', ReActLoop)
-    app.component('StreamingDemo', StreamingDemo)
-    app.component('MessageAccumulator', MessageAccumulator)
-    app.component('PermissionFlow', PermissionFlow)
-    app.component('McpHandshake', McpHandshake)
-    app.component('SseBroadcast', SseBroadcast)
-    app.component('ContextCompaction', ContextCompaction)
-    app.component('ProviderFallback', ProviderFallback)
-    app.component('WorkflowVsAgent', WorkflowVsAgent)
-    app.component('LspHover', LspHover)
-    app.component('ConnectionGate', ConnectionGate)
-    app.component('StarCTA', StarCTA)
-    app.component('AgentDispatchDemo', AgentDispatchDemo)
-    app.component('BackgroundTaskDemo', BackgroundTaskDemo)
-    app.component('RuntimeFallbackDemo', RuntimeFallbackDemo)
-    app.component('HashlineEditDemo', HashlineEditDemo)
-    app.component('TaskDelegationDemo', TaskDelegationDemo)
-    app.component('PracticeTerminalHero', PracticeTerminalHero)
-    app.component('PracticePhaseGrid', PracticePhaseGrid)
-    app.component('PracticeTagCloud', PracticeTagCloud)
-    app.component('ProjectCard', ProjectCard)
-    app.component('RunCommand', RunCommand)
-    app.component('PracticePreview', PracticePreview)
-    app.component('WhatIsAgent', WhatIsAgent)
-    app.component('MultiTurnDialog', MultiTurnDialog)
-    app.component('FunctionCalling', FunctionCalling)
-    app.component('FunctionCallingCss', FunctionCallingCss)
-    app.component('MultiAgentCollab', MultiAgentCollab)
-    app.component('MemorySystem', MemorySystem)
-    app.component('MemorySystemCss', MemorySystemCss)
+    for (const [name, component] of globalComponents) {
+      app.component(name, component)
+    }
   }
 } satisfies Theme

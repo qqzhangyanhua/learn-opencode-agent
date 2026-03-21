@@ -32,6 +32,14 @@ import PracticeTagCloud from '../../.vitepress/theme/components/PracticeTagCloud
 
 </div>
 
+## 实践篇解决什么问题
+
+实践篇不是把理论篇再讲一遍，而是把“看懂 OpenCode 怎样实现”切换成“如果你自己来做，一个最小可运行 Agent 应该怎么逐步搭出来”。
+
+- 如果你刚读完理论篇第 1-4 章，最适合从 `P1-P4` 开始，把工具调用、多轮对话、流式输出和错误处理亲手跑通。
+- 如果你已经在理论篇里理解了会话、模型、工具和服务边界，实践篇就是把这些抽象概念改写成可执行 TypeScript 示例。
+- 如果你准备进入中级篇，实践篇里 `P7-P9`、`P15-P17`、`P18-P21` 会分别对应 RAG、多智能体协作和生产化专题。
+
 ## 课程阶段 {#phases}
 
 <PracticePhaseGrid :phases="[
@@ -168,7 +176,10 @@ import PracticeTagCloud from '../../.vitepress/theme/components/PracticeTagCloud
 
 补充说明：
 
-- `P14` 章节除了 `p14-mcp.ts` 外，还需要 `practice/p14-mcp-server.ts` 配合运行。
+- 全书统一使用 `bun run pxx-*.ts` 作为标准命令格式。
+- `P14` 章节除了 `p14-mcp.ts` 外，还需要 `practice/p14-mcp-server.ts` 配合运行，建议分两个终端分别执行：
+  - `bun run p14-mcp-server.ts`
+  - `bun run p14-mcp.ts`
 - 运行前仍建议先看 [实践环境准备](/practice/setup)，重点确认依赖和 `OPENAI_API_KEY`。
 
 <style scoped>

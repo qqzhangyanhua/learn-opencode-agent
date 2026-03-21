@@ -18,7 +18,8 @@ import SourceSnapshotCard from '../.vitepress/theme/components/SourceSnapshotCar
 本书当前拆成两类仓库语义，阅读时不要混淆：
 
 - OpenCode 源码仓库：`anomalyco/opencode`
-- 文中源码链接默认分支：`dev`
+- 文中源码链接默认基线：`f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc`
+- 最新实现追踪分支：`dev`
 - 电子书站点目录：`docs/book/`
 - 本书维护仓库：`qqzhangyanhua/learn-opencode-agent`
 
@@ -43,7 +44,11 @@ import SourceSnapshotCard from '../.vitepress/theme/components/SourceSnapshotCar
       path: 'docs/book/'
     },
     {
-      label: '章节源码链接默认分支',
+      label: '章节源码链接默认基线',
+      path: 'f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc'
+    },
+    {
+      label: '最新实现追踪分支',
       path: 'dev'
     },
     {
@@ -93,13 +98,20 @@ import SourceSnapshotCard from '../.vitepress/theme/components/SourceSnapshotCar
 - 文中写明“实验性”“当前状态”“更适合理解为”的内容，优先视为“基于现状的工程判断”。
 - 如果仓库未来发生重构，章节里的结构理解方法通常仍然有价值，但具体文件路径和实现细节可能变化。
 
-## 为什么统一指向 `dev`
+## 默认为什么改成 commit 锚定
 
-本书中的源码链接统一指向 `dev` 分支，不指向 `main`，原因很简单：
+这本书现在默认采用 commit 锚定链接，而不是直接把 `dev` 当作唯一入口，原因很简单：
 
-- 当前仓库默认开发分支是 `dev`
-- 这样更接近真实迭代状态
-- 也能减少读者点开链接后发现“代码对不上”的情况
+- 源码带读首先要保证“你看到的文字”和“你点开的代码”能稳定对齐
+- 章节之间要共享同一份快照语义，不能今天对着这版代码解释，明天链接已经漂走
+- 阅读型内容优先解决“可复现”和“可验证”，再解决“追踪最新”
+
+因此现在的链接策略是两层：
+
+- 默认阅读：优先使用 commit 锚定链接，确保章节解释和源码快照稳定一致
+- 追踪最新：只有在明确说明“对照最新实现”时，才额外给出 `dev` 分支入口
+
+这样做不是否认 `dev` 的价值，而是把它放回更合理的位置：它适合做增量对照，不适合做全书默认基线。
 
 ## 如何理解“当前实现状态”
 

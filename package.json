@@ -1,10 +1,15 @@
 {
-  "name": "book",
+  "name": "learn-opencode-agent-book",
   "type": "module",
   "version": "0.0.1",
+  "description": "从零构建 AI Coding Agent：OpenCode 源码剖析与实战电子书",
   "scripts": {
     "dev": "vitepress dev",
     "build": "vitepress build",
+    "build:strict": "bun run check:content && bun run check:practice && bun run build",
+    "typecheck": "tsc --noEmit -p .vitepress/tsconfig.json",
+    "check:content": "node scripts/check-content.mjs",
+    "check:practice": "node scripts/check-practice-entries.mjs",
     "preview": "vitepress preview",
     "start": "caddy run --config /Caddyfile --adapter caddyfile"
   },

@@ -4,7 +4,7 @@ layout: home
 hero:
   name: 从零构建 AI Coding Agent
   text: OpenCode 源码剖析与实战
-  tagline: 面向 Agent 开发初学者的 OpenCode 源码带读电子书
+  tagline: 面向中文开发者的 Agent 工程学习站，覆盖源码带读、可运行实践与工程专题
   actions:
     - theme: brand
       text: 开始阅读理论篇
@@ -22,8 +22,8 @@ hero:
       text: Star 支持本书
       link: https://github.com/qqzhangyanhua/learn-opencode-agent
     - theme: alt
-      text: 查看 OpenCode 源码
-      link: https://github.com/anomalyco/opencode/tree/dev
+      text: 查看源码基线
+      link: https://github.com/anomalyco/opencode/tree/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc
 ---
 
 <script setup>
@@ -33,12 +33,19 @@ import TechStackGrid from '../.vitepress/theme/components/TechStackGrid.vue'
 import PracticePreview from '../.vitepress/theme/components/PracticePreview.vue'
 </script>
 
+## 这三条线分别回答什么
+
+- **理论篇**：回答“OpenCode 这类 AI Coding Agent 是怎么实现的”，重点是看懂真实源码的主链路与工程边界。
+- **实践篇**：回答“如果你自己来做，最小可运行版本该怎么搭起来”，重点是把核心模式落到可执行 TypeScript 示例。
+- **中级篇**：回答“当你开始碰到稳定性、协作、成本、安全这些工程问题时，应该按什么专题继续深化”。
+
 ## 学习方式
 
-本书提供**双轨学习体系**：
+本书提供**理论篇 + 实践篇 + 中级篇**三条互相衔接的学习路径：
 
 - **理论篇**（第 1-16 章）：深入剖析 OpenCode 源码架构，理解 Agent 系统设计原理
 - **实践篇**（P1-P23）：23 个可运行项目，从最小 Agent 到生产部署全覆盖
+- **中级篇**（第 25-32 章）：围绕 RAG、多智能体、Planning、上下文工程、安全与成本等工程专题继续深化
 
 建议**理论与实践穿插学习**：看完理论篇第 1-4 章后，先跑通实践篇 P1-P4，建立感性认知后再深入后续章节。
 
@@ -63,7 +70,7 @@ import PracticePreview from '../.vitepress/theme/components/PracticePreview.vue'
 - [术语表](/glossary)：统一理解 `Agent`、`Subagent`、`Primary Agent`、`运行时`、`工作台` 等高频概念。
 - [封版清单](/release-checklist)：查看当前版本完成度、已知非阻塞项和发布前检查项。
 
-> **阅读边界**：本书以当前 `dev` 分支源码实现为准，重点解释已经落在仓库里的结构、主链路和工程约束，不承诺覆盖未来版本变更。若文档与代码不一致，以当前仓库源码为准。
+> **阅读边界**：本书默认以 commit 锚定的源码基线为准，重点解释已经落在仓库里的结构、主链路和工程约束；只有在明确说明“追踪最新实现”时，才额外回到 `dev` 分支对照差异。若文档与代码不一致，以当前仓库给出的源码快照与入口文件为准。
 
 ## 这本书怎么读
 
