@@ -21,6 +21,8 @@ const debugCopyStatus = ref('')
 const summaryCopyStatus = ref('')
 const outputPanelRef = ref<HTMLElement | null>(null)
 const liveDurationMs = ref<number | null>(null)
+const outputExpanded = ref(false)
+const debugExpanded = ref(false)
 let liveDurationTimer: number | null = null
 let lastOutputLength = 0
 
@@ -29,6 +31,7 @@ const hasRunnableOutput = computed(() => Boolean(props.runState.outputText.trim(
 const hasDebugContent = computed(() => {
   return props.runState.debugLines.length > 0 || Boolean(props.runState.errorMessage.trim())
 })
+const hasExpandedPanel = computed(() => outputExpanded.value || debugExpanded.value)
 const hasRunArtifacts = computed(() => {
   return props.runState.status !== 'idle'
     || Boolean(props.runState.outputText.trim())
@@ -105,6 +108,16 @@ const copyOutputButtonTitle = computed(() => (
 const copyDebugButtonTitle = computed(() => (
   hasDebugContent.value ? '复制当前调试信息。' : '当前还没有可复制的调试信息。'
 ))
+const canToggleOutputExpanded = computed(() => props.runState.outputText.trim().length > 0)
+const canToggleDebugExpanded = computed(() => debugEntries.value.length > 0)
+const outputToggleLabel = computed(() => (outputExpanded.value ? '收起输出' : '展开输出'))
+const debugToggleLabel = computed(() => (debugExpanded.value ? '收起调试' : '展开调试'))
+const outputToggleTitle = computed(() => (
+  outputExpanded.value ? '恢复为紧凑输出视图。' : '展开输出区域，便于查看长内容。'
+))
+const debugToggleTitle = computed(() => (
+  debugExpanded.value ? '恢复为紧凑调试视图。' : '展开调试区域，便于查看完整日志。'
+))
 const summaryText = computed(() => [
   `章节：${props.chapterLabel}`,
   `模板：${props.templateLabel}`,
@@ -176,6 +189,16 @@ function stopLiveDurationTimer() {
   }
 }
 
+function toggleOutputExpanded() {
+  if (!canToggleOutputExpanded.value) return
+  outputExpanded.value = !outputExpanded.value
+}
+
+function toggleDebugExpanded() {
+  if (!canToggleDebugExpanded.value) return
+  debugExpanded.value = !debugExpanded.value
+}
+
 async function handleCopySummary() {
   const text = summaryText.value.trim()
   if (!text || typeof navigator === 'undefined' || !navigator.clipboard?.writeText) {
@@ -237,7 +260,7 @@ function resolveDebugTone(line: string): 'error' | 'warning' | 'trace' | 'neutra
 </script>
 
 <template>
-  <section class="result-panel">
+  <section :class="['result-panel', { expanded: hasExpandedPanel }]">
     <article class="result-card summary-card">
       <div class="summary-header">
         <h2>请求摘要</h2>
@@ -315,6 +338,15 @@ function resolveDebugTone(line: string): 'error' | 'warning' | 'trace' | 'neutra
           <button
             type="button"
             class="ghost-button"
+            :title="outputToggleTitle"
+            :disabled="!canToggleOutputExpanded"
+            @click="toggleOutputExpanded"
+          >
+            {{ outputToggleLabel }}
+          </button>
+          <button
+            type="button"
+            class="ghost-button"
             :title="copyOutputButtonTitle"
             :disabled="!hasRunnableOutput"
             @click="handleCopyOutput"
@@ -323,7 +355,7 @@ function resolveDebugTone(line: string): 'error' | 'warning' | 'trace' | 'neutra
           </button>
         </div>
       </div>
-      <pre ref="outputPanelRef" :class="['output-panel', { empty: !runState.outputText.trim() }]">
+      <pre ref="outputPanelRef" :class="['output-panel', { empty: !runState.outputText.trim(), expanded: outputExpanded }]">
         {{ outputSummary }}
       </pre>
       <p v-if="outputCopyStatus" class="copy-status" role="status" aria-live="polite">{{ outputCopyStatus }}</p>
@@ -332,18 +364,29 @@ function resolveDebugTone(line: string): 'error' | 'warning' | 'trace' | 'neutra
     <article class="result-card debug-card">
       <div class="card-header">
         <h2>调试</h2>
-        <button
-          type="button"
-          class="ghost-button"
-          :title="copyDebugButtonTitle"
-          :disabled="!hasDebugContent"
-          @click="handleCopyDebug"
-        >
-          复制调试
-        </button>
+        <div class="card-actions">
+          <button
+            type="button"
+            class="ghost-button"
+            :title="debugToggleTitle"
+            :disabled="!canToggleDebugExpanded"
+            @click="toggleDebugExpanded"
+          >
+            {{ debugToggleLabel }}
+          </button>
+          <button
+            type="button"
+            class="ghost-button"
+            :title="copyDebugButtonTitle"
+            :disabled="!hasDebugContent"
+            @click="handleCopyDebug"
+          >
+            复制调试
+          </button>
+        </div>
       </div>
       <p v-if="runState.errorMessage" class="error-message">{{ runState.errorMessage }}</p>
-      <ul class="debug-list">
+      <ul :class="['debug-list', { expanded: debugExpanded }]">
         <li
           v-for="entry in debugEntries"
           :key="entry.id"
@@ -363,6 +406,11 @@ function resolveDebugTone(line: string): 'error' | 'warning' | 'trace' | 'neutra
   gap: 12px;
   height: 100%;
   grid-template-rows: auto minmax(220px, 0.95fr) minmax(220px, 1.05fr);
+}
+
+.result-panel.expanded {
+  height: auto;
+  grid-template-rows: auto auto auto;
 }
 
 .result-card {
@@ -480,6 +528,7 @@ function resolveDebugTone(line: string): 'error' | 'warning' | 'trace' | 'neutra
   margin: 0;
   min-height: 0;
   height: 100%;
+  max-height: 100%;
   overflow: auto;
   border-radius: 14px;
   padding: 14px;
@@ -493,6 +542,11 @@ function resolveDebugTone(line: string): 'error' | 'warning' | 'trace' | 'neutra
 
 .output-panel.empty {
   color: var(--vp-c-text-2);
+}
+
+.output-panel.expanded {
+  height: auto;
+  max-height: min(70vh, 960px);
 }
 
 .copy-status {
@@ -518,6 +572,10 @@ function resolveDebugTone(line: string): 'error' | 'warning' | 'trace' | 'neutra
   max-height: 100%;
   overflow: auto;
   color: var(--vp-c-text-2);
+}
+
+.debug-list.expanded {
+  max-height: min(70vh, 960px);
 }
 
 .debug-item {
