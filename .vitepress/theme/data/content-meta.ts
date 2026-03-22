@@ -4,12 +4,19 @@ export type LearningDifficulty = 'beginner' | 'intermediate' | 'advanced'
 export type EntryMode = 'read-first' | 'build-first' | 'bridge'
 export type SectionId = 'theory' | 'practice' | 'intermediate'
 export type LearningPathId = 'theory-first' | 'practice-first' | 'engineering-depth'
+export type DiscoveryContentTypeLabel = '章节' | '实践项目' | '进阶专题' | '辅助页面'
+export type DiscoveryGoalId = 'system-learn' | 'engineering-upgrade' | 'build-by-project'
 export const CONTENT_TYPES = ['theory', 'practice', 'intermediate', 'support'] as const satisfies readonly ContentType[]
 export const CONTENT_SERIES = ['book', 'practice', 'intermediate', 'support'] as const satisfies readonly ContentSeries[]
 export const LEARNING_DIFFICULTIES = ['beginner', 'intermediate', 'advanced'] as const satisfies readonly LearningDifficulty[]
 export const ENTRY_MODES = ['read-first', 'build-first', 'bridge'] as const satisfies readonly EntryMode[]
 export const SECTION_IDS = ['theory', 'practice', 'intermediate'] as const satisfies readonly SectionId[]
 export const LEARNING_PATH_IDS = ['theory-first', 'practice-first', 'engineering-depth'] as const satisfies readonly LearningPathId[]
+export const DISCOVERY_GOAL_IDS = [
+  'system-learn',
+  'engineering-upgrade',
+  'build-by-project'
+] as const satisfies readonly DiscoveryGoalId[]
 export const PRACTICE_PHASE_IDS = [
   'phase-1',
   'phase-2',
@@ -22,6 +29,19 @@ export const PRACTICE_PHASE_IDS = [
 export const PRACTICE_PHASE_ORDERS = [1, 2, 3, 4, 5, 6, 7] as const
 export type PracticePhaseId = typeof PRACTICE_PHASE_IDS[number]
 export type PracticePhaseOrder = typeof PRACTICE_PHASE_ORDERS[number]
+
+export const CONTENT_TYPE_LABELS: Record<ContentType, DiscoveryContentTypeLabel> = {
+  theory: '章节',
+  practice: '实践项目',
+  intermediate: '进阶专题',
+  support: '辅助页面'
+}
+
+export const ENTRY_MODE_LABELS: Record<EntryMode, string> = {
+  'read-first': '先看原理',
+  'build-first': '先做项目',
+  bridge: '原理与工程衔接'
+}
 
 export interface LearningContentFrontmatter {
   contentType: ContentType
@@ -134,4 +154,12 @@ export function normalizeLearningFrontmatter(
     entryMode: value.entryMode ?? 'read-first',
     roleDescription: value.roleDescription?.trim() ?? ''
   }
+}
+
+export function getContentTypeLabel(contentType: ContentType): DiscoveryContentTypeLabel {
+  return CONTENT_TYPE_LABELS[contentType]
+}
+
+export function getEntryModeLabel(entryMode: EntryMode): string {
+  return ENTRY_MODE_LABELS[entryMode]
 }

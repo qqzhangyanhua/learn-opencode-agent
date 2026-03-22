@@ -1,9 +1,14 @@
 import type {
+  DiscoveryGoalId,
   LearningDifficulty,
   LearningPathDefinition,
   PracticePhaseSummary,
   SectionRoleSummary
 } from '../data/content-meta'
+import type {
+  DiscoveryGoalRoute,
+  DiscoveryTopicCollection
+} from '../data/discovery-content'
 import type {
   PracticeCourseRoute,
   PracticeProjectDefinition,
@@ -13,6 +18,8 @@ import type {
 export type {
   ContentSeries,
   ContentType,
+  DiscoveryContentTypeLabel,
+  DiscoveryGoalId,
   EntryMode,
   LearningContentFrontmatter,
   LearningDifficulty,
@@ -22,6 +29,11 @@ export type {
   SectionId,
   SectionRoleSummary
 } from '../data/content-meta'
+
+export type {
+  DiscoveryGoalRoute,
+  DiscoveryTopicCollection
+} from '../data/discovery-content'
 
 export type {
   PracticeCourseRoute,
@@ -132,6 +144,18 @@ export interface PracticeRouteExplorerProps {
 
 export interface PracticeProjectSyllabusProps {
   phaseIds?: PracticePhaseSummary['phaseId'][]
+}
+
+export interface DiscoveryGoalRoutesProps {
+  goalIds?: DiscoveryGoalId[]
+}
+
+export interface DiscoveryStartGridProps {
+  goalIds?: DiscoveryGoalId[]
+}
+
+export interface DiscoveryTopicHubProps {
+  topicIds?: DiscoveryTopicCollection['topicId'][]
 }
 
 export interface PracticeProjectGuideProps {

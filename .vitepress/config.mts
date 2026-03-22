@@ -1,5 +1,10 @@
 import { withMermaid } from 'vitepress-plugin-mermaid'
 import { defineConfig } from 'vitepress'
+import {
+  getContentTypeLabel,
+  getEntryModeLabel,
+  normalizeLearningFrontmatter
+} from './theme/data/content-meta'
 
 const siteTitle = '从零构建 AI Coding Agent'
 const siteDescription = 'OpenCode 源码剖析与实战'
@@ -7,6 +12,122 @@ const bookRepository = 'https://github.com/qqzhangyanhua/learn-opencode-agent'
 const sourceCommit = 'f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc'
 const sourceRepository = `https://github.com/anomalyco/opencode/tree/${sourceCommit}`
 const sourceRepositoryLatest = 'https://github.com/anomalyco/opencode/tree/dev'
+
+function stripWrappingQuotes(value: string): string {
+  if (
+    (value.startsWith("'") && value.endsWith("'")) ||
+    (value.startsWith('"') && value.endsWith('"'))
+  ) {
+    return value.slice(1, -1)
+  }
+
+  return value
+}
+
+function parseInlineArray(value: string): string[] {
+  const inner = value.trim().replace(/^\[/, '').replace(/\]$/, '').trim()
+  if (!inner) {
+    return []
+  }
+
+  return inner
+    .split(',')
+    .map((item) => stripWrappingQuotes(item.trim()))
+    .filter(Boolean)
+}
+
+function extractFrontmatterBlock(src: string): string[] | null {
+  if (!src.startsWith('---')) {
+    return null
+  }
+
+  const lines = src.split(/\r?\n/)
+  if (lines[0]?.trim() !== '---') {
+    return null
+  }
+
+  for (let index = 1; index < lines.length; index += 1) {
+    if (lines[index]?.trim() === '---') {
+      return lines.slice(1, index)
+    }
+  }
+
+  return null
+}
+
+function parseFrontmatter(src: string): Record<string, unknown> {
+  const lines = extractFrontmatterBlock(src)
+  if (!lines) {
+    return {}
+  }
+
+  const frontmatter: Record<string, unknown> = {}
+  let currentArrayKey: string | null = null
+
+  for (const rawLine of lines) {
+    const line = rawLine.replace(/\t/g, '  ')
+
+    if (!line.trim() || line.trim().startsWith('#')) {
+      continue
+    }
+
+    const arrayItemMatch = line.match(/^\s*-\s+(.*)$/)
+    if (arrayItemMatch && currentArrayKey) {
+      const currentValue = Array.isArray(frontmatter[currentArrayKey])
+        ? frontmatter[currentArrayKey] as string[]
+        : []
+      currentValue.push(stripWrappingQuotes(arrayItemMatch[1].trim()))
+      frontmatter[currentArrayKey] = currentValue
+      continue
+    }
+
+    const fieldMatch = line.match(/^([A-Za-z][\w-]*):(?:\s*(.*))?$/)
+    if (!fieldMatch) {
+      currentArrayKey = null
+      continue
+    }
+
+    const [, key, rawValue = ''] = fieldMatch
+    const value = rawValue.trim()
+
+    if (!value) {
+      frontmatter[key] = []
+      currentArrayKey = key
+      continue
+    }
+
+    if (value.startsWith('[') && value.endsWith(']')) {
+      frontmatter[key] = parseInlineArray(value)
+      currentArrayKey = null
+      continue
+    }
+
+    frontmatter[key] = stripWrappingQuotes(value)
+    currentArrayKey = null
+  }
+
+  return frontmatter
+}
+
+function buildSearchPrelude(src: string): string {
+  const frontmatter = normalizeLearningFrontmatter(parseFrontmatter(src))
+  if (!frontmatter.contentId) {
+    return src
+  }
+
+  const searchPrelude = [
+    '## 学习定位',
+    `- 内容类型：${getContentTypeLabel(frontmatter.contentType)}`,
+    `- 导航名称：${frontmatter.navigationLabel || frontmatter.shortTitle}`,
+    `- 进入方式：${getEntryModeLabel(frontmatter.entryMode)}`,
+    frontmatter.roleDescription ? `- 适合场景：${frontmatter.roleDescription}` : '',
+    frontmatter.summary ? `- 摘要：${frontmatter.summary}` : '',
+    frontmatter.searchTags.length ? `- 主题标签：${frontmatter.searchTags.join(' / ')}` : '',
+    frontmatter.learningGoals.length ? `- 你会学到：${frontmatter.learningGoals.join('；')}` : ''
+  ].filter(Boolean).join('\n')
+
+  return `${searchPrelude}\n\n${src}`
+}
 
 export default withMermaid(defineConfig({
   srcDir: 'docs',
@@ -271,7 +392,22 @@ export default withMermaid(defineConfig({
     },
 
     search: {
-      provider: 'local'
+      provider: 'local',
+      options: {
+        detailedView: true,
+        translations: {
+          button: {
+            buttonText: '搜索章节 / 项目 / 专题',
+            buttonAriaLabel: '搜索章节、实践项目和进阶专题'
+          },
+          modal: {
+            noResultsText: '没有找到匹配内容，试试换一个主题词，或先去发现中心按目标选路线。'
+          }
+        },
+        _render(src) {
+          return buildSearchPrelude(src)
+        }
+      }
     }
   }
 }))

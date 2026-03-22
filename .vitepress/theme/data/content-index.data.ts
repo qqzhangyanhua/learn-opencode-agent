@@ -1,6 +1,7 @@
 import { createContentLoader } from 'vitepress'
 import type { ContentData } from 'vitepress'
 import {
+  getContentTypeLabel,
   normalizeLearningFrontmatter,
   type LearningContentFrontmatter,
   type SectionId,
@@ -11,6 +12,10 @@ export interface ContentNode extends LearningContentFrontmatter {
   title: string
   url: string
   sectionId: SectionId
+  contentTypeLabel: string
+  sectionTitle: string
+  searchDescription: string
+  discoveryTags: string[]
 }
 
 const SECTION_ORDER: SectionId[] = ['theory', 'practice', 'intermediate']
@@ -62,6 +67,15 @@ function buildCountLabel(sectionId: SectionId, count: number): string {
   return `${count} 个中级专题`
 }
 
+function buildDiscoveryTags(frontmatter: LearningContentFrontmatter, pageTitle: string): string[] {
+  return Array.from(new Set([
+    frontmatter.navigationLabel,
+    frontmatter.shortTitle,
+    pageTitle,
+    ...frontmatter.searchTags
+  ].map((item) => item.trim()).filter(Boolean)))
+}
+
 function normalizeContentNode(page: ContentData): ContentNode | null {
   const frontmatter = normalizeLearningFrontmatter(
     (page.frontmatter ?? {}) as Partial<LearningContentFrontmatter>
@@ -76,12 +90,18 @@ function normalizeContentNode(page: ContentData): ContentNode | null {
     typeof page.frontmatter?.title === 'string' && page.frontmatter.title.trim()
       ? page.frontmatter.title.trim()
       : frontmatter.shortTitle
+  const section = SECTION_META[sectionId]
+  const discoveryTags = buildDiscoveryTags(frontmatter, pageTitle)
 
   return {
     ...frontmatter,
     title: pageTitle,
     url: page.url,
-    sectionId
+    sectionId,
+    contentTypeLabel: getContentTypeLabel(frontmatter.contentType),
+    sectionTitle: section.title,
+    searchDescription: `${section.title} · ${frontmatter.roleDescription || frontmatter.summary}`,
+    discoveryTags
   }
 }
 
