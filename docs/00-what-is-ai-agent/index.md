@@ -1,6 +1,34 @@
 ---
 title: 第1章：什么是 AI Agent
 description: 从 LLM 到 Agent 的演进，理解 AI Agent 的本质与核心能力
+contentType: theory
+series: book
+contentId: book-00-agent-intro
+shortTitle: 什么是 AI Agent
+summary: 从 LLM 到 Agent 的演进，理解 AI Agent 的定义、核心能力和应用场景。
+difficulty: beginner
+estimatedTime: 15 分钟
+learningGoals:
+  - 理解 AI Agent 的定义
+  - 区分 AI Agent、LLM 和 Chatbot
+  - 了解 AI Agent 的核心能力和应用场景
+prerequisites:
+  - 了解大语言模型（LLM）的基本概念
+recommendedNext:
+  - /01-agent-basics/
+  - /practice/p01-minimal-agent/
+practiceLinks:
+  - /01-agent-basics/
+  - /practice/p01-minimal-agent/
+searchTags:
+  - AI Agent
+  - LLM
+  - Chatbot
+  - Execution Loop
+  - 工具调用
+navigationLabel: 什么是 Agent
+entryMode: read-first
+roleDescription: 用一条最基础的执行主链路先建立共同语境，再带着问题进入后续源码和实践章节。
 ---
 
 <script setup>

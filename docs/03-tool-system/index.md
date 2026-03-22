@@ -1,6 +1,34 @@
 ---
 title: 第4章：工具系统
 description: 深入 OpenCode 工具系统——Tool.define 抽象、注册表过滤、权限控制、输出截断，以及核心工具的实现细节
+contentType: theory
+series: book
+contentId: book-03-tool-system
+shortTitle: 工具系统
+summary: 理解工具如何定义、注册、过滤和执行，并掌握权限控制与输出截断这些关键工程机制。
+difficulty: intermediate
+estimatedTime: 25 分钟
+learningGoals:
+  - 理解工具如何定义、注册、过滤和执行
+  - 读懂核心工具的实现方式
+  - 掌握工具权限控制和输出截断机制
+prerequisites:
+  - 第3章“OpenCode 项目介绍”
+recommendedNext:
+  - /04-session-management/
+  - /practice/p10-react-loop/
+practiceLinks:
+  - /04-session-management/
+  - /practice/p10-react-loop/
+searchTags:
+  - Tool.define
+  - registry
+  - 权限控制
+  - 输出截断
+  - Function Calling
+navigationLabel: 工具系统
+entryMode: read-first
+roleDescription: 把 Agent 从“会想”推进到“能做”，看清工具协议、权限边界和执行回路是怎样接上的。
 ---
 
 <script setup>

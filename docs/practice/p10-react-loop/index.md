@@ -1,6 +1,35 @@
 ---
 title: P10：ReAct Loop 实现
 description: 实现 Reason-Act 循环，让 Agent 在每次行动前显式输出推理过程，使思考链可见、可调试
+contentType: practice
+series: practice
+contentId: practice-p10-react-loop
+shortTitle: ReAct Loop
+summary: 实现显式 Thought / Action / Observation 推理链，让 Agent 的决策过程可见、可调试、可复盘。
+difficulty: intermediate
+estimatedTime: 60 min
+learningGoals:
+  - 理解 ReAct 与普通工具调用的核心区别
+  - 实现 ReActAgent 类并解析推理链
+  - 跑通一个需要多步推理的实际问题
+prerequisites:
+  - P1：最小 Agent
+  - P4：错误处理
+recommendedNext:
+  - /intermediate/27-planning-mechanism/
+  - /04-session-management/
+practiceLinks:
+  - /intermediate/27-planning-mechanism/
+  - /04-session-management/
+searchTags:
+  - ReAct
+  - Reasoning
+  - Agent Loop
+  - TypeScript
+  - OpenAI SDK
+navigationLabel: P10 ReAct Loop
+entryMode: build-first
+roleDescription: 把最小 Agent 升级成显式推理链，让你能看见每一步为什么行动，并为后续 Planning 主题搭桥。
 ---
 
 <ProjectCard

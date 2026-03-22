@@ -1,6 +1,34 @@
 ---
 title: 第5章：会话管理
 description: 深入 Session 数据模型、MessageV2 结构化消息、processor.ts 执行循环、上下文压缩与死循环防护机制
+contentType: theory
+series: book
+contentId: book-04-session-management
+shortTitle: 会话管理
+summary: 理解 Session 如何承载消息流、执行循环、上下文压缩和死循环防护，是把 Agent 主链路真正串起来的一章。
+difficulty: intermediate
+estimatedTime: 25 分钟
+learningGoals:
+  - 理解 Session 是 OpenCode 的核心骨架
+  - 掌握消息如何流动与循环如何控制
+  - 理解上下文溢出处理与死循环防护机制
+prerequisites:
+  - 第4章“工具系统”
+recommendedNext:
+  - /practice/p10-react-loop/
+  - /intermediate/27-planning-mechanism/
+practiceLinks:
+  - /practice/p10-react-loop/
+  - /intermediate/27-planning-mechanism/
+searchTags:
+  - Session
+  - MessageV2
+  - processor.ts
+  - 上下文压缩
+  - 死循环防护
+navigationLabel: 会话管理
+entryMode: read-first
+roleDescription: 用消息结构、循环控制和压缩策略把前面学过的 LLM 与工具调用连成真实可运行的系统主链路。
 ---
 
 <script setup>

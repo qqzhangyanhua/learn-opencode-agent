@@ -1,6 +1,34 @@
 ---
 title: 第2章：AI Agent 的核心组件
 description: 深入理解 LLM、Tools、Memory、Planning、Execution Loop 五个核心模块的工作原理与实现
+contentType: theory
+series: book
+contentId: book-01-agent-basics
+shortTitle: Agent 核心组件
+summary: 拆解 LLM、Tools、Memory、Planning 与 Execution Loop 五个核心模块，建立阅读源码所需的概念骨架。
+difficulty: beginner
+estimatedTime: 25 分钟
+learningGoals:
+  - 深入理解 AI Agent 的 5 个核心组件
+  - 理解 Function Calling 与工具调用的底层机制
+  - 为阅读 OpenCode 源码建立概念基础
+prerequisites:
+  - 第1章“什么是 AI Agent”
+recommendedNext:
+  - /03-tool-system/
+  - /practice/p01-minimal-agent/
+practiceLinks:
+  - /03-tool-system/
+  - /practice/p01-minimal-agent/
+searchTags:
+  - Agent 架构
+  - Function Calling
+  - Memory
+  - Planning
+  - Execution Loop
+navigationLabel: 核心组件
+entryMode: read-first
+roleDescription: 把 Agent 从概念拆回模块边界，让你在真正读代码前先知道每个部件各自负责什么。
 ---
 
 <script setup>

@@ -1,6 +1,35 @@
 ---
 title: 第27章：为什么智能体要先列清单再干活
 description: 从 ReAct 的局限出发，理解 Planning 为什么能提升复杂任务的完成率，并掌握 Plan-and-Execute 与动态重规划的工程权衡。
+contentType: intermediate
+series: intermediate
+contentId: intermediate-27-planning-mechanism
+shortTitle: Planning 机制
+summary: 从 ReAct 的局限出发，理解 Planning 如何提升复杂任务完成率，并掌握计划生成、执行和重规划的工程权衡。
+difficulty: advanced
+estimatedTime: 30 分钟
+learningGoals:
+  - 理解为什么复杂任务不能只靠边想边做
+  - 学会区分 ReAct、Plan-and-Execute 与自适应规划
+  - 理解三种执行方式各自的成本、边界和工程权衡
+prerequisites:
+  - P10：ReAct Loop
+  - P11：Planning 机制
+recommendedNext:
+  - /intermediate/
+  - /practice/p10-react-loop/
+practiceLinks:
+  - /intermediate/
+  - /practice/p10-react-loop/
+searchTags:
+  - Planning
+  - ReAct
+  - Plan-and-Execute
+  - Adaptive Planning
+  - 智能体规划
+navigationLabel: Planning 机制
+entryMode: bridge
+roleDescription: 把实践里学到的 ReAct 循环提升到计划与重规划视角，作为进入中级工程专题的桥接节点。
 ---
 
 > **对应路径**：`packages/opencode/src/agent/agent.ts`、`packages/opencode/src/session/processor.ts`、`packages/opencode/src/tool/task.ts`、`docs/intermediate/examples/27-planning-mechanism/`

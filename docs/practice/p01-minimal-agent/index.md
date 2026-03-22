@@ -1,6 +1,35 @@
 ---
 title: P1：最小 Agent — 工具调用核心机制
 description: 用 80 行 TypeScript 构建你的第一个可运行 Agent，理解工具调用的完整生命周期
+contentType: practice
+series: practice
+contentId: practice-p01-minimal-agent
+shortTitle: 最小 Agent
+summary: 用最少的代码跑通工具调用生命周期，亲手实现一个可查询天气的最小 Agent。
+difficulty: beginner
+estimatedTime: 45 min
+learningGoals:
+  - 用 80 行 TypeScript 构建第一个可运行 Agent
+  - 理解工具调用的完整生命周期
+  - 跑通“用户输入 → 模型思考 → 工具执行 → 最终回复”的最小闭环
+prerequisites:
+  - 已阅读实践环境准备
+  - 无，可直接开始
+recommendedNext:
+  - /practice/p10-react-loop/
+  - /00-what-is-ai-agent/
+practiceLinks:
+  - /practice/p10-react-loop/
+  - /00-what-is-ai-agent/
+searchTags:
+  - 最小 Agent
+  - OpenAI SDK
+  - Tool Calling
+  - TypeScript
+  - Agent Loop
+navigationLabel: P1 最小 Agent
+entryMode: build-first
+roleDescription: 用一个最短可运行项目先把工具调用和 Agent 循环亲手跑通，再回头理解理论篇里的系统抽象。
 ---
 
 <ProjectCard
