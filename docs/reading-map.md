@@ -12,6 +12,21 @@ import RuntimeLifecycleDiagram from '../.vitepress/theme/components/RuntimeLifec
 
 这一页只做一件事：给你一张可以直接执行的阅读路线图。
 
+<EntryContextBanner
+  section="阅读地图"
+  badge="当前位置"
+  tone="theory"
+  summary="你现在在全站的路线分发页。它不负责替你读完整本书，而是帮你先定位『我应该从哪条路径切进去』，再决定回理论篇、去实践篇还是进入中级专题。"
+  :next-steps="[
+    { label: '按目标重新选学习路径', href: '/learning-paths/', hint: '先判断自己更适合先看源码、先做项目，还是先补工程判断。' },
+    { label: '直接进入实践篇', href: '/practice/', hint: '如果你更想先跑项目，这里能马上进入 P1 和阶段总览。' }
+  ]"
+  :support-links="[
+    { label: '回到首页', href: '/', hint: '重新从首页的起步卡做一次快速判断。' },
+    { label: '准备好后进入中级篇', href: '/intermediate/', hint: '当你已经做过基础闭环并开始关心工程问题时，再切到专题页。' }
+  ]"
+/>
+
 ## 核心概念快速定位
 
 如果你想快速找到特定主题，直接跳转到对应章节：

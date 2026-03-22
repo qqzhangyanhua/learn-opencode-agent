@@ -9,6 +9,21 @@ description: 面向掌握基础 Agent 理论后想进入工程专题的读者，
 
 > **当前定位**：处理稳定性、协作、安全与成本等工程专题。如果你还没决定是否应该现在进入专题页，可以先回到 [学习路径](/learning-paths/) 看看哪条路线最适合你。
 
+<EntryContextBanner
+  section="中级篇"
+  badge="Bridge"
+  tone="intermediate"
+  summary="你现在在从『能跑 Demo』过渡到『能做工程判断』的桥接层。这里不再讲最小闭环，而是帮助你把实践经验升级为关于稳定性、协作、安全和成本的系统决策。"
+  :next-steps="[
+    { label: '直接从 Planning 机制开始', href: '/intermediate/27-planning-mechanism/', hint: '如果你已经完成基础闭环，这是最容易承接实践经验的工程专题起点。' },
+    { label: '按专题问题选入口', href: '/intermediate/25-rag-failure-patterns/', hint: '从 RAG、协作或安全等具体问题切入，再回链对应理论与实践章节。' }
+  ]"
+  :support-links="[
+    { label: '回到学习路径', href: '/learning-paths/', hint: '重新判断自己现在该停在实践篇，还是继续走工程专题路线。' },
+    { label: '回到实践篇', href: '/practice/', hint: '如果你还没把最小项目和关键章节跑通，先回去补手感。' }
+  ]"
+/>
+
 ## 什么时候进入中级篇
 
 - **你已经跑过最小闭环**：至少完成 [第 1-4 章](/00-what-is-ai-agent/) 或 [P1-P4](/practice/) 其中一条，再进入中级篇会更稳。

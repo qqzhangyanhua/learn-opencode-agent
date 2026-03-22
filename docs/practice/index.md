@@ -35,6 +35,21 @@ import PracticeTagCloud from '../../.vitepress/theme/components/PracticeTagCloud
 
 </div>
 
+<EntryContextBanner
+  section="实践篇"
+  badge="当前位置"
+  tone="practice"
+  summary="你现在在全站的项目跟练入口。这里负责把理论篇里抽象的 Agent 结构拆成可运行项目，并在完成基础闭环后把你送往中级专题。"
+  :next-steps="[
+    { label: '从 P1：最小 Agent 开始', href: '/practice/p01-minimal-agent/', hint: '第一次进入实践篇时最稳的起点，先把工具调用和对话闭环跑通。' },
+    { label: '先看实践环境准备', href: '/practice/setup', hint: '确认 bun、API Key 和本地 / 在线运行模式，再开始逐章练习。' }
+  ]"
+  :support-links="[
+    { label: '回到学习路径', href: '/learning-paths/', hint: '重新判断是否该先做项目，还是先回去补理论主链路。' },
+    { label: '基础跑通后进入中级篇', href: '/intermediate/', hint: '当你开始关心 RAG、Planning、安全和成本时，从这里继续。' }
+  ]"
+/>
+
 ## 实践篇解决什么问题
 
 ::: info 核心定位

@@ -24,6 +24,7 @@ import PracticeTagCloud from './components/PracticeTagCloud.vue'
 import ProjectCard from './components/ProjectCard.vue'
 import RunCommand from './components/RunCommand.vue'
 import HomeStartPanel from './components/HomeStartPanel.vue'
+import EntryContextBanner from './components/EntryContextBanner.vue'
 import PracticePreview from './components/PracticePreview.vue'
 import WhatIsAgent from './components/animations/css/WhatIsAgent.vue'
 import MultiTurnDialog from './components/animations/css/MultiTurnDialog.vue'
@@ -66,6 +67,7 @@ const globalComponents = [
   ['ProjectCard', ProjectCard],
   ['RunCommand', RunCommand],
   ['HomeStartPanel', HomeStartPanel],
+  ['EntryContextBanner', EntryContextBanner],
   ['PracticePreview', PracticePreview],
   ['WhatIsAgent', WhatIsAgent],
   ['MultiTurnDialog', MultiTurnDialog],
