@@ -11,6 +11,8 @@ description: 综合多 Agent 编排、安全检测、结构化输出等技术，
   :tags="['Project', 'Code Review', 'Multi-Agent', 'TypeScript', 'OpenAI SDK']"
 />
 
+<PracticeProjectGuide project-id="practice-p22-project" />
+
 > 开始前先看：[实践环境准备](/practice/setup)。本章对应示例文件位于 `practice/` 目录，可直接按命令运行。
 
 ## 前置准备
@@ -879,3 +881,5 @@ main().catch(console.error)
 这不是终点。下一章 **P23 生产部署与运维** 会讨论如何把这样的 Agent 部署到生产环境：容器化、监控、成本控制、灰度发布。你的 Code Review Agent 已经具备了生产级的代码结构，P23 会补上生产级的运维能力。
 
 <StarCTA />
+
+<PracticeProjectActionPanel project-id="practice-p22-project" />

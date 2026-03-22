@@ -134,6 +134,22 @@ export interface PracticeProjectSyllabusProps {
   phaseIds?: PracticePhaseSummary['phaseId'][]
 }
 
+export interface PracticeProjectGuideProps {
+  projectId: PracticeProjectDefinition['projectId']
+}
+
+export interface PracticeProjectActionPanelProps {
+  projectId: PracticeProjectDefinition['projectId']
+  title?: string
+}
+
+export interface RelatedPracticeProjectsProps {
+  projectIds?: PracticeProjectDefinition['projectId'][]
+  theoryPath?: string
+  title?: string
+  description?: string
+}
+
 export interface ChapterActionItem {
   title: string
   description: string

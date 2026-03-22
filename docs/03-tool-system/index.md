@@ -37,6 +37,11 @@ import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshot
 
 <ChapterLearningGuide />
 
+<RelatedPracticeProjects
+  :project-ids="['practice-p01-minimal-agent', 'practice-p10-react-loop']"
+  description="如果你已经理解工具协议和权限边界，下一步最适合去看一个最小工具调用闭环，或直接观察工具如何落进显式推理链。"
+/>
+
 > **源码路径**：`packages/opencode/src/tool/`
 
 ## 本章导读

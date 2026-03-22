@@ -11,6 +11,8 @@ description: 构建系统化的 Agent 评估框架——测试用例设计、LLM
   :tags="['Evaluation', 'Benchmarking', 'LLM-as-Judge', 'TypeScript', 'OpenAI SDK']"
 />
 
+<PracticeProjectGuide project-id="practice-p21-evaluation" />
+
 > 开始前先看：[实践环境准备](/practice/setup)。本章对应示例文件已提供在 `practice/` 目录，可直接按命令运行。
 
 ## 前置准备
@@ -724,3 +726,5 @@ Token 用量: 输入 1250 / 输出 890
 接下来 P22 将进入综合项目实战——把本书积累的所有模式（ReAct、Reflection、多 Agent、评估）组合成一个生产级 Agent，评估框架会作为质量保障的最后一道防线。
 
 <StarCTA />
+
+<PracticeProjectActionPanel project-id="practice-p21-evaluation" />

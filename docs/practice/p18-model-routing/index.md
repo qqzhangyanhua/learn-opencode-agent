@@ -11,6 +11,8 @@ description: 按任务复杂度智能路由到不同模型，实现 Token 预算
   :tags="['Model Routing', 'Cost Control', 'TypeScript', 'OpenAI SDK']"
 />
 
+<PracticeProjectGuide project-id="practice-p18-model-routing" />
+
 > 开始前先看：[实践环境准备](/practice/setup)。如果你想先体验浏览器里的路由演示，也可以直接打开 <a href="/practice/playground/?chapter=p18-model-routing" target="_blank" rel="noopener noreferrer">本章在线运行工作台</a>；相关限制和安全提示见 [在线运行模式](/practice/setup#online-mode)。本章对应示例文件位于 `practice/` 目录，可直接按命令运行。
 
 ## 前置准备
@@ -670,3 +672,5 @@ OpenAI API 返回的 Token 数是精确的，但**估算成本和实际账单可
 下一章 **P19 Agent 安全与防注入**，我们会处理另一个生产级问题：当用户输入可能包含恶意 prompt injection 时，Agent 如何防御。
 
 <StarCTA />
+
+<PracticeProjectActionPanel project-id="practice-p18-model-routing" />

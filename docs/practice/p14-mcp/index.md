@@ -11,6 +11,8 @@ description: 连接标准化工具服务器，让 Agent 接入外部能力生态
   :tags="['MCP', 'Protocol', 'TypeScript', 'OpenAI SDK']"
 />
 
+<PracticeProjectGuide project-id="practice-p14-mcp" />
+
 > 开始前先看：[实践环境准备](/practice/setup)。本章对应示例文件位于 `practice/` 目录，可直接按命令运行。
 
 ## 前置准备
@@ -532,3 +534,5 @@ async function callToolWithRetry(
 - **P20 可观测性**：在 `callToolViaMcp` 中加入耗时埋点，监控每个 MCP 工具的延迟分布
 
 <StarCTA />
+
+<PracticeProjectActionPanel project-id="practice-p14-mcp" />

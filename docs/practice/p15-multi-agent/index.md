@@ -11,6 +11,8 @@ description: Orchestrator-Worker 架构设计 — 一个编排器拆解任务，
   :tags="['Multi-Agent', 'Orchestrator', 'Parallel', 'TypeScript', 'OpenAI SDK']"
 />
 
+<PracticeProjectGuide project-id="practice-p15-multi-agent" />
+
 > 开始前先看：[实践环境准备](/practice/setup)。本章对应示例文件位于 `practice/` 目录，可直接按命令运行。
 
 ## 前置准备
@@ -502,3 +504,5 @@ P4 的重试策略在这里也适用——可以对失败的 Worker 做指数退
 - **P17 Agent 间通信**：Worker 之间可以共享中间状态，支持协作而非纯并行
 
 <StarCTA />
+
+<PracticeProjectActionPanel project-id="practice-p15-multi-agent" />

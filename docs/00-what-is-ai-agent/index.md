@@ -37,6 +37,11 @@ import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshot
 
 <ChapterLearningGuide />
 
+<RelatedPracticeProjects
+  :project-ids="['practice-p01-minimal-agent']"
+  description="这一章先帮你建立 Agent 的最小概念骨架，最适合立刻去做 P1，把工具调用闭环亲手跑一遍。"
+/>
+
 ## 本章导读
 
 ### 这一章解决什么问题

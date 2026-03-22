@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready
-stopped_at: Phase 4 已规划完成，下一步执行 04-01
-last_updated: "2026-03-22T10:35:00Z"
+stopped_at: Phase 4 已完成，下一步规划 Phase 5
+last_updated: "2026-03-22T12:40:00Z"
 progress:
   total_phases: 5
-  completed_phases: 3
-  total_plans: 3
-  completed_plans: 3
+  completed_phases: 4
+  total_plans: 12
+  completed_plans: 12
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-21)
 
 **Core value:** 让想系统学习 AI Agent 的中文开发者在 30 秒内知道从哪里开始，并能沿着清晰路径持续学下去
-**Current focus:** Phase 04 — 实践篇课程化重构
+**Current focus:** Phase 05 — 搜索与发现体验收口
 
 ## Current Position
 
-Phase: 04 (实践篇课程化重构) — READY TO EXECUTE
-Plan: 0 of 3
+Phase: 05 (搜索与发现体验收口) — READY TO PLAN
+Plan: 0 of 2
 
 ## Performance Metrics
 
@@ -77,19 +77,21 @@ Recent decisions affecting current work:
 - [Phase 03]: 新增 ChapterLearningGuide 与 ChapterActionPanel，统一章节顶部学习摘要和底部行动闭环
 - [Phase 03]: 首批 7 个关键章节接入统一学习结构，覆盖理论 / 实践 / 中级三条线
 - [Phase 03]: 章节体验校验脚本升级为约束样板章节必须同时接入学习摘要和行动闭环
+- [Phase 04]: 新增 practice-projects.ts 作为实践首页、项目页和理论桥接共享的统一真源
+- [Phase 04]: 23 个实践项目页统一接入 PracticeProjectGuide 与 PracticeProjectActionPanel，实践篇首次拥有课程单元骨架
+- [Phase 04]: 关键理论页接入 RelatedPracticeProjects，把“看概念 -> 做项目”升级为显式桥接
 
 ### Pending Todos
 
-- 执行 04-01：重构实践篇索引与阶段化浏览入口
-- 执行 04-02：标准化实践项目页面信息结构
-- 执行 04-03：建立理论章节到实践项目的双向关联
+- 规划 05-01：优化搜索索引内容与结果展示结构
+- 规划 05-02：收口全站发现入口、推荐关系和内容类型标识
 
 ### Blockers/Concerns
 
-- 当前无功能性 blocker；下一步风险主要在 Phase 4 需要一次性覆盖 23 个项目页，同时避免破坏现有命令、Playground 链路和 Phase 3 校验
+- 当前无功能性 blocker；下一步风险主要在 Phase 5 需要在不增加搜索噪声的前提下，把内容类型、推荐关系和发现入口统一起来
 
 ## Session Continuity
 
 Last session: 2026-03-22T08:49:35Z
-Stopped at: Phase 4 规划已完成，准备执行 04-01
+Stopped at: Phase 4 执行已完成，准备进入 Phase 5
 Resume file: None

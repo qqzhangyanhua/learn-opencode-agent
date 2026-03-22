@@ -23,6 +23,9 @@ import PracticePhaseGrid from './components/PracticePhaseGrid.vue'
 import PracticeTagCloud from './components/PracticeTagCloud.vue'
 import PracticeRouteExplorer from './components/PracticeRouteExplorer.vue'
 import PracticeProjectSyllabus from './components/PracticeProjectSyllabus.vue'
+import PracticeProjectGuide from './components/PracticeProjectGuide.vue'
+import PracticeProjectActionPanel from './components/PracticeProjectActionPanel.vue'
+import RelatedPracticeProjects from './components/RelatedPracticeProjects.vue'
 import ProjectCard from './components/ProjectCard.vue'
 import RunCommand from './components/RunCommand.vue'
 import HomeStartPanel from './components/HomeStartPanel.vue'
@@ -70,6 +73,9 @@ const globalComponents = [
   ['PracticeTagCloud', PracticeTagCloud],
   ['PracticeRouteExplorer', PracticeRouteExplorer],
   ['PracticeProjectSyllabus', PracticeProjectSyllabus],
+  ['PracticeProjectGuide', PracticeProjectGuide],
+  ['PracticeProjectActionPanel', PracticeProjectActionPanel],
+  ['RelatedPracticeProjects', RelatedPracticeProjects],
   ['ProjectCard', ProjectCard],
   ['RunCommand', RunCommand],
   ['HomeStartPanel', HomeStartPanel],

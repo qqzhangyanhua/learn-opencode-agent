@@ -11,6 +11,8 @@ description: Rate Limiting、Circuit Breaker、超时控制、优雅降级、健
   :tags="['Production', 'Deployment', 'Checklist', 'TypeScript']"
 />
 
+<PracticeProjectGuide project-id="practice-p23-production" />
+
 > 开始前先看：[实践环境准备](/practice/setup)。本章对应示例文件已提供在 `practice/` 目录，可直接按命令运行。
 
 ## 前置准备
@@ -632,3 +634,5 @@ Claude Sonnet 的 P95 延迟大约在 5-15 秒（取决于输出长度），Opus
 去构建吧。
 
 <StarCTA />
+
+<PracticeProjectActionPanel project-id="practice-p23-production" />

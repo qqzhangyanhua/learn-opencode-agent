@@ -37,6 +37,11 @@ import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshot
 
 <ChapterLearningGuide />
 
+<RelatedPracticeProjects
+  :project-ids="['practice-p02-multi-turn', 'practice-p10-react-loop']"
+  description="会话管理的抽象最适合拿多轮对话和 ReAct 两类项目来验证：一个看上下文裁剪，一个看循环控制。"
+/>
+
 > **源码路径**：`packages/opencode/src/session/`
 
 ## 本章导读

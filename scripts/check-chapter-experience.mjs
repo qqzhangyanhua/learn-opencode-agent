@@ -7,6 +7,8 @@ const packageJsonPath = path.join(rootDir, 'package.json')
 const themeIndexPath = path.join(rootDir, '.vitepress', 'theme', 'index.ts')
 const guidePath = path.join(rootDir, '.vitepress', 'theme', 'components', 'ChapterLearningGuide.vue')
 const actionPath = path.join(rootDir, '.vitepress', 'theme', 'components', 'ChapterActionPanel.vue')
+const practiceGuidePath = path.join(rootDir, '.vitepress', 'theme', 'components', 'PracticeProjectGuide.vue')
+const practiceActionPath = path.join(rootDir, '.vitepress', 'theme', 'components', 'PracticeProjectActionPanel.vue')
 const guideTargetPages = [
   'docs/00-what-is-ai-agent/index.md',
   'docs/01-agent-basics/index.md',
@@ -16,6 +18,10 @@ const guideTargetPages = [
   'docs/practice/p10-react-loop/index.md',
   'docs/intermediate/27-planning-mechanism/index.md'
 ]
+const upgradedPracticePages = new Set([
+  'docs/practice/p01-minimal-agent/index.md',
+  'docs/practice/p10-react-loop/index.md'
+])
 
 const issues = []
 
@@ -25,6 +31,14 @@ if (!existsSync(guidePath)) {
 
 if (!existsSync(actionPath)) {
   issues.push('缺少 .vitepress/theme/components/ChapterActionPanel.vue')
+}
+
+if (!existsSync(practiceGuidePath)) {
+  issues.push('缺少 .vitepress/theme/components/PracticeProjectGuide.vue')
+}
+
+if (!existsSync(practiceActionPath)) {
+  issues.push('缺少 .vitepress/theme/components/PracticeProjectActionPanel.vue')
 }
 
 const themeIndex = readFileSync(themeIndexPath, 'utf8')
@@ -47,15 +61,23 @@ if (!packageJson.includes('bun run check:chapter-experience')) {
 
 for (const relativePath of guideTargetPages) {
   const pageContent = readFileSync(path.join(rootDir, relativePath), 'utf8')
-  if (!pageContent.includes('<ChapterLearningGuide')) {
-    issues.push(`${relativePath} 尚未接入 <ChapterLearningGuide />`)
+  const allowPracticeUpgrade = upgradedPracticePages.has(relativePath)
+  const hasGuide =
+    pageContent.includes('<ChapterLearningGuide') ||
+    (allowPracticeUpgrade && pageContent.includes('<PracticeProjectGuide'))
+  const hasAction =
+    pageContent.includes('<ChapterActionPanel') ||
+    (allowPracticeUpgrade && pageContent.includes('<PracticeProjectActionPanel'))
+
+  if (!hasGuide) {
+    issues.push(`${relativePath} 尚未接入章节或实践导览组件`)
   }
 
-  if (!pageContent.includes('<ChapterActionPanel')) {
-    issues.push(`${relativePath} 尚未接入 <ChapterActionPanel />`)
+  if (!hasAction) {
+    issues.push(`${relativePath} 尚未接入章节或实践行动组件`)
   }
 
-  if (!pageContent.includes('actionItems')) {
+  if (pageContent.includes('<ChapterActionPanel') && !pageContent.includes('actionItems')) {
     issues.push(`${relativePath} 尚未声明 ChapterActionPanel.actionItems`)
   }
 }

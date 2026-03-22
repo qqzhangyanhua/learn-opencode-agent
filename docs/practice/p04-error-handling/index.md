@@ -11,6 +11,8 @@ description: 指数退避、工具调用失败降级、让 Agent 在不稳定环
   :tags="['Error Handling', 'Retry', 'OpenAI SDK', 'TypeScript']"
 />
 
+<PracticeProjectGuide project-id="practice-p04-error-handling" />
+
 > 开始前先看：[实践环境准备](/practice/setup)。本章对应示例文件位于 `practice/` 目录，可直接按命令运行。
 
 ## 前置准备
@@ -389,3 +391,5 @@ Agent: 用户 ID 1 的信息：Alice（alice@example.com）。
 - **P20**：可观测性——如何在生产环境追踪 Agent 的每一步行为
 
 <StarCTA />
+
+<PracticeProjectActionPanel project-id="practice-p04-error-handling" />

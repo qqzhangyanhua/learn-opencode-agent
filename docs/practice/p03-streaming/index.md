@@ -11,6 +11,8 @@ description: 用 stream() API 实现逐 token 打印，让 Agent 回复不再让
   :tags="['OpenAI SDK', 'Streaming', 'TypeScript']"
 />
 
+<PracticeProjectGuide project-id="practice-p03-streaming" />
+
 > 开始前先看：[实践环境准备](/practice/setup)。如果你想先看浏览器侧的流式效果，也可以直接打开 <a href="/practice/playground/?chapter=p03-streaming" target="_blank" rel="noopener noreferrer">本章在线运行工作台</a>；相关限制和安全提示见 [在线运行模式](/practice/setup#online-mode)。本章对应示例文件位于 `practice/` 目录，可直接按命令运行。
 
 ## 前置准备
@@ -381,3 +383,5 @@ app.get('/stream', async (req, res) => {
 - **P10**：完整的 ReAct 推理循环，把流式输出和思维链结合起来
 
 <StarCTA />
+
+<PracticeProjectActionPanel project-id="practice-p03-streaming" />

@@ -11,6 +11,8 @@ description: 向量化、分块策略、语义检索，构建让 Agent 能读文
   :tags="['RAG', 'Vector Search', 'TypeScript', 'OpenAI SDK']"
 />
 
+<PracticeProjectGuide project-id="practice-p07-rag-basics" />
+
 > 开始前先看：[实践环境准备](/practice/setup)。本章对应示例文件位于 `practice/` 目录，可直接按命令运行。
 
 ## 前置准备
@@ -567,3 +569,5 @@ Embedding 模型选型：
 - **P9**：混合检索——关键词 + 向量双路并行，在精准性和召回率之间取得最佳平衡
 
 <StarCTA />
+
+<PracticeProjectActionPanel project-id="practice-p07-rag-basics" />

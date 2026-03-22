@@ -11,6 +11,8 @@ description: 构建有记忆的对话助手，掌握 messages 历史管理与 To
   :tags="['OpenAI SDK', 'Context Management', 'TypeScript']"
 />
 
+<PracticeProjectGuide project-id="practice-p02-multi-turn" />
+
 > 开始前先看：[实践环境准备](/practice/setup)。如果你想先跳过本地安装，也可以直接打开 <a href="/practice/playground/?chapter=p02-multi-turn" target="_blank" rel="noopener noreferrer">本章在线运行工作台</a> 运行预置多轮示例；相关限制和安全提示见 [在线运行模式](/practice/setup#online-mode)。本章对应示例文件位于 `practice/` 目录，可直接按命令运行。
 
 ## 前置准备
@@ -338,3 +340,5 @@ OpenAI API 会返回 400 错误，错误信息类似 `prompt is too long: 210234
 - **P5**：系统性地了解 Agent 的记忆架构（短期/长期/工作记忆）
 
 <StarCTA />
+
+<PracticeProjectActionPanel project-id="practice-p02-multi-turn" />
