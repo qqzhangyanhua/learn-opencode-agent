@@ -1,3 +1,23 @@
+import type {
+  LearningDifficulty,
+  LearningPathDefinition,
+  PracticePhaseSummary,
+  SectionRoleSummary
+} from '../data/content-meta'
+
+export type {
+  ContentSeries,
+  ContentType,
+  EntryMode,
+  LearningContentFrontmatter,
+  LearningDifficulty,
+  LearningPathDefinition,
+  LearningPathStep,
+  PracticePhaseSummary,
+  SectionId,
+  SectionRoleSummary
+} from '../data/content-meta'
+
 export interface SourceSnapshotEntry {
   label: string
   path: string
@@ -45,6 +65,10 @@ export interface LearningPathChapter {
   link: string
 }
 
+export interface LearningPathProps {
+  pathIds?: LearningPathDefinition['pathId'][]
+}
+
 export interface LearningPhase {
   number: string
   title: string
@@ -54,16 +78,12 @@ export interface LearningPhase {
   chapters: LearningPathChapter[]
 }
 
-export interface PracticePhase {
-  id: number
-  title: string
-  subtitle: string
-  chapterCount: number
-  link: string
+export interface SectionRoleGridProps {
+  sections?: SectionRoleSummary[]
 }
 
 export interface PracticePhaseGridProps {
-  phases: PracticePhase[]
+  phases?: PracticePhaseSummary[]
 }
 
 export interface PracticeTagCloudProps {
@@ -72,7 +92,7 @@ export interface PracticeTagCloudProps {
 
 export interface ProjectCardProps {
   title: string
-  difficulty: 'beginner' | 'intermediate' | 'advanced'
+  difficulty: LearningDifficulty
   duration: string
   prerequisites: string[]
   tags: string[]
