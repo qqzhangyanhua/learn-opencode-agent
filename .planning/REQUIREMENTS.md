@@ -7,28 +7,28 @@
 
 ### Information Architecture
 
-- [ ] **IA-01**: 新用户进入首页后，可以在 30 秒内识别至少一条适合自己的起步路线
+- [x] **IA-01**: 新用户进入首页后，可以在 30 秒内识别至少一条适合自己的起步路线
 - [x] **IA-02**: 用户可以按学习目标选择路线，而不是只能按目录顺序阅读全部内容
 - [x] **IA-03**: 用户可以明确区分理论篇、实践篇和中级篇各自的定位与推荐进入方式
 
 ### Homepage & Navigation
 
-- [ ] **HOME-01**: 用户在首页可以看到面向不同人群/目标的起步入口卡片或分流区
-- [ ] **HOME-02**: 用户在全站导航中可以快速进入核心学习路径、实践入口和辅助页面，而不需要先理解完整章节树
-- [ ] **HOME-03**: 用户在任意主要页面都能理解自己当前所处的学习板块及可前往的下一层入口
+- [x] **HOME-01**: 用户在首页可以看到面向不同人群/目标的起步入口卡片或分流区
+- [x] **HOME-02**: 用户在全站导航中可以快速进入核心学习路径、实践入口和辅助页面，而不需要先理解完整章节树
+- [x] **HOME-03**: 用户在任意主要页面都能理解自己当前所处的学习板块及可前往的下一层入口
 
 ### Chapter Experience
 
-- [ ] **CHAP-01**: 用户打开任一核心章节时，可以看到本章学习目标、适合人群和预计投入时间
-- [ ] **CHAP-02**: 用户打开任一核心章节时，可以看到前置知识要求或推荐先读章节
-- [ ] **CHAP-03**: 用户读完任一核心章节后，可以看到明确的下一步推荐（继续阅读、对应实践或进阶专题）
-- [ ] **CHAP-04**: 用户读完任一核心章节后，可以看到至少一个可执行的练习、任务或对应实践入口
+- [x] **CHAP-01**: 用户打开任一核心章节时，可以看到本章学习目标、适合人群和预计投入时间
+- [x] **CHAP-02**: 用户打开任一核心章节时，可以看到前置知识要求或推荐先读章节
+- [x] **CHAP-03**: 用户读完任一核心章节后，可以看到明确的下一步推荐（继续阅读、对应实践或进阶专题）
+- [x] **CHAP-04**: 用户读完任一核心章节后，可以看到至少一个可执行的练习、任务或对应实践入口
 
 ### Practice Experience
 
-- [ ] **PRAC-01**: 用户可以按学习阶段或目标浏览实践项目，而不是只能面对脚本文件列表
-- [ ] **PRAC-02**: 用户在每个实践项目页面都可以看到学习目标、前置要求、运行入口和完成标准
-- [ ] **PRAC-03**: 用户可以从相关理论章节直接跳转到对应实践项目，形成“看完就练”的闭环
+- [x] **PRAC-01**: 用户可以按学习阶段或目标浏览实践项目，而不是只能面对脚本文件列表
+- [x] **PRAC-02**: 用户在每个实践项目页面都可以看到学习目标、前置要求、运行入口和完成标准
+- [x] **PRAC-03**: 用户可以从相关理论章节直接跳转到对应实践项目，形成“看完就练”的闭环
 
 ### Discovery & Search
 
@@ -64,19 +64,19 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| IA-01 | Phase 2 | Pending |
+| IA-01 | Phase 2 | Complete |
 | IA-02 | Phase 1 | Complete |
 | IA-03 | Phase 1 | Complete |
-| HOME-01 | Phase 2 | Pending |
-| HOME-02 | Phase 2 | Pending |
-| HOME-03 | Phase 2 | Pending |
-| CHAP-01 | Phase 3 | Pending |
-| CHAP-02 | Phase 3 | Pending |
-| CHAP-03 | Phase 3 | Pending |
-| CHAP-04 | Phase 3 | Pending |
-| PRAC-01 | Phase 4 | Pending |
-| PRAC-02 | Phase 4 | Pending |
-| PRAC-03 | Phase 4 | Pending |
+| HOME-01 | Phase 2 | Complete |
+| HOME-02 | Phase 2 | Complete |
+| HOME-03 | Phase 2 | Complete |
+| CHAP-01 | Phase 3 | Complete |
+| CHAP-02 | Phase 3 | Complete |
+| CHAP-03 | Phase 3 | Complete |
+| CHAP-04 | Phase 3 | Complete |
+| PRAC-01 | Phase 4 | Complete |
+| PRAC-02 | Phase 4 | Complete |
+| PRAC-03 | Phase 4 | Complete |
 | DISC-01 | Phase 5 | Complete |
 | DISC-02 | Phase 1 | Complete |
 | DISC-03 | Phase 5 | Complete |
@@ -88,4 +88,4 @@
 
 ---
 *Requirements defined: 2026-03-21*
-*Last updated: 2026-03-22 after Phase 5 completion*
+*Last updated: 2026-03-22 after v1 requirement audit*
