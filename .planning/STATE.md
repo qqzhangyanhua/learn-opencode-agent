@@ -3,11 +3,11 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready
-stopped_at: Phase 3 已规划完成，下一步执行 Phase 3
-last_updated: "2026-03-22T08:36:28Z"
+stopped_at: Phase 3 已完成，下一步规划 Phase 4
+last_updated: "2026-03-22T08:49:35Z"
 progress:
   total_phases: 5
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 3
   completed_plans: 3
 ---
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-21)
 
 **Core value:** 让想系统学习 AI Agent 的中文开发者在 30 秒内知道从哪里开始，并能沿着清晰路径持续学下去
-**Current focus:** Phase 03 — 章节学习体验标准化
+**Current focus:** Phase 04 — 实践篇课程化重构
 
 ## Current Position
 
-Phase: 03 (章节学习体验标准化) — READY TO EXECUTE
-Plan: 3 of 3 planned
+Phase: 04 (实践篇课程化重构) — READY TO PLAN
+Plan: 0 of 3
 
 ## Performance Metrics
 
@@ -32,6 +32,7 @@ Plan: 3 of 3 planned
 
 - Total plans completed: 3
 - Total plans completed: 6
+- Total plans completed: 9
 - Average duration: -
 - Total execution time: 0.0 hours
 
@@ -41,6 +42,7 @@ Plan: 3 of 3 planned
 |-------|-------|-------|----------|
 | 1 | 3 | - | - |
 | 2 | 3 | - | - |
+| 3 | 3 | - | - |
 
 **Recent Trend:**
 
@@ -53,6 +55,9 @@ Plan: 3 of 3 planned
 | Phase 02 P01 | - | 2 tasks | 7 files |
 | Phase 02 P02 | - | 2 tasks | 6 files |
 | Phase 02 P03 | - | 2 tasks | 7 files |
+| Phase 03 P01 | - | 2 tasks | 6 files |
+| Phase 03 P02 | - | 2 tasks | 8 files |
+| Phase 03 P03 | - | 2 tasks | 8 files |
 
 ## Accumulated Context
 
@@ -69,19 +74,22 @@ Recent decisions affecting current work:
 - [Phase 02]: 首页首屏改为起步分流入口，明确“先看源码 / 先做项目 / 先补工程判断”三条入口
 - [Phase 02]: 顶层导航与侧边栏改为入口优先，学习路径、实践篇、中级篇和阅读地图成为一等入口
 - [Phase 02]: 阅读地图、实践页与中级篇统一接入 EntryContextBanner，持续提示当前位置与下一步
+- [Phase 03]: 新增 ChapterLearningGuide 与 ChapterActionPanel，统一章节顶部学习摘要和底部行动闭环
+- [Phase 03]: 首批 7 个关键章节接入统一学习结构，覆盖理论 / 实践 / 中级三条线
+- [Phase 03]: 章节体验校验脚本升级为约束样板章节必须同时接入学习摘要和行动闭环
 
 ### Pending Todos
 
-- 执行 03-01：设计统一章节模板与可复用组件
-- 执行 03-02：为关键章节补齐目标、前置与行动闭环信息
-- 执行 03-03：建立章节与理论/实践/专题之间的推荐关系
+- 规划 04-01：重构实践篇索引与阶段化浏览入口
+- 规划 04-02：标准化实践项目页面信息结构
+- 规划 04-03：建立理论章节到实践项目的双向关联
 
 ### Blockers/Concerns
 
-- 当前无功能性 blocker；下一步风险主要在 Phase 3 需要复用现有 frontmatter 字段，避免为了样板章节重新扩大全站 metadata 合同
+- 当前无功能性 blocker；下一步风险主要在 Phase 4 需要把实践页做得更课程化，同时避免破坏现有脚本运行入口与 Playground 链路
 
 ## Session Continuity
 
-Last session: 2026-03-22T08:36:28Z
-Stopped at: Phase 3 已规划完成，准备执行 Phase 3
+Last session: 2026-03-22T08:49:35Z
+Stopped at: Phase 3 已执行完成，准备进入 Phase 4
 Resume file: None
