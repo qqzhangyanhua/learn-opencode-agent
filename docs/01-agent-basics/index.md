@@ -772,3 +772,11 @@ graph TD
 
 
 <StarCTA />
+
+<ChapterActionPanel
+  :actionItems="[
+    { title: '画出自己的组件边界图', description: '把 LLM、Tools、Memory、Planning、Execution Loop 五个模块写成结构草图，再对照源码验证。' },
+    { title: '继续进入工具系统', description: '下一步看工具协议、权限控制和执行回路，理解 Agent 为什么能真正行动。', href: '/03-tool-system/' },
+    { title: '回到 P1 对照最小实现', description: '用一个最小项目把刚才的模块边界映射到可运行代码。', href: '/practice/p01-minimal-agent/' }
+  ]"
+/>

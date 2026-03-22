@@ -836,3 +836,11 @@ Bus                 ← 事件广播：实时通知所有 UI 客户端
 
 
 <StarCTA />
+
+<ChapterActionPanel
+  :actionItems="[
+    { title: '顺着 processor.ts 走一遍循环', description: '从 while 循环开始，依次标出调用 LLM、执行工具、写回消息和退出条件的位置。' },
+    { title: '去做 P10：ReAct Loop', description: '把本章的消息流和循环控制映射到一个可调试的显式推理链项目。', href: '/practice/p10-react-loop/' },
+    { title: '继续进入 Planning 机制', description: '当你已经理解循环控制后，再看复杂任务如何在循环之上增加计划与重规划。', href: '/intermediate/27-planning-mechanism/' }
+  ]"
+/>

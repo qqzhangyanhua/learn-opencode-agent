@@ -50,6 +50,14 @@ for (const relativePath of guideTargetPages) {
   if (!pageContent.includes('<ChapterLearningGuide')) {
     issues.push(`${relativePath} 尚未接入 <ChapterLearningGuide />`)
   }
+
+  if (!pageContent.includes('<ChapterActionPanel')) {
+    issues.push(`${relativePath} 尚未接入 <ChapterActionPanel />`)
+  }
+
+  if (!pageContent.includes('actionItems')) {
+    issues.push(`${relativePath} 尚未声明 ChapterActionPanel.actionItems`)
+  }
 }
 
 if (issues.length === 0) {

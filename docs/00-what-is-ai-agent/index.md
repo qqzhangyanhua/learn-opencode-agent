@@ -754,3 +754,11 @@ assistant = client.beta.assistants.create(
 
 
 <StarCTA />
+
+<ChapterActionPanel
+  :actionItems="[
+    { title: '验证最小闭环入口', description: '带着本章里的执行链路，先去打开 processor.ts 和 agent.ts，确认真正的启动与循环入口。' },
+    { title: '继续拆解五大组件', description: '下一步进入第 2 章，把 Agent 的整体概念继续拆到具体模块边界。', href: '/01-agent-basics/' },
+    { title: '如果想先动手，直接做 P1', description: '把“用户输入 → 工具调用 → 最终回复”的最小闭环亲手跑通。', href: '/practice/p01-minimal-agent/' }
+  ]"
+/>

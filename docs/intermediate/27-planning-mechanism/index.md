@@ -287,3 +287,11 @@ class SmartAgent:
 - 如果你还在理解“边想边做”的工作方式，先回看 [P10：ReAct Loop](/practice/p10-react-loop/)。
 - 如果你想动手实现完整的 Plan-and-Execute 主链，直接阅读 [P11：Planning 机制](/practice/p11-planning/)。
 - 如果你想把 Planning 和 OpenCode 的角色/权限/会话循环结合起来理解，建议串读 [第3章：OpenCode 项目介绍](/02-agent-core/) 与 [第5章：会话管理](/04-session-management/)。
+
+<ChapterActionPanel
+  :actionItems="[
+    { title: '把你当前任务分类一次', description: '拿一个正在做的真实任务，判断它更适合 ReAct、Plan-and-Execute 还是自适应规划，并写下原因。' },
+    { title: '回到 P10 对照 ReAct', description: '把本章的 Planning 结论和你在 ReAct Loop 项目里观察到的局部决策问题逐一对应。', href: '/practice/p10-react-loop/' },
+    { title: '继续浏览中级篇专题', description: '如果你已经理解规划边界，下一步可以回到中级篇总览，按问题选择 RAG、安全或成本专题。', href: '/intermediate/' }
+  ]"
+/>
