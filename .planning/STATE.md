@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready
-stopped_at: Phase 4 已完成，下一步规划 Phase 5
-last_updated: "2026-03-22T12:40:00Z"
+stopped_at: Phase 5 规划已完成，下一步执行 05-01
+last_updated: "2026-03-22T14:10:00Z"
 progress:
   total_phases: 5
   completed_phases: 4
-  total_plans: 12
+  total_plans: 14
   completed_plans: 12
 ---
 
@@ -23,8 +23,8 @@ See: .planning/PROJECT.md (updated 2026-03-21)
 
 ## Current Position
 
-Phase: 05 (搜索与发现体验收口) — READY TO PLAN
-Plan: 0 of 2
+Phase: 05 (搜索与发现体验收口) — READY TO EXECUTE
+Plan: 2 of 2
 
 ## Performance Metrics
 
@@ -83,15 +83,15 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-- 规划 05-01：优化搜索索引内容与结果展示结构
-- 规划 05-02：收口全站发现入口、推荐关系和内容类型标识
+- 执行 05-01：优化搜索索引内容与结果展示结构
+- 执行 05-02：收口全站发现入口、推荐关系和内容类型标识
 
 ### Blockers/Concerns
 
-- 当前无功能性 blocker；下一步风险主要在 Phase 5 需要在不增加搜索噪声的前提下，把内容类型、推荐关系和发现入口统一起来
+- 当前无功能性 blocker；执行阶段的主要风险在于 VitePress 本地搜索结果 UI 可定制度有限，需要优先通过索引语义增强与 /discover 页面补足体验
 
 ## Session Continuity
 
 Last session: 2026-03-22T08:49:35Z
-Stopped at: Phase 4 执行已完成，准备进入 Phase 5
+Stopped at: Phase 5 规划已完成，等待执行 05-01 / 05-02
 Resume file: None
