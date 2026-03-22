@@ -39,21 +39,15 @@ import PracticeTagCloud from '../../.vitepress/theme/components/PracticeTagCloud
 实践篇不是把理论篇再讲一遍，而是把“看懂 OpenCode 怎样实现”切换成“如果你自己来做，一个最小可运行 Agent 应该怎么逐步搭出来”。
 :::
 
+> **当前定位**：把关键机制亲手跑通并形成实现手感。如果你还在判断自己该先读理论、还是先动手，也可以先回到 [学习路径](/learning-paths/) 再选入口。
+
 - **刚读完理论篇 1-4 章**：最适合从 `P1-P4` 开始，把工具调用、多轮对话、流式输出和错误处理亲手跑通。
 - **理解了抽象概念**：如果你已经在理论篇里理解了会话、模型、工具和服务边界，实践篇就是把这些抽象概念改写成可执行 TypeScript 示例。
 - **准备进阶中级篇**：实践篇里 `P7-P9`、`P15-P17`、`P18-P21` 会分别对应 RAG、多智能体协作和生产化专题。
 
 ## 课程阶段 {#phases}
 
-<PracticePhaseGrid :phases="[
-  { id: 1, title: 'Agent 基础', subtitle: '工具调用 / 多轮对话 / 流式输出 / 错误处理', chapterCount: 4, link: '/practice/p01-minimal-agent/' },
-  { id: 2, title: '记忆与知识', subtitle: '记忆系统 / 记忆增强检索 / RAG / GraphRAG', chapterCount: 5, link: '/practice/p05-memory-arch/' },
-  { id: 3, title: '推理与规划', subtitle: 'ReAct Loop / Planning / Reflection', chapterCount: 3, link: '/practice/p10-react-loop/' },
-  { id: 4, title: '感知扩展', subtitle: '多模态智能体 / MCP 协议接入', chapterCount: 2, link: '/practice/p13-multimodal/' },
-  { id: 5, title: '多 Agent 协作', subtitle: '编排模式 / 子 Agent / 通信协议', chapterCount: 3, link: '/practice/p15-multi-agent/' },
-  { id: 6, title: '生产化', subtitle: '模型路由 / 安全 / 可观测性 / 评估', chapterCount: 4, link: '/practice/p18-model-routing/' },
-  { id: 7, title: '综合实战', subtitle: 'Code Review Agent 完整项目 / 部署清单', chapterCount: 2, link: '/practice/p22-project/' },
-]" />
+<PracticePhaseGrid />
 
 ## 技术覆盖
 

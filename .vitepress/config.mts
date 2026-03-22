@@ -62,6 +62,7 @@ export default withMermaid(defineConfig({
   themeConfig: {
     nav: [
       { text: '首页', link: '/' },
+      { text: '学习路径', link: '/learning-paths/', activeMatch: '/learning-paths/' },
       { text: '实践篇', link: '/practice/', activeMatch: '/practice/' },
       { text: '🚀 在线运行', link: '/practice/playground/' },
       { text: '术语表', link: '/glossary' },
@@ -142,6 +143,7 @@ export default withMermaid(defineConfig({
         },
       ],
       '/': [
+        { text: '学习路径', link: '/learning-paths/' },
         { text: '阅读地图', link: '/reading-map' },
         { text: '版本说明', link: '/version-notes' },
         { text: '术语表', link: '/glossary' },

@@ -4,6 +4,7 @@ description: 这本电子书的推荐阅读顺序与章节关系图
 ---
 
 <script setup>
+import LearningPath from '../.vitepress/theme/components/LearningPath.vue'
 import RuntimeLifecycleDiagram from '../.vitepress/theme/components/RuntimeLifecycleDiagram.vue'
 </script>
 
@@ -27,6 +28,10 @@ import RuntimeLifecycleDiagram from '../.vitepress/theme/components/RuntimeLifec
 💡 **建议**：如果你是初学者，不要直接跳到某个概念，先按下面的”推荐起点”顺序建立整体认知。
 
 ## 推荐起点
+
+如果你不想先读完整张地图，可以先回到 [学习路径](/learning-paths/)，或者直接从下面三条 canonical path 中选一条开始：
+
+<LearningPath :path-ids="['theory-first', 'practice-first', 'engineering-depth']" />
 
 如果你是 Agent 开发初学者，默认按下面顺序读：
 
