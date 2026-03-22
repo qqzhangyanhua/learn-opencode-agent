@@ -1,7 +1,13 @@
 ---
 title: 第9章：HTTP API 服务器
 description: 深入 Hono 框架驱动的 API 服务器，理解路由组织、SSE 推送、OpenAPI 自动生成与工作区上下文注入机制
+roleDescription: 深入 HTTP API 服务器设计，理解 SSE 流式传输机制。
+contentType: theory
+contentId: book-08-http-api-server
+series: book
 ---
+
+<ChapterLearningGuide />
 
 <script setup>
 import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshotCard.vue'

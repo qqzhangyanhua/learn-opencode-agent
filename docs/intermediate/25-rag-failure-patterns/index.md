@@ -1,13 +1,14 @@
 ---
 title: 第25章：RAG 为什么总是答不准？
 description: 从五个高频翻车场景切入，理解 RAG 系统为何会答偏、漏答、编造，以及如何用工程手段逐个修复。
+contentType: intermediate
+contentId: intermediate-25-rag-failure-patterns
+series: book
+roleDescription: 理解 RAG 系统常见故障模式，掌握排查与修复方法。
 ---
 
-> **对应路径**：`packages/opencode/src/session/compaction.ts`、`packages/opencode/src/session/prompt.ts`、`packages/opencode/src/tool/truncation.ts`、`packages/opencode/src/session/processor.ts`、`docs/intermediate/examples/25-rag-failure-patterns/`
-> **前置阅读**：[P7：RAG 基础](/practice/p07-rag-basics/)、[P8：GraphRAG](/practice/p08-graphrag/)、[P9：混合检索策略](/practice/p09-hybrid-retrieval/)
-> **学习目标**：把“RAG 答不准”拆成分块、向量、召回、提示词、文档冲突五类具体故障，建立排查顺序，并理解这些问题为什么最终都会落到上下文组织与信息预算上。
+<ChapterLearningGuide />
 
----
 
 ## 这篇解决什么问题
 

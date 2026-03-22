@@ -1,7 +1,13 @@
 ---
 title: 第16章：高级主题与最佳实践
 description: 从 OpenCode 源码提炼的五条工程原则：先定义边界再给能力、上下文预算化、多 Agent 协作正式协议、长链路可恢复性，以及开源协作约束
+roleDescription: 探索高级主题与最佳实践，提升工程能力与架构视野。
+contentType: theory
+contentId: book-15-advanced-topics
+series: book
 ---
+
+<ChapterLearningGuide />
 
 <script setup>
 import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshotCard.vue'

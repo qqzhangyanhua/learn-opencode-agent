@@ -1,13 +1,14 @@
 ---
 title: 第32章：性能与成本控制
 description: 理解 Agent 的性能与成本为什么首先是架构问题，而不是“等更强模型出来”以后自然解决的问题。
+contentType: intermediate
+contentId: intermediate-32-performance-cost
+series: book
+roleDescription: 优化性能与成本，理解 Token 计费与缓存策略。
 ---
 
-> **对应路径**：`packages/opencode/src/provider/models.ts`、`packages/opencode/src/session/processor.ts`、`packages/opencode/src/session/compaction.ts`、`packages/opencode/src/tool/truncation.ts`、`docs/intermediate/examples/32-performance-cost/`
-> **前置阅读**：[第6章：多模型支持](/05-provider-system/)、[第5章：会话管理](/04-session-management/)、[第16章：高级主题与最佳实践](/15-advanced-topics/)、[P18：多模型路由与成本控制](/practice/p18-model-routing/)、[P20：可观测性与调试](/practice/p20-observability/)
-> **学习目标**：理解 Agent 成本为什么不仅来自模型单价，还来自上下文膨胀、工具输出和失败重试；掌握模型路由、上下文预算、输出裁剪和成本可观测四类核心手段；知道 OpenCode 在这些问题上已经有哪些明确实现。
+<ChapterLearningGuide />
 
----
 
 ## 这篇解决什么问题
 

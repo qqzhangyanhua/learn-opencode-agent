@@ -1,7 +1,13 @@
 ---
 title: 第8章：TUI 终端界面
 description: 深入 OpenCode TUI 实现——SolidJS 响应式终端渲染、Provider 树、SSE 事件驱动、Sync 状态中心与工具可视化
+roleDescription: 理解终端 UI 的实现原理，掌握 TUI 框架的使用方式。
+contentType: theory
+contentId: book-07-tui-interface
+series: book
 ---
+
+<ChapterLearningGuide />
 
 <script setup>
 import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshotCard.vue'

@@ -3,28 +3,7 @@ title: P22：完整项目实战 — Code Review Agent
 description: 综合多 Agent 编排、安全检测、结构化输出等技术，从零构建一个生产级 Code Review Agent
 ---
 
-<ProjectCard
-  title="你将构建：一个完整的 Code Review Agent，包含 Diff 解析、多维度并行审查、结果聚合与报告生成的全流水线"
-  difficulty="advanced"
-  duration="90 min"
-  :prerequisites="['P1', 'P10', 'P15', 'P19']"
-  :tags="['Project', 'Code Review', 'Multi-Agent', 'TypeScript', 'OpenAI SDK']"
-/>
-
 <PracticeProjectGuide project-id="practice-p22-project" />
-
-> 开始前先看：[实践环境准备](/practice/setup)。本章对应示例文件位于 `practice/` 目录，可直接按命令运行。
-
-## 前置准备
-
-开始本章前，请先确认：
-
-- 已阅读 [实践环境准备](/practice/setup)
-- 基础依赖已就绪：`openai`
-- 环境变量已配置：`OPENAI_API_KEY`
-- 建议先完成前置章节：`P1`、`P10`、`P15`、`P19`
-- 本章建议入口命令：`bun run p22-project.ts`
-- 示例文件位置：`practice/p22-project.ts`
 
 ## 背景与目标
 
@@ -115,15 +94,6 @@ ReportGenerator（生成最终报告）
 
 ## 动手实现
 
-<RunCommand command="bun run p22-project.ts" :verified="true" />
-
-### 运行与验证
-
-- 先按前置准备完成依赖和环境变量配置
-- 执行上面的推荐入口命令
-- 将输出与下文的“运行结果”或章节描述对照，确认主链路已经跑通
-- 如果遇到命令、依赖、环境变量或样例输入问题，先回到 [实践环境准备](/practice/setup) 排查
-
 ### 快速判断是否跑通
 
 如果主链路正常，你至少会看到下面 4 类关键信号：
@@ -134,8 +104,6 @@ ReportGenerator（生成最终报告）
 - 最终输出里会出现 `Code Review Agent 审查报告` 标题，以及 `发现总数 / 严重 / 警告 / 信息` 统计
 
 如果你的输出和示例里的具体问题数量不完全一致，不一定是错误。只要阶段日志完整、报告结构正确、且能识别出至少一部分安全或质量问题，通常就说明链路已经跑通。
-
-
 
 ### 第一步：类型定义
 

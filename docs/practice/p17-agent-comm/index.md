@@ -3,28 +3,7 @@ title: P17：Agent 间通信与状态共享
 description: 共享黑板、消息传递、Handoff 三种 Agent 协作通信模式——让多个 Agent 不再各自为战
 ---
 
-<ProjectCard
-  title="你将构建：一个多 Agent 协作写作系统，通过共享黑板和消息传递实现研究员-写手-编辑三方协作"
-  difficulty="advanced"
-  duration="60 min"
-  :prerequisites="['P15', 'P16']"
-  :tags="['Multi-Agent', 'Communication', 'Blackboard', 'Handoff', 'TypeScript', 'OpenAI SDK']"
-/>
-
 <PracticeProjectGuide project-id="practice-p17-agent-comm" />
-
-> 开始前先看：[实践环境准备](/practice/setup)。本章对应示例文件已提供在 `practice/` 目录，可直接按命令运行。
-
-## 前置准备
-
-开始本章前，请先确认：
-
-- 已阅读 [实践环境准备](/practice/setup)
-- 基础依赖已就绪：`openai`
-- 环境变量已配置：`OPENAI_API_KEY`
-- 建议先完成前置章节：`P15`、`P16`
-- 本章建议入口命令：`bun run p17-agent-comm.ts`
-- 示例文件位置：`practice/p17-agent-comm.ts`
 
 ## 背景与目标
 
@@ -98,17 +77,6 @@ interface HandoffPayload {
 ```
 
 ## 动手实现
-
-<RunCommand command="bun run p17-agent-comm.ts" :verified="true" />
-
-### 运行与验证
-
-- 先按前置准备完成依赖和环境变量配置
-- 执行上面的推荐入口命令
-- 将输出与下文的“运行结果”或章节描述对照，确认主链路已经跑通
-- 如果遇到命令、依赖、环境变量或样例输入问题，先回到 [实践环境准备](/practice/setup) 排查
-
-
 
 ### 第一步：定义类型和共享黑板
 

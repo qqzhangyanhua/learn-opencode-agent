@@ -3,29 +3,7 @@ title: P18：多模型路由与成本控制
 description: 按任务复杂度智能路由到不同模型，实现 Token 预算追踪与故障降级链
 ---
 
-<ProjectCard
-  title="你将构建：一个 ModelRouter，按任务复杂度自动选择 Mini/Standard/Large，并追踪每次调用的 Token 用量与成本"
-  difficulty="intermediate"
-  duration="45 min"
-  :prerequisites="['P1']"
-  :tags="['Model Routing', 'Cost Control', 'TypeScript', 'OpenAI SDK']"
-/>
-
 <PracticeProjectGuide project-id="practice-p18-model-routing" />
-
-> 开始前先看：[实践环境准备](/practice/setup)。如果你想先体验浏览器里的路由演示，也可以直接打开 <a href="/practice/playground/?chapter=p18-model-routing" target="_blank" rel="noopener noreferrer">本章在线运行工作台</a>；相关限制和安全提示见 [在线运行模式](/practice/setup#online-mode)。本章对应示例文件位于 `practice/` 目录，可直接按命令运行。
-
-## 前置准备
-
-开始本章前，请先确认：
-
-- 已阅读 [实践环境准备](/practice/setup)
-- 如果暂时不走本地环境，已了解 [在线运行模式](/practice/setup#online-mode) 的适用范围与安全提示
-- 基础依赖已就绪：`openai`
-- 环境变量已配置：`OPENAI_API_KEY`
-- 建议先完成前置章节：`P1`
-- 本章建议入口命令：`bun run p18-model-routing.ts`
-- 示例文件位置：`practice/p18-model-routing.ts`
 
 ## 背景与目标
 
@@ -99,18 +77,6 @@ OpenAI API 的每次响应都包含 `usage` 字段，告诉你实际消耗了多
 - 预算预警（快超额时自动切换到便宜模型）
 
 ## 动手实现
-
-<RunCommand command="bun run p18-model-routing.ts" :verified="true" />
-
-### 运行与验证
-
-- 先按前置准备完成依赖和环境变量配置
-- 如果你走在线运行模式，先打开 <a href="/practice/playground/?chapter=p18-model-routing" target="_blank" rel="noopener noreferrer">本章在线运行工作台</a> 并填写 `API Key / baseURL / model`
-- 如果你走本地运行模式，再执行上面的推荐入口命令
-- 将输出与下文的“运行结果”或章节描述对照，确认主链路已经跑通
-- 如果遇到命令、依赖、环境变量或样例输入问题，先回到 [实践环境准备](/practice/setup) 排查
-
-
 
 ### 第一步：定义类型和常量
 

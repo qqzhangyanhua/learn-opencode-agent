@@ -1,7 +1,13 @@
 ---
 title: 第10章：数据持久化
 description: SQLite + Drizzle ORM 的 Schema 设计、JSON blob 策略、事务与副效应队列、以及从文件存储到数据库的演进迁移
+roleDescription: 理解数据持久化方案，掌握 ORM 层的设计与使用。
+contentType: theory
+contentId: book-09-data-persistence
+series: book
 ---
+
+<ChapterLearningGuide />
 
 <script setup>
 import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshotCard.vue'

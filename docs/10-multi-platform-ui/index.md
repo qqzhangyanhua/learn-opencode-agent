@@ -1,7 +1,13 @@
 ---
 title: 第11章：多端 UI 开发
 description: Web 应用、桌面端与 TUI 共用同一 HTTP API 的架构设计：SolidJS Provider 树、Platform 抽象、Tauri Sidecar 模式与事件批处理
+roleDescription: 理解多端 UI 开发策略，掌握代码共享与平台适配。
+contentType: theory
+contentId: book-10-multi-platform-ui
+series: book
 ---
+
+<ChapterLearningGuide />
 
 <script setup>
 import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshotCard.vue'

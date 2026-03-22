@@ -3,28 +3,7 @@ title: P7：RAG 基础
 description: 向量化、分块策略、语义检索，构建让 Agent 能读文档的知识库
 ---
 
-<ProjectCard
-  title="你将构建：一个本地 RAG 系统，把文档分块、向量化、检索相关片段并注入 Agent 上下文"
-  difficulty="intermediate"
-  duration="60 min"
-  :prerequisites="['P1', 'P5']"
-  :tags="['RAG', 'Vector Search', 'TypeScript', 'OpenAI SDK']"
-/>
-
 <PracticeProjectGuide project-id="practice-p07-rag-basics" />
-
-> 开始前先看：[实践环境准备](/practice/setup)。本章对应示例文件位于 `practice/` 目录，可直接按命令运行。
-
-## 前置准备
-
-开始本章前，请先确认：
-
-- 已阅读 [实践环境准备](/practice/setup)
-- 基础依赖已就绪：`openai`
-- 环境变量已配置：`OPENAI_API_KEY`
-- 建议先完成前置章节：`P1`、`P5`
-- 本章建议入口命令：`bun run practice/p07-rag-basics.ts`
-- 示例文件位置：`practice/p07-rag-basics.ts`
 
 ## 背景与目标
 
@@ -160,17 +139,6 @@ type 更灵活，支持联合类型、交叉类型和条件类型...
 这个格式让模型明确知道哪些是参考资料、来源是什么，有助于引用准确、减少幻觉。
 
 ## 动手实现
-
-<RunCommand command="bun run practice/p07-rag-basics.ts" :verified="true" />
-
-### 运行与验证
-
-- 先按前置准备完成依赖和环境变量配置
-- 执行上面的推荐入口命令
-- 将输出与下文的“运行结果”或章节描述对照，确认主链路已经跑通
-- 如果遇到命令、依赖、环境变量或样例输入问题，先回到 [实践环境准备](/practice/setup) 排查
-
-
 
 ### 第一步：定义 Chunk 接口
 

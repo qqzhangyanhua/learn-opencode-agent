@@ -1,7 +1,13 @@
 ---
 title: 第15章：测试与质量保证
 description: 按系统边界分层的测试体系：核心运行时（Bun Test）、共享前端状态层（Happy DOM 单测）和真实用户流程（Playwright E2E）如何各司其职
+roleDescription: 理解测试策略与质量保证体系，掌握测试工程实践。
+contentType: theory
+contentId: book-14-testing-quality
+series: book
 ---
+
+<ChapterLearningGuide />
 
 <script setup>
 import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshotCard.vue'

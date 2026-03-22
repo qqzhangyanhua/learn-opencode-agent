@@ -1,7 +1,13 @@
 ---
 title: 第12章：代码智能
 description: LSP 客户端的工程实现：懒加载客户端管理、诊断信息注入 AI 响应、LspTool 的九种操作，以及文件编辑与代码分析的协作流水线
+roleDescription: 深入代码智能实现，理解 LSP 集成与语义分析。
+contentType: theory
+contentId: book-11-code-intelligence
+series: book
 ---
+
+<ChapterLearningGuide />
 
 <script setup>
 import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshotCard.vue'

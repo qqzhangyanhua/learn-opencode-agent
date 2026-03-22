@@ -3,28 +3,7 @@ title: P15：多 Agent 编排模式
 description: Orchestrator-Worker 架构设计 — 一个编排器拆解任务，多个 Worker 并行执行，最终聚合结果
 ---
 
-<ProjectCard
-  title="你将构建：一个 Orchestrator-Worker 多 Agent 系统，支持任务拆解、并行执行与结果聚合"
-  difficulty="advanced"
-  duration="60 min"
-  :prerequisites="['P1', 'P11']"
-  :tags="['Multi-Agent', 'Orchestrator', 'Parallel', 'TypeScript', 'OpenAI SDK']"
-/>
-
 <PracticeProjectGuide project-id="practice-p15-multi-agent" />
-
-> 开始前先看：[实践环境准备](/practice/setup)。本章对应示例文件位于 `practice/` 目录，可直接按命令运行。
-
-## 前置准备
-
-开始本章前，请先确认：
-
-- 已阅读 [实践环境准备](/practice/setup)
-- 基础依赖已就绪：`openai`
-- 环境变量已配置：`OPENAI_API_KEY`
-- 建议先完成前置章节：`P1`、`P11`
-- 本章建议入口命令：`bun run p15-multi-agent.ts`
-- 示例文件位置：`practice/p15-multi-agent.ts`
 
 ## 背景与目标
 
@@ -107,17 +86,6 @@ interface DispatchInput {
 用 `id` 而不是数组下标来标识子任务，因为聚合阶段需要按语义引用（"安全审查发现了……"），而不是按序号。
 
 ## 动手实现
-
-<RunCommand command="bun run p15-multi-agent.ts" :verified="true" />
-
-### 运行与验证
-
-- 先按前置准备完成依赖和环境变量配置
-- 执行上面的推荐入口命令
-- 将输出与下文的“运行结果”或章节描述对照，确认主链路已经跑通
-- 如果遇到命令、依赖、环境变量或样例输入问题，先回到 [实践环境准备](/practice/setup) 排查
-
-
 
 ### 第一步：定义类型和配置
 

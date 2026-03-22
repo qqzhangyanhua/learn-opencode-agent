@@ -1,15 +1,17 @@
 ---
 title: 第19章：配置系统实战
 description: 打开 .opencode/oh-my-opencode.jsonc 之前先读这章——最小可用配置、常见场景配置、配置错了会发生什么，以及用户配置和项目配置的合并规则
+contentType: theory
+contentId: book-oh-config
+series: book
+roleDescription: 掌握配置系统的使用方法，理解配置加载与合并规则。
 ---
+
+<ChapterLearningGuide />
 
 <script setup>
 import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshotCard.vue'
 </script>
-
-> **对应路径**：`src/plugin-config.ts`、`src/config/schema/`
-> **前置阅读**：第17章（为什么需要多个 Agent？）
-> **学习目标**：能独立读写 oh-my-openagent 配置文件，理解各字段的作用，知道配置错了去哪里看错误
 
 ---
 

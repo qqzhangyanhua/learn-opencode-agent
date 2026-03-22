@@ -1,13 +1,14 @@
 ---
 title: 第28章：Prompt 不够用了，上下文工程实战
 description: 从“选、排、压、拼”四个动作切入，理解为什么决定智能体上限的不是一句 Prompt，而是整个上下文供应系统。
+contentType: intermediate
+contentId: intermediate-28-context-engineering
+series: book
+roleDescription: 掌握上下文工程技巧，优化 Token 使用与信息密度。
 ---
 
-> **对应路径**：`packages/opencode/src/session/processor.ts`、`packages/opencode/src/session/prompt.ts`、`packages/opencode/src/session/compaction.ts`、`packages/opencode/src/tool/truncation.ts`、`docs/intermediate/examples/28-context-engineering/`
-> **前置阅读**：[第5章：会话管理](/04-session-management/)、[P6：记忆增强检索](/practice/p06-memory-retrieval/)、[第16章：高级主题与最佳实践](/15-advanced-topics/)
-> **学习目标**：理解上下文工程为什么比 Prompt 工程更接近真实 Agent 系统；掌握“选、排、压、拼”四步，以及预算分配、历史压缩、动态 prompt 组装的基本工程思路。
+<ChapterLearningGuide />
 
----
 
 ## 这篇解决什么问题
 

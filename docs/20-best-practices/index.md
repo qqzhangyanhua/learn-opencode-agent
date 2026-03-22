@@ -1,16 +1,17 @@
 ---
 title: 第24章：实战案例与最佳实践
 description: 四个实战案例带你掌握 oh-my-openagent 插件开发——添加新 Agent、扩展工具、自定义 Hook、调试排错，以及生产环境的性能与可靠性技巧
+contentType: theory
+contentId: book-20-best-practices
+series: book
+roleDescription: 通过实战案例掌握插件开发技巧，理解生产环境最佳实践。
 ---
+
+<ChapterLearningGuide />
 
 <script setup>
 import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshotCard.vue'
 </script>
-
-> **对应路径**：全项目
-> **前置阅读**：第18-22章
-> **学习目标**：能够独立添加 Agent、工具、Hook，掌握调试技巧，理解生产环境的最佳实践
-> **阅读提醒**：本章更强调“你该去哪个入口改”，不是让你逐字复制代码。下面的代码块都做了教学删减，重点是帮助新手先建立接入点，再回源码补全细节。
 
 ---
 

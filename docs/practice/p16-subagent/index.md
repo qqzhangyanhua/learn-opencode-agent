@@ -3,28 +3,7 @@ title: P16：子 Agent 与任务分解
 description: 将 Worker 升级为拥有独立工具和多轮循环的子 Agent，让编排器调度真正有"手脚"的执行者
 ---
 
-<ProjectCard
-  title="你将构建：一个 Orchestrator + SubAgent 系统，每个 SubAgent 拥有独立的工具集和完整的 Agent 循环"
-  difficulty="advanced"
-  duration="60 min"
-  :prerequisites="['P1', 'P15']"
-  :tags="['Sub-Agent', 'Task Decomposition', 'Tool Loop', 'TypeScript', 'OpenAI SDK']"
-/>
-
 <PracticeProjectGuide project-id="practice-p16-subagent" />
-
-> 开始前先看：[实践环境准备](/practice/setup)。本章对应示例文件位于 `practice/` 目录，可直接按命令运行。
-
-## 前置准备
-
-开始本章前，请先确认：
-
-- 已阅读 [实践环境准备](/practice/setup)
-- 基础依赖已就绪：`openai`
-- 环境变量已配置：`OPENAI_API_KEY`
-- 建议先完成前置章节：`P1`、`P15`
-- 本章建议入口命令：`bun run p16-subagent.ts`
-- 示例文件位置：`practice/p16-subagent.ts`
 
 ## 背景与目标
 
@@ -91,17 +70,6 @@ const TIMEOUT_MS = 30_000  // 防止单个子 Agent 卡住整个系统
 ```
 
 ## 动手实现
-
-<RunCommand command="bun run p16-subagent.ts" :verified="true" />
-
-### 运行与验证
-
-- 先按前置准备完成依赖和环境变量配置
-- 执行上面的推荐入口命令
-- 将输出与下文的“运行结果”或章节描述对照，确认主链路已经跑通
-- 如果遇到命令、依赖、环境变量或样例输入问题，先回到 [实践环境准备](/practice/setup) 排查
-
-
 
 ### 第一步：定义类型和模拟工具
 

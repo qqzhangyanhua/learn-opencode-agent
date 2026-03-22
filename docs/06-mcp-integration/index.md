@@ -1,7 +1,13 @@
 ---
 title: 第7章：MCP 协议集成
 description: 深入 MCP 客户端实现——local/remote 两种连接方式、工具发现与转换、OAuth 认证、资源与提示词管理
+roleDescription: 深入 MCP 协议集成机制，理解工具扩展的标准化方案。
+contentType: theory
+contentId: book-06-mcp-integration
+series: book
 ---
+
+<ChapterLearningGuide />
 
 <script setup>
 import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshotCard.vue'

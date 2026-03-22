@@ -3,28 +3,7 @@ title: P4：错误处理与重试策略
 description: 指数退避、工具调用失败降级、让 Agent 在不稳定环境中可靠运行
 ---
 
-<ProjectCard
-  title="你将构建：一个带指数退避重试的健壮 Agent，能优雅处理限流、超时和工具失败"
-  difficulty="intermediate"
-  duration="45 min"
-  :prerequisites="['P1', 'P2']"
-  :tags="['Error Handling', 'Retry', 'OpenAI SDK', 'TypeScript']"
-/>
-
 <PracticeProjectGuide project-id="practice-p04-error-handling" />
-
-> 开始前先看：[实践环境准备](/practice/setup)。本章对应示例文件位于 `practice/` 目录，可直接按命令运行。
-
-## 前置准备
-
-开始本章前，请先确认：
-
-- 已阅读 [实践环境准备](/practice/setup)
-- 基础依赖已就绪：`openai`
-- 环境变量已配置：`OPENAI_API_KEY`
-- 建议先完成前置章节：`P1`、`P2`
-- 本章建议入口命令：`bun run p04-error-handling.ts`
-- 示例文件位置：`practice/p04-error-handling.ts`
 
 ## 背景与目标
 
@@ -95,17 +74,6 @@ delay = baseDelay * 2^attempt + random(0, jitter)
 | 第 4 次 | 8000–8500 ms |
 
 ## 动手实现
-
-<RunCommand command="bun run p04-error-handling.ts" :verified="true" />
-
-### 运行与验证
-
-- 先按前置准备完成依赖、环境变量和本章示例文件
-- 执行上面的推荐入口命令
-- 将输出与下文的“运行结果”或章节描述对照，确认主链路已经跑通
-- 如果遇到命令、依赖、环境变量或样例输入问题，先回到 [实践环境准备](/practice/setup) 排查
-
-
 
 ### 第一步：定义类型与常量
 

@@ -1,7 +1,13 @@
 ---
 title: 第14章：部署与基础设施
 description: OpenCode 的四层基础设施：本地运行时、云端公共 API（Cloudflare Workers）、控制台产品线（PlanetScale + SolidStart）与交付层（Docker + CI/CD）的分层设计
+roleDescription: 理解部署与基础设施方案，掌握云端部署策略。
+contentType: theory
+contentId: book-13-deployment-infrastructure
+series: book
 ---
+
+<ChapterLearningGuide />
 
 <script setup>
 import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshotCard.vue'

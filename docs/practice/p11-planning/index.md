@@ -3,28 +3,7 @@ title: P11：Planning 机制 — Plan-and-Execute
 description: 实现两阶段 Agent：先用 LLM 将目标分解为有序步骤列表，再逐步执行，支持步骤失败时重新规划
 ---
 
-<ProjectCard
-  title="你将构建：一个 Plan-and-Execute Agent，先规划后执行，支持失败重规划"
-  difficulty="advanced"
-  duration="60 min"
-  :prerequisites="['P10']"
-  :tags="['Planning', 'Plan-and-Execute', 'TypeScript', 'OpenAI SDK']"
-/>
-
 <PracticeProjectGuide project-id="practice-p11-planning" />
-
-> 开始前先看：[实践环境准备](/practice/setup)。本章对应示例文件位于 `practice/` 目录，可直接按命令运行。
-
-## 前置准备
-
-开始本章前，请先确认：
-
-- 已阅读 [实践环境准备](/practice/setup)
-- 基础依赖已就绪：`openai`
-- 环境变量已配置：`OPENAI_API_KEY`
-- 建议先完成前置章节：`P10`
-- 本章建议入口命令：`bun run p11-planning.ts`
-- 示例文件位置：`practice/p11-planning.ts`
 
 ## 背景与目标
 
@@ -125,17 +104,6 @@ Action: ...
 注意重新规划的输入必须包含**已完成步骤的摘要**，否则规划器不知道哪些事情已经做了，会产生重复步骤。
 
 ## 动手实现
-
-<RunCommand command="bun run p11-planning.ts" :verified="true" />
-
-### 运行与验证
-
-- 先按前置准备完成依赖和环境变量配置
-- 执行上面的推荐入口命令
-- 将输出与下文的“运行结果”或章节描述对照，确认主链路已经跑通
-- 如果遇到命令、依赖、环境变量或样例输入问题，先回到 [实践环境准备](/practice/setup) 排查
-
-
 
 ### 第一步：定义数据结构
 

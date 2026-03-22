@@ -3,28 +3,7 @@ title: P20：可观测性与调试
 description: 结构化日志、Span 追踪、指标收集——用装饰器模式为 Agent 添加生产级可观测性
 ---
 
-<ProjectCard
-  title="你将构建：一个具备结构化日志、分布式追踪和指标收集的可观测 Agent，运行后输出完整 Trace 树和指标摘要"
-  difficulty="intermediate"
-  duration="45 min"
-  :prerequisites="['P1']"
-  :tags="['Observability', 'Tracing', 'Debugging', 'TypeScript', 'OpenAI SDK']"
-/>
-
 <PracticeProjectGuide project-id="practice-p20-observability" />
-
-> 开始前先看：[实践环境准备](/practice/setup)。本章对应示例文件位于 `practice/` 目录，可直接按命令运行。
-
-## 前置准备
-
-开始本章前，请先确认：
-
-- 已阅读 [实践环境准备](/practice/setup)
-- 基础依赖已就绪：`openai`
-- 环境变量已配置：`OPENAI_API_KEY`
-- 建议先完成前置章节：`P1`
-- 本章建议入口命令：`bun run p20-observability.ts`
-- 示例文件位置：`practice/p20-observability.ts`
 
 ## 背景与目标
 
@@ -92,17 +71,6 @@ agent_turn (根 Span)
 可观测性的核心设计原则是**不侵入业务逻辑**。我们不在 Agent 循环里到处加 `tracer.startSpan()` 调用，而是构建一个可观测层包裹在外面。业务代码保持干净，追踪逻辑集中管理。
 
 ## 动手实现
-
-<RunCommand command="bun run p20-observability.ts" :verified="true" />
-
-### 运行与验证
-
-- 先按前置准备完成依赖和环境变量配置
-- 执行上面的推荐入口命令
-- 将输出与下文的“运行结果”或章节描述对照，确认主链路已经跑通
-- 如果遇到命令、依赖、环境变量或样例输入问题，先回到 [实践环境准备](/practice/setup) 排查
-
-
 
 ### 第一步：类型定义与工具函数
 

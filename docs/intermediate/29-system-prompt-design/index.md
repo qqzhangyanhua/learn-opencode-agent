@@ -1,13 +1,14 @@
 ---
 title: 第29章：System Prompt 设计
 description: 理解 System Prompt 为什么是 Agent 的行为合同，而不是一句“你是一个助手”，并把它放回 OpenCode 的上下文装配主链里。
+contentType: intermediate
+contentId: intermediate-29-system-prompt-design
+series: book
+roleDescription: 理解 System Prompt 设计原则，提升 Agent 行为稳定性。
 ---
 
-> **对应路径**：`packages/opencode/src/session/instruction.ts`、`packages/opencode/src/session/system.ts`、`packages/opencode/src/session/prompt.ts`、`packages/opencode/src/session/llm.ts`、`packages/opencode/src/agent/agent.ts`、`docs/intermediate/examples/29-system-prompt-design/`
-> **前置阅读**：[第2章：AI Agent 的核心组件](/01-agent-basics/)、[第5章：会话管理](/04-session-management/)、[第16章：高级主题与最佳实践](/15-advanced-topics/)
-> **学习目标**：理解 System Prompt 为什么应该被写成“行为合同”而不是一句口号；掌握身份、能力边界、行为规则、安全约束四类信息如何进入一次真实会话；知道 Prompt 为什么必须和角色、权限、上下文装配一起设计。
+<ChapterLearningGuide />
 
----
 
 ## 这篇解决什么问题
 

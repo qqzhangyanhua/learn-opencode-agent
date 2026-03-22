@@ -1,13 +1,14 @@
 ---
 title: 第31章：安全边界与高风险控制
 description: 把高风险 Agent 的安全问题拆成风险分级、确认机制、最小权限和运行时边界，而不是把一切都压给 Prompt。
+contentType: intermediate
+contentId: intermediate-31-safety-boundaries
+series: book
+roleDescription: 建立安全边界机制，防范注入攻击与权限滥用。
 ---
 
-> **对应路径**：`packages/opencode/src/agent/agent.ts`、`packages/opencode/src/permission/next.ts`、`packages/opencode/src/tool/registry.ts`、`packages/opencode/src/tool/bash.ts`、`docs/intermediate/examples/31-safety-boundaries/`
-> **前置阅读**：[第4章：工具系统](/03-tool-system/)、[第16章：高级主题与最佳实践](/15-advanced-topics/)、[P19：Agent 安全与防注入](/practice/p19-security/)
-> **学习目标**：理解为什么“高风险操作里的安全”首先是边界设计问题；掌握风险分级、人工确认、最小权限和渐进授权的基本思路；知道这些思路在 OpenCode 里分别由哪些运行时模块承担。
+<ChapterLearningGuide />
 
----
 
 ## 这篇解决什么问题
 

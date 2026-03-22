@@ -1,7 +1,13 @@
 ---
 title: 第3章：OpenCode 项目介绍
 description: 建立 OpenCode 源码地图——从项目定位到代码路径，理解一个真实 AI Coding Agent 的工程结构
+roleDescription: 建立 OpenCode 源码地图，把抽象概念对应到真实代码路径。
+contentType: theory
+contentId: book-02-agent-core
+series: book
 ---
+
+<ChapterLearningGuide />
 
 <script setup>
 import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshotCard.vue'

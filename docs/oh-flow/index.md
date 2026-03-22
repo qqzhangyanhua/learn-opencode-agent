@@ -1,17 +1,17 @@
 ---
 title: 第23章：一条消息的完整旅程
 description: 跟着"帮我写一个登录 API"这条消息，从用户按下回车到代码写入文件，逐步追踪它经过了哪些 Hook、哪个 Agent 处理、工具如何被调用——建立整体感的最快方式
+contentType: theory
+contentId: book-oh-flow
+series: book
+roleDescription: 跟随一条消息的完整旅程，串联整个系统的运行机制。
 ---
+
+<ChapterLearningGuide />
 
 <script setup>
 import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshotCard.vue'
 </script>
-
-> **对应路径**：`src/plugin/`、`src/hooks/`、`src/agents/`、`src/tools/`
-> **前置阅读**：第18章 插件系统概述、第20章 多模型编排系统、第21章 Hooks 三层架构
-> **学习目标**：能在脑子里串联整个系统，知道"发生了 X 问题"应该去哪个文件找原因
-
----
 
 ## 用一个具体请求来贯穿全文
 

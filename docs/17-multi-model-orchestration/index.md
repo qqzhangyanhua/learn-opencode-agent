@@ -1,7 +1,13 @@
 ---
 title: 第20章：多模型编排系统
 description: 深入 oh-my-openagent 的 11 个内置 Agent——Sisyphus、Hephaestus、Atlas 等如何分工协作，AgentFactory 模式、模型路由策略和 Background Agent 并行执行机制全解析
+roleDescription: 深入多模型编排系统，理解模型协作与任务分配机制。
+contentType: theory
+contentId: book-17-multi-model-orchestration
+series: book
 ---
+
+<ChapterLearningGuide />
 
 <script setup>
 import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshotCard.vue'

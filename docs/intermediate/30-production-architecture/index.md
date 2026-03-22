@@ -1,13 +1,14 @@
 ---
 title: 第30章：生产架构与部署
 description: 从“能跑的 Demo”到“可持续运行的产品”，理解 Agent 生产架构真正要补齐的是哪些边界、状态和闭环。
+contentType: intermediate
+contentId: intermediate-30-production-architecture
+series: book
+roleDescription: 理解生产环境架构设计，掌握可靠性与可扩展性策略。
 ---
 
-> **对应路径**：`packages/opencode/src/server/`、`packages/opencode/src/session/`、`packages/opencode/src/storage/`、`packages/opencode/src/provider/`、`packages/opencode/src/permission/`、`docs/intermediate/examples/30-production-architecture/`
-> **前置阅读**：[第9章：HTTP API 服务器](/08-http-api-server/)、[第10章：数据持久化](/09-data-persistence/)、[第14章：部署与基础设施](/13-deployment-infrastructure/)、[P23：生产部署清单](/practice/p23-production/)
-> **学习目标**：理解 Agent 从 Demo 走向生产时必须补齐的五层能力：接入层、会话层、模型与工具执行层、持久化层、风险与观测闭环；知道这些层在 OpenCode 里分别落在哪些明确模块。
+<ChapterLearningGuide />
 
----
 
 ## 这篇解决什么问题
 

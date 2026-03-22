@@ -3,28 +3,7 @@ title: P12：Reflection 模式
 description: 让 Agent 生成初稿后用评审者角色评估质量，根据反馈迭代修改，直到满足标准
 ---
 
-<ProjectCard
-  title="你将构建：一个带 Reflection 循环的迭代改进 Agent"
-  difficulty="intermediate"
-  duration="45 min"
-  :prerequisites="['P10']"
-  :tags="['Reflection', 'Self-Evaluation', 'TypeScript', 'OpenAI SDK']"
-/>
-
 <PracticeProjectGuide project-id="practice-p12-reflection" />
-
-> 开始前先看：[实践环境准备](/practice/setup)。本章对应示例文件位于 `practice/` 目录，可直接按命令运行。
-
-## 前置准备
-
-开始本章前，请先确认：
-
-- 已阅读 [实践环境准备](/practice/setup)
-- 基础依赖已就绪：`openai`
-- 环境变量已配置：`OPENAI_API_KEY`
-- 建议先完成前置章节：`P10`
-- 本章建议入口命令：`bun run p12-reflection.ts`
-- 示例文件位置：`practice/p12-reflection.ts`
 
 ## 背景与目标
 
@@ -109,17 +88,6 @@ Reflection 模式有两种实现方式：
 本章使用**同一模型**扮演两个角色。即使是同一个模型，只要 system prompt 不同，它的评估视角就会不同——因为 prompt 决定了模型关注的维度。
 
 ## 动手实现
-
-<RunCommand command="bun run p12-reflection.ts" :verified="true" />
-
-### 运行与验证
-
-- 先按前置准备完成依赖和环境变量配置
-- 执行上面的推荐入口命令
-- 将输出与下文的“运行结果”或章节描述对照，确认主链路已经跑通
-- 如果遇到命令、依赖、环境变量或样例输入问题，先回到 [实践环境准备](/practice/setup) 排查
-
-
 
 ### 第一步：类型定义和初始化
 

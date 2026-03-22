@@ -3,29 +3,7 @@ title: P14：MCP 协议接入
 description: 连接标准化工具服务器，让 Agent 接入外部能力生态
 ---
 
-<ProjectCard
-  title="你将构建：一个通过 MCP 接入外部工具服务器的 Agent，以及一个极简 MCP Server"
-  difficulty="advanced"
-  duration="60 min"
-  :prerequisites="['P1', 'P4']"
-  :tags="['MCP', 'Protocol', 'TypeScript', 'OpenAI SDK']"
-/>
-
 <PracticeProjectGuide project-id="practice-p14-mcp" />
-
-> 开始前先看：[实践环境准备](/practice/setup)。本章对应示例文件位于 `practice/` 目录，可直接按命令运行。
-
-## 前置准备
-
-开始本章前，请先确认：
-
-- 已阅读 [实践环境准备](/practice/setup)
-- 基础依赖已就绪：`openai`
-- 环境变量已配置：`OPENAI_API_KEY`
-- 额外依赖：`@modelcontextprotocol/sdk`
-- 建议先完成前置章节：`P1`、`P4`
-- 本章建议入口命令：`bun run p14-mcp.ts`
-- 示例文件位置：`practice/p14-mcp.ts`、`p14-mcp-server.ts`
 
 ## 背景与目标
 
@@ -128,17 +106,6 @@ bun add @modelcontextprotocol/sdk
 ```
 
 ## 动手实现
-
-<RunCommand command="bun run p14-mcp.ts" :verified="true" />
-
-### 运行与验证
-
-- 先按前置准备完成依赖和环境变量配置
-- 执行上面的推荐入口命令
-- 将输出与下文的“运行结果”或章节描述对照，确认主链路已经跑通
-- 如果遇到命令、依赖、环境变量或样例输入问题，先回到 [实践环境准备](/practice/setup) 排查
-
-
 
 ### 第一步：实现 MCP Server（p14-mcp-server.ts）
 

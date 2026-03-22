@@ -1,10 +1,13 @@
 ---
 title: 第17章：为什么需要多个 Agent？
 description: 在学习 oh-my-openagent 的架构之前，先搞清楚一个根本问题——一个 Claude 不够用吗？什么情况下单模型会失败，多 Agent 编排解决的是什么真实问题
+contentType: theory
+contentId: book-oh-prelude
+series: book
+roleDescription: 理解多 Agent 编排的必要性，建立系统化思维。
 ---
 
-> **前置阅读**：无（本章是第五部分的入口）
-> **学习目标**：理解多 Agent 编排的必要性，建立"为什么要这么复杂"的直觉
+<ChapterLearningGuide />
 
 ---
 

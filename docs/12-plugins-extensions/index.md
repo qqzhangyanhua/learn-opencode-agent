@@ -1,7 +1,13 @@
 ---
 title: 第13章：插件与扩展
 description: 插件、Skill、命令和编辑器扩展四种扩展方式的完整对比：何时写代码、何时写 Markdown、何时接外部系统，以及扩展如何进入统一工具和命令边界
+roleDescription: 理解插件系统架构，掌握扩展机制的设计原则。
+contentType: theory
+contentId: book-12-plugins-extensions
+series: book
 ---
+
+<ChapterLearningGuide />
 
 <script setup>
 import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshotCard.vue'

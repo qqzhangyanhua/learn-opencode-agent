@@ -1,7 +1,13 @@
 ---
 title: 第22章：工具扩展系统
 description: oh-my-openagent 26 个工具的完整解析——hashline-edit 的内容哈希精确编辑、LSP 集成、task 委托机制，以及如何添加自定义工具
+roleDescription: 深入工具扩展系统实现，理解工具注册与执行流程。
+contentType: theory
+contentId: book-19-tool-extension
+series: book
 ---
+
+<ChapterLearningGuide />
 
 <script setup>
 import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshotCard.vue'

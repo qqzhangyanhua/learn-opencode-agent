@@ -3,29 +3,7 @@ title: P2：多轮对话与上下文管理
 description: 构建有记忆的对话助手，掌握 messages 历史管理与 Token 预算控制两项核心技能
 ---
 
-<ProjectCard
-  title="你将构建：一个支持多轮对话、能自动裁剪历史的 ChatSession"
-  difficulty="beginner"
-  duration="30 min"
-  :prerequisites="['P1']"
-  :tags="['OpenAI SDK', 'Context Management', 'TypeScript']"
-/>
-
 <PracticeProjectGuide project-id="practice-p02-multi-turn" />
-
-> 开始前先看：[实践环境准备](/practice/setup)。如果你想先跳过本地安装，也可以直接打开 <a href="/practice/playground/?chapter=p02-multi-turn" target="_blank" rel="noopener noreferrer">本章在线运行工作台</a> 运行预置多轮示例；相关限制和安全提示见 [在线运行模式](/practice/setup#online-mode)。本章对应示例文件位于 `practice/` 目录，可直接按命令运行。
-
-## 前置准备
-
-开始本章前，请先确认：
-
-- 已阅读 [实践环境准备](/practice/setup)
-- 如果暂时不走本地环境，已了解 [在线运行模式](/practice/setup#online-mode) 的适用范围与安全提示
-- 基础依赖已就绪：`openai`
-- 环境变量已配置：`OPENAI_API_KEY`
-- 建议先完成前置章节：`P1`
-- 本章建议入口命令：`bun run practice/p02-multi-turn.ts`
-- 示例文件位置：`practice/p02-multi-turn.ts`
 
 ## 背景与目标
 
@@ -111,18 +89,6 @@ function estimateTokens(text: string): number {
 `gpt-4o-mini` 的 context window 是 200K Token，但生产中一般把单次请求控制在 10-20K 以内，兼顾成本和响应速度。
 
 ## 动手实现
-
-<RunCommand command="bun run practice/p02-multi-turn.ts" :verified="true" />
-
-### 运行与验证
-
-- 先按前置准备完成依赖、环境变量和本章示例文件
-- 如果你走在线运行模式，先打开 <a href="/practice/playground/?chapter=p02-multi-turn" target="_blank" rel="noopener noreferrer">本章在线运行工作台</a> 并填写 `API Key / baseURL / model`
-- 如果你走本地运行模式，再执行上面的推荐入口命令
-- 将输出与下文的“运行结果”或章节描述对照，确认主链路已经跑通
-- 如果遇到命令、依赖、环境变量或样例输入问题，先回到 [实践环境准备](/practice/setup) 排查
-
-
 
 ### 第一步：定义类型与估算函数
 

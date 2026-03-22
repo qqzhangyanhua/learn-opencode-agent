@@ -1,7 +1,13 @@
 ---
 title: 第18章：oh-my-openagent 插件系统概述
 description: 从零理解 oh-my-openagent 如何通过 OpenCode 插件接口实现多模型编排——Plugin 入口、核心插件接口、配置加载流程全解析
+roleDescription: 理解 oh-my-openagent 插件系统总体架构与设计理念。
+contentType: theory
+contentId: book-16-plugin-overview
+series: book
 ---
+
+<ChapterLearningGuide />
 
 <script setup>
 import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshotCard.vue'

@@ -32,29 +32,7 @@ entryMode: build-first
 roleDescription: 用一个最短可运行项目先把工具调用和 Agent 循环亲手跑通，再回头理解理论篇里的系统抽象。
 ---
 
-<ProjectCard
-  title="你将构建：一个可以查询天气的最小 Agent"
-  difficulty="beginner"
-  duration="45 min"
-  :prerequisites="[]"
-  :tags="['OpenAI SDK', 'Tool Calling', 'TypeScript']"
-/>
-
 <PracticeProjectGuide project-id="practice-p01-minimal-agent" />
-
-> 开始前先看：[实践环境准备](/practice/setup)。如果你还不想先搭本地环境，也可以先打开 <a href="/practice/playground/?chapter=p01-minimal-agent" target="_blank" rel="noopener noreferrer">本章在线运行工作台</a>，在浏览器侧填写 `API Key / baseURL / model` 直接试跑；相关限制和安全提示见 [在线运行模式](/practice/setup#online-mode)。本章对应示例文件位于 `practice/` 目录，可直接按命令运行。
-
-## 前置准备
-
-开始本章前，请先确认：
-
-- 已阅读 [实践环境准备](/practice/setup)
-- 如果暂时不走本地环境，已了解 [在线运行模式](/practice/setup#online-mode) 的适用范围与安全提示
-- 基础依赖已就绪：`openai`
-- 本地运行时环境变量已配置：`OPENAI_API_KEY`
-- 前置章节：无，可直接开始
-- 本章建议入口命令：`bun run p01-minimal-agent.ts`
-- 示例文件位置：`practice/p01-minimal-agent.ts`
 
 ## 背景与目标
 
@@ -87,18 +65,6 @@ const response = await client.chat.completions.create({
 4. **整合**：把工具结果放回对话，模型生成最终回复
 
 ## 动手实现
-
-<RunCommand command="bun run p01-minimal-agent.ts" :verified="true" />
-
-### 运行与验证
-
-- 先按前置准备完成依赖、运行参数和本章示例文件
-- 如果你走在线运行模式，先打开 <a href="/practice/playground/?chapter=p01-minimal-agent" target="_blank" rel="noopener noreferrer">本章在线运行工作台</a>，确认页面里的 `API Key / baseURL / model` 已填写正确
-- 如果你走本地运行模式，再执行上面的推荐入口命令
-- 将输出与下文的“运行结果”或章节描述对照，确认主链路已经跑通
-- 如果遇到命令、依赖、环境变量或样例输入问题，先回到 [实践环境准备](/practice/setup) 排查
-
-
 
 ### 第一步：声明工具
 

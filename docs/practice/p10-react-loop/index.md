@@ -32,29 +32,7 @@ entryMode: build-first
 roleDescription: 把最小 Agent 升级成显式推理链，让你能看见每一步为什么行动，并为后续 Planning 主题搭桥。
 ---
 
-<ProjectCard
-  title="你将构建：一个显式推理链的 ReAct Agent"
-  difficulty="intermediate"
-  duration="60 min"
-  :prerequisites="['P1', 'P4']"
-  :tags="['ReAct', 'Reasoning', 'Agent Loop', 'TypeScript', 'OpenAI SDK']"
-/>
-
 <PracticeProjectGuide project-id="practice-p10-react-loop" />
-
-> 开始前先看：[实践环境准备](/practice/setup)。如果你想先观察教学型 `Thought / Action / Observation` 链路，也可以直接打开 <a href="/practice/playground/?chapter=p10-react-loop" target="_blank" rel="noopener noreferrer">本章在线运行工作台</a>；相关限制和安全提示见 [在线运行模式](/practice/setup#online-mode)。本章对应示例文件位于 `practice/` 目录，可直接按命令运行。
-
-## 前置准备
-
-开始本章前，请先确认：
-
-- 已阅读 [实践环境准备](/practice/setup)
-- 如果暂时不走本地环境，已了解 [在线运行模式](/practice/setup#online-mode) 的适用范围与安全提示
-- 基础依赖已就绪：`openai`
-- 环境变量已配置：`OPENAI_API_KEY`
-- 建议先完成前置章节：`P1`、`P4`
-- 本章建议入口命令：`bun run p10-react-loop.ts`
-- 示例文件位置：`practice/p10-react-loop.ts`
 
 ## 背景与目标
 
@@ -154,18 +132,6 @@ Action Input: {"city": "北京"}
 - 或者 `Final Answer`（结束循环）
 
 ## 动手实现
-
-<RunCommand command="bun run p10-react-loop.ts" :verified="true" />
-
-### 运行与验证
-
-- 先按前置准备完成依赖和环境变量配置
-- 如果你走在线运行模式，先打开 <a href="/practice/playground/?chapter=p10-react-loop" target="_blank" rel="noopener noreferrer">本章在线运行工作台</a> 并填写 `API Key / baseURL / model`
-- 如果你走本地运行模式，再执行上面的推荐入口命令
-- 将输出与下文的“运行结果”或章节描述对照，确认主链路已经跑通
-- 如果遇到命令、依赖、环境变量或样例输入问题，先回到 [实践环境准备](/practice/setup) 排查
-
-
 
 ### 第一步：System Prompt 定义格式
 

@@ -1,15 +1,11 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { getPracticeProjectById, getPracticeProjectsByIds } from '../data/practice-projects.js'
-import LearningProgressToggle from './LearningProgressToggle.vue'
+import { getPracticeProjectById } from '../data/practice-projects.js'
 import type { PracticeProjectGuideProps } from './types'
 
 const props = defineProps<PracticeProjectGuideProps>()
 
 const project = computed(() => getPracticeProjectById(props.projectId))
-const prerequisiteProjects = computed(() =>
-  project.value ? getPracticeProjectsByIds(project.value.prerequisiteProjectIds) : []
-)
 
 function difficultyLabel(value: string) {
   if (value === 'advanced') return '高阶'
@@ -26,197 +22,115 @@ const playgroundHref = computed(() => {
   return slug ? `/practice/playground/?chapter=${slug}` : null
 })
 
-const progressContentId = computed(() => project.value?.projectId.trim() ?? '')
 </script>
 
 <template>
-  <section v-if="project" class="practice-project-guide">
-    <div class="guide-overview">
-      <div class="guide-heading">
-        <span class="guide-badge strong">Phase {{ project.phaseOrder }}</span>
-        <span class="guide-badge">{{ project.shortLabel }}</span>
-        <span class="guide-badge">{{ difficultyLabel(project.difficulty) }}</span>
-        <span class="guide-badge">{{ project.estimatedTime }}</span>
-        <span class="guide-badge">{{ project.runModeLabel }}</span>
-      </div>
+  <section v-if="project" class="practice-hero">
+    <h1 class="hero-title">{{ project.projectTitle }}</h1>
+    <p class="hero-description">{{ project.summary }}</p>
 
-      <h2>{{ project.projectTitle }}</h2>
-      <p class="guide-summary">{{ project.summary }}</p>
-      <p class="guide-phase">
-        {{ project.phaseTitle }} · {{ project.phaseSubtitle }}
-      </p>
-      <LearningProgressToggle
-        :content-id="progressContentId"
-        content-type="practice"
-        description="把这个项目标成待练、继续或已完成，下次回来就知道该从哪接着做。"
-      />
-    </div>
-
-    <div class="guide-panel">
-      <h3>这章学完你要拿到什么</h3>
-      <ul>
-        <li v-for="goal in project.learningGoals" :key="goal">{{ goal }}</li>
-      </ul>
-    </div>
-
-    <div class="guide-panel">
-      <h3>开始前先确认</h3>
-      <ul>
-        <li v-for="item in project.prerequisites" :key="item">{{ item }}</li>
-      </ul>
-      <div v-if="prerequisiteProjects.length" class="guide-links">
-        <a
-          v-for="linkProject in prerequisiteProjects"
-          :key="linkProject.projectId"
-          :href="linkProject.path"
-        >
-          {{ linkProject.shortLabel }} {{ linkProject.title }}
-        </a>
-      </div>
-    </div>
-
-    <div class="guide-panel">
-      <h3>推荐运行入口</h3>
+    <div class="hero-run">
       <RunCommand
         :command="project.runCommand"
         :verified="true"
         :hint="project.runModeHint"
       />
-      <ul class="source-files">
-        <li v-for="sourceFile in project.sourceFiles" :key="sourceFile">
-          示例文件：`{{ sourceFile }}`
-        </li>
-      </ul>
-      <a v-if="playgroundHref" :href="playgroundHref" class="guide-inline-link">
-        先去在线工作台试跑
+      <a v-if="playgroundHref" :href="playgroundHref" class="playground-link">
+        在线工作台 →
       </a>
     </div>
   </section>
 </template>
 
 <style scoped>
-.practice-project-guide {
-  display: grid;
-  grid-template-columns: minmax(0, 1.1fr) repeat(3, minmax(0, 1fr));
-  gap: 16px;
-  margin: 22px 0 28px;
-  padding: 20px;
-  border-radius: 22px;
+/* Practice Hero Container */
+.practice-hero {
+  position: relative;
+  margin: 0 0 48px;
+  padding: 32px 40px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, var(--vp-c-bg-soft) 0%, var(--vp-c-bg) 100%);
   border: 1px solid var(--vp-c-divider);
-  background:
-    linear-gradient(180deg, rgba(234, 88, 12, 0.12), transparent 42%),
-    linear-gradient(180deg, var(--vp-c-bg-soft), var(--vp-c-bg));
-  box-shadow: var(--card-shadow-light);
 }
 
-.guide-overview,
-.guide-panel {
-  padding: 18px;
-  border-radius: 18px;
-  border: 1px solid var(--vp-c-divider);
-  background: rgba(255, 255, 255, 0.62);
+.practice-hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #ea580c 0%, #f97316 100%);
+  border-radius: 16px 16px 0 0;
 }
 
-.dark .guide-overview,
-.dark .guide-panel {
-  background: rgba(15, 23, 42, 0.55);
+/* Title */
+.hero-title {
+  margin: 0 0 16px;
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: -0.02em;
+  background: linear-gradient(90deg, #ea580c 0%, #f97316 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
-.guide-heading {
+/* Description */
+.hero-description {
+  margin: 0 0 24px;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--vp-c-text-2);
+  max-width: 720px;
+}
+
+/* Run Section */
+.hero-run {
   display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-bottom: 14px;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.guide-badge {
+.playground-link {
   display: inline-flex;
   align-items: center;
-  border-radius: 999px;
-  padding: 5px 12px;
-  background: var(--vp-c-bg-alt);
-  color: var(--vp-c-text-2);
-  font-size: 0.8rem;
-  font-weight: 700;
+  align-self: flex-start;
+  color: #ea580c;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition: color 0.2s ease;
 }
 
-.guide-badge.strong {
-  background: rgba(234, 88, 12, 0.14);
+.playground-link:hover {
   color: #c2410c;
 }
 
-.guide-overview h2 {
-  margin: 0 0 10px;
-  font-size: 1.34rem;
-  line-height: 1.4;
-  color: var(--vp-c-text-1);
-}
+/* Responsive */
+@media (max-width: 960px) {
+  .practice-hero {
+    padding: 28px 32px;
+  }
 
-.guide-summary,
-.guide-phase {
-  margin: 0;
-  color: var(--vp-c-text-2);
-  line-height: 1.75;
-}
-
-.guide-phase {
-  margin-top: 10px;
-  color: var(--vp-c-text-1);
-  font-weight: 600;
-}
-
-.guide-panel h3 {
-  margin: 0 0 12px;
-  font-size: 0.98rem;
-  color: var(--vp-c-text-1);
-}
-
-.guide-panel ul {
-  margin: 0;
-  padding-left: 18px;
-  display: grid;
-  gap: 8px;
-  color: var(--vp-c-text-2);
-}
-
-.guide-links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 14px;
-}
-
-.guide-links a,
-.guide-inline-link {
-  text-decoration: none;
-  color: var(--vp-c-brand-1);
-  font-weight: 700;
-}
-
-.source-files {
-  margin-top: 14px;
-}
-
-.guide-inline-link {
-  display: inline-flex;
-  margin-top: 10px;
-}
-
-@media (max-width: 1180px) {
-  .practice-project-guide {
-    grid-template-columns: 1fr;
+  .hero-title {
+    font-size: 1.75rem;
   }
 }
 
 @media (max-width: 640px) {
-  .practice-project-guide {
-    padding: 16px;
-    margin-bottom: 24px;
+  .practice-hero {
+    padding: 24px 20px;
+    margin-bottom: 32px;
   }
 
-  .guide-overview,
-  .guide-panel {
-    padding: 16px;
+  .hero-title {
+    font-size: 1.5rem;
+  }
+
+  .hero-description {
+    font-size: 0.95rem;
   }
 }
 </style>

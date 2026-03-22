@@ -1,7 +1,13 @@
 ---
 title: 第6章：多模型支持
 description: 深入 Provider 抽象层——模型能力描述、消息格式转换、认证机制，以及 Vercel AI SDK 如何统一十余个提供商
+roleDescription: 理解多模型支持的工程实现，掌握 Provider 抽象层设计。
+contentType: theory
+contentId: book-05-provider-system
+series: book
 ---
+
+<ChapterLearningGuide />
 
 <script setup>
 import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshotCard.vue'
