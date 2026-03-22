@@ -101,6 +101,7 @@ html {
 .VPHero .actions {
   margin-top: 44px;
   gap: 14px;
+  justify-content: center;
 }
 
 /* Hero 底部分割线 */
@@ -179,6 +180,14 @@ html {
   max-width: 1280px;
   padding-top: 56px;
   padding-bottom: 80px;
+}
+
+.VPHome .vp-doc > div > p {
+  max-width: 780px;
+  margin-left: auto;
+  margin-right: auto;
+  color: var(--vp-c-text-2);
+  text-align: center;
 }
 
 .vp-doc h2 {

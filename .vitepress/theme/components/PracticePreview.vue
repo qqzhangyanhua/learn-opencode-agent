@@ -14,30 +14,33 @@ const practiceProjectCount = computed(() =>
 const entryCards = computed(() => [
   {
     key: 'theory',
-    label: '先读源码',
+    label: '理论篇',
     title: theoryEntry.value.title,
     subtitle: theoryEntry.value.countLabel,
-    description: theoryEntry.value.roleDescription,
+    description: '先建立概念地图，再带着主链路进入后续项目和中级专题。',
     href: theoryEntry.value.recommendedStart,
-    tone: 'theory'
+    tone: 'theory',
+    cta: '进入理论篇'
   },
   {
     key: 'practice',
-    label: '先动手实践',
+    label: '实践篇',
     title: practiceEntry.value.title,
     subtitle: `${practiceProjectCount.value} 个项目 · ${practicePhaseCount.value} 个阶段`,
-    description: practiceEntry.value.roleDescription,
+    description: '把工具调用、记忆、RAG、Planning 和部署清单亲手跑一遍，建立实现手感。',
     href: practiceEntry.value.recommendedStart,
-    tone: 'practice'
+    tone: 'practice',
+    cta: '进入实践篇'
   },
   {
     key: 'intermediate',
-    label: '带着问题进阶',
+    label: '中级篇',
     title: intermediateEntry.value.title,
     subtitle: intermediateEntry.value.countLabel,
-    description: intermediateEntry.value.roleDescription,
+    description: '当你开始关心可靠性、协作、安全和成本时，从这里进入更工程化的专题。',
     href: intermediateEntry.value.recommendedStart,
-    tone: 'intermediate'
+    tone: 'intermediate',
+    cta: '进入中级篇'
   }
 ])
 </script>
@@ -57,7 +60,7 @@ const entryCards = computed(() => [
       </div>
       <p class="track-description">{{ card.description }}</p>
       <a :href="card.href" class="track-btn" :class="{ primary: card.tone === 'practice' }">
-        从这里开始 →
+        {{ card.cta }} →
       </a>
     </article>
   </div>
