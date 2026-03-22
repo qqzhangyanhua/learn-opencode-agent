@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready
-stopped_at: Phase 5 规划已完成，下一步执行 05-01
-last_updated: "2026-03-22T14:10:00Z"
+stopped_at: Phase 5 已完成，v1 里程碑功能范围全部落地
+last_updated: "2026-03-22T15:20:00Z"
 progress:
   total_phases: 5
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 14
-  completed_plans: 12
+  completed_plans: 14
 ---
 
 # Project State
@@ -19,11 +19,11 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-21)
 
 **Core value:** 让想系统学习 AI Agent 的中文开发者在 30 秒内知道从哪里开始，并能沿着清晰路径持续学下去
-**Current focus:** Phase 05 — 搜索与发现体验收口
+**Current focus:** v1 里程碑功能范围已完成，等待最终审视与归档
 
 ## Current Position
 
-Phase: 05 (搜索与发现体验收口) — READY TO EXECUTE
+Phase: 05 (搜索与发现体验收口) — COMPLETE
 Plan: 2 of 2
 
 ## Performance Metrics
@@ -80,18 +80,20 @@ Recent decisions affecting current work:
 - [Phase 04]: 新增 practice-projects.ts 作为实践首页、项目页和理论桥接共享的统一真源
 - [Phase 04]: 23 个实践项目页统一接入 PracticeProjectGuide 与 PracticeProjectActionPanel，实践篇首次拥有课程单元骨架
 - [Phase 04]: 关键理论页接入 RelatedPracticeProjects，把“看概念 -> 做项目”升级为显式桥接
+- [Phase 05]: 新增 /discover 作为统一发现中心，把首页、学习路径、阅读地图、实践篇和中级篇重新收口到同一学习入口
+- [Phase 05]: 保留 VitePress local search，并通过 _render 注入内容类型、进入方式和主题标签，提升搜索语义识别度
+- [Phase 05]: discovery-content.ts 成为搜索语义、目标路线、主题聚合和推荐关系的共享编排层
 
 ### Pending Todos
 
-- 执行 05-01：优化搜索索引内容与结果展示结构
-- 执行 05-02：收口全站发现入口、推荐关系和内容类型标识
+- 当前无待执行 todo
 
 ### Blockers/Concerns
 
-- 当前无功能性 blocker；执行阶段的主要风险在于 VitePress 本地搜索结果 UI 可定制度有限，需要优先通过索引语义增强与 /discover 页面补足体验
+- 当前无功能性 blocker；已知非阻塞项仍是 `lottie-web` 的 eval warning 与 chunk size warning
 
 ## Session Continuity
 
 Last session: 2026-03-22T08:49:35Z
-Stopped at: Phase 5 规划已完成，等待执行 05-01 / 05-02
+Stopped at: Phase 5 已完成，主分支验证通过
 Resume file: None
