@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready
-stopped_at: Phase 3 已完成，下一步规划 Phase 4
-last_updated: "2026-03-22T08:49:35Z"
+stopped_at: Phase 4 已规划完成，下一步执行 04-01
+last_updated: "2026-03-22T10:35:00Z"
 progress:
   total_phases: 5
   completed_phases: 3
@@ -23,7 +23,7 @@ See: .planning/PROJECT.md (updated 2026-03-21)
 
 ## Current Position
 
-Phase: 04 (实践篇课程化重构) — READY TO PLAN
+Phase: 04 (实践篇课程化重构) — READY TO EXECUTE
 Plan: 0 of 3
 
 ## Performance Metrics
@@ -80,16 +80,16 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-- 规划 04-01：重构实践篇索引与阶段化浏览入口
-- 规划 04-02：标准化实践项目页面信息结构
-- 规划 04-03：建立理论章节到实践项目的双向关联
+- 执行 04-01：重构实践篇索引与阶段化浏览入口
+- 执行 04-02：标准化实践项目页面信息结构
+- 执行 04-03：建立理论章节到实践项目的双向关联
 
 ### Blockers/Concerns
 
-- 当前无功能性 blocker；下一步风险主要在 Phase 4 需要把实践页做得更课程化，同时避免破坏现有脚本运行入口与 Playground 链路
+- 当前无功能性 blocker；下一步风险主要在 Phase 4 需要一次性覆盖 23 个项目页，同时避免破坏现有命令、Playground 链路和 Phase 3 校验
 
 ## Session Continuity
 
 Last session: 2026-03-22T08:49:35Z
-Stopped at: Phase 3 已执行完成，准备进入 Phase 4
+Stopped at: Phase 4 规划已完成，准备执行 04-01
 Resume file: None
