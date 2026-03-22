@@ -33,7 +33,7 @@
 ### Discovery & Search
 
 - [ ] **DISC-01**: 用户可以通过搜索或路径页快速找到某个主题对应的章节、实践项目或专题入口
-- [ ] **DISC-02**: 用户可以访问按目标组织的学习路径页，并获得清晰的推荐阅读顺序
+- [x] **DISC-02**: 用户可以访问按目标组织的学习路径页，并获得清晰的推荐阅读顺序
 - [ ] **DISC-03**: 用户在搜索或导航结果中可以区分内容类型（章节、实践、专题、辅助页面）
 
 ## v2 Requirements
@@ -78,7 +78,7 @@
 | PRAC-02 | Phase 4 | Pending |
 | PRAC-03 | Phase 4 | Pending |
 | DISC-01 | Phase 5 | Pending |
-| DISC-02 | Phase 1 | Pending |
+| DISC-02 | Phase 1 | Complete |
 | DISC-03 | Phase 5 | Pending |
 
 **Coverage:**
