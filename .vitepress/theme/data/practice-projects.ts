@@ -1,8 +1,10 @@
 import type {
   LearningDifficulty,
   PracticePhaseId,
-  PracticePhaseOrder
+  PracticePhaseOrder,
+  PracticePhaseSummary
 } from './content-meta'
+// @ts-expect-error VitePress `.data.ts` modules inject a runtime `data` export.
 import { data as learningPathData } from './learning-paths.data.js'
 
 export interface PracticeReferenceLink {
@@ -799,8 +801,12 @@ const projectSeeds: ProjectSeed[] = [
   }
 ]
 
+const typedLearningPathData = learningPathData as {
+  practicePhases: PracticePhaseSummary[]
+}
+
 const phaseMetaByProjectId = Object.fromEntries(
-  learningPathData.practicePhases.flatMap((phase) =>
+  typedLearningPathData.practicePhases.flatMap((phase) =>
     phase.projectIds.map((projectId) => [
       projectId,
       {
