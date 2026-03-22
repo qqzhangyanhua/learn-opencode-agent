@@ -21,12 +21,14 @@ import PracticeTagCloud from '../../.vitepress/theme/components/PracticeTagCloud
 
 <div class="practice-actions">
   <a href="/practice/playground/" class="btn-playground">🚀 在线运行 Playground</a>
+  <a href="/learning-paths/" class="btn-secondary">按学习路径选入口</a>
   <a href="/practice/setup" class="btn-secondary">开始前先看</a>
   <a href="/practice/p01-minimal-agent/" class="btn-primary">从 P1 开始</a>
+  <a href="/intermediate/" class="btn-secondary">下一步去中级篇</a>
   <a href="#phases" class="btn-secondary">课程大纲</a>
   <a href="#chapter-matrix" class="btn-secondary">章节总表</a>
   <a href="#run-index" class="btn-secondary">运行索引</a>
-  <a href="/" class="btn-secondary">← 返回理论篇</a>
+  <a href="/" class="btn-secondary">回到首页</a>
 </div>
 
 > 第一次进入实践篇，建议先看 [实践环境准备](/practice/setup)。如果你想先在浏览器侧填写 `API Key / baseURL / model` 试跑，再决定要不要搭本地环境，可以直接跳到 [在线运行模式](/practice/setup#online-mode)。当前实践篇已经覆盖 `P1-P23` 的仓库内示例文件，可直接按章节命令运行。
@@ -40,6 +42,12 @@ import PracticeTagCloud from '../../.vitepress/theme/components/PracticeTagCloud
 :::
 
 > **当前定位**：把关键机制亲手跑通并形成实现手感。如果你还在判断自己该先读理论、还是先动手，也可以先回到 [学习路径](/learning-paths/) 再选入口。
+
+## 从这里开始
+
+- **第一次进入实践篇**：先看 [学习路径](/learning-paths/) 里的“先做项目”路线，然后直接进入 [P1：最小 Agent](/practice/p01-minimal-agent/)。
+- **想先确认环境再动手**：先过一遍 [实践环境准备](/practice/setup)，再按 `P1 -> P4 -> P10 -> P18` 的顺序推进。
+- **准备把项目经验上升为工程判断**：完成基础闭环后，下一步直接切到 [中级篇导读](/intermediate/)，优先读 Planning、RAG 和安全相关专题。
 
 - **刚读完理论篇 1-4 章**：最适合从 `P1-P4` 开始，把工具调用、多轮对话、流式输出和错误处理亲手跑通。
 - **理解了抽象概念**：如果你已经在理论篇里理解了会话、模型、工具和服务边界，实践篇就是把这些抽象概念改写成可执行 TypeScript 示例。

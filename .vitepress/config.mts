@@ -64,18 +64,20 @@ export default withMermaid(defineConfig({
       { text: '首页', link: '/' },
       { text: '学习路径', link: '/learning-paths/', activeMatch: '/learning-paths/' },
       { text: '实践篇', link: '/practice/', activeMatch: '/practice/' },
+      { text: '中级篇', link: '/intermediate/', activeMatch: '/intermediate/' },
+      { text: '阅读地图', link: '/reading-map', activeMatch: '/reading-map' },
       { text: '🚀 在线运行', link: '/practice/playground/' },
-      { text: '术语表', link: '/glossary' },
       { text: '本书仓库', link: bookRepository },
-      { text: 'OpenCode 源码基线', link: sourceRepository },
     ],
 
     sidebar: {
       '/practice/': [
-        { text: '← 返回理论篇', link: '/' },
+        { text: '← 返回学习路径', link: '/learning-paths/' },
+        { text: '课程介绍', link: '/practice/' },
+        { text: '从 P1 开始', link: '/practice/p01-minimal-agent/' },
+        { text: '下一步去中级篇', link: '/intermediate/' },
         { text: '🚀 在线运行 Playground', link: '/practice/playground/' },
         { text: '开始前先看', link: '/practice/setup' },
-        { text: '课程介绍', link: '/practice/' },
         {
           text: 'Phase 1 — Agent 基础',
           collapsed: false,
@@ -142,8 +144,30 @@ export default withMermaid(defineConfig({
           ]
         },
       ],
+      '/intermediate/': [
+        { text: '← 返回学习路径', link: '/learning-paths/' },
+        { text: '回到实践篇', link: '/practice/' },
+        { text: '中级篇导读', link: '/intermediate/' },
+        { text: '先读 Planning 机制', link: '/intermediate/27-planning-mechanism/' },
+        {
+          text: '中级专题',
+          collapsed: false,
+          items: [
+            { text: '第25章：RAG 为什么总是答不准？', link: '/intermediate/25-rag-failure-patterns/' },
+            { text: '第26章：多智能体协作实战', link: '/intermediate/26-multi-agent-collaboration/' },
+            { text: '第27章：Planning 机制', link: '/intermediate/27-planning-mechanism/' },
+            { text: '第28章：上下文工程实战', link: '/intermediate/28-context-engineering/' },
+            { text: '第29章：System Prompt 设计', link: '/intermediate/29-system-prompt-design/' },
+            { text: '第30章：生产架构', link: '/intermediate/30-production-architecture/' },
+            { text: '第31章：安全与边界', link: '/intermediate/31-safety-boundaries/' },
+            { text: '第32章：性能与成本', link: '/intermediate/32-performance-cost/' },
+          ]
+        },
+      ],
       '/': [
         { text: '学习路径', link: '/learning-paths/' },
+        { text: '实践篇总览', link: '/practice/' },
+        { text: '中级篇导读', link: '/intermediate/' },
         { text: '阅读地图', link: '/reading-map' },
         { text: '版本说明', link: '/version-notes' },
         { text: '术语表', link: '/glossary' },
