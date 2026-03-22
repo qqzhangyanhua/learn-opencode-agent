@@ -8,8 +8,8 @@
 ### Information Architecture
 
 - [ ] **IA-01**: 新用户进入首页后，可以在 30 秒内识别至少一条适合自己的起步路线
-- [ ] **IA-02**: 用户可以按学习目标选择路线，而不是只能按目录顺序阅读全部内容
-- [ ] **IA-03**: 用户可以明确区分理论篇、实践篇和中级篇各自的定位与推荐进入方式
+- [x] **IA-02**: 用户可以按学习目标选择路线，而不是只能按目录顺序阅读全部内容
+- [x] **IA-03**: 用户可以明确区分理论篇、实践篇和中级篇各自的定位与推荐进入方式
 
 ### Homepage & Navigation
 
@@ -65,8 +65,8 @@
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | IA-01 | Phase 2 | Pending |
-| IA-02 | Phase 1 | Pending |
-| IA-03 | Phase 1 | Pending |
+| IA-02 | Phase 1 | Complete |
+| IA-03 | Phase 1 | Complete |
 | HOME-01 | Phase 2 | Pending |
 | HOME-02 | Phase 2 | Pending |
 | HOME-03 | Phase 2 | Pending |
