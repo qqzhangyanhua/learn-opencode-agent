@@ -6,10 +6,11 @@
   "scripts": {
     "dev": "vitepress dev",
     "build": "vitepress build",
-    "build:strict": "bun run check:content && bun run check:practice && bun run check:learning-metadata && bun run build",
+    "build:strict": "bun run check:content && bun run check:practice && bun run check:learning-metadata && bun run check:learning-paths && bun run build",
     "typecheck": "tsc --noEmit -p .vitepress/tsconfig.json",
     "check:content": "node scripts/check-content.mjs",
     "check:learning-metadata": "node scripts/check-learning-metadata.mjs",
+    "check:learning-paths": "node scripts/check-learning-paths.mjs",
     "check:practice": "node scripts/check-practice-entries.mjs",
     "preview": "vitepress preview",
     "start": "caddy run --config /Caddyfile --adapter caddyfile"
