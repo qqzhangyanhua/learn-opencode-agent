@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready
-stopped_at: Phase 5 已完成，v1 里程碑功能范围全部落地
-last_updated: "2026-03-22T15:20:00Z"
+stopped_at: Phase 06 已完成规划，等待执行
+last_updated: "2026-03-22T16:35:00Z"
 progress:
-  total_phases: 5
+  total_phases: 6
   completed_phases: 5
-  total_plans: 14
+  total_plans: 16
   completed_plans: 14
 ---
 
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-21)
 
 **Core value:** 让想系统学习 AI Agent 的中文开发者在 30 秒内知道从哪里开始，并能沿着清晰路径持续学下去
-**Current focus:** v1 里程碑功能范围已完成，等待最终审视与归档
+**Current focus:** Phase 06 本地学习进度 MVP 已完成规划，处于 READY TO EXECUTE
 
 ## Current Position
 
-Phase: 05 (搜索与发现体验收口) — COMPLETE
-Plan: 2 of 2
+Phase: 06 (本地学习进度 MVP) — READY TO EXECUTE
+Plan: 0 of 2
 
 ## Performance Metrics
 
@@ -83,6 +83,9 @@ Recent decisions affecting current work:
 - [Phase 05]: 新增 /discover 作为统一发现中心，把首页、学习路径、阅读地图、实践篇和中级篇重新收口到同一学习入口
 - [Phase 05]: 保留 VitePress local search，并通过 _render 注入内容类型、进入方式和主题标签，提升搜索语义识别度
 - [Phase 05]: discovery-content.ts 成为搜索语义、目标路线、主题聚合和推荐关系的共享编排层
+- [Phase 06]: 本地学习进度第一版只做内容页内的手动三态记录，不做首页汇总、路线完成率或自动追踪
+- [Phase 06]: 进度控件嵌入 ChapterLearningGuide 与 PracticeProjectGuide，而不是放到 ActionPanel
+- [Phase 06]: 学习状态统一收敛为 `稍后再看 / 从这里继续 / 已完成`，单内容互斥并保存 `updatedAt`
 
 ### Pending Todos
 
@@ -94,6 +97,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-22T08:49:35Z
-Stopped at: Phase 5 已完成，主分支验证通过
+Last session: 2026-03-22T16:35:00Z
+Stopped at: Phase 06 规划完成，待执行 06-01
 Resume file: None

@@ -80,12 +80,17 @@
 | DISC-01 | Phase 5 | Complete |
 | DISC-02 | Phase 1 | Complete |
 | DISC-03 | Phase 5 | Complete |
+| PROG-01 | Phase 6 | Planned |
+| PROG-02 | Phase 6 | Planned |
 
 **Coverage:**
 - v1 requirements: 16 total
 - Mapped to phases: 16
 - Unmapped: 0
+- v2 requirements: 4 total
+- Mapped to phases: 2
+- Unmapped: 2 (`RECO-01`, `RECO-02`)
 
 ---
 *Requirements defined: 2026-03-21*
-*Last updated: 2026-03-22 after v1 requirement audit*
+*Last updated: 2026-03-22 after Phase 6 planning*
