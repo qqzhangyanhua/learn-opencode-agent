@@ -50,6 +50,11 @@ if (!themeIndex.includes('ChapterActionPanel')) {
   issues.push('主题入口尚未注册 ChapterActionPanel')
 }
 
+const guideSource = readFileSync(guidePath, 'utf8')
+if (!guideSource.includes('LearningProgressToggle')) {
+  issues.push('ChapterLearningGuide.vue 尚未内嵌 LearningProgressToggle')
+}
+
 const packageJson = readFileSync(packageJsonPath, 'utf8')
 if (!packageJson.includes('check:chapter-experience')) {
   issues.push('package.json 尚未声明 check:chapter-experience')

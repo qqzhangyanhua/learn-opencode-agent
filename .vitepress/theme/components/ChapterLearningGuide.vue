@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { useData } from 'vitepress'
 import { data as contentIndex } from '../data/content-index.data.js'
+import LearningProgressToggle from './LearningProgressToggle.vue'
 import type {
   ChapterLearningGuideProps,
   EntryMode,
@@ -66,6 +67,20 @@ const estimatedTime = computed(() => {
   return typeof value === 'string' && value.trim() ? value.trim() : '未标注'
 })
 
+const progressContentId = computed(() => {
+  const frontmatterContentId =
+    typeof frontmatter.value.contentId === 'string' ? frontmatter.value.contentId.trim() : ''
+  return frontmatterContentId || currentNode.value?.contentId || ''
+})
+
+const progressContentType = computed(() => {
+  return (
+    (frontmatter.value.contentType as LearningContentFrontmatter['contentType'] | undefined) ??
+    currentNode.value?.contentType ??
+    'support'
+  )
+})
+
 const difficultyLabel = computed(() => {
   const difficulty = (frontmatter.value.difficulty as LearningContentFrontmatter['difficulty'] | undefined) ?? 'beginner'
   if (difficulty === 'advanced') {
@@ -94,6 +109,11 @@ const stageLabel = computed(() => props.stageLabel ?? stageLabelByMode[entryMode
         {{ currentNode?.roleDescription ?? sectionSummary?.roleDescription ?? '帮助你快速判断本章定位、前置要求与学习目标。' }}
       </p>
       <p class="guide-stage">{{ stageLabel }}</p>
+      <LearningProgressToggle
+        :content-id="progressContentId"
+        :content-type="progressContentType"
+        description="先把这章标成待学、继续或已完成，方便下次回来直接接上。"
+      />
     </div>
 
     <div class="guide-panel">

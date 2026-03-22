@@ -1,4 +1,5 @@
 import type {
+  ContentType,
   DiscoveryGoalId,
   LearningDifficulty,
   LearningPathDefinition,
@@ -160,6 +161,46 @@ export interface DiscoveryTopicHubProps {
 
 export interface PracticeProjectGuideProps {
   projectId: PracticeProjectDefinition['projectId']
+}
+
+export const LEARNING_PROGRESS_STATUSES = ['saved', 'active', 'done'] as const
+export type LearningProgressStatus = typeof LEARNING_PROGRESS_STATUSES[number]
+
+export interface LearningProgressStatusMeta {
+  label: string
+  description: string
+}
+
+export const LEARNING_PROGRESS_STATUS_META: Record<
+  LearningProgressStatus,
+  LearningProgressStatusMeta
+> = {
+  saved: {
+    label: '稍后再看',
+    description: '先把这页记下来，之后再系统补完。'
+  },
+  active: {
+    label: '从这里继续',
+    description: '把这页标成当前正在推进的内容。'
+  },
+  done: {
+    label: '已完成',
+    description: '这页已经看完或练完，可以继续下一步。'
+  }
+}
+
+export interface LearningProgressRecord {
+  contentId: string
+  contentType: ContentType
+  status: LearningProgressStatus
+  updatedAt: number
+}
+
+export interface LearningProgressToggleProps {
+  contentId?: string | null
+  contentType: ContentType
+  title?: string
+  description?: string
 }
 
 export interface PracticeProjectActionPanelProps {

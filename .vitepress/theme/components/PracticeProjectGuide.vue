@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { getPracticeProjectById, getPracticeProjectsByIds } from '../data/practice-projects.js'
+import LearningProgressToggle from './LearningProgressToggle.vue'
 import type { PracticeProjectGuideProps } from './types'
 
 const props = defineProps<PracticeProjectGuideProps>()
@@ -24,6 +25,8 @@ const playgroundHref = computed(() => {
   const slug = project.value.path.split('/').filter(Boolean).at(-1)
   return slug ? `/practice/playground/?chapter=${slug}` : null
 })
+
+const progressContentId = computed(() => project.value?.projectId.trim() ?? '')
 </script>
 
 <template>
@@ -42,6 +45,11 @@ const playgroundHref = computed(() => {
       <p class="guide-phase">
         {{ project.phaseTitle }} · {{ project.phaseSubtitle }}
       </p>
+      <LearningProgressToggle
+        :content-id="progressContentId"
+        content-type="practice"
+        description="把这个项目标成待练、继续或已完成，下次回来就知道该从哪接着做。"
+      />
     </div>
 
     <div class="guide-panel">

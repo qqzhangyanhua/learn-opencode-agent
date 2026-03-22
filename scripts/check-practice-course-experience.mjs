@@ -71,6 +71,11 @@ if (!themeIndex.includes('RelatedPracticeProjects')) {
   issues.push('主题入口尚未注册 RelatedPracticeProjects')
 }
 
+const practiceGuideSource = readFileSync(practiceGuidePath, 'utf8')
+if (!practiceGuideSource.includes('LearningProgressToggle')) {
+  issues.push('PracticeProjectGuide.vue 尚未内嵌 LearningProgressToggle')
+}
+
 const packageJson = readFileSync(packageJsonPath, 'utf8')
 if (!packageJson.includes('check:practice-course-experience')) {
   issues.push('package.json 尚未声明 check:practice-course-experience')
