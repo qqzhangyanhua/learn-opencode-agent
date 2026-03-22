@@ -24,6 +24,10 @@ if (homePage && !homePage.includes('<HomeStartPanel />')) {
   issues.push('docs/index.md 尚未接入 <HomeStartPanel />')
 }
 
+if (homePage && !homePage.includes('/discover/')) {
+  issues.push('docs/index.md 尚未暴露 /discover/ 发现入口')
+}
+
 if (startPanel) {
   for (const label of requiredLabels) {
     if (!startPanel.includes(label)) {

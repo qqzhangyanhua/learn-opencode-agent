@@ -22,6 +22,7 @@ import PracticeTagCloud from '../../.vitepress/theme/components/PracticeTagCloud
 
 <div class="practice-actions">
   <a href="/practice/p01-minimal-agent/" class="btn-primary">从 P1 开始</a>
+  <a href="/discover/" class="btn-secondary">回到发现中心</a>
   <a href="#course-routes" class="btn-secondary">30 秒选路线</a>
   <a href="#course-syllabus" class="btn-secondary">课程大纲</a>
   <a href="/practice/playground/" class="btn-playground">在线运行 Playground</a>
@@ -43,6 +44,7 @@ import PracticeTagCloud from '../../.vitepress/theme/components/PracticeTagCloud
     { label: '先看实践环境准备', href: '/practice/setup', hint: '确认 bun、API Key 和本地 / 在线运行模式，再开始逐章练习。' }
   ]"
   :support-links="[
+    { label: '回到发现中心', href: '/discover/', hint: '如果你发现自己还没想清楚先做项目还是先补原理，回统一入口重新判断。' },
     { label: '回到学习路径', href: '/learning-paths/', hint: '重新判断是否该先做项目，还是先回去补理论主链路。' },
     { label: '基础跑通后进入中级篇', href: '/intermediate/', hint: '当你开始关心 RAG、Planning、安全和成本时，从这里继续。' }
   ]"

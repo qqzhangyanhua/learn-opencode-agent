@@ -3,7 +3,6 @@ import {
   type ContentType,
   type DiscoveryGoalId
 } from './content-meta'
-import { learningPathById } from './learning-paths.data'
 import { practiceProjectsById } from './practice-projects'
 
 export interface DiscoveryContentLink {
@@ -146,7 +145,7 @@ export const discoveryGoalRoutes: DiscoveryGoalRoute[] = [
     title: '系统入门 AI Agent',
     audience: '适合已经会调用模型，但还没有把 Agent 主链路系统串起来的开发者',
     summary: '先建立统一概念框架，再进入第一个最小可运行项目，避免只会抄代码却不知道为什么这样设计。',
-    routeLabel: learningPathById['theory-first'].title,
+    routeLabel: '先看懂 Agent 主链路',
     recommendedStart: resolveContentLink('book-00-agent-intro'),
     continueWith: [
       resolveContentLink('book-03-tool-system'),
@@ -159,7 +158,7 @@ export const discoveryGoalRoutes: DiscoveryGoalRoute[] = [
     title: '补齐工程化能力',
     audience: '适合已经做过基础 Demo，开始关心工具边界、上下文、规划和生产约束的开发者',
     summary: '从关键理论与工程专题切入，优先补系统判断，而不是继续堆更多零散技巧。',
-    routeLabel: learningPathById['engineering-depth'].title,
+    routeLabel: '从最小闭环走到工程判断',
     recommendedStart: resolveContentLink('book-01-agent-basics'),
     continueWith: [
       resolveContentLink('book-03-tool-system'),
@@ -172,7 +171,7 @@ export const discoveryGoalRoutes: DiscoveryGoalRoute[] = [
     title: '边学边做项目',
     audience: '适合希望先抄作业、先跑通一个项目，再回头补原理的开发者',
     summary: '先拿到可运行反馈，再按需要回补理论与中级专题，始终保持动手驱动。',
-    routeLabel: learningPathById['practice-first'].title,
+    routeLabel: '先跑通第一个可运行 Agent',
     recommendedStart: resolveContentLink('practice-p01-minimal-agent'),
     continueWith: [
       resolveContentLink('practice-p10-react-loop'),

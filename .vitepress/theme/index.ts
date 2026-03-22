@@ -26,6 +26,10 @@ import PracticeProjectSyllabus from './components/PracticeProjectSyllabus.vue'
 import PracticeProjectGuide from './components/PracticeProjectGuide.vue'
 import PracticeProjectActionPanel from './components/PracticeProjectActionPanel.vue'
 import RelatedPracticeProjects from './components/RelatedPracticeProjects.vue'
+import DiscoveryTypeBadge from './components/DiscoveryTypeBadge.vue'
+import DiscoveryGoalRoutes from './components/DiscoveryGoalRoutes.vue'
+import DiscoveryStartGrid from './components/DiscoveryStartGrid.vue'
+import DiscoveryTopicHub from './components/DiscoveryTopicHub.vue'
 import ProjectCard from './components/ProjectCard.vue'
 import RunCommand from './components/RunCommand.vue'
 import HomeStartPanel from './components/HomeStartPanel.vue'
@@ -76,6 +80,10 @@ const globalComponents = [
   ['PracticeProjectGuide', PracticeProjectGuide],
   ['PracticeProjectActionPanel', PracticeProjectActionPanel],
   ['RelatedPracticeProjects', RelatedPracticeProjects],
+  ['DiscoveryTypeBadge', DiscoveryTypeBadge],
+  ['DiscoveryGoalRoutes', DiscoveryGoalRoutes],
+  ['DiscoveryStartGrid', DiscoveryStartGrid],
+  ['DiscoveryTopicHub', DiscoveryTopicHub],
   ['ProjectCard', ProjectCard],
   ['RunCommand', RunCommand],
   ['HomeStartPanel', HomeStartPanel],

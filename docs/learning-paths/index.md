@@ -14,6 +14,7 @@ import SectionRoleGrid from '../../.vitepress/theme/components/SectionRoleGrid.v
 
 ## 常用入口
 
+- [回到发现中心](/discover/)：如果你还在“先补原理 / 先做项目 / 先补工程化”之间犹豫，先回统一入口重新判断。
 - [直接进入实践篇](/practice/)：如果你已经确认想先做项目，这里能马上进入 `P1` 和阶段总览。
 - [准备进入中级篇](/intermediate/)：当你开始关心稳定性、协作、安全和成本时，从这里进入工程专题。
 - [还想看章节全貌](/reading-map)：如果你想先知道整本书的结构，再决定按哪条路线开始。

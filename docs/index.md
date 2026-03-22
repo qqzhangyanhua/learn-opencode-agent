@@ -8,7 +8,7 @@ hero:
   actions:
     - theme: brand
       text: 30 秒选起步路线
-      link: /learning-paths/
+      link: /discover/
     - theme: brand
       text: 直接开始第一个项目
       link: /practice/p01-minimal-agent/
@@ -70,6 +70,7 @@ import SectionRoleGrid from '../.vitepress/theme/components/SectionRoleGrid.vue'
 
 ## 辅助阅读入口
 
+- [开始学习](/discover/)：统一发现中心，先按目标选路线，再按主题或内容类型继续探索。
 - [学习路径](/learning-paths/)：按目标选起步路线，30 秒内知道先读什么、先练什么。
 - [阅读地图](/reading-map)：先选路线，再决定按哪条主链路进入全书。
 - [版本说明](/version-notes)：确认本书基于哪份源码、写到什么边界。

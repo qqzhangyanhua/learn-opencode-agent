@@ -19,6 +19,7 @@ description: 面向掌握基础 Agent 理论后想进入工程专题的读者，
     { label: '按专题问题选入口', href: '/intermediate/25-rag-failure-patterns/', hint: '从 RAG、协作或安全等具体问题切入，再回链对应理论与实践章节。' }
   ]"
   :support-links="[
+    { label: '回到发现中心', href: '/discover/', hint: '如果你还不确定现在是不是进入工程专题的时机，先回统一入口重新判断。' },
     { label: '回到学习路径', href: '/learning-paths/', hint: '重新判断自己现在该停在实践篇，还是继续走工程专题路线。' },
     { label: '回到实践篇', href: '/practice/', hint: '如果你还没把最小项目和关键章节跑通，先回去补手感。' }
   ]"

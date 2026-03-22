@@ -6,6 +6,14 @@ const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const packageJsonPath = path.join(rootDir, 'package.json')
 const configPath = path.join(rootDir, '.vitepress', 'config.mts')
 const discoveryDataPath = path.join(rootDir, '.vitepress', 'theme', 'data', 'discovery-content.ts')
+const themeIndexPath = path.join(rootDir, '.vitepress', 'theme', 'index.ts')
+const discoverPagePath = path.join(rootDir, 'docs', 'discover', 'index.md')
+const discoveryComponentPaths = [
+  ['DiscoveryTypeBadge', path.join(rootDir, '.vitepress', 'theme', 'components', 'DiscoveryTypeBadge.vue')],
+  ['DiscoveryGoalRoutes', path.join(rootDir, '.vitepress', 'theme', 'components', 'DiscoveryGoalRoutes.vue')],
+  ['DiscoveryStartGrid', path.join(rootDir, '.vitepress', 'theme', 'components', 'DiscoveryStartGrid.vue')],
+  ['DiscoveryTopicHub', path.join(rootDir, '.vitepress', 'theme', 'components', 'DiscoveryTopicHub.vue')]
+]
 
 const issues = []
 
@@ -47,6 +55,38 @@ if (existsSync(discoveryDataPath)) {
     if (!discoveryData.includes(exportName)) {
       issues.push(`discovery-content.ts 缺少 ${exportName} 导出`)
     }
+  }
+}
+
+const themeIndex = readFileSync(themeIndexPath, 'utf8')
+for (const [componentName, componentPath] of discoveryComponentPaths) {
+  if (!existsSync(componentPath)) {
+    issues.push(`缺少 ${path.relative(rootDir, componentPath)}`)
+  }
+
+  if (!themeIndex.includes(componentName)) {
+    issues.push(`主题入口尚未注册 ${componentName}`)
+  }
+}
+
+if (!existsSync(discoverPagePath)) {
+  issues.push('缺少 docs/discover/index.md')
+} else {
+  const discoverPage = readFileSync(discoverPagePath, 'utf8')
+  const requiredTokens = [
+    '<DiscoveryGoalRoutes',
+    '<DiscoveryStartGrid',
+    '<DiscoveryTopicHub'
+  ]
+
+  for (const token of requiredTokens) {
+    if (!discoverPage.includes(token)) {
+      issues.push(`docs/discover/index.md 尚未接入 ${token}`)
+    }
+  }
+
+  if (!discoverPage.includes('/discover/')) {
+    issues.push('docs/discover/index.md 缺少 discovery 自身规范链接')
   }
 }
 
