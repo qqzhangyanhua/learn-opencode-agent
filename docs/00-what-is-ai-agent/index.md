@@ -35,11 +35,7 @@ roleDescription: 用一条最基础的执行主链路先建立共同语境，再
 import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshotCard.vue'
 </script>
 
-> **学习目标**：理解 AI Agent 的定义、与 LLM/Chatbot 的区别、核心能力和应用场景
-> **前置知识**：了解大语言模型（LLM）的基本概念
-> **阅读时间**：15 分钟
-
----
+<ChapterLearningGuide />
 
 ## 本章导读
 

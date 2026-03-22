@@ -35,12 +35,9 @@ roleDescription: 用消息结构、循环控制和压缩策略把前面学过的
 import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshotCard.vue'
 </script>
 
-> **学习目标**：理解 Session 是 OpenCode 的核心骨架，掌握消息如何流动、循环如何控制、上下文溢出如何处理
-> **前置知识**：第4章"工具系统"
-> **源码路径**：`packages/opencode/src/session/`
-> **阅读时间**：25 分钟
+<ChapterLearningGuide />
 
----
+> **源码路径**：`packages/opencode/src/session/`
 
 ## 本章导读
 

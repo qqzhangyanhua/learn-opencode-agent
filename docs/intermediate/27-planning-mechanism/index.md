@@ -32,11 +32,9 @@ entryMode: bridge
 roleDescription: 把实践里学到的 ReAct 循环提升到计划与重规划视角，作为进入中级工程专题的桥接节点。
 ---
 
-> **对应路径**：`packages/opencode/src/agent/agent.ts`、`packages/opencode/src/session/processor.ts`、`packages/opencode/src/tool/task.ts`、`docs/intermediate/examples/27-planning-mechanism/`
-> **前置阅读**：[P10：ReAct Loop](/practice/p10-react-loop/)、[P11：Planning 机制](/practice/p11-planning/)
-> **学习目标**：理解为什么复杂任务不能只靠“边想边做”，学会区分 ReAct、Plan-and-Execute、自适应规划三种执行方式，并知道它们各自的成本和边界。
+<ChapterLearningGuide :audience="['已经理解 ReAct 基础，准备把实践经验升级成规划机制判断的人']" />
 
----
+> **对应路径**：`packages/opencode/src/agent/agent.ts`、`packages/opencode/src/session/processor.ts`、`packages/opencode/src/tool/task.ts`、`docs/intermediate/examples/27-planning-mechanism/`
 
 ## 这篇解决什么问题
 

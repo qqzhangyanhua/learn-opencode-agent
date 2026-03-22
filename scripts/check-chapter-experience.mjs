@@ -7,6 +7,15 @@ const packageJsonPath = path.join(rootDir, 'package.json')
 const themeIndexPath = path.join(rootDir, '.vitepress', 'theme', 'index.ts')
 const guidePath = path.join(rootDir, '.vitepress', 'theme', 'components', 'ChapterLearningGuide.vue')
 const actionPath = path.join(rootDir, '.vitepress', 'theme', 'components', 'ChapterActionPanel.vue')
+const guideTargetPages = [
+  'docs/00-what-is-ai-agent/index.md',
+  'docs/01-agent-basics/index.md',
+  'docs/03-tool-system/index.md',
+  'docs/04-session-management/index.md',
+  'docs/practice/p01-minimal-agent/index.md',
+  'docs/practice/p10-react-loop/index.md',
+  'docs/intermediate/27-planning-mechanism/index.md'
+]
 
 const issues = []
 
@@ -34,6 +43,13 @@ if (!packageJson.includes('check:chapter-experience')) {
 
 if (!packageJson.includes('bun run check:chapter-experience')) {
   issues.push('build:strict 尚未接入 check:chapter-experience')
+}
+
+for (const relativePath of guideTargetPages) {
+  const pageContent = readFileSync(path.join(rootDir, relativePath), 'utf8')
+  if (!pageContent.includes('<ChapterLearningGuide')) {
+    issues.push(`${relativePath} 尚未接入 <ChapterLearningGuide />`)
+  }
 }
 
 if (issues.length === 0) {
