@@ -80,8 +80,8 @@
 | DISC-01 | Phase 5 | Complete |
 | DISC-02 | Phase 1 | Complete |
 | DISC-03 | Phase 5 | Complete |
-| PROG-01 | Phase 6 | Planned |
-| PROG-02 | Phase 6 | Planned |
+| PROG-01 | Phase 6 | Complete |
+| PROG-02 | Phase 6 | Complete |
 
 **Coverage:**
 - v1 requirements: 16 total
@@ -93,4 +93,4 @@
 
 ---
 *Requirements defined: 2026-03-21*
-*Last updated: 2026-03-22 after Phase 6 planning*
+*Last updated: 2026-03-22 after Phase 6 completion*

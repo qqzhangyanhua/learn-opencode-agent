@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: ready
-stopped_at: Phase 06 已完成规划，等待执行
-last_updated: "2026-03-22T16:35:00Z"
+stopped_at: Phase 06 已完成，等待下一阶段规划
+last_updated: "2026-03-22T18:20:00Z"
 progress:
   total_phases: 6
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 16
-  completed_plans: 14
+  completed_plans: 16
 ---
 
 # Project State
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-21)
 
 **Core value:** 让想系统学习 AI Agent 的中文开发者在 30 秒内知道从哪里开始，并能沿着清晰路径持续学下去
-**Current focus:** Phase 06 本地学习进度 MVP 已完成规划，处于 READY TO EXECUTE
+**Current focus:** Phase 06 本地学习进度 MVP 已完成，等待选择下一项 v2 工作
 
 ## Current Position
 
-Phase: 06 (本地学习进度 MVP) — READY TO EXECUTE
-Plan: 0 of 2
+Phase: 06 (本地学习进度 MVP) — COMPLETE
+Plan: 2 of 2
 
 ## Performance Metrics
 
@@ -86,6 +86,8 @@ Recent decisions affecting current work:
 - [Phase 06]: 本地学习进度第一版只做内容页内的手动三态记录，不做首页汇总、路线完成率或自动追踪
 - [Phase 06]: 进度控件嵌入 ChapterLearningGuide 与 PracticeProjectGuide，而不是放到 ActionPanel
 - [Phase 06]: 学习状态统一收敛为 `稍后再看 / 从这里继续 / 已完成`，单内容互斥并保存 `updatedAt`
+- [Phase 06]: `check:learning-progress` 已接入 `build:strict`，章节页和实践页 guide 层进度能力成为自动校验的一部分
+- [Phase 06]: `practice-projects.ts` 已修复对 `learning-paths.data` 的类型/运行时接口对齐问题，`bun run typecheck` 已恢复为绿
 
 ### Pending Todos
 
@@ -97,6 +99,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-03-22T16:35:00Z
-Stopped at: Phase 06 规划完成，待执行 06-01
+Last session: 2026-03-22T18:20:00Z
+Stopped at: Phase 06 已完成，主分支验证通过
 Resume file: None

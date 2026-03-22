@@ -1,7 +1,7 @@
 ---
 phase: 6
 slug: local-learning-progress-mvp
-status: draft
+status: complete
 nyquist_compliant: true
 wave_0_complete: true
 created: 2026-03-22
@@ -28,10 +28,10 @@ created: 2026-03-22
 
 | Task ID | Plan | Wave | Requirement | Automated Command | Status |
 |---------|------|------|-------------|-------------------|--------|
-| 06-01-01 | 01 | 1 | PROG-01, PROG-02 | `bun run build:strict` | ⬜ pending |
-| 06-01-02 | 01 | 1 | PROG-01, PROG-02 | `bun run build:strict` | ⬜ pending |
-| 06-02-01 | 02 | 2 | PROG-01, PROG-02 | `bun run build:strict` | ⬜ pending |
-| 06-02-02 | 02 | 2 | PROG-01, PROG-02 | `bun run build:strict` | ⬜ pending |
+| 06-01-01 | 01 | 1 | PROG-01, PROG-02 | `bun run build:strict` | ✅ complete |
+| 06-01-02 | 01 | 1 | PROG-01, PROG-02 | `bun run build:strict` | ✅ complete |
+| 06-02-01 | 02 | 2 | PROG-01, PROG-02 | `bun run build:strict` | ✅ complete |
+| 06-02-02 | 02 | 2 | PROG-01, PROG-02 | `bun run build:strict` | ✅ complete |
 
 ## Manual Checks
 
@@ -47,5 +47,7 @@ created: 2026-03-22
 - [x] Phase 1 至 Phase 5 已提供稳定 content metadata、内容页 guide 骨架与统一校验入口，不需要额外 Wave 0 基础设施
 - [x] 所有 tasks 都有统一自动验证命令
 - [x] `nyquist_compliant: true` 已设置
+- [x] `b6c3c8e` 已交付本地学习进度功能，`8ae9cf7` 已补齐 `typecheck` 基线修复
+- [x] `bun run typecheck` 与 `bun run build:strict` 已在主分支重新验证通过
 
-**Approval:** pending
+**Approval:** approved
