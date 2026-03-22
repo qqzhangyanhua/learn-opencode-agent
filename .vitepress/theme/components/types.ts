@@ -115,6 +115,22 @@ export interface PracticePreviewProps {
   practicePhases?: number
 }
 
+export interface ChapterActionItem {
+  title: string
+  description: string
+  href?: string
+}
+
+export interface ChapterLearningGuideProps {
+  audience?: string[]
+  stageLabel?: string
+}
+
+export interface ChapterActionPanelProps {
+  title?: string
+  actionItems?: ChapterActionItem[]
+}
+
 // ===== 动画系统类型 =====
 
 export interface AnimationContainerProps {

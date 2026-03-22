@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vitepress dev",
     "build": "vitepress build",
-    "build:strict": "bun run check:content && bun run check:practice && bun run check:learning-metadata && bun run check:learning-paths && bun run check:homepage-entry && bun run check:navigation-entry && bun run check:entry-context && bun run build",
+    "build:strict": "bun run check:content && bun run check:practice && bun run check:learning-metadata && bun run check:learning-paths && bun run check:homepage-entry && bun run check:navigation-entry && bun run check:entry-context && bun run check:chapter-experience && bun run build",
     "typecheck": "tsc --noEmit -p .vitepress/tsconfig.json",
     "check:content": "node scripts/check-content.mjs",
     "check:learning-metadata": "node scripts/check-learning-metadata.mjs",
@@ -14,6 +14,7 @@
     "check:homepage-entry": "node scripts/check-homepage-entry.mjs",
     "check:navigation-entry": "node scripts/check-navigation-entry.mjs",
     "check:entry-context": "node scripts/check-entry-context.mjs",
+    "check:chapter-experience": "node scripts/check-chapter-experience.mjs",
     "check:practice": "node scripts/check-practice-entries.mjs",
     "preview": "vitepress preview",
     "start": "caddy run --config /Caddyfile --adapter caddyfile"
