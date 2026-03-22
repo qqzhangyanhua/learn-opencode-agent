@@ -4,6 +4,11 @@ import type {
   PracticePhaseSummary,
   SectionRoleSummary
 } from '../data/content-meta'
+import type {
+  PracticeCourseRoute,
+  PracticeProjectDefinition,
+  PracticeReferenceLink
+} from '../data/practice-projects'
 
 export type {
   ContentSeries,
@@ -17,6 +22,12 @@ export type {
   SectionId,
   SectionRoleSummary
 } from '../data/content-meta'
+
+export type {
+  PracticeCourseRoute,
+  PracticeProjectDefinition,
+  PracticeReferenceLink
+} from '../data/practice-projects'
 
 export interface SourceSnapshotEntry {
   label: string
@@ -113,6 +124,14 @@ export interface PracticePreviewProps {
   theoryChapters?: number
   practiceProjects?: number
   practicePhases?: number
+}
+
+export interface PracticeRouteExplorerProps {
+  routeIds?: PracticeCourseRoute['routeId'][]
+}
+
+export interface PracticeProjectSyllabusProps {
+  phaseIds?: PracticePhaseSummary['phaseId'][]
 }
 
 export interface ChapterActionItem {

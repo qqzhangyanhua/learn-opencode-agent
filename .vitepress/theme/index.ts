@@ -21,6 +21,8 @@ import TaskDelegationDemo from './components/TaskDelegationDemo.vue'
 import PracticeTerminalHero from './components/PracticeTerminalHero.vue'
 import PracticePhaseGrid from './components/PracticePhaseGrid.vue'
 import PracticeTagCloud from './components/PracticeTagCloud.vue'
+import PracticeRouteExplorer from './components/PracticeRouteExplorer.vue'
+import PracticeProjectSyllabus from './components/PracticeProjectSyllabus.vue'
 import ProjectCard from './components/ProjectCard.vue'
 import RunCommand from './components/RunCommand.vue'
 import HomeStartPanel from './components/HomeStartPanel.vue'
@@ -66,6 +68,8 @@ const globalComponents = [
   ['PracticeTerminalHero', PracticeTerminalHero],
   ['PracticePhaseGrid', PracticePhaseGrid],
   ['PracticeTagCloud', PracticeTagCloud],
+  ['PracticeRouteExplorer', PracticeRouteExplorer],
+  ['PracticeProjectSyllabus', PracticeProjectSyllabus],
   ['ProjectCard', ProjectCard],
   ['RunCommand', RunCommand],
   ['HomeStartPanel', HomeStartPanel],
