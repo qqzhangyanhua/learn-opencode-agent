@@ -166,7 +166,24 @@ function validateRunnerConfig(config: PracticePlaygroundConfig): void {
   }
 
   if (missingFields.length > 0) {
-    throw new Error(`无法开始运行：请先填写 ${missingFields.join(' / ')}。`)
+    const errorMessage = [
+      '❌ 无法开始运行，请先完成配置：',
+      '',
+      '缺失项：',
+      ...missingFields.map(f => `  • ${f}`),
+      '',
+      '📝 如何配置：',
+      '  1. 点击右上角"设置"按钮',
+      '  2. 填写上述缺失项',
+      '  3. 点击"保存"',
+      '',
+      '💡 提示：',
+      '  • API Key 可从 OpenAI 官网获取',
+      '  • baseURL 默认为 https://api.openai.com/v1',
+      '  • model 推荐使用 gpt-4o 或 gpt-4o-mini',
+    ].join('\n')
+
+    throw new Error(errorMessage)
   }
 }
 
@@ -814,5 +831,26 @@ export async function runPracticePlaygroundChapter(
     return
   }
 
-  throw new Error('当前章节暂未接入，将在后续任务实现。')
+  const chapter = context.chapter as PracticePlaygroundChapter
+  const errorMessage = [
+    `❌ 章节 ${chapter.number} 暂未接入 Playground`,
+    '',
+    '当前仅支持以下章节的在线运行：',
+    '  ✅ P1：最小 Agent',
+    '  ✅ P2：多轮对话',
+    '  ✅ P3：流式输出',
+    '  ✅ P10：ReAct Loop',
+    '  ✅ P18：模型路由',
+    '',
+    '💡 如何运行其他章节：',
+    '  1. 查看章节文档了解实现细节',
+    `  2. 访问 ${chapter.articleHref}`,
+    '  3. 按照文档在本地环境运行',
+    '',
+    '📚 参考资源：',
+    '  • 实践环境准备：/practice/setup',
+    '  • 本地运行说明：/practice/setup#local-mode',
+  ].join('\n')
+
+  throw new Error(errorMessage)
 }

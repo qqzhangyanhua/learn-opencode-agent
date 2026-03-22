@@ -50,7 +50,7 @@ const runButtonTitle = computed(() => {
             :key="chapter.id"
             :value="chapter.id"
           >
-            {{ chapter.number }} · {{ chapter.title }}
+            {{ chapter.playground.status === 'ready' ? '✅' : '🚧' }} {{ chapter.number }} · {{ chapter.title }}
           </option>
         </select>
       </label>

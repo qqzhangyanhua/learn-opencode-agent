@@ -20,8 +20,8 @@ import PracticeTagCloud from '../../.vitepress/theme/components/PracticeTagCloud
 **23 个项目 · 可跟打实现 · OpenAI SDK + TypeScript**
 
 <div class="practice-actions">
+  <a href="/practice/playground/" class="btn-playground">🚀 在线运行 Playground</a>
   <a href="/practice/setup" class="btn-secondary">开始前先看</a>
-  <a href="/practice/setup#online-mode" class="btn-secondary">在线运行说明</a>
   <a href="/practice/p01-minimal-agent/" class="btn-primary">从 P1 开始</a>
   <a href="#phases" class="btn-secondary">课程大纲</a>
   <a href="#chapter-matrix" class="btn-secondary">章节总表</a>
@@ -247,5 +247,22 @@ import PracticeTagCloud from '../../.vitepress/theme/components/PracticeTagCloud
 .btn-secondary:hover {
   border-color: #f97316;
   color: #f97316;
+}
+
+.btn-playground {
+  background: linear-gradient(135deg, #0d9488 0%, #06b6d4 100%);
+  color: white;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-family: monospace;
+  font-size: 14px;
+  text-decoration: none;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
+}
+
+.btn-playground:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(13, 148, 136, 0.4);
 }
 </style>

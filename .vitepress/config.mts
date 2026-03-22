@@ -63,6 +63,7 @@ export default withMermaid(defineConfig({
     nav: [
       { text: '首页', link: '/' },
       { text: '实践篇', link: '/practice/', activeMatch: '/practice/' },
+      { text: '🚀 在线运行', link: '/practice/playground/' },
       { text: '术语表', link: '/glossary' },
       { text: '本书仓库', link: bookRepository },
       { text: 'OpenCode 源码基线', link: sourceRepository },
@@ -71,6 +72,7 @@ export default withMermaid(defineConfig({
     sidebar: {
       '/practice/': [
         { text: '← 返回理论篇', link: '/' },
+        { text: '🚀 在线运行 Playground', link: '/practice/playground/' },
         { text: '开始前先看', link: '/practice/setup' },
         { text: '课程介绍', link: '/practice/' },
         {
