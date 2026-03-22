@@ -1,76 +1,81 @@
 <script setup lang="ts">
-interface Props {
-  theoryChapters?: number
-  practiceProjects?: number
-  practicePhases?: number
-}
+import { computed } from 'vue'
+import { data as contentIndex } from '../data/content-index.data.js'
+import { data as learningPathData } from '../data/learning-paths.data.js'
 
-withDefaults(defineProps<Props>(), {
-  theoryChapters: 16,
-  practiceProjects: 23,
-  practicePhases: 7
-})
+const theoryEntry = computed(() => contentIndex.sectionById.theory)
+const practiceEntry = computed(() => contentIndex.sectionById.practice)
+const intermediateEntry = computed(() => contentIndex.sectionById.intermediate)
+const practicePhaseCount = computed(() => learningPathData.practicePhases.length)
+const practiceProjectCount = computed(() =>
+  learningPathData.practicePhases.reduce((total, phase) => total + phase.projectCount, 0)
+)
+
+const entryCards = computed(() => [
+  {
+    key: 'theory',
+    label: '先读源码',
+    title: theoryEntry.value.title,
+    subtitle: theoryEntry.value.countLabel,
+    description: theoryEntry.value.roleDescription,
+    href: theoryEntry.value.recommendedStart,
+    tone: 'theory'
+  },
+  {
+    key: 'practice',
+    label: '先动手实践',
+    title: practiceEntry.value.title,
+    subtitle: `${practiceProjectCount.value} 个项目 · ${practicePhaseCount.value} 个阶段`,
+    description: practiceEntry.value.roleDescription,
+    href: practiceEntry.value.recommendedStart,
+    tone: 'practice'
+  },
+  {
+    key: 'intermediate',
+    label: '带着问题进阶',
+    title: intermediateEntry.value.title,
+    subtitle: intermediateEntry.value.countLabel,
+    description: intermediateEntry.value.roleDescription,
+    href: intermediateEntry.value.recommendedStart,
+    tone: 'intermediate'
+  }
+])
 </script>
 
 <template>
   <div class="dual-track-container">
-    <div class="track-card theory">
+    <article
+      v-for="card in entryCards"
+      :key="card.key"
+      class="track-card"
+      :class="card.tone"
+    >
+      <p class="track-label">{{ card.label }}</p>
       <div class="track-header">
-        <div class="track-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-          </svg>
-        </div>
-        <h3>理论篇：源码剖析</h3>
+        <h3>{{ card.title }}</h3>
+        <span class="track-subtitle">{{ card.subtitle }}</span>
       </div>
-      <p class="track-subtitle">{{ theoryChapters }} 章深入解读 OpenCode 架构</p>
-      <ul class="track-highlights">
-        <li>Agent 核心机制与执行循环</li>
-        <li>工具系统与权限管理</li>
-        <li>多模型支持与 MCP 协议</li>
-        <li>TUI/Web/Desktop 多端架构</li>
-        <li>生产化部署与质量保证</li>
-      </ul>
-      <a href="/00-what-is-ai-agent/" class="track-btn">开始阅读 →</a>
-    </div>
-
-    <div class="track-card practice">
-      <div class="track-header">
-        <div class="track-icon">
-          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="16 18 22 12 16 6"></polyline>
-            <polyline points="8 6 2 12 8 18"></polyline>
-          </svg>
-        </div>
-        <h3>实践篇：23 个项目</h3>
-      </div>
-      <p class="track-subtitle">{{ practiceProjects }} 个可运行示例 · {{ practicePhases }} 个阶段</p>
-      <ul class="track-highlights">
-        <li>从最小 Agent 到生产部署</li>
-        <li>OpenAI SDK + TypeScript</li>
-        <li>每章可独立运行验证</li>
-        <li>完整 Code Review Agent 项目</li>
-        <li>记忆系统、RAG、多 Agent 编排</li>
-      </ul>
-      <a href="/practice/" class="track-btn primary">立即动手 →</a>
-    </div>
+      <p class="track-description">{{ card.description }}</p>
+      <a :href="card.href" class="track-btn" :class="{ primary: card.tone === 'practice' }">
+        从这里开始 →
+      </a>
+    </article>
   </div>
 </template>
 
 <style scoped>
 .dual-track-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 24px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
   margin: 32px 0;
 }
 
 .track-card {
-  background: var(--vp-c-bg-soft);
+  background: linear-gradient(180deg, var(--vp-c-bg-soft), var(--vp-c-bg));
   border: 1px solid var(--vp-c-divider);
-  border-radius: 12px;
-  padding: 28px;
+  border-radius: 16px;
+  padding: 24px;
   transition: all 0.3s ease;
 }
 
@@ -84,22 +89,23 @@ withDefaults(defineProps<Props>(), {
   border-color: #ea580c;
 }
 
-.track-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.track-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.track-label {
+  margin: 0 0 12px;
   color: var(--vp-c-brand-1);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
-.track-card.practice .track-icon {
+.track-card.practice .track-label {
   color: #ea580c;
+}
+
+.track-header {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 12px;
 }
 
 .track-card h3 {
@@ -110,37 +116,21 @@ withDefaults(defineProps<Props>(), {
 }
 
 .track-subtitle {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  border-radius: 999px;
+  padding: 4px 10px;
+  background: var(--vp-c-bg-alt);
   color: var(--vp-c-text-2);
-  font-size: 14px;
-  margin: 0 0 20px 0;
-  line-height: 1.6;
+  font-size: 13px;
 }
 
-.track-highlights {
-  list-style: none;
-  padding: 0;
-  margin: 0 0 24px 0;
-}
-
-.track-highlights li {
-  position: relative;
-  padding-left: 20px;
-  margin-bottom: 10px;
+.track-description {
+  margin: 0 0 20px;
   color: var(--vp-c-text-2);
   font-size: 14px;
   line-height: 1.6;
-}
-
-.track-highlights li::before {
-  content: '▸';
-  position: absolute;
-  left: 0;
-  color: var(--vp-c-brand-1);
-  font-weight: bold;
-}
-
-.track-card.practice .track-highlights li::before {
-  color: #ea580c;
 }
 
 .track-btn {
@@ -171,10 +161,9 @@ withDefaults(defineProps<Props>(), {
 .track-btn.primary:hover {
   background: #c2410c;
   border-color: #c2410c;
-  transform: translateX(2px);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 640px) {
   .dual-track-container {
     grid-template-columns: 1fr;
   }

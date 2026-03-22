@@ -13,6 +13,9 @@ hero:
       text: 动手实践 23 个项目
       link: /practice/
     - theme: alt
+      text: 按目标选学习路径
+      link: /learning-paths/
+    - theme: alt
       text: Star 支持本书
       link: https://github.com/qqzhangyanhua/learn-opencode-agent
 ---
@@ -22,15 +25,14 @@ import LearningPath from '../.vitepress/theme/components/LearningPath.vue'
 import RuntimeLifecycleDiagram from '../.vitepress/theme/components/RuntimeLifecycleDiagram.vue'
 import TechStackGrid from '../.vitepress/theme/components/TechStackGrid.vue'
 import PracticePreview from '../.vitepress/theme/components/PracticePreview.vue'
+import SectionRoleGrid from '../.vitepress/theme/components/SectionRoleGrid.vue'
 </script>
 
 ## 这本书解决什么问题
 
-- **理论篇**：回答"OpenCode 这类 AI Coding Agent 是怎么实现的"，重点是看懂真实源码的主链路与工程边界。
-- **实践篇**：回答"如果你自己来做，最小可运行版本该怎么搭起来"，重点是把核心模式落到可执行 TypeScript 示例。
-- **中级篇**：回答"当你碰到稳定性、协作、成本、安全这些工程问题时，应该按什么专题继续深化"。
-
 建议**理论与实践穿插学习**：看完理论篇第 1-4 章后，先跑通实践篇 P1-P4，建立感性认知后再深入后续章节。
+
+<SectionRoleGrid />
 
 ## 你会得到什么
 
@@ -48,7 +50,7 @@ import PracticePreview from '../.vitepress/theme/components/PracticePreview.vue'
 
 ## 双轨学习体系
 
-<PracticePreview :theoryChapters="16" :practiceProjects="23" :practicePhases="7" />
+<PracticePreview />
 
 ## 核心学习路径
 
@@ -64,6 +66,7 @@ import PracticePreview from '../.vitepress/theme/components/PracticePreview.vue'
 
 ## 辅助阅读入口
 
+- [学习路径](/learning-paths/)：按目标选起步路线，30 秒内知道先读什么、先练什么。
 - [阅读地图](/reading-map)：先选路线，再决定按哪条主链路进入全书。
 - [版本说明](/version-notes)：确认本书基于哪份源码、写到什么边界。
 - [术语表](/glossary)：统一理解 `Agent`、`Subagent`、`Primary Agent`、`运行时`、`工作台` 等高频概念。
