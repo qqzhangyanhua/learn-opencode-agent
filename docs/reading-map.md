@@ -3,30 +3,15 @@ title: 阅读地图
 description: 这本电子书的推荐阅读顺序与章节关系图
 ---
 
-<script setup>
-import LearningPath from '../.vitepress/theme/components/LearningPath.vue'
-import RuntimeLifecycleDiagram from '../.vitepress/theme/components/RuntimeLifecycleDiagram.vue'
-</script>
-
 如果你是第一次系统阅读一个真实 AI Coding Agent 仓库，最常见的问题不是”内容不够”，而是”信息太多，不知道先读哪一篇”。
 
 这一页只做一件事：给你一张可以直接执行的阅读路线图。
 
-<EntryContextBanner
-  section="阅读地图"
-  badge="当前位置"
-  tone="theory"
-  summary="你现在在全站的路线分发页。它不负责替你读完整本书，而是帮你先定位『我应该从哪条路径切进去』，再决定回理论篇、去实践篇还是进入中级专题。"
-  :next-steps="[
-    { label: '回到发现中心重新选路线', href: '/discover/', hint: '如果你还没确定自己现在更适合哪条路线，先回统一入口再判断。' },
-    { label: '按目标重新选学习路径', href: '/learning-paths/', hint: '先判断自己更适合先看源码、先做项目，还是先补工程判断。' },
-    { label: '直接进入实践篇', href: '/practice/', hint: '如果你更想先跑项目，这里能马上进入 P1 和阶段总览。' }
-  ]"
-  :support-links="[
-    { label: '回到首页', href: '/', hint: '重新从首页的起步卡做一次快速判断。' },
-    { label: '准备好后进入中级篇', href: '/intermediate/', hint: '当你已经做过基础闭环并开始关心工程问题时，再切到专题页。' }
-  ]"
-/>
+## 快速导航
+
+- [回到首页](/) - 重新从首页开始
+- [直接进入实践篇](/practice/) - 如果你更想先跑项目
+- [进入中级篇](/intermediate/) - 当你已经做过基础闭环并开始关心工程问题
 
 ## 核心概念快速定位
 
@@ -45,25 +30,24 @@ import RuntimeLifecycleDiagram from '../.vitepress/theme/components/RuntimeLifec
 
 ## 推荐起点
 
-如果你不想先读完整张地图，可以先回到 [学习路径](/learning-paths/)，或者直接从下面三条 canonical path 中选一条开始：
-
-<LearningPath :path-ids="['theory-first', 'practice-first', 'engineering-depth']" />
-
 如果你是 Agent 开发初学者，默认按下面顺序读：
 
-1. 第一篇：先建立“系统怎样跑起来”的最小闭环
-2. 第二篇：再理解 Agent 是如何被定义和约束的
-3. 第三篇：再看工具怎样进入 Agent 能力边界
-4. 第四篇：最后把会话怎样把模型、工具和状态串起来读顺
+1. **第一篇**：先建立”系统怎样跑起来”的最小闭环
+2. **第二篇**：再理解 Agent 是如何被定义和约束的
+3. **第三篇**：再看工具怎样进入 Agent 能力边界
+4. **第四篇**：最后把会话怎样把模型、工具和状态串起来读顺
 
 读完这四篇后，再决定往哪条路线深入，效率会高很多。
 
 ## 全书统一主链路
 
-<RuntimeLifecycleDiagram
-  :highlight-keys="['session', 'tools', 'provider']"
-  description="阅读地图不是另一套解释，它只是把同一条运行时主链路拆成更适合初学者执行的章节顺序。"
-/>
+Agent 的核心执行流程：
+
+```
+用户输入 → Session 管理 → Provider 调用 → Tools 执行 → 结果返回
+```
+
+阅读地图不是另一套解释，它只是把同一条运行时主链路拆成更适合初学者执行的章节顺序。
 
 ## 三条主线怎么配合
 

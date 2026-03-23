@@ -183,7 +183,6 @@ export default withMermaid(defineConfig({
   themeConfig: {
     nav: [
       { text: '首页', link: '/' },
-      { text: '学习路径', link: '/learning-paths/', activeMatch: '/learning-paths/' },
       { text: '实践篇', link: '/practice/', activeMatch: '/practice/' },
       { text: '中级篇', link: '/intermediate/', activeMatch: '/intermediate/' },
       { text: '阅读地图', link: '/reading-map', activeMatch: '/reading-map' },
@@ -192,7 +191,7 @@ export default withMermaid(defineConfig({
 
     sidebar: {
       '/practice/': [
-        { text: '← 返回学习路径', link: '/learning-paths/' },
+        { text: '← 返回首页', link: '/' },
         { text: '课程介绍', link: '/practice/' },
         { text: '从 P1 开始', link: '/practice/p01-minimal-agent/' },
         { text: '下一步去中级篇', link: '/intermediate/' },
@@ -264,7 +263,7 @@ export default withMermaid(defineConfig({
         },
       ],
       '/intermediate/': [
-        { text: '← 返回学习路径', link: '/learning-paths/' },
+        { text: '← 返回首页', link: '/' },
         { text: '回到实践篇', link: '/practice/' },
         { text: '中级篇导读', link: '/intermediate/' },
         { text: '先读 Planning 机制', link: '/intermediate/27-planning-mechanism/' },
@@ -284,7 +283,6 @@ export default withMermaid(defineConfig({
         },
       ],
       '/': [
-        { text: '学习路径', link: '/learning-paths/' },
         { text: '实践篇总览', link: '/practice/' },
         { text: '中级篇导读', link: '/intermediate/' },
         { text: '阅读地图', link: '/reading-map' },
