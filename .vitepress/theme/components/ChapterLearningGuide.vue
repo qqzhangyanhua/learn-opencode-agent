@@ -92,10 +92,7 @@ const difficultyLabel = computed(() => {
   font-weight: 700;
   line-height: 1.3;
   letter-spacing: -0.02em;
-  background: var(--vp-home-hero-name-background);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--vp-c-text-1);
 }
 
 /* Description */
