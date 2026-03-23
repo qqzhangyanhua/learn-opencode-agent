@@ -54,6 +54,15 @@ import SecurityBoundaryDemo from './components/SecurityBoundaryDemo.vue'
 import CostOptimizationDashboard from './components/CostOptimizationDashboard.vue'
 import RuntimeLifecycleDiagram from './components/RuntimeLifecycleDiagram.vue'
 import HomeExploreLinks from './components/HomeExploreLinks.vue'
+import ToolCallingLifecycle from './components/ToolCallingLifecycle.vue'
+import RagPipelineDemo from './components/RagPipelineDemo.vue'
+import GraphRagDemo from './components/GraphRagDemo.vue'
+import StreamingOutputDemo from './components/StreamingOutputDemo.vue'
+import ContextWindowDemo from './components/ContextWindowDemo.vue'
+import MemoryBankDemo from './components/MemoryBankDemo.vue'
+import ErrorRetryDemo from './components/ErrorRetryDemo.vue'
+import MemoryLayersDemo from './components/MemoryLayersDemo.vue'
+import HybridRetrievalDemo from './components/HybridRetrievalDemo.vue'
 import './custom.css'
 
 const globalComponents = [
@@ -110,6 +119,15 @@ const globalComponents = [
   ['CostOptimizationDashboard', CostOptimizationDashboard],
   ['RuntimeLifecycleDiagram', RuntimeLifecycleDiagram],
   ['HomeExploreLinks', HomeExploreLinks],
+  ['ToolCallingLifecycle', ToolCallingLifecycle],
+  ['RagPipelineDemo', RagPipelineDemo],
+  ['GraphRagDemo', GraphRagDemo],
+  ['StreamingOutputDemo', StreamingOutputDemo],
+  ['ContextWindowDemo', ContextWindowDemo],
+  ['MemoryBankDemo', MemoryBankDemo],
+  ['ErrorRetryDemo', ErrorRetryDemo],
+  ['MemoryLayersDemo', MemoryLayersDemo],
+  ['HybridRetrievalDemo', HybridRetrievalDemo],
 ] as const
 
 export default {

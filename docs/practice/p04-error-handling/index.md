@@ -73,6 +73,8 @@ delay = baseDelay * 2^attempt + random(0, jitter)
 | 第 3 次 | 4000–4500 ms |
 | 第 4 次 | 8000–8500 ms |
 
+<ErrorRetryDemo />
+
 ## 动手实现
 
 ### 第一步：定义类型与常量

@@ -115,6 +115,8 @@ interface RetrievalResult {
 
 融合算法只关心排名，不关心原始分数的绝对值，因此两路分数即使量纲不同也可以融合。
 
+<HybridRetrievalDemo />
+
 ## 动手实现
 
 ### 第一步：共享数据类型和工具函数

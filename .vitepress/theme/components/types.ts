@@ -475,3 +475,109 @@ export interface CostScenario {
 export interface CostOptimizationDashboardProps {
   scenarios: CostScenario[]
 }
+
+// ===== P1: 最小 Agent - 工具调用生命周期 =====
+
+export type ToolCallingPhase = 'declare' | 'decide' | 'execute' | 'integrate'
+
+export interface ToolCallingStep {
+  phase: ToolCallingPhase
+  title: string
+  description: string
+  code?: string
+  output?: string
+}
+
+export interface ToolCallingLifecycleProps {
+  autoPlay?: boolean
+  playSpeed?: number
+}
+
+// ===== P5: MemoryLayersDemo - 三层记忆架构 =====
+
+export type MemoryPhase = 'short' | 'working' | 'long' | 'inject' | 'complete'
+
+export interface MemoryLayersStep {
+  phase: MemoryPhase
+  title: string
+  description: string
+  code?: string
+  output?: string
+}
+
+export interface MemoryLayersDemoProps {
+  autoPlay?: boolean
+  playSpeed?: number
+}
+
+// ===== P6: MemoryBank - 标签记忆检索 =====
+
+export type MemoryRetrievalPhase = 'query' | 'keywords' | 'match' | 'select' | 'inject'
+
+export interface MemoryRetrievalStep {
+  phase: MemoryRetrievalPhase
+  title: string
+  description: string
+  code?: string
+  output?: string
+}
+
+export interface MemoryBankDemoProps {
+  autoPlay?: boolean
+  playSpeed?: number
+}
+
+// ===== P7: RAG 基础 - RAG 流水线演示 =====
+
+export type RagPipelinePhase = 'doc' | 'chunk' | 'vectorize' | 'store' | 'query' | 'search' | 'generate'
+
+export interface RagPipelineStep {
+  phase: RagPipelinePhase
+  title: string
+  description: string
+  code?: string
+  output?: string
+}
+
+export interface RagPipelineDemoProps {
+  autoPlay?: boolean
+  playSpeed?: number
+}
+
+// ===== P9: 混合检索 + RRF 融合 =====
+
+export type HybridRetrievalPhase = 'query' | 'keyword' | 'vector' | 'rrf' | 'merge' | 'inject'
+
+export interface HybridRetrievalDemoProps {
+  autoPlay?: boolean
+  playSpeed?: number
+}
+
+// ===== P8: GraphRAG - 知识图谱遍历 =====
+
+export type GraphNodeType = 'person' | 'project' | 'department' | 'tech'
+
+export interface GraphNode {
+  id: string
+  label: string
+  type: GraphNodeType
+  x: number
+  y: number
+}
+
+export interface GraphEdge {
+  from: string
+  to: string
+  relation: string
+}
+
+export type GraphNodeStatus = 'unvisited' | 'current' | 'visited' | 'target'
+
+export interface GraphRagDemoProps {
+  nodes: GraphNode[]
+  edges: GraphEdge[]
+  startNodeId: string
+  query: string
+  autoPlay?: boolean
+  playSpeed?: number
+}

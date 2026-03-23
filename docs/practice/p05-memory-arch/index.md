@@ -80,6 +80,8 @@ POST /chat/completions
 
 本章采用最简单的**手动触发**方式，建立清晰的架构骨架。
 
+<MemoryLayersDemo />
+
 ## 动手实现
 
 ### 第一步：定义类型

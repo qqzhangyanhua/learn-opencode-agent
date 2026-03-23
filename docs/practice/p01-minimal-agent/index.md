@@ -64,6 +64,8 @@ const response = await client.chat.completions.create({
 3. **执行**：你的代码接收到 `tool_calls` 数组，调用真实函数并返回结果
 4. **整合**：把工具结果放回对话，模型生成最终回复
 
+<ToolCallingLifecycle />
+
 ## 动手实现
 
 ### 第一步：声明工具
