@@ -5,14 +5,14 @@
 
 /* ===== 品牌色系 ===== */
 :root {
-  --vp-c-brand-1: #0d9488;
+  --vp-c-brand-1: #14b8a6;
   --vp-c-brand-2: #0f766e;
   --vp-c-brand-3: #115e59;
-  --vp-c-brand-soft: rgba(13, 148, 136, 0.1);
+  --vp-c-brand-soft: rgba(20, 184, 166, 0.1);
 
   /* Hero 渐变 */
-  --vp-home-hero-name-color: transparent;
-  --vp-home-hero-name-background: linear-gradient(135deg, #0d9488 0%, #3b82f6 100%);
+  --vp-home-hero-name-color: var(--vp-c-brand-1);
+  --vp-home-hero-name-background: transparent;
 
   /* 亮色模式 Hero 光晕 */
   --vp-home-hero-image-filter: blur(44px);
@@ -25,8 +25,8 @@
   --selection-bg: rgba(13, 148, 136, 0.18);
 
   /* 亮色卡片增强 */
-  --card-shadow-light: 0 1px 4px rgba(0, 0, 0, 0.06), 0 4px 16px rgba(13, 148, 136, 0.06);
-  --card-shadow-hover: 0 6px 24px -4px rgba(13, 148, 136, 0.18), 0 2px 8px rgba(0, 0, 0, 0.05);
+  --card-shadow-light: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --card-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 .dark {
@@ -37,7 +37,33 @@
   --vp-home-hero-image-background-image: radial-gradient(circle, rgba(45, 212, 191, 0.15) 0%, transparent 70%);
   --code-bg: #161b22;
   --card-shadow-light: none;
-  --card-shadow-hover: 0 8px 24px -8px rgba(13, 148, 136, 0.2);
+  --card-shadow-hover: 0 8px 24px -8px rgba(45, 212, 191, 0.15);
+}
+
+/* ===== 首页专属：全屏固定有机波浪背景 ===== */
+/* .VPHome 只在首页存在，position:fixed 的伪元素固定在视口，离开首页自动消失 */
+.VPHome::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-color: #dff2ef;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 900' preserveAspectRatio='xMidYMid slice'%3E%3Cpath d='M860%2C0 C980%2C0 1160%2C60 1300%2C160 C1400%2C235 1440%2C320 1440%2C0 Z' fill='%23115e59' opacity='0.6'/%3E%3Cpath d='M0%2C320 C180%2C230 400%2C400 660%2C330 C880%2C268 1080%2C460 1340%2C380 C1410%2C358 1440%2C450 1440%2C900 L0%2C900 Z' fill='%230d9488' opacity='0.22'/%3E%3Cpath d='M0%2C580 C240%2C500 520%2C640 800%2C570 C1020%2C514 1240%2C660 1440%2C600 L1440%2C900 L0%2C900 Z' fill='%230f766e' opacity='0.3'/%3E%3C%2Fsvg%3E");
+  background-size: cover;
+  background-position: center top;
+}
+
+html.dark .VPHome::before {
+  background-color: #061615;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 900' preserveAspectRatio='xMidYMid slice'%3E%3Cpath d='M860%2C0 C980%2C0 1160%2C60 1300%2C160 C1400%2C235 1440%2C320 1440%2C0 Z' fill='%230d9488' opacity='0.5'/%3E%3Cpath d='M0%2C320 C180%2C230 400%2C400 660%2C330 C880%2C268 1080%2C460 1340%2C380 C1410%2C358 1440%2C450 1440%2C900 L0%2C900 Z' fill='%23115e59' opacity='0.45'/%3E%3Cpath d='M0%2C580 C240%2C500 520%2C640 800%2C570 C1020%2C514 1240%2C660 1440%2C600 L1440%2C900 L0%2C900 Z' fill='%230a2926' opacity='0.7'/%3E%3C%2Fsvg%3E");
+}
+
+/* 首页内容层透明，让波浪背景透出 */
+.VPHome {
+  background: transparent !important;
+}
+.VPHome .VPHomeContent {
+  background: transparent;
 }
 
 /* ===== 全局基础 ===== */
@@ -54,19 +80,11 @@ html {
 .VPHero {
   padding-top: 120px;
   padding-bottom: 80px;
-  background-image:
-    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(13, 148, 136, 0.08) 0%, transparent 60%),
-    linear-gradient(rgba(13, 148, 136, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(59, 130, 246, 0.025) 1px, transparent 1px);
-  background-size: auto, 50px 50px, 50px 50px;
+  background: transparent;
 }
 
 .dark .VPHero {
-  background-image:
-    radial-gradient(ellipse 80% 60% at 50% -10%, rgba(45, 212, 191, 0.06) 0%, transparent 60%),
-    linear-gradient(rgba(45, 212, 191, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(45, 212, 191, 0.03) 1px, transparent 1px);
-  background-size: auto, 50px 50px, 50px 50px;
+  background: transparent;
 }
 
 .VPHero .container {
@@ -114,7 +132,7 @@ html {
   transform: translateX(-50%);
   width: 80px;
   height: 3px;
-  background: linear-gradient(90deg, var(--vp-c-brand-1), #3b82f6);
+  background: var(--vp-c-brand-1);
   border-radius: 2px;
 }
 
@@ -156,15 +174,72 @@ html {
   color: var(--vp-c-brand-1);
 }
 
+/* 首页 Hero 按钮个性化：实践篇(橙色)、中级篇(蓝色) */
+.VPHome .VPHero .actions .action:nth-child(2) .VPButton {
+  border-color: rgba(234, 88, 12, 0.4);
+  color: #ea580c;
+}
+.VPHome .VPHero .actions .action:nth-child(2) .VPButton:hover {
+  background: rgba(234, 88, 12, 0.08);
+  border-color: #ea580c;
+}
+.dark .VPHome .VPHero .actions .action:nth-child(2) .VPButton {
+  border-color: rgba(234, 88, 12, 0.5);
+  color: #f97316;
+}
+.dark .VPHome .VPHero .actions .action:nth-child(2) .VPButton:hover {
+  background: rgba(234, 88, 12, 0.15);
+  border-color: #fb923c;
+  color: #fb923c;
+}
+
+.VPHome .VPHero .actions .action:nth-child(3) .VPButton {
+  border-color: rgba(59, 130, 246, 0.4);
+  color: #2563eb;
+}
+.VPHome .VPHero .actions .action:nth-child(3) .VPButton:hover {
+  background: rgba(59, 130, 246, 0.08);
+  border-color: #2563eb;
+}
+.dark .VPHome .VPHero .actions .action:nth-child(3) .VPButton {
+  border-color: rgba(59, 130, 246, 0.5);
+  color: #3b82f6;
+}
+.dark .VPHome .VPHero .actions .action:nth-child(3) .VPButton:hover {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: #60a5fa;
+  color: #60a5fa;
+}
+
+/* 首页 Hero 按钮个性化：Star GitHub (对比色/性冷淡风) */
+.VPHome .VPHero .actions .action:nth-child(4) .VPButton {
+  border-color: #d1d5db;
+  color: #374151;
+  background: rgba(255, 255, 255, 0.5);
+  font-weight: 600;
+}
+.VPHome .VPHero .actions .action:nth-child(4) .VPButton:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+  color: #111827;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+.dark .VPHome .VPHero .actions .action:nth-child(4) .VPButton {
+  border-color: #4b5563;
+  color: #d1d5db;
+  background: rgba(17, 24, 39, 0.5);
+}
+.dark .VPHome .VPHero .actions .action:nth-child(4) .VPButton:hover {
+  background: #374151;
+  border-color: #6b7280;
+  color: #f9fafb;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
 /* ===== 首页背景 ===== */
 .VPHome {
-  background: linear-gradient(
-    180deg,
-    transparent 0%,
-    rgba(13, 148, 136, 0.025) 30%,
-    rgba(59, 130, 246, 0.02) 60%,
-    transparent 100%
-  );
+  background: transparent;
 }
 
 .dark .VPHome {

@@ -52,6 +52,8 @@ import PromptDesignStudio from './components/PromptDesignStudio.vue'
 import ProductionArchitectureDiagram from './components/ProductionArchitectureDiagram.vue'
 import SecurityBoundaryDemo from './components/SecurityBoundaryDemo.vue'
 import CostOptimizationDashboard from './components/CostOptimizationDashboard.vue'
+import RuntimeLifecycleDiagram from './components/RuntimeLifecycleDiagram.vue'
+import HomeExploreLinks from './components/HomeExploreLinks.vue'
 import './custom.css'
 
 const globalComponents = [
@@ -106,6 +108,8 @@ const globalComponents = [
   ['ProductionArchitectureDiagram', ProductionArchitectureDiagram],
   ['SecurityBoundaryDemo', SecurityBoundaryDemo],
   ['CostOptimizationDashboard', CostOptimizationDashboard],
+  ['RuntimeLifecycleDiagram', RuntimeLifecycleDiagram],
+  ['HomeExploreLinks', HomeExploreLinks],
 ] as const
 
 export default {

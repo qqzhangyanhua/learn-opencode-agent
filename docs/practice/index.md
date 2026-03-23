@@ -25,12 +25,11 @@ import PracticeTagCloud from '../../.vitepress/theme/components/PracticeTagCloud
   <a href="/discover/" class="btn-secondary">回到发现中心</a>
   <a href="#course-routes" class="btn-secondary">30 秒选路线</a>
   <a href="#course-syllabus" class="btn-secondary">课程大纲</a>
-  <a href="/practice/playground/" class="btn-playground">在线运行 Playground</a>
   <a href="/practice/setup" class="btn-secondary">实践环境准备</a>
   <a href="/learning-paths/" class="btn-secondary">回到学习路径</a>
 </div>
 
-> 这里不是项目目录，而是整套 AI Agent 跟练课程的入口。第一次进入实践篇，推荐先在下面选一条路线；如果你还没准备好环境，再先看 [实践环境准备](/practice/setup)。想先试跑效果，也可以直接跳到 [在线运行模式](/practice/setup#online-mode) 或 [Practice Playground](/practice/playground/)。
+> 这里不是项目目录，而是整套 AI Agent 跟练课程的入口。第一次进入实践篇，推荐先在下面选一条路线；如果你还没准备好环境，再先看 [实践环境准备](/practice/setup)。
 
 </div>
 
@@ -41,7 +40,7 @@ import PracticeTagCloud from '../../.vitepress/theme/components/PracticeTagCloud
   summary="你现在在全站的项目跟练入口。这里负责把理论篇里抽象的 Agent 结构拆成可运行项目，并在完成基础闭环后把你送往中级专题。"
   :next-steps="[
     { label: '从 P1：最小 Agent 开始', href: '/practice/p01-minimal-agent/', hint: '第一次进入实践篇时最稳的起点，先把工具调用和对话闭环跑通。' },
-    { label: '先看实践环境准备', href: '/practice/setup', hint: '确认 bun、API Key 和本地 / 在线运行模式，再开始逐章练习。' }
+    { label: '先看实践环境准备', href: '/practice/setup', hint: '确认 bun、API Key 和本地运行环境，再开始逐章练习。' }
   ]"
   :support-links="[
     { label: '回到发现中心', href: '/discover/', hint: '如果你发现自己还没想清楚先做项目还是先补原理，回统一入口重新判断。' },
@@ -78,9 +77,7 @@ import PracticeTagCloud from '../../.vitepress/theme/components/PracticeTagCloud
 
 ## 运行索引 {#run-index}
 
-如果你只是想快速复制命令或确认脚本位置，再看下面的命令索引和章节总表。课程建议依然以上面的“路线选择 + 阶段大纲”为主。
-
-如果你当前走的是在线运行模式，建议先从 `P1-P4`、`P10`、`P18` 这类轻量章节开始；像 `P14` 这样的双进程章节，仍然优先使用本地运行模式。
+如果你只是想快速复制命令或确认脚本位置，再看下面的命令索引和章节总表。课程建议依然以上面的”路线选择 + 阶段大纲”为主。
 
 ### 先看依赖分组
 
@@ -258,22 +255,5 @@ import PracticeTagCloud from '../../.vitepress/theme/components/PracticeTagCloud
 .btn-secondary:hover {
   border-color: #f97316;
   color: #f97316;
-}
-
-.btn-playground {
-  background: linear-gradient(135deg, #0d9488 0%, #06b6d4 100%);
-  color: white;
-  padding: 10px 24px;
-  border-radius: 8px;
-  font-family: monospace;
-  font-size: 14px;
-  text-decoration: none;
-  transition: transform 0.2s, box-shadow 0.2s;
-  box-shadow: 0 4px 12px rgba(13, 148, 136, 0.3);
-}
-
-.btn-playground:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(13, 148, 136, 0.4);
 }
 </style>

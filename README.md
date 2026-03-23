@@ -28,7 +28,6 @@
 - 实践篇：`/practice/`
 - 实践环境准备：`/practice/setup`
 - 阅读地图：`/reading-map`
-- 版本说明：`/version-notes`
 - 术语表：`/glossary`
 
 ## 目录结构

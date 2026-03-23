@@ -39,7 +39,6 @@ export interface PracticeProjectDefinition {
   prerequisiteProjectIds: string[]
   runCommand: string
   sourceFiles: string[]
-  supportsPlayground: boolean
   runModeLabel: string
   runModeHint: string
   completionSignals: string[]
@@ -106,7 +105,6 @@ const projectSeeds: ProjectSeed[] = [
     prerequisiteProjectIds: [],
     runCommand: 'bun run p01-minimal-agent.ts',
     sourceFiles: ['practice/p01-minimal-agent.ts'],
-    supportsPlayground: true,
     runModeLabel: '在线/本地均可',
     runModeHint: '第一次进入实践篇最适合从这里开始，浏览器试跑和本地运行都很顺手。',
     completionSignals: [
@@ -137,7 +135,6 @@ const projectSeeds: ProjectSeed[] = [
     prerequisiteProjectIds: ['practice-p01-minimal-agent'],
     runCommand: 'bun run practice/p02-multi-turn.ts',
     sourceFiles: ['practice/p02-multi-turn.ts'],
-    supportsPlayground: true,
     runModeLabel: '在线/本地均可',
     runModeHint: '如果你想先感受多轮上下文效果，可以直接从在线工作台开始。',
     completionSignals: [
@@ -168,7 +165,6 @@ const projectSeeds: ProjectSeed[] = [
     prerequisiteProjectIds: ['practice-p01-minimal-agent'],
     runCommand: 'bun run p03-streaming.ts',
     sourceFiles: ['practice/p03-streaming.ts'],
-    supportsPlayground: true,
     runModeLabel: '在线/本地均可',
     runModeHint: '如果你想先看实时输出效果，优先用在线工作台验证流式体验。',
     completionSignals: [
@@ -199,7 +195,6 @@ const projectSeeds: ProjectSeed[] = [
     prerequisiteProjectIds: ['practice-p01-minimal-agent', 'practice-p02-multi-turn'],
     runCommand: 'bun run p04-error-handling.ts',
     sourceFiles: ['practice/p04-error-handling.ts'],
-    supportsPlayground: false,
     runModeLabel: '推荐本地运行',
     runModeHint: '这章更适合在本地观察重试、限流和错误日志，不建议只看静态结果。',
     completionSignals: [
@@ -230,7 +225,6 @@ const projectSeeds: ProjectSeed[] = [
     prerequisiteProjectIds: ['practice-p01-minimal-agent', 'practice-p02-multi-turn'],
     runCommand: 'bun run practice/p05-memory-arch.ts',
     sourceFiles: ['practice/p05-memory-arch.ts'],
-    supportsPlayground: false,
     runModeLabel: '推荐本地运行',
     runModeHint: '记忆读写和本地文件状态更适合在本地观察完整效果。',
     completionSignals: [
@@ -261,7 +255,6 @@ const projectSeeds: ProjectSeed[] = [
     prerequisiteProjectIds: ['practice-p01-minimal-agent', 'practice-p05-memory-arch'],
     runCommand: 'bun run practice/p06-memory-retrieval.ts',
     sourceFiles: ['practice/p06-memory-retrieval.ts'],
-    supportsPlayground: false,
     runModeLabel: '推荐本地运行',
     runModeHint: '这章关注检索逻辑和记忆召回，不必优先追求在线演示。',
     completionSignals: [
@@ -292,7 +285,6 @@ const projectSeeds: ProjectSeed[] = [
     prerequisiteProjectIds: ['practice-p01-minimal-agent', 'practice-p05-memory-arch'],
     runCommand: 'bun run practice/p07-rag-basics.ts',
     sourceFiles: ['practice/p07-rag-basics.ts'],
-    supportsPlayground: false,
     runModeLabel: '推荐本地运行',
     runModeHint: '需要处理文档分块和检索结果，对本地调试更友好。',
     completionSignals: [
@@ -323,7 +315,6 @@ const projectSeeds: ProjectSeed[] = [
     prerequisiteProjectIds: ['practice-p07-rag-basics'],
     runCommand: 'bun run p08-graphrag.ts',
     sourceFiles: ['practice/p08-graphrag.ts'],
-    supportsPlayground: false,
     runModeLabel: '推荐本地运行',
     runModeHint: '图谱构建和调试步骤较多，更适合本地逐段观察。',
     completionSignals: [
@@ -354,7 +345,6 @@ const projectSeeds: ProjectSeed[] = [
     prerequisiteProjectIds: ['practice-p07-rag-basics', 'practice-p08-graphrag'],
     runCommand: 'bun run p09-hybrid-retrieval.ts',
     sourceFiles: ['practice/p09-hybrid-retrieval.ts'],
-    supportsPlayground: false,
     runModeLabel: '推荐本地运行',
     runModeHint: '这章更偏检索对比实验，建议本地多改几次参数做观察。',
     completionSignals: [
@@ -385,7 +375,6 @@ const projectSeeds: ProjectSeed[] = [
     prerequisiteProjectIds: ['practice-p01-minimal-agent', 'practice-p04-error-handling'],
     runCommand: 'bun run p10-react-loop.ts',
     sourceFiles: ['practice/p10-react-loop.ts'],
-    supportsPlayground: true,
     runModeLabel: '在线/本地均可',
     runModeHint: '如果你想先看教学型推理链，在线工作台会更快；调试解析逻辑时再切回本地。',
     completionSignals: [
@@ -416,7 +405,6 @@ const projectSeeds: ProjectSeed[] = [
     prerequisiteProjectIds: ['practice-p10-react-loop'],
     runCommand: 'bun run p11-planning.ts',
     sourceFiles: ['practice/p11-planning.ts'],
-    supportsPlayground: false,
     runModeLabel: '推荐本地运行',
     runModeHint: '这章更适合在本地看任务树、执行顺序和失败时的重规划日志。',
     completionSignals: [
@@ -447,7 +435,6 @@ const projectSeeds: ProjectSeed[] = [
     prerequisiteProjectIds: ['practice-p10-react-loop'],
     runCommand: 'bun run p12-reflection.ts',
     sourceFiles: ['practice/p12-reflection.ts'],
-    supportsPlayground: false,
     runModeLabel: '推荐本地运行',
     runModeHint: 'Reflection 的价值来自多轮迭代过程，本地看日志会更完整。',
     completionSignals: [
@@ -478,7 +465,6 @@ const projectSeeds: ProjectSeed[] = [
     prerequisiteProjectIds: ['practice-p01-minimal-agent'],
     runCommand: 'bun run p13-multimodal.ts',
     sourceFiles: ['practice/p13-multimodal.ts'],
-    supportsPlayground: false,
     runModeLabel: '推荐本地运行',
     runModeHint: '图像输入和文件路径更适合在本地完整走通。',
     completionSignals: [
@@ -509,7 +495,6 @@ const projectSeeds: ProjectSeed[] = [
     prerequisiteProjectIds: ['practice-p01-minimal-agent', 'practice-p04-error-handling'],
     runCommand: 'bun run p14-mcp.ts',
     sourceFiles: ['practice/p14-mcp.ts', 'practice/p14-mcp-server.ts'],
-    supportsPlayground: false,
     runModeLabel: '双进程本地运行',
     runModeHint: '这章需要 Agent 端和 MCP Server 端分别运行，更适合本地双终端调试。',
     completionSignals: [
@@ -540,7 +525,6 @@ const projectSeeds: ProjectSeed[] = [
     prerequisiteProjectIds: ['practice-p01-minimal-agent', 'practice-p11-planning'],
     runCommand: 'bun run p15-multi-agent.ts',
     sourceFiles: ['practice/p15-multi-agent.ts'],
-    supportsPlayground: false,
     runModeLabel: '推荐本地运行',
     runModeHint: '多角色日志和并行执行细节更适合在本地逐段观察。',
     completionSignals: [
@@ -571,7 +555,6 @@ const projectSeeds: ProjectSeed[] = [
     prerequisiteProjectIds: ['practice-p01-minimal-agent', 'practice-p15-multi-agent'],
     runCommand: 'bun run p16-subagent.ts',
     sourceFiles: ['practice/p16-subagent.ts'],
-    supportsPlayground: false,
     runModeLabel: '推荐本地运行',
     runModeHint: '子 Agent 的状态切换和工具边界更适合在本地完整观察。',
     completionSignals: [
@@ -602,7 +585,6 @@ const projectSeeds: ProjectSeed[] = [
     prerequisiteProjectIds: ['practice-p15-multi-agent', 'practice-p16-subagent'],
     runCommand: 'bun run p17-agent-comm.ts',
     sourceFiles: ['practice/p17-agent-comm.ts'],
-    supportsPlayground: false,
     runModeLabel: '推荐本地运行',
     runModeHint: '协作日志较多，建议本地从消息和状态流向切入。',
     completionSignals: [
@@ -633,7 +615,6 @@ const projectSeeds: ProjectSeed[] = [
     prerequisiteProjectIds: ['practice-p01-minimal-agent'],
     runCommand: 'bun run p18-model-routing.ts',
     sourceFiles: ['practice/p18-model-routing.ts'],
-    supportsPlayground: true,
     runModeLabel: '在线/本地均可',
     runModeHint: '想先看路由决策结果时可在线试跑，调成本策略时再切本地。',
     completionSignals: [
@@ -664,7 +645,6 @@ const projectSeeds: ProjectSeed[] = [
     prerequisiteProjectIds: ['practice-p01-minimal-agent', 'practice-p04-error-handling'],
     runCommand: 'bun run p19-security.ts',
     sourceFiles: ['practice/p19-security.ts'],
-    supportsPlayground: false,
     runModeLabel: '推荐本地运行',
     runModeHint: '安全策略需要看完整输入、工具权限和日志，不建议只看结果。',
     completionSignals: [
@@ -695,7 +675,6 @@ const projectSeeds: ProjectSeed[] = [
     prerequisiteProjectIds: ['practice-p01-minimal-agent'],
     runCommand: 'bun run p20-observability.ts',
     sourceFiles: ['practice/p20-observability.ts'],
-    supportsPlayground: false,
     runModeLabel: '推荐本地运行',
     runModeHint: 'trace 树和结构化日志更适合本地完整观察。',
     completionSignals: [
@@ -726,7 +705,6 @@ const projectSeeds: ProjectSeed[] = [
     prerequisiteProjectIds: ['practice-p01-minimal-agent', 'practice-p12-reflection'],
     runCommand: 'bun run p21-evaluation.ts',
     sourceFiles: ['practice/p21-evaluation.ts'],
-    supportsPlayground: false,
     runModeLabel: '推荐本地运行',
     runModeHint: '评估需要多次运行和结果对比，本地更适合积累实验记录。',
     completionSignals: [
@@ -757,7 +735,6 @@ const projectSeeds: ProjectSeed[] = [
     prerequisiteProjectIds: ['practice-p01-minimal-agent', 'practice-p10-react-loop', 'practice-p15-multi-agent', 'practice-p19-security'],
     runCommand: 'bun run p22-project.ts',
     sourceFiles: ['practice/p22-project.ts'],
-    supportsPlayground: false,
     runModeLabel: '推荐本地运行',
     runModeHint: '这是综合项目，建议本地完整走完解析、分派、聚合和报告输出。',
     completionSignals: [
@@ -788,7 +765,6 @@ const projectSeeds: ProjectSeed[] = [
     prerequisiteProjectIds: ['practice-p18-model-routing', 'practice-p19-security', 'practice-p20-observability'],
     runCommand: 'bun run p23-production.ts',
     sourceFiles: ['practice/p23-production.ts'],
-    supportsPlayground: false,
     runModeLabel: '推荐本地运行',
     runModeHint: '生产特性依赖完整日志和健康检查输出，本地观察最直接。',
     completionSignals: [

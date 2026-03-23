@@ -188,7 +188,6 @@ export default withMermaid(defineConfig({
       { text: '实践篇', link: '/practice/', activeMatch: '/practice/' },
       { text: '中级篇', link: '/intermediate/', activeMatch: '/intermediate/' },
       { text: '阅读地图', link: '/reading-map', activeMatch: '/reading-map' },
-      { text: '🚀 在线运行', link: '/practice/playground/' },
       { text: '本书仓库', link: bookRepository },
     ],
 
@@ -198,7 +197,6 @@ export default withMermaid(defineConfig({
         { text: '课程介绍', link: '/practice/' },
         { text: '从 P1 开始', link: '/practice/p01-minimal-agent/' },
         { text: '下一步去中级篇', link: '/intermediate/' },
-        { text: '🚀 在线运行 Playground', link: '/practice/playground/' },
         { text: '开始前先看', link: '/practice/setup' },
         {
           text: 'Phase 1 — Agent 基础',
@@ -292,7 +290,6 @@ export default withMermaid(defineConfig({
         { text: '实践篇总览', link: '/practice/' },
         { text: '中级篇导读', link: '/intermediate/' },
         { text: '阅读地图', link: '/reading-map' },
-        { text: '版本说明', link: '/version-notes' },
         { text: '术语表', link: '/glossary' },
         {
           text: '第一部分：AI Agent 基础',

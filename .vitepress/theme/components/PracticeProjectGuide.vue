@@ -13,15 +13,6 @@ function difficultyLabel(value: string) {
   return '入门'
 }
 
-const playgroundHref = computed(() => {
-  if (!project.value?.supportsPlayground) {
-    return null
-  }
-
-  const slug = project.value.path.split('/').filter(Boolean).at(-1)
-  return slug ? `/practice/playground/?chapter=${slug}` : null
-})
-
 </script>
 
 <template>
@@ -35,9 +26,6 @@ const playgroundHref = computed(() => {
         :verified="true"
         :hint="project.runModeHint"
       />
-      <a v-if="playgroundHref" :href="playgroundHref" class="playground-link">
-        在线工作台 →
-      </a>
     </div>
   </section>
 </template>
@@ -91,21 +79,6 @@ const playgroundHref = computed(() => {
   display: flex;
   flex-direction: column;
   gap: 12px;
-}
-
-.playground-link {
-  display: inline-flex;
-  align-items: center;
-  align-self: flex-start;
-  color: #ea580c;
-  font-weight: 600;
-  font-size: 0.95rem;
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
-
-.playground-link:hover {
-  color: #c2410c;
 }
 
 /* Responsive */

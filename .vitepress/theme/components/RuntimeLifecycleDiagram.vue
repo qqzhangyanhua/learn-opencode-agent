@@ -127,9 +127,11 @@ const resolvedSteps = computed(() => props.steps ?? defaultSteps)
   gap: 14px;
   padding: 18px;
   border-radius: 14px;
-  border: 1px solid var(--vp-c-divider);
-  background: var(--vp-c-bg-soft);
-  box-shadow: var(--card-shadow-light);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.62);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 2px 12px rgba(13, 148, 136, 0.06);
 }
 
 .runtime-step.is-highlighted {
@@ -211,6 +213,17 @@ const resolvedSteps = computed(() => props.steps ?? defaultSteps)
     width: 44px;
     height: 44px;
   }
+}
+
+html.dark .runtime-step {
+  background: rgba(6, 22, 21, 0.65);
+  border-color: rgba(13, 148, 136, 0.2);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+}
+
+html.dark .runtime-step.is-highlighted {
+  background: rgba(13, 148, 136, 0.15);
+  border-color: rgba(13, 148, 136, 0.4);
 }
 </style>
 
