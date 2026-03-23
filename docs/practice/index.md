@@ -8,6 +8,7 @@ pageClass: practice-page
 <script setup>
 import PracticeTerminalHero from '../../.vitepress/theme/components/PracticeTerminalHero.vue'
 import PracticeRouteExplorer from '../../.vitepress/theme/components/PracticeRouteExplorer.vue'
+import PracticeProjectSyllabus from '../../.vitepress/theme/components/PracticeProjectSyllabus.vue'
 
 const bannerNextSteps = [
   { label: '选择适合你的学习路线', href: '#course-routes', hint: '根据你的背景和目标，选择最合适的起点。' }
@@ -47,6 +48,8 @@ const bannerSupportLinks = [
   :next-steps="bannerNextSteps"
   :support-links="bannerSupportLinks"
 />
+
+<PracticeProjectSyllabus />
 
 <style scoped>
 .practice-hero-section {
@@ -108,4 +111,3 @@ const bannerSupportLinks = [
   color: #f97316;
 }
 </style>
-
