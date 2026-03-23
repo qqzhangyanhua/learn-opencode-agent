@@ -593,3 +593,63 @@ html {
   border-color: #c2410c;
   box-shadow: 0 4px 16px rgba(234, 88, 12, 0.35);
 }
+
+/* ===== Practice Index Hero ===== */
+.practice-hero-section {
+  text-align: center;
+  padding: 60px 24px 40px;
+}
+
+.practice-hero-section h1 {
+  font-size: 2.4em;
+  font-weight: 700;
+  color: #f5f5f4;
+  margin: 16px 0 8px;
+  letter-spacing: -0.02em;
+}
+
+.practice-hero-section p {
+  color: #a8a29e;
+  font-size: 15px;
+  margin-bottom: 28px;
+}
+
+.practice-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+
+.practice-actions .btn-primary {
+  background: #ea580c;
+  color: white;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-family: monospace;
+  font-size: 14px;
+  text-decoration: none;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.practice-actions .btn-primary:hover {
+  background: #c2410c;
+  transform: translateY(-1px);
+}
+
+.practice-actions .btn-secondary {
+  background: transparent;
+  color: #a8a29e;
+  border: 1px solid #44403c;
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-size: 14px;
+  text-decoration: none;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.practice-actions .btn-secondary:hover {
+  border-color: #f97316;
+  color: #f97316;
+}
