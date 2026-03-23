@@ -14,7 +14,7 @@ const bannerNextSteps = [
 ]
 
 const bannerSupportLinks = [
-  { label: '回到学习路径', href: '/learning-paths/', hint: '重新判断是否该先做项目，还是先回去补理论主链路。' }
+  { label: '回到阅读地图', href: '/reading-map', hint: '重新判断是否该先做项目，还是先回去补理论主链路。' }
 ]
 </script>
 
