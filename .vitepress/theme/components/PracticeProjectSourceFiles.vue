@@ -1,18 +1,32 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, reactive } from 'vue'
 import { getPracticeProjectById } from '../data/practice-projects.js'
-import { getPracticeSourceFiles } from '../data/practice-source-files.js'
+import {
+  getPracticeSourceFiles,
+  type PracticeSourceFileEntry
+} from '../data/practice-source-files.js'
 import type { PracticeProjectSourceFilesProps } from './types'
 
 const props = defineProps<PracticeProjectSourceFilesProps>()
 
 const project = computed(() => getPracticeProjectById(props.projectId))
-
 const entries = computed(() => {
   const target = project.value
   return target ? getPracticeSourceFiles(target.sourceFiles) : []
 })
-
+const entryMap = computed(() => {
+  const map = new Map<string, PracticeSourceFileEntry>()
+  for (const entry of entries.value) {
+    map.set(entry.path, entry)
+  }
+  return map
+})
+const orderedEntries = computed(() =>
+  project.value?.sourceFiles.map((path) => ({
+    path,
+    entry: entryMap.value.get(path) ?? null
+  })) ?? []
+)
 const heading = computed(() => props.title ?? '完整示例源码')
 
 const copyStates = reactive<Record<string, boolean>>({})
@@ -24,21 +38,6 @@ onBeforeUnmount(() => {
   }
   copyTimers.clear()
 })
-
-async function copyCode(path: string, code: string) {
-  if (!code) return
-  const succeeded = await tryCopy(code)
-  if (!succeeded) return
-  copyStates[path] = true
-  if (copyTimers.has(path)) {
-    clearTimeout(copyTimers.get(path))
-  }
-  const timer = setTimeout(() => {
-    copyStates[path] = false
-    copyTimers.delete(path)
-  }, 1600)
-  copyTimers.set(path, timer)
-}
 
 async function tryCopy(value: string): Promise<boolean> {
   if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
@@ -65,15 +64,32 @@ async function tryCopy(value: string): Promise<boolean> {
 
   return false
 }
+
+function getEntry(path: string) {
+  return entryMap.value.get(path)
+}
+
+async function handleCopy(path: string) {
+  const entry = getEntry(path)
+  if (!entry || !entry.code) return
+  const success = await tryCopy(entry.code)
+  if (!success) return
+  copyStates[path] = true
+  if (copyTimers.has(path)) {
+    clearTimeout(copyTimers.get(path))
+  }
+  const timer = setTimeout(() => {
+    copyStates[path] = false
+    copyTimers.delete(path)
+  }, 1600)
+  copyTimers.set(path, timer)
+}
 </script>
 
 <template>
   <section class="practice-source-files">
     <header class="practice-source-files__header">
       <h2>{{ heading }}</h2>
-      <p class="practice-source-files__note">
-        当前练习项目的示例源码会逐一展开，便于查阅和复制。
-      </p>
     </header>
 
     <div v-if="!project" class="practice-source-files__empty">
@@ -87,45 +103,37 @@ async function tryCopy(value: string): Promise<boolean> {
 
       <div v-else class="practice-source-files__list">
         <details
-          v-for="path in project.sourceFiles"
-          :key="path"
+          v-for="item in orderedEntries"
+          :key="item.path"
           class="practice-source-files__entry"
         >
           <summary class="practice-source-files__summary">
-            <span class="practice-source-files__path">{{ path }}</span>
-            <span
-              v-if="entries.find((entry) => entry.path === path)"
-              class="practice-source-files__language"
-            >
-              {{ entries.find((entry) => entry.path === path).language.toUpperCase() }}
+            <span class="practice-source-files__path">{{ item.path }}</span>
+            <span v-if="item.entry" class="practice-source-files__language">
+              {{ item.entry.language.toUpperCase() }}
             </span>
           </summary>
 
           <div class="practice-source-files__body">
-            <div
-              v-if="!entries.find((entry) => entry.path === path)"
-              class="practice-source-files__fallback"
-            >
+            <div v-if="!item.entry" class="practice-source-files__fallback">
               <p>源码暂未收录，敬请期待更新。</p>
             </div>
             <div v-else>
               <div class="practice-source-files__controls">
                 <button
                   type="button"
-                  @click="
-                    const entry = entries.find((entry) => entry.path === path)
-                    if (entry) copyCode(path, entry.code)
-                  "
-                  :disabled="copyStates[path]"
+                  @click="handleCopy(item.path)"
+                  :disabled="copyStates[item.path]"
                 >
-                  {{ copyStates[path] ? '已复制' : '复制代码' }}
+                  {{ copyStates[item.path] ? '已复制' : '复制代码' }}
                 </button>
               </div>
               <div class="practice-source-files__code">
                 <pre>
-                  <code class="practice-source-files__code-text">
-{{ entries.find((entry) => entry.path === path)?.code }}
-                  </code>
+                  <code
+                    class="practice-source-files__code-text"
+                    v-text="item.entry.code"
+                  ></code>
                 </pre>
               </div>
             </div>
@@ -143,7 +151,7 @@ async function tryCopy(value: string): Promise<boolean> {
   border-radius: 24px;
   background: var(--vp-c-bg-soft);
   border: 1px solid var(--vp-c-divider);
-  box-shadow: var(--card-shadow-light);
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0);
 }
 
 .practice-source-files__header {
@@ -157,12 +165,6 @@ async function tryCopy(value: string): Promise<boolean> {
   font-size: 1.75rem;
   font-weight: 700;
   color: var(--vp-c-text);
-}
-
-.practice-source-files__note {
-  margin: 0;
-  color: var(--vp-c-text-2);
-  font-size: 0.95rem;
 }
 
 .practice-source-files__list {
@@ -241,7 +243,7 @@ async function tryCopy(value: string): Promise<boolean> {
 .practice-source-files__code {
   border: 1px solid var(--vp-c-divider);
   border-radius: 12px;
-  background: var(--code-bg, var(--vp-c-bg-soft));
+  background: var(--vp-c-bg-soft);
   overflow-x: auto;
 }
 
