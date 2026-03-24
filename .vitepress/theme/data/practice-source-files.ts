@@ -1,14 +1,12 @@
 /// <reference types="vite/client" />
 
-import { extname } from 'path'
-
 export interface PracticeSourceFileEntry {
   path: string
   code: string
   language: string
 }
 
-const PRACTICE_ROOT_GLOB_PREFIX = '../../../practice/'
+const PRACTICE_SEGMENT = 'practice/'
 
 const LANGUAGE_BY_EXTENSION: Record<string, string> = {
   '.ts': 'ts',
@@ -18,14 +16,18 @@ const LANGUAGE_BY_EXTENSION: Record<string, string> = {
 }
 
 function normalizePracticePath(globPath: string): string {
-  if (globPath.startsWith(PRACTICE_ROOT_GLOB_PREFIX)) {
-    return `practice/${globPath.slice(PRACTICE_ROOT_GLOB_PREFIX.length)}`
+  const practiceIndex = globPath.indexOf(PRACTICE_SEGMENT)
+  if (practiceIndex >= 0) {
+    return `practice/${globPath.slice(practiceIndex + PRACTICE_SEGMENT.length)}`
   }
-  return globPath
+  const segments = globPath.split('/').filter((segment) => segment.length > 0)
+  const fallback = segments[segments.length - 1] ?? globPath
+  return `practice/${fallback}`
 }
 
 function detectLanguage(filePath: string): string {
-  const extension = extname(filePath).toLowerCase()
+  const match = filePath.match(/\.[a-z0-9]+$/i)
+  const extension = match ? match[0].toLowerCase() : ''
   return LANGUAGE_BY_EXTENSION[extension] ?? 'text'
 }
 
