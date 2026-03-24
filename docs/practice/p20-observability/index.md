@@ -659,4 +659,5 @@ if (summary.errorCount / (summary.totalLlmCalls + summary.totalToolCalls) > 0.1)
 
 <StarCTA />
 
+<PracticeProjectSourceFiles project-id="practice-p20-observability" />
 <PracticeProjectActionPanel project-id="practice-p20-observability" />

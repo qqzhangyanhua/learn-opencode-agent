@@ -342,4 +342,5 @@ Agent: macOS 上用 Activity Monitor（活动监视器）图形界面查看，
 
 <StarCTA />
 
+<PracticeProjectSourceFiles project-id="practice-p06-memory-retrieval" />
 <PracticeProjectActionPanel project-id="practice-p06-memory-retrieval" />

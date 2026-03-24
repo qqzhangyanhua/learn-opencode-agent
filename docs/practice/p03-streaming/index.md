@@ -352,4 +352,5 @@ app.get('/stream', async (req, res) => {
 
 <StarCTA />
 
+<PracticeProjectSourceFiles project-id="practice-p03-streaming" />
 <PracticeProjectActionPanel project-id="practice-p03-streaming" />

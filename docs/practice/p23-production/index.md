@@ -603,4 +603,5 @@ Claude Sonnet 的 P95 延迟大约在 5-15 秒（取决于输出长度），Opus
 
 <StarCTA />
 
+<PracticeProjectSourceFiles project-id="practice-p23-production" />
 <PracticeProjectActionPanel project-id="practice-p23-production" />

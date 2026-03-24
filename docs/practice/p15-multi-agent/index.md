@@ -473,4 +473,5 @@ P4 的重试策略在这里也适用——可以对失败的 Worker 做指数退
 
 <StarCTA />
 
+<PracticeProjectSourceFiles project-id="practice-p15-multi-agent" />
 <PracticeProjectActionPanel project-id="practice-p15-multi-agent" />

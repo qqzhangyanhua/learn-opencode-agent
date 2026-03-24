@@ -850,4 +850,5 @@ main().catch(console.error)
 
 <StarCTA />
 
+<PracticeProjectSourceFiles project-id="practice-p22-project" />
 <PracticeProjectActionPanel project-id="practice-p22-project" />

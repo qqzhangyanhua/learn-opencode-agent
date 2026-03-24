@@ -540,4 +540,5 @@ Embedding 模型选型：
 
 <StarCTA />
 
+<PracticeProjectSourceFiles project-id="practice-p07-rag-basics" />
 <PracticeProjectActionPanel project-id="practice-p07-rag-basics" />

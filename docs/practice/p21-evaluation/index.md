@@ -695,4 +695,5 @@ Token 用量: 输入 1250 / 输出 890
 
 <StarCTA />
 
+<PracticeProjectSourceFiles project-id="practice-p21-evaluation" />
 <PracticeProjectActionPanel project-id="practice-p21-evaluation" />

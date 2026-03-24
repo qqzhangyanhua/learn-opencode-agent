@@ -496,4 +496,5 @@ main().catch(console.error)
 
 <StarCTA />
 
+<PracticeProjectSourceFiles project-id="practice-p08-graphrag" />
 <PracticeProjectActionPanel project-id="practice-p08-graphrag" />
