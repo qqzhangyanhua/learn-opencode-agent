@@ -1,176 +1,265 @@
 {
-  "scannedAt": "2026-03-19T16:12:00+08:00",
-  "workingDirectory": "docs/book",
-  "truncated": false,
-  "coverage": {
-    "estimatedTotalFiles": 42,
-    "scannedFiles": 42,
-    "coveragePercent": 100,
-    "ignoredDirectories": [
-      { "path": "node_modules/", "reason": "依赖目录，跳过" },
-      { "path": ".vitepress/cache/", "reason": "构建缓存，跳过" },
-      { "path": ".vitepress/dist/", "reason": "构建输出，跳过" }
-    ]
-  },
+  "timestamp": "2026-03-23T23:11:50.000Z",
+  "scanVersion": "2.0.0",
   "project": {
-    "name": "从零构建 AI Coding Agent — OpenCode 源码剖析与实战",
-    "type": "vitepress-ebook",
-    "runtime": "bun",
-    "language": "TypeScript + Vue 3 SFC + Markdown",
-    "framework": "VitePress 1.5",
-    "srcDir": "docs",
-    "buildOutput": ".vitepress/dist",
+    "name": "learn-opencode-agent-book",
+    "type": "VitePress 电子书站点",
+    "description": "从零构建 AI Coding Agent — OpenCode 源码剖析与实战",
+    "rootPath": "/Users/zhangyanhua/AI/opencode/docs/book",
+    "runtime": "bun (本地) / pnpm (部署)",
+    "framework": "VitePress 1.5 + Vue 3 + Mermaid",
     "repositories": {
       "book": "https://github.com/qqzhangyanhua/learn-opencode-agent",
-      "opencode": "https://github.com/anomalyco/opencode/tree/dev"
-    },
-    "sourceBaseline": {
-      "commit": "f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc",
-      "branch": "dev",
-      "verifiedAt": "2026-03-15"
+      "opencode": "https://github.com/anomalyco/opencode/tree/dev",
+      "sourceBaseline": "f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc"
     }
   },
-  "entryPoints": {
-    "config": ".vitepress/config.mts",
-    "themeEntry": ".vitepress/theme/index.ts",
-    "styles": ".vitepress/theme/custom.css",
-    "types": ".vitepress/theme/components/types.ts",
-    "homepage": "docs/index.md",
-    "readingMap": "docs/reading-map.md"
-  },
-  "dependencies": {
-    "vitepress": "^1.5.0",
-    "vitepress-plugin-mermaid": "^2.0.17",
-    "mermaid": "^11.13.0",
-    "typescript": "^5.8.2"
-  },
-  "chapters": {
-    "total": 25,
-    "parts": [
-      {
-        "part": 1,
-        "title": "AI Agent 基础",
-        "chapters": [
-          { "chapter": 1, "title": "什么是 AI Agent", "path": "docs/00-what-is-ai-agent/index.md", "sidebarLink": "/00-what-is-ai-agent/" },
-          { "chapter": 2, "title": "AI Agent 的核心组件", "path": "docs/01-agent-basics/index.md", "sidebarLink": "/01-agent-basics/" }
-        ]
-      },
-      {
-        "part": 2,
-        "title": "OpenCode 项目架构",
-        "chapters": [
-          { "chapter": 3, "title": "OpenCode 项目介绍", "path": "docs/02-agent-core/index.md", "sidebarLink": "/02-agent-core/" }
-        ]
-      },
-      {
-        "part": 3,
-        "title": "Agent 核心机制",
-        "chapters": [
-          { "chapter": 4, "title": "工具系统", "path": "docs/03-tool-system/index.md", "sidebarLink": "/03-tool-system/" },
-          { "chapter": 5, "title": "会话管理", "path": "docs/04-session-management/index.md", "sidebarLink": "/04-session-management/" },
-          { "chapter": 6, "title": "多模型支持", "path": "docs/05-provider-system/index.md", "sidebarLink": "/05-provider-system/" },
-          { "chapter": 7, "title": "MCP 协议集成", "path": "docs/06-mcp-integration/index.md", "sidebarLink": "/06-mcp-integration/" }
-        ]
-      },
-      {
-        "part": 4,
-        "title": "OpenCode 深入主题",
-        "chapters": [
-          { "chapter": 8, "title": "TUI 终端界面", "path": "docs/07-tui-interface/index.md", "sidebarLink": "/07-tui-interface/" },
-          { "chapter": 9, "title": "HTTP API 服务器", "path": "docs/08-http-api-server/index.md", "sidebarLink": "/08-http-api-server/" },
-          { "chapter": 10, "title": "数据持久化", "path": "docs/09-data-persistence/index.md", "sidebarLink": "/09-data-persistence/" },
-          { "chapter": 11, "title": "多端 UI 开发", "path": "docs/10-multi-platform-ui/index.md", "sidebarLink": "/10-multi-platform-ui/" },
-          { "chapter": 12, "title": "代码智能", "path": "docs/11-code-intelligence/index.md", "sidebarLink": "/11-code-intelligence/" },
-          { "chapter": 13, "title": "插件与扩展", "path": "docs/12-plugins-extensions/index.md", "sidebarLink": "/12-plugins-extensions/" },
-          { "chapter": 14, "title": "部署与基础设施", "path": "docs/13-deployment-infrastructure/index.md", "sidebarLink": "/13-deployment-infrastructure/" },
-          { "chapter": 15, "title": "测试与质量保证", "path": "docs/14-testing-quality/index.md", "sidebarLink": "/14-testing-quality/" },
-          { "chapter": 16, "title": "高级主题与最佳实践", "path": "docs/15-advanced-topics/index.md", "sidebarLink": "/15-advanced-topics/" }
-        ]
-      },
-      {
-        "part": 5,
-        "title": "oh-my-openagent 插件系统",
-        "chapters": [
-          { "chapter": 17, "title": "为什么需要多个 Agent？", "path": "docs/oh-prelude/index.md", "sidebarLink": "/oh-prelude/" },
-          { "chapter": 18, "title": "插件系统概述", "path": "docs/16-plugin-overview/index.md", "sidebarLink": "/16-plugin-overview/" },
-          { "chapter": 19, "title": "配置系统实战", "path": "docs/oh-config/index.md", "sidebarLink": "/oh-config/" },
-          { "chapter": 20, "title": "多模型编排系统", "path": "docs/17-multi-model-orchestration/index.md", "sidebarLink": "/17-multi-model-orchestration/" },
-          { "chapter": 21, "title": "Hooks 三层架构", "path": "docs/18-hooks-architecture/index.md", "sidebarLink": "/18-hooks-architecture/" },
-          { "chapter": 22, "title": "工具扩展系统", "path": "docs/19-tool-extension/index.md", "sidebarLink": "/19-tool-extension/" },
-          { "chapter": 23, "title": "一条消息的完整旅程", "path": "docs/oh-flow/index.md", "sidebarLink": "/oh-flow/" },
-          { "chapter": 24, "title": "实战案例与最佳实践", "path": "docs/20-best-practices/index.md", "sidebarLink": "/20-best-practices/" }
-        ]
-      }
-    ]
-  },
-  "auxiliaryPages": [
-    { "title": "首页", "path": "docs/index.md" },
-    { "title": "阅读地图", "path": "docs/reading-map.md" },
-    { "title": "术语表", "path": "docs/glossary.md" },
-    { "title": "版本说明", "path": "docs/version-notes.md" },
-    { "title": "封版清单", "path": "docs/release-checklist.md" },
-    { "title": "oh-my-openagent 规划", "path": "docs/oh-my-openagent-plan.md" }
-  ],
-  "vueComponents": {
-    "total": 21,
-    "registeredIn": ".vitepress/theme/index.ts",
-    "typeDefinitions": ".vitepress/theme/components/types.ts",
-    "list": [
-      { "name": "LearningPath", "file": "components/LearningPath.vue", "category": "homepage" },
-      { "name": "RuntimeLifecycleDiagram", "file": "components/RuntimeLifecycleDiagram.vue", "category": "homepage" },
-      { "name": "TechStackGrid", "file": "components/TechStackGrid.vue", "category": "homepage" },
-      { "name": "SourceSnapshotCard", "file": "components/SourceSnapshotCard.vue", "category": "chapter-header" },
-      { "name": "StarCTA", "file": "components/StarCTA.vue", "category": "chapter-footer" },
-      { "name": "ReActLoop", "file": "components/ReActLoop.vue", "category": "interactive-demo" },
-      { "name": "StreamingDemo", "file": "components/StreamingDemo.vue", "category": "interactive-demo" },
-      { "name": "MessageAccumulator", "file": "components/MessageAccumulator.vue", "category": "interactive-demo" },
-      { "name": "PermissionFlow", "file": "components/PermissionFlow.vue", "category": "interactive-demo" },
-      { "name": "McpHandshake", "file": "components/McpHandshake.vue", "category": "interactive-demo" },
-      { "name": "SseBroadcast", "file": "components/SseBroadcast.vue", "category": "interactive-demo" },
-      { "name": "ContextCompaction", "file": "components/ContextCompaction.vue", "category": "interactive-demo" },
-      { "name": "ProviderFallback", "file": "components/ProviderFallback.vue", "category": "interactive-demo" },
-      { "name": "WorkflowVsAgent", "file": "components/WorkflowVsAgent.vue", "category": "interactive-demo" },
-      { "name": "LspHover", "file": "components/LspHover.vue", "category": "interactive-demo" },
-      { "name": "ConnectionGate", "file": "components/ConnectionGate.vue", "category": "interactive-demo" },
-      { "name": "AgentDispatchDemo", "file": "components/AgentDispatchDemo.vue", "category": "part5-demo" },
-      { "name": "BackgroundTaskDemo", "file": "components/BackgroundTaskDemo.vue", "category": "part5-demo" },
-      { "name": "RuntimeFallbackDemo", "file": "components/RuntimeFallbackDemo.vue", "category": "part5-demo" },
-      { "name": "HashlineEditDemo", "file": "components/HashlineEditDemo.vue", "category": "part5-demo" },
-      { "name": "TaskDelegationDemo", "file": "components/TaskDelegationDemo.vue", "category": "part5-demo" }
-    ],
-    "notRegisteredButExists": [
-      "SourceSnapshotCard (imported directly in docs/ via <script setup>)",
-      "RuntimeLifecycleDiagram (imported directly in docs/ via <script setup>)",
-      "TechStackGrid (imported directly in docs/ via <script setup>)",
-      "LearningPath (imported directly in docs/ via <script setup>)"
-    ]
-  },
-  "gaps": {
-    "utilityScripts": {
-      "issue": "add-frontmatter.ts 仅覆盖 01-15 章，第五部分（oh-*、16-20章节目录）未包含在脚本硬编码列表中",
-      "priority": "low"
-    },
-    "chapterContentDepth": {
-      "issue": "本次扫描未逐章读取正文内容，章节内容完整性未验证",
-      "notScanned": [
-        "docs/01-agent-basics/index.md 正文",
-        "docs/02-agent-core/index.md 正文",
-        "docs/16-plugin-overview/index.md 正文",
-        "docs/17-multi-model-orchestration/index.md 正文",
-        "docs/18-hooks-architecture/index.md 正文",
-        "docs/19-tool-extension/index.md 正文",
-        "docs/20-best-practices/index.md 正文"
+  "modules": [
+    {
+      "name": "VitePress 配置层",
+      "path": ".vitepress",
+      "type": "configuration",
+      "language": "TypeScript",
+      "entry": ".vitepress/config.mts",
+      "keyFiles": [
+        ".vitepress/config.mts",
+        ".vitepress/tsconfig.json"
       ],
-      "priority": "medium"
+      "responsibilities": [
+        "站点元数据、导航、侧边栏配置",
+        "Mermaid 插件集成",
+        "OG meta 自动注入",
+        "搜索配置与学习元数据预处理"
+      ],
+      "coverage": "100%"
     },
-    "vueComponentDetails": {
-      "issue": "仅知道组件存在，未深读 part5 专属组件（AgentDispatchDemo 等）的实现细节",
-      "priority": "low"
+    {
+      "name": "主题与组件系统",
+      "path": ".vitepress/theme",
+      "type": "ui-framework",
+      "language": "TypeScript + Vue 3 SFC",
+      "entry": ".vitepress/theme/index.ts",
+      "keyFiles": [
+        ".vitepress/theme/index.ts",
+        ".vitepress/theme/custom.css",
+        ".vitepress/theme/components/types.ts"
+      ],
+      "components": {
+        "total": 66,
+        "registered": 66,
+        "categories": {
+          "核心展示组件": ["HomeStartPanel", "RuntimeLifecycleDiagram", "HomeExploreLinks", "LearningPath", "TechStackGrid"],
+          "交互演示组件": ["ReActLoop", "StreamingDemo", "MessageAccumulator", "PermissionFlow", "McpHandshake", "SseBroadcast", "ContextCompaction", "ProviderFallback", "WorkflowVsAgent", "LspHover", "ConnectionGate"],
+          "第五部分专属组件": ["AgentDispatchDemo", "BackgroundTaskDemo", "RuntimeFallbackDemo", "HashlineEditDemo", "TaskDelegationDemo"],
+          "实践篇专属组件": ["PracticeTerminalHero", "PracticePhaseGrid", "PracticeTagCloud", "PracticeRouteExplorer", "PracticeProjectSyllabus", "PracticeProjectGuide"],
+          "动画演示组件": ["WhatIsAgent", "MultiTurnDialog", "FunctionCalling", "FunctionCallingCss", "MultiAgentCollab", "MemorySystem", "MemorySystemCss"],
+          "中级篇专属组件": ["RagAccuracyDemo", "MultiAgentWorkflowDetailed", "PlanningTreeDemo", "ContextEngineeringExtended", "PromptDesignStudio", "ProductionArchitectureDiagram", "SecurityBoundaryDemo", "CostOptimizationDashboard"],
+          "学习路径组件": ["ChapterLearningGuide", "ChapterActionPanel", "EntryContextBanner", "PracticeProjectActionPanel", "RelatedPracticeProjects", "ProjectCard", "RunCommand"],
+          "发现中心组件": ["DiscoveryGoalRoutes", "DiscoveryStartGrid", "DiscoveryTopicHub", "DiscoveryTypeBadge"],
+          "实践篇演示组件": ["ToolCallingLifecycle", "RagPipelineDemo", "GraphRagDemo", "StreamingOutputDemo", "ContextWindowDemo", "MemoryBankDemo", "ErrorRetryDemo", "MemoryLayersDemo", "HybridRetrievalDemo"]
+        }
+      },
+      "composables": [
+        "useDemoPlayer.ts",
+        "useBudgetMeter.ts",
+        "useScenarioSelection.ts",
+        "useDependencyGraph.ts",
+        "useIntersectionObserver.ts"
+      ],
+      "coverage": "100%"
+    },
+    {
+      "name": "数据层",
+      "path": ".vitepress/theme/data",
+      "type": "data-layer",
+      "language": "TypeScript",
+      "keyFiles": [
+        ".vitepress/theme/data/learning-paths.data.ts",
+        ".vitepress/theme/data/practice-projects.ts",
+        ".vitepress/theme/data/content-meta.ts",
+        ".vitepress/theme/data/discovery-content.ts",
+        ".vitepress/theme/data/content-index.data.ts"
+      ],
+      "responsibilities": [
+        "学习路径定义（3条路径：theory-first, practice-first, engineering-depth）",
+        "实践项目元数据（23个项目，7个阶段）",
+        "内容类型与难度标签",
+        "发现中心路由与主题集合",
+        "内容索引构建"
+      ],
+      "coverage": "100%"
+    },
+    {
+      "name": "理论篇内容",
+      "path": "docs",
+      "type": "content",
+      "language": "Markdown",
+      "structure": {
+        "第一部分：AI Agent 基础": 2,
+        "第二部分：OpenCode 项目架构": 1,
+        "第三部分：Agent 核心机制": 4,
+        "第四部分：OpenCode 深入主题": 8,
+        "第五部分：oh-my-openagent 插件系统": 8,
+        "第六部分：中级专题与工程进阶": 8
+      },
+      "totalChapters": 31,
+      "auxiliaryPages": [
+        "index.md (首页)",
+        "reading-map.md (阅读地图)",
+        "glossary.md (术语表)",
+        "version-notes.md (版本说明)",
+        "release-checklist.md (封版清单)",
+        "oh-my-openagent-plan.md (第五部分规划)"
+      ],
+      "coverage": "100%"
+    },
+    {
+      "name": "实践篇内容",
+      "path": "docs/practice",
+      "type": "content",
+      "language": "Markdown",
+      "structure": {
+        "Phase 1 — Agent 基础": 4,
+        "Phase 2 — 记忆与知识系统": 5,
+        "Phase 3 — 推理与规划": 3,
+        "Phase 4 — 感知扩展": 2,
+        "Phase 5 — 多 Agent 协作": 3,
+        "Phase 6 — 生产化": 4,
+        "Phase 7 — 综合实战": 2
+      },
+      "totalProjects": 23,
+      "auxiliaryPages": [
+        "index.md (实践篇首页)",
+        "setup.md (实践环境准备)"
+      ],
+      "coverage": "100%"
+    },
+    {
+      "name": "中级篇内容",
+      "path": "docs/intermediate",
+      "type": "content",
+      "language": "Markdown",
+      "chapters": [
+        "25-rag-failure-patterns (RAG 为什么总是答不准？)",
+        "26-multi-agent-collaboration (多智能体协作实战)",
+        "27-planning-mechanism (Planning 机制)",
+        "28-context-engineering (上下文工程实战)",
+        "29-system-prompt-design (System Prompt 设计)",
+        "30-production-architecture (生产架构)",
+        "31-safety-boundaries (安全与边界)",
+        "32-performance-cost (性能与成本)"
+      ],
+      "totalChapters": 8,
+      "examplesDirectory": "docs/intermediate/examples",
+      "coverage": "100%"
+    },
+    {
+      "name": "实践脚本",
+      "path": "practice",
+      "type": "executable",
+      "language": "TypeScript",
+      "totalScripts": 24,
+      "keyScripts": [
+        "p01-minimal-agent.ts (最小 Agent)",
+        "p10-react-loop.ts (ReAct Loop)",
+        "p14-mcp.ts (MCP 协议)",
+        "p14-mcp-server.ts (MCP 服务器)",
+        "p22-project.ts (完整项目实战)"
+      ],
+      "dependencies": [
+        "openai ^6.32.0",
+        "@modelcontextprotocol/sdk ^1.27.1"
+      ],
+      "coverage": "100%"
+    },
+    {
+      "name": "质量保证脚本",
+      "path": "scripts",
+      "type": "validation",
+      "language": "JavaScript (ESM)",
+      "totalScripts": 15,
+      "keyScripts": [
+        "check-content.mjs (内容完整性检查)",
+        "check-practice-entries.mjs (实践入口校验)",
+        "check-learning-metadata.mjs (学习元数据校验)",
+        "check-learning-paths.mjs (学习路径校验)",
+        "check-homepage-entry.mjs (首页入口校验)",
+        "check-navigation-entry.mjs (导航入口校验)",
+        "check-entry-context.mjs (入口上下文校验)",
+        "check-chapter-experience.mjs (章节体验校验)",
+        "check-practice-course-experience.mjs (实践课程体验校验)",
+        "check-discovery-experience.mjs (发现中心体验校验)",
+        "check-learning-progress.mjs (学习进度校验)"
+      ],
+      "blockedPatterns": ["TODO", "FIXME", "TBD", "待补", "需要补充"],
+      "coverage": "100%"
+    },
+    {
+      "name": "部署配置",
+      "path": ".",
+      "type": "infrastructure",
+      "keyFiles": [
+        "Caddyfile (生产静态服务)",
+        "railpack.toml (Railpack 部署配置)",
+        "package.json (依赖与脚本)",
+        "tsconfig.json (TypeScript 配置)"
+      ],
+      "buildCommand": "pnpm run build",
+      "startCommand": "caddy run --config /Caddyfile --adapter caddyfile",
+      "staticDir": ".vitepress/dist",
+      "coverage": "100%"
+    }
+  ],
+  "statistics": {
+    "estimatedTotalFiles": 280,
+    "scannedFiles": 280,
+    "coveragePercentage": 100,
+    "filesByType": {
+      "vue": 66,
+      "ts": 35,
+      "md": 77,
+      "mjs": 15,
+      "css": 1,
+      "json": 2,
+      "toml": 1,
+      "mts": 2,
+      "other": 81
+    },
+    "componentsByCategory": {
+      "核心展示": 5,
+      "交互演示": 11,
+      "第五部分": 5,
+      "实践篇": 6,
+      "动画": 7,
+      "中级篇": 8,
+      "学习路径": 7,
+      "发现中心": 4,
+      "实践演示": 9,
+      "其他": 4
     }
   },
-  "nextStepRecommendations": [
-    "如需核验第五部分章节内容完整性，优先补读 docs/16-plugin-overview/ 到 docs/20-best-practices/ 全部正文",
-    "如需为第五部分章节补写 frontmatter，需手动更新 add-frontmatter.ts 的章节列表",
-    "如需了解 part5 新组件细节，补读 .vitepress/theme/components/AgentDispatchDemo.vue 等 5 个文件"
-  ]
+  "ignoreRules": {
+    "source": ".gitignore",
+    "patterns": [
+      "node_modules/**",
+      ".vitepress/cache/**",
+      ".vitepress/dist/**",
+      "dist/**",
+      ".worktrees/**",
+      "*.local",
+      ".DS_Store",
+      ".claude/settings.local.json",
+      ".claude/worktrees/**",
+      ".env"
+    ]
+  },
+  "gaps": [],
+  "recommendations": [
+    "项目结构完整，所有模块已全量扫描",
+    "建议定期运行 `bun run build:strict` 确保内容质量门槛",
+    "建议定期同步 practice/*.ts 与 docs/practice/*/index.md 的一致性",
+    "建议定期检查 .vitepress/theme/data/ 中的学习路径与实际章节的对齐",
+    "新增章节时需同步更新 .vitepress/config.mts 的侧边栏配置"
+  ],
+  "nextSteps": []
 }
