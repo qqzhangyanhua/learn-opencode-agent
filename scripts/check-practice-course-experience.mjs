@@ -80,6 +80,10 @@ if (!themeIndex.includes('RelatedPracticeProjects')) {
   issues.push('主题入口尚未注册 RelatedPracticeProjects')
 }
 
+if (!themeIndex.includes('PracticeProjectSourceFiles')) {
+  issues.push('主题入口尚未注册 PracticeProjectSourceFiles')
+}
+
 const practiceGuideSource = readFileSync(practiceGuidePath, 'utf8')
 if (!practiceGuideSource.includes('LearningProgressToggle')) {
   issues.push('PracticeProjectGuide.vue 尚未内嵌 LearningProgressToggle')
