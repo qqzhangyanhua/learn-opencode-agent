@@ -31,6 +31,7 @@ const heading = computed(() => props.title ?? '完整示例源码')
 
 const copyStates = reactive<Record<string, boolean>>({})
 const copyTimers = new Map<string, ReturnType<typeof setTimeout>>()
+const openStates = reactive<Record<string, boolean>>({})
 
 onBeforeUnmount(() => {
   for (const timer of copyTimers.values()) {
@@ -55,9 +56,17 @@ async function tryCopy(value: string): Promise<boolean> {
     textarea.setAttribute('readonly', '')
     textarea.style.position = 'absolute'
     textarea.style.left = '-9999px'
+    textarea.style.top = '0'
     document.body.appendChild(textarea)
+    textarea.focus()
+    textarea.setSelectionRange(0, textarea.value.length)
     textarea.select()
-    const succeeded = document.execCommand('copy')
+    let succeeded = false
+    try {
+      succeeded = document.execCommand('copy')
+    } catch (error) {
+      console.warn('PracticeProjectSourceFiles execCommand copy failed', error)
+    }
     document.body.removeChild(textarea)
     return succeeded
   }
@@ -84,6 +93,11 @@ async function handleCopy(path: string) {
   }, 1600)
   copyTimers.set(path, timer)
 }
+
+function handleToggle(path: string, event: Event) {
+  const details = event.currentTarget as HTMLDetailsElement | null
+  openStates[path] = Boolean(details?.open)
+}
 </script>
 
 <template>
@@ -109,6 +123,7 @@ async function handleCopy(path: string) {
           v-for="item in orderedEntries"
           :key="item.path"
           class="practice-source-files__entry"
+          @toggle="handleToggle(item.path, $event)"
         >
           <summary class="practice-source-files__summary">
             <span class="practice-source-files__path">{{ item.path }}</span>
@@ -121,7 +136,7 @@ async function handleCopy(path: string) {
             <div v-if="!item.entry" class="practice-source-files__fallback">
               <p>源码暂未收录，敬请期待更新。</p>
             </div>
-            <div v-else>
+            <div v-else-if="openStates[item.path]">
               <div class="practice-source-files__controls">
                 <button
                   type="button"
