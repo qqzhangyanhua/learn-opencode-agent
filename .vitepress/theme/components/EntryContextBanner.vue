@@ -58,58 +58,37 @@ const props = withDefaults(defineProps<EntryContextBannerProps>(), {
 .entry-context-banner {
   display: grid;
   grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr);
-  gap: 16px;
+  gap: 12px;
   margin: 24px 0 40px;
-  padding: 20px;
-  border-radius: 22px;
-  border: 1px solid var(--vp-c-divider);
-  background:
-    linear-gradient(180deg, rgba(13, 148, 136, 0.08), transparent 42%),
-    linear-gradient(180deg, var(--vp-c-bg-soft), var(--vp-c-bg));
-  box-shadow: var(--card-shadow-light);
-}
-
-.entry-context-banner.practice {
-  background:
-    linear-gradient(180deg, rgba(234, 88, 12, 0.12), transparent 42%),
-    linear-gradient(180deg, var(--vp-c-bg-soft), var(--vp-c-bg));
-}
-
-.entry-context-banner.intermediate {
-  background:
-    linear-gradient(180deg, rgba(59, 130, 246, 0.12), transparent 42%),
-    linear-gradient(180deg, var(--vp-c-bg-soft), var(--vp-c-bg));
+  padding: 0;
+  border: none;
+  background: transparent;
 }
 
 .entry-context-main,
 .entry-context-panel {
-  padding: 18px;
-  border-radius: 18px;
+  padding: 16px;
+  border-radius: 8px;
   border: 1px solid var(--vp-c-divider);
-  background: rgba(255, 255, 255, 0.58);
-}
-
-.dark .entry-context-main,
-.dark .entry-context-panel {
-  background: rgba(15, 23, 42, 0.55);
+  background: var(--vp-c-bg-soft);
 }
 
 .entry-context-header {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: 8px;
   align-items: center;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 .entry-context-badge,
 .entry-context-section {
   display: inline-flex;
   align-items: center;
-  border-radius: 999px;
-  padding: 5px 12px;
-  font-size: 0.82rem;
-  font-weight: 700;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
 }
 
 .entry-context-badge {
@@ -118,31 +97,33 @@ const props = withDefaults(defineProps<EntryContextBannerProps>(), {
 }
 
 .entry-context-banner.practice .entry-context-badge {
-  background: rgba(234, 88, 12, 0.12);
-  color: #c2410c;
+  background: rgba(234, 88, 12, 0.1);
+  color: #ea580c;
 }
 
 .entry-context-banner.intermediate .entry-context-badge {
-  background: rgba(59, 130, 246, 0.12);
-  color: #2563eb;
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
 }
 
 .entry-context-section {
   margin: 0;
-  background: var(--vp-c-bg-alt);
-  color: var(--vp-c-text-2);
+  background: transparent;
+  color: var(--vp-c-text-1);
+  font-weight: 700;
 }
 
 .entry-context-summary {
   margin: 0;
-  color: var(--vp-c-text-1);
-  line-height: 1.85;
+  color: var(--vp-c-text-2);
+  line-height: 1.7;
+  font-size: 0.95rem;
 }
 
 .entry-context-title {
-  margin: 0 0 12px;
-  font-size: 0.95rem;
-  font-weight: 700;
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
   color: var(--vp-c-text-1);
 }
 
@@ -151,18 +132,19 @@ const props = withDefaults(defineProps<EntryContextBannerProps>(), {
   padding: 0;
   list-style: none;
   display: grid;
-  gap: 12px;
+  gap: 10px;
 }
 
 .entry-context-list li {
   display: grid;
-  gap: 4px;
+  gap: 3px;
 }
 
 .entry-context-list a {
   color: var(--vp-c-text-1);
-  font-weight: 700;
+  font-weight: 600;
   text-decoration: none;
+  font-size: 0.9rem;
 }
 
 .entry-context-list a:hover {
@@ -171,8 +153,8 @@ const props = withDefaults(defineProps<EntryContextBannerProps>(), {
 
 .entry-context-list span {
   color: var(--vp-c-text-2);
-  line-height: 1.65;
-  font-size: 0.92rem;
+  line-height: 1.6;
+  font-size: 0.85rem;
 }
 
 @media (max-width: 1100px) {
@@ -183,13 +165,12 @@ const props = withDefaults(defineProps<EntryContextBannerProps>(), {
 
 @media (max-width: 640px) {
   .entry-context-banner {
-    padding: 16px;
     margin-bottom: 32px;
   }
 
   .entry-context-main,
   .entry-context-panel {
-    padding: 16px;
+    padding: 14px;
   }
 }
 </style>
