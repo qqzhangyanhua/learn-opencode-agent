@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { getPracticeProjectById } from '../data/practice-projects.js'
-import LearningProgressToggle from './LearningProgressToggle.vue'
 import type { PracticeProjectGuideProps } from './types'
 
 const props = defineProps<PracticeProjectGuideProps>()
@@ -20,11 +19,6 @@ function difficultyLabel(value: string) {
   <section v-if="project" class="practice-hero">
     <h1 class="hero-title">{{ project.projectTitle }}</h1>
     <p class="hero-description">{{ project.summary }}</p>
-
-    <LearningProgressToggle
-      :content-id="project.projectId"
-      content-type="practice"
-    />
 
     <div class="hero-run">
       <RunCommand
