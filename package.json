@@ -24,6 +24,7 @@
   },
   "devDependencies": {
     "mermaid": "^11.13.0",
+    "shiki": "^1.22.2",
     "typescript": "^5.8.2",
     "vitepress": "^1.5.0",
     "vitepress-plugin-mermaid": "^2.0.17"
