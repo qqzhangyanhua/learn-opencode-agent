@@ -723,4 +723,5 @@ system prompt 泄露检测也可能误报：如果 system prompt 包含常见短
 
 <StarCTA />
 
+<PracticeProjectSourceFiles project-id="practice-p19-security" />
 <PracticeProjectActionPanel project-id="practice-p19-security" />

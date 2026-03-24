@@ -502,4 +502,5 @@ async function callToolWithRetry(
 
 <StarCTA />
 
+<PracticeProjectSourceFiles project-id="practice-p14-mcp" />
 <PracticeProjectActionPanel project-id="practice-p14-mcp" />

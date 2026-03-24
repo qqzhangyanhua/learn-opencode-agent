@@ -614,4 +614,5 @@ const [keywordResults, vectorResults] = await Promise.all([
 
 <StarCTA />
 
+<PracticeProjectSourceFiles project-id="practice-p09-hybrid-retrieval" />
 <PracticeProjectActionPanel project-id="practice-p09-hybrid-retrieval" />

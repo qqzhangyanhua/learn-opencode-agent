@@ -12,6 +12,7 @@ const routeExplorerPath = path.join(rootDir, '.vitepress', 'theme', 'components'
 const syllabusPath = path.join(rootDir, '.vitepress', 'theme', 'components', 'PracticeProjectSyllabus.vue')
 const practiceGuidePath = path.join(rootDir, '.vitepress', 'theme', 'components', 'PracticeProjectGuide.vue')
 const practiceActionPath = path.join(rootDir, '.vitepress', 'theme', 'components', 'PracticeProjectActionPanel.vue')
+const practiceSourceFilesPath = path.join(rootDir, '.vitepress', 'theme', 'components', 'PracticeProjectSourceFiles.vue')
 const relatedPracticeProjectsPath = path.join(rootDir, '.vitepress', 'theme', 'components', 'RelatedPracticeProjects.vue')
 const theoryBridgePages = [
   'docs/00-what-is-ai-agent/index.md',
@@ -46,6 +47,10 @@ if (!existsSync(practiceActionPath)) {
   issues.push('缺少 .vitepress/theme/components/PracticeProjectActionPanel.vue')
 }
 
+if (!existsSync(practiceSourceFilesPath)) {
+  issues.push('缺少 .vitepress/theme/components/PracticeProjectSourceFiles.vue')
+}
+
 if (!existsSync(relatedPracticeProjectsPath)) {
   issues.push('缺少 .vitepress/theme/components/RelatedPracticeProjects.vue')
 }
@@ -65,6 +70,10 @@ if (!themeIndex.includes('PracticeProjectGuide')) {
 
 if (!themeIndex.includes('PracticeProjectActionPanel')) {
   issues.push('主题入口尚未注册 PracticeProjectActionPanel')
+}
+
+if (!themeIndex.includes('PracticeProjectSourceFiles')) {
+  issues.push('主题入口尚未注册 PracticeProjectSourceFiles')
 }
 
 if (!themeIndex.includes('RelatedPracticeProjects')) {
@@ -104,6 +113,10 @@ for (const pagePath of practicePagePaths) {
 
   if (!pageContent.includes('<PracticeProjectActionPanel')) {
     issues.push(`${relativePath} 尚未接入 <PracticeProjectActionPanel />`)
+  }
+
+  if (!pageContent.includes('<PracticeProjectSourceFiles')) {
+    issues.push(`${relativePath} 尚未接入 <PracticeProjectSourceFiles />`)
   }
 }
 

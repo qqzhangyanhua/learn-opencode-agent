@@ -362,4 +362,5 @@ Agent: 用户 ID 1 的信息：Alice（alice@example.com）。
 
 <StarCTA />
 
+<PracticeProjectSourceFiles project-id="practice-p04-error-handling" />
 <PracticeProjectActionPanel project-id="practice-p04-error-handling" />

@@ -1,6 +1,7 @@
 // .vitepress/theme/index.ts
 import DefaultTheme from 'vitepress/theme'
 import type { Theme } from 'vitepress'
+import { defineAsyncComponent } from 'vue'
 import ReActLoop from './components/ReActLoop.vue'
 import StreamingDemo from './components/StreamingDemo.vue'
 import MessageAccumulator from './components/MessageAccumulator.vue'
@@ -130,11 +131,16 @@ const globalComponents = [
   ['HybridRetrievalDemo', HybridRetrievalDemo],
 ] as const
 
+const AsyncPracticeProjectSourceFiles = defineAsyncComponent(() =>
+  import('./components/PracticeProjectSourceFiles.vue')
+)
+
 export default {
   extends: DefaultTheme,
   enhanceApp({ app }) {
     for (const [name, component] of globalComponents) {
       app.component(name, component)
     }
+    app.component('PracticeProjectSourceFiles', AsyncPracticeProjectSourceFiles)
   }
 } satisfies Theme

@@ -309,4 +309,5 @@ OpenAI API 会返回 400 错误，错误信息类似 `prompt is too long: 210234
 
 <StarCTA />
 
+<PracticeProjectSourceFiles project-id="practice-p02-multi-turn" />
 <PracticeProjectActionPanel project-id="practice-p02-multi-turn" />
