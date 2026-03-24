@@ -163,6 +163,11 @@ export interface PracticeProjectGuideProps {
   projectId: PracticeProjectDefinition['projectId']
 }
 
+export interface PracticeProjectSourceFilesProps {
+  projectId: PracticeProjectDefinition['projectId']
+  title?: string
+}
+
 export const LEARNING_PROGRESS_STATUSES = ['saved', 'active', 'done'] as const
 export type LearningProgressStatus = typeof LEARNING_PROGRESS_STATUSES[number]
 
