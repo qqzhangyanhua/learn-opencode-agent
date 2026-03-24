@@ -31,7 +31,7 @@ function detectLanguage(filePath: string): string {
   return LANGUAGE_BY_EXTENSION[extension] ?? 'text'
 }
 
-const practiceSourceModules = import.meta.glob('../../../practice/*.ts', {
+const practiceSourceModules = import.meta.glob('../../../practice/p*.ts', {
   query: '?raw',
   import: 'default',
   eager: true
