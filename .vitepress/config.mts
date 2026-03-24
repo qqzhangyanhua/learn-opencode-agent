@@ -204,6 +204,9 @@ export default withMermaid(defineConfig({
             { text: 'P2：多轮对话与上下文管理', link: '/practice/p02-multi-turn/' },
             { text: 'P3：流式输出与实时反馈', link: '/practice/p03-streaming/' },
             { text: 'P4：错误处理与重试策略', link: '/practice/p04-error-handling/' },
+            { text: '补充：Prompt Engineering 基础', link: '/practice/p24-prompt-engineering/' },
+            { text: '补充：长上下文管理', link: '/practice/p25-long-context/' },
+            { text: '补充：结构化输出', link: '/practice/p26-structured-output/' },
           ]
         },
         {
@@ -232,6 +235,7 @@ export default withMermaid(defineConfig({
           items: [
             { text: 'P13：多模态智能体', link: '/practice/p13-multimodal/' },
             { text: 'P14：MCP 协议接入', link: '/practice/p14-mcp/' },
+            { text: '补充：代码执行 Agent', link: '/practice/p27-code-execution/' },
           ]
         },
         {
@@ -241,6 +245,7 @@ export default withMermaid(defineConfig({
             { text: 'P15：多 Agent 编排模式', link: '/practice/p15-multi-agent/' },
             { text: 'P16：子 Agent 与任务分解', link: '/practice/p16-subagent/' },
             { text: 'P17：Agent 间通信与状态共享', link: '/practice/p17-agent-comm/' },
+            { text: '补充：Human-in-the-Loop', link: '/practice/p28-human-in-loop/' },
           ]
         },
         {
