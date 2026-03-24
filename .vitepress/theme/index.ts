@@ -64,6 +64,7 @@ import ErrorRetryDemo from './components/ErrorRetryDemo.vue'
 import MemoryLayersDemo from './components/MemoryLayersDemo.vue'
 import HybridRetrievalDemo from './components/HybridRetrievalDemo.vue'
 import './custom.css'
+import PracticeProjectSourceFiles from './components/PracticeProjectSourceFiles.vue'
 
 const globalComponents = [
   ['ReActLoop', ReActLoop],
@@ -102,6 +103,7 @@ const globalComponents = [
   ['ChapterLearningGuide', ChapterLearningGuide],
   ['ChapterActionPanel', ChapterActionPanel],
   ['PracticePreview', PracticePreview],
+  ['PracticeProjectSourceFiles', PracticeProjectSourceFiles],
   ['WhatIsAgent', WhatIsAgent],
   ['MultiTurnDialog', MultiTurnDialog],
   ['FunctionCalling', FunctionCalling],
