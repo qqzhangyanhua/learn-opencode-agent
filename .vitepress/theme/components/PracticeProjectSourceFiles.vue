@@ -97,8 +97,11 @@ async function handleCopy(path: string) {
     </div>
 
     <div v-else>
-      <div v-if="entries.length === 0" class="practice-source-files__empty">
-        <p>源码暂未收录，敬请期待更新。</p>
+      <div
+        v-if="project.sourceFiles.length === 0"
+        class="practice-source-files__empty"
+      >
+        <p>暂未配置示例源码文件，敬请稍后补齐。</p>
       </div>
 
       <div v-else class="practice-source-files__list">
@@ -128,14 +131,7 @@ async function handleCopy(path: string) {
                   {{ copyStates[item.path] ? '已复制' : '复制代码' }}
                 </button>
               </div>
-              <div class="practice-source-files__code">
-                <pre>
-                  <code
-                    class="practice-source-files__code-text"
-                    v-text="item.entry.code"
-                  ></code>
-                </pre>
-              </div>
+              <div class="practice-source-files__code"><pre><code class="practice-source-files__code-text" v-text="item.entry.code"></code></pre></div>
             </div>
           </div>
         </details>
