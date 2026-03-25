@@ -131,6 +131,8 @@ Action Input: {"city": "北京"}
 - `Action Input` 的 JSON（调用函数）
 - 或者 `Final Answer`（结束循环）
 
+<ReActLoopDemo />
+
 ## 动手实现
 
 ### 第一步：System Prompt 定义格式

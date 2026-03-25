@@ -64,6 +64,7 @@ import MemoryBankDemo from './components/MemoryBankDemo.vue'
 import ErrorRetryDemo from './components/ErrorRetryDemo.vue'
 import MemoryLayersDemo from './components/MemoryLayersDemo.vue'
 import HybridRetrievalDemo from './components/HybridRetrievalDemo.vue'
+import ReActLoopDemo from './components/ReActLoopDemo.vue'
 import './custom.css'
 
 const globalComponents = [
@@ -129,6 +130,7 @@ const globalComponents = [
   ['ErrorRetryDemo', ErrorRetryDemo],
   ['MemoryLayersDemo', MemoryLayersDemo],
   ['HybridRetrievalDemo', HybridRetrievalDemo],
+  ['ReActLoopDemo', ReActLoopDemo],
 ] as const
 
 const AsyncPracticeProjectSourceFiles = defineAsyncComponent(() =>
