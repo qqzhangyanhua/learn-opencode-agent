@@ -297,6 +297,8 @@ if (props.autoPlay) startDemo()
   flex-direction: column;
   gap: 1rem;
   margin: 1.5rem 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .cwd-header {
