@@ -7,13 +7,11 @@ import type {
   SectionRoleSummary
 } from '../data/content-meta'
 import type {
-  DiscoveryGoalRoute,
   DiscoveryTopicCollection
 } from '../data/discovery-content'
 import type {
   PracticeCourseRoute,
-  PracticeProjectDefinition,
-  PracticeReferenceLink
+  PracticeProjectDefinition
 } from '../data/practice-projects'
 
 export type {
@@ -160,11 +158,11 @@ export interface DiscoveryTopicHubProps {
 }
 
 export interface PracticeProjectGuideProps {
-  projectId: PracticeProjectDefinition['projectId']
+  projectId: string
 }
 
 export interface PracticeProjectSourceFilesProps {
-  projectId: PracticeProjectDefinition['projectId']
+  projectId: string
   title?: string
 }
 

@@ -88,6 +88,10 @@ function estimateTokens(text: string): number {
 
 `gpt-4o-mini` 的 context window 是 200K Token，但生产中一般把单次请求控制在 10-20K 以内，兼顾成本和响应速度。
 
+:::tip 演示说明
+下方演示使用 800 tokens 预算（而非生产环境的 4K-20K），以便在较少轮次内触发截断效果。实际应用中，你应该根据模型的 context window 和成本预算设置合理的阈值。
+:::
+
 <ContextWindowDemo />
 
 ## 动手实现

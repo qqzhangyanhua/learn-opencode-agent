@@ -17,8 +17,10 @@ const props = withDefaults(defineProps<{
   playSpeed: 1500,
 })
 
-const TOKEN_BUDGET = 4000
-const TRUNCATE_TO = 2000
+// 演示用预算（生产环境通常 4K-20K tokens）
+// 设置为 800 以便在 3-4 轮对话后触发截断效果
+const TOKEN_BUDGET = 800
+const TRUNCATE_TO = 400
 
 const messages = ref<Message[]>([
   { role: 'system', content: '你是一个有帮助的助手', tokens: 12 }
@@ -31,12 +33,38 @@ const executionLog = ref<{ time: string; msg: string; type: 'info' | 'warning' |
 
 let timer: ReturnType<typeof setInterval> | null = null
 
+// 对话轮次数据（tokens 数值经过调整以匹配演示预算）
 const conversationTurns = [
-  { user: '你好，请介绍一下你自己', userTokens: 15, assistant: '你好！我是一个 AI 助手，可以回答问题、提供建议...', assistantTokens: 45 },
-  { user: '你能帮我写代码吗？', userTokens: 12, assistant: '当然可以！我可以帮你编写各种编程语言的代码...', assistantTokens: 50 },
-  { user: '那帮我写一个快速排序算法', userTokens: 18, assistant: '好的，这是一个 TypeScript 实现的快速排序：\nfunction quickSort(arr: number[])...', assistantTokens: 120 },
-  { user: '能解释一下时间复杂度吗？', userTokens: 16, assistant: '快速排序的平均时间复杂度是 O(n log n)，最坏情况是 O(n²)...', assistantTokens: 85 },
-  { user: '如何优化这个算法？', userTokens: 14, assistant: '可以通过以下方式优化：1. 三数取中选择枢轴 2. 小数组用插入排序...', assistantTokens: 95 },
+  {
+    user: '你好，请介绍一下你自己',
+    userTokens: 15,
+    assistant: '你好！我是一个 AI 助手，可以回答问题、提供建议、帮助编写代码、解释技术概念等。我会尽力提供准确、有用的信息。',
+    assistantTokens: 150
+  },
+  {
+    user: '你能帮我写代码吗？',
+    userTokens: 12,
+    assistant: '当然可以！我可以帮你编写各种编程语言的代码，包括 Python、JavaScript、TypeScript、Rust 等。我还可以解释代码逻辑、优化性能、添加注释和单元测试。',
+    assistantTokens: 180
+  },
+  {
+    user: '那帮我写一个快速排序算法',
+    userTokens: 18,
+    assistant: '好的，这是一个 TypeScript 实现的快速排序：\n\nfunction quickSort(arr: number[]): number[] {\n  if (arr.length <= 1) return arr\n  const pivot = arr[0]\n  const left = arr.slice(1).filter(x => x <= pivot)\n  const right = arr.slice(1).filter(x => x > pivot)\n  return [...quickSort(left), pivot, ...quickSort(right)]\n}\n\n这个实现使用了函数式风格，易于理解。时间复杂度平均为 O(n log n)。',
+    assistantTokens: 280
+  },
+  {
+    user: '能解释一下时间复杂度吗？',
+    userTokens: 16,
+    assistant: '快速排序的时间复杂度分析：\n\n平均情况：O(n log n)\n- 每次分区将数组分成两半\n- 递归深度为 log n\n- 每层需要 O(n) 时间遍历\n\n最坏情况：O(n²)\n- 当数组已排序或逆序时\n- 每次只能排除一个元素\n- 递归深度退化为 n\n\n优化方法：使用三数取中法选择枢轴，可以避免最坏情况。',
+    assistantTokens: 220
+  },
+  {
+    user: '如何优化这个算法？',
+    userTokens: 14,
+    assistant: '可以通过以下方式优化快速排序：\n\n1. 三数取中选择枢轴\n   - 取首、中、尾三个元素的中位数\n   - 避免最坏情况\n\n2. 小数组用插入排序\n   - 当子数组长度 < 10 时切换\n   - 减少递归开销\n\n3. 尾递归优化\n   - 先递归较小的子数组\n   - 减少栈空间使用\n\n4. 原地分区\n   - 避免创建新数组\n   - 节省内存',
+    assistantTokens: 240
+  },
 ]
 
 const totalTokens = computed(() => {
