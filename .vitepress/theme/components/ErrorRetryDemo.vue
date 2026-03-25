@@ -235,6 +235,8 @@ if (props.autoPlay) startDemo()
   flex-direction: column;
   gap: 1rem;
   margin: 1.5rem 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .erd-header {
@@ -343,6 +345,7 @@ if (props.autoPlay) startDemo()
   grid-template-columns: 1fr 280px;
   gap: 1.25rem;
   min-height: 400px;
+  overflow-x: auto;
 }
 
 .erd-main {
@@ -466,6 +469,9 @@ if (props.autoPlay) startDemo()
   line-height: 1.6;
   color: var(--vp-c-text-1);
   overflow-x: auto;
+  max-width: 100%;
+  word-wrap: break-word;
+  white-space: pre-wrap;
 }
 
 .erd-output-block.call       { border-left: 3px solid #3b82f6; }

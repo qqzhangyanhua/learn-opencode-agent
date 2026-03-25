@@ -194,6 +194,8 @@ if (props.autoPlay) startDemo()
   flex-direction: column;
   gap: 1rem;
   margin: 1.5rem 0;
+  max-width: 100%;
+  overflow: hidden;
 }
 .mbd-header {
   display: flex;
@@ -299,6 +301,9 @@ if (props.autoPlay) startDemo()
   margin: 0; padding: 0.75rem;
   font-family: var(--vp-font-family-mono); font-size: 0.8125rem;
   line-height: 1.6; color: var(--vp-c-text-1); overflow-x: auto;
+  max-width: 100%;
+  word-wrap: break-word;
+  white-space: pre-wrap;
 }
 .mbd-output-block            { border-left: 3px solid var(--vp-c-brand-1); }
 .mbd-output-block.query      { border-left-color: #3b82f6; }
