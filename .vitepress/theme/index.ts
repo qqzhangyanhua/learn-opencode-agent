@@ -67,6 +67,13 @@ import HybridRetrievalDemo from './components/HybridRetrievalDemo.vue'
 import ReActLoopDemo from './components/ReActLoopDemo.vue'
 import PlanningExecuteDemo from './components/PlanningExecuteDemo.vue'
 import ReflectionCycleDemo from './components/ReflectionCycleDemo.vue'
+import AgentCommunicationModesDemo from './components/AgentCommunicationModesDemo.vue'
+import TraceSpanTimelineDemo from './components/TraceSpanTimelineDemo.vue'
+import EvaluationPipelineDemo from './components/EvaluationPipelineDemo.vue'
+import CodeReviewAgentSystemDemo from './components/CodeReviewAgentSystemDemo.vue'
+import ContextBudgetCompressionDemo from './components/ContextBudgetCompressionDemo.vue'
+import GenerateExecuteRepairLoopDemo from './components/GenerateExecuteRepairLoopDemo.vue'
+import ApprovalInterruptResumeDemo from './components/ApprovalInterruptResumeDemo.vue'
 import './custom.css'
 
 const globalComponents = [
@@ -135,6 +142,13 @@ const globalComponents = [
   ['ReActLoopDemo', ReActLoopDemo],
   ['PlanningExecuteDemo', PlanningExecuteDemo],
   ['ReflectionCycleDemo', ReflectionCycleDemo],
+  ['AgentCommunicationModesDemo', AgentCommunicationModesDemo],
+  ['TraceSpanTimelineDemo', TraceSpanTimelineDemo],
+  ['EvaluationPipelineDemo', EvaluationPipelineDemo],
+  ['CodeReviewAgentSystemDemo', CodeReviewAgentSystemDemo],
+  ['ContextBudgetCompressionDemo', ContextBudgetCompressionDemo],
+  ['GenerateExecuteRepairLoopDemo', GenerateExecuteRepairLoopDemo],
+  ['ApprovalInterruptResumeDemo', ApprovalInterruptResumeDemo],
 ] as const
 
 const AsyncPracticeProjectSourceFiles = defineAsyncComponent(() =>

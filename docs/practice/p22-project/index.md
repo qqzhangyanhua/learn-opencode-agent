@@ -48,6 +48,8 @@ ReportGenerator（生成最终报告）
 
 ## 系统架构
 
+<CodeReviewAgentSystemDemo />
+
 整个系统由六个模块组成，数据单向流动，没有循环依赖：
 
 ```

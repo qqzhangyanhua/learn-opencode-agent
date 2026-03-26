@@ -59,6 +59,8 @@ Agent 运行 → 遇到 critical 工具 → 保存状态，返回"等待审批"
 
 Agent 不是终止了，而是**暂停**在检查点，等待人类决策后继续。
 
+<ApprovalInterruptResumeDemo />
+
 ## 动手实现
 
 ### 第一步：定义风险注册表和确认机制

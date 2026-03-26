@@ -35,6 +35,8 @@ Metrics — 聚合统计（总调用次数、平均延迟、错误率）
 
 三者互补：Metrics 告诉你"有问题"，Traces 帮你定位"哪里出了问题"，Logs 提供"出问题时的具体上下文"。
 
+<TraceSpanTimelineDemo />
+
 ### Span：追踪的基本单元
 
 Span 是 Trace 中的一个操作片段。每个 Span 记录：
