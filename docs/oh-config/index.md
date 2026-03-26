@@ -2,11 +2,33 @@
 title: 第19章：配置系统实战
 description: 打开 .opencode/oh-my-opencode.jsonc 之前先读这章——最小可用配置、常见场景配置、配置错了会发生什么，以及用户配置和项目配置的合并规则
 contentType: theory
-contentId: book-oh-config
 series: book
+contentId: book-oh-config
+shortTitle: 配置系统实战
+summary: 打开 .opencode/oh-my-opencode.jsonc 之前先读这章——最小可用配置、常见场景配置、配置错了会发生什么，以及用户配置和项目配置的合并规则
+difficulty: intermediate
+estimatedTime: 15 分钟
+learningGoals:
+  - 打开 .opencode/oh-my-opencode.jsonc 之前先读这章——最小可用配置
+  - 常见场景配置
+  - 配置错了会发生什么
+  - 以及用户配置和项目配置的合并规则
+prerequisites:
+  - 建议按当前章节顺序继续阅读
+recommendedNext:
+  - /oh-flow/
+  - /practice/p23-production/
+practiceLinks:
+  - /practice/
+  - /17-multi-model-orchestration/
+searchTags:
+  - 配置系统实战
+  - OpenCode
+  - 源码阅读
+navigationLabel: 配置系统实战
+entryMode: bridge
 roleDescription: 掌握配置系统的使用方法，理解配置加载与合并规则。
 ---
-
 <ChapterLearningGuide />
 
 <script setup>

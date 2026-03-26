@@ -1,12 +1,33 @@
 ---
 title: 第21章：Hooks 三层架构
 description: 深入 oh-my-openagent 的 46 个 Hook 分层设计——Core/Continuation/Skill 三层如何协作，Safe Hook Creation 机制，以及最关键的几个 Hook 工作原理
-roleDescription: 理解 Hooks 三层架构设计，掌握生命周期扩展机制。
 contentType: theory
-contentId: book-18-hooks-architecture
 series: book
+contentId: book-18-hooks-architecture
+shortTitle: Hooks 三层架构
+summary: 深入 oh-my-openagent 的 46 个 Hook 分层设计——Core/Continuation/Skill 三层如何协作，Safe Hook Creation 机制，以及最关键的几个 Hook 工作原理
+difficulty: intermediate
+estimatedTime: 20 分钟
+learningGoals:
+  - 理解 46 个 Hook 的三层分组逻辑
+  - 掌握 Hook 注册流程
+  - 能读懂核心 Hook 的实现
+prerequisites:
+  - 第18章 插件系统概述
+recommendedNext:
+  - /19-tool-extension/
+  - /practice/
+practiceLinks:
+  - /practice/
+  - /reading-map
+searchTags:
+  - Hooks 三层架构
+  - OpenCode
+  - 源码阅读
+navigationLabel: Hooks 三层架构
+entryMode: read-first
+roleDescription: 理解 Hooks 三层架构设计，掌握生命周期扩展机制。
 ---
-
 <ChapterLearningGuide />
 
 <script setup>

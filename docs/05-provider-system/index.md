@@ -1,12 +1,33 @@
 ---
 title: 第6章：多模型支持
 description: 深入 Provider 抽象层——模型能力描述、消息格式转换、认证机制，以及 Vercel AI SDK 如何统一十余个提供商
-roleDescription: 理解多模型支持的工程实现，掌握 Provider 抽象层设计。
 contentType: theory
-contentId: book-05-provider-system
 series: book
+contentId: book-05-provider-system
+shortTitle: 多模型支持
+summary: 深入 Provider 抽象层——模型能力描述、消息格式转换、认证机制，以及 Vercel AI SDK 如何统一十余个提供商
+difficulty: intermediate
+estimatedTime: 20 分钟
+learningGoals:
+  - 理解 Provider 层的设计动机
+  - 掌握模型能力如何驱动运行时决策
+  - 了解认证与消息格式转换机制
+prerequisites:
+  - 第5章"会话管理"
+recommendedNext:
+  - /06-mcp-integration/
+  - /practice/
+practiceLinks:
+  - /practice/
+  - /reading-map
+searchTags:
+  - 多模型支持
+  - OpenCode
+  - 源码阅读
+navigationLabel: 多模型支持
+entryMode: read-first
+roleDescription: 理解多模型支持的工程实现，掌握 Provider 抽象层设计。
 ---
-
 <ChapterLearningGuide />
 
 <script setup>

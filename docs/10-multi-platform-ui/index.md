@@ -1,12 +1,33 @@
 ---
 title: 第11章：多端 UI 开发
 description: Web 应用、桌面端与 TUI 共用同一 HTTP API 的架构设计：SolidJS Provider 树、Platform 抽象、Tauri Sidecar 模式与事件批处理
-roleDescription: 理解多端 UI 开发策略，掌握代码共享与平台适配。
 contentType: theory
-contentId: book-10-multi-platform-ui
 series: book
+contentId: book-10-multi-platform-ui
+shortTitle: 多端 UI 开发
+summary: Web 应用、桌面端与 TUI 共用同一 HTTP API 的架构设计：SolidJS Provider 树、Platform 抽象、Tauri Sidecar 模式与事件批处理
+difficulty: intermediate
+estimatedTime: 20 分钟
+learningGoals:
+  - 理解 Web 应用和桌面端如何共用同一套 SolidJS UI
+  - 以及 Platform 抽象如何隔离平台差异
+prerequisites:
+  - 第9章 HTTP API 服务器
+  - 第8章 TUI 终端界面
+recommendedNext:
+  - /11-code-intelligence/
+  - /practice/
+practiceLinks:
+  - /practice/
+  - /reading-map
+searchTags:
+  - 多端 UI 开发
+  - OpenCode
+  - 源码阅读
+navigationLabel: 多端 UI 开发
+entryMode: read-first
+roleDescription: 理解多端 UI 开发策略，掌握代码共享与平台适配。
 ---
-
 <ChapterLearningGuide />
 
 <script setup>

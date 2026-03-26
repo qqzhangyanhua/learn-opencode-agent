@@ -2,11 +2,32 @@
 title: 第29章：System Prompt 设计
 description: 理解 System Prompt 为什么是 Agent 的行为合同，而不是一句“你是一个助手”，并把它放回 OpenCode 的上下文装配主链里。
 contentType: intermediate
-contentId: intermediate-29-system-prompt-design
 series: book
+contentId: intermediate-29-system-prompt-design
+shortTitle: System Prompt 设计
+summary: 理解 System Prompt 为什么是 Agent 的行为合同，而不是一句“你是一个助手”，并把它放回 OpenCode 的上下文装配主链里。
+difficulty: advanced
+estimatedTime: 30 分钟
+learningGoals:
+  - 理解 System Prompt 为什么是 Agent 的行为合同
+  - 而不是一句“你是一个助手”
+  - 并把它放回 OpenCode 的上下文装配主链里。
+prerequisites:
+  - 建议按当前章节顺序继续阅读
+recommendedNext:
+  - /intermediate/30-production-architecture/
+  - /practice/
+practiceLinks:
+  - /practice/
+  - /intermediate/
+searchTags:
+  - System Prompt 设计
+  - OpenCode
+  - 进阶专题
+navigationLabel: System Prompt 设计
+entryMode: bridge
 roleDescription: 理解 System Prompt 设计原则，提升 Agent 行为稳定性。
 ---
-
 <ChapterLearningGuide />
 
 

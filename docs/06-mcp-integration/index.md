@@ -1,12 +1,33 @@
 ---
 title: 第7章：MCP 协议集成
 description: 深入 MCP 客户端实现——local/remote 两种连接方式、工具发现与转换、OAuth 认证、资源与提示词管理
-roleDescription: 深入 MCP 协议集成机制，理解工具扩展的标准化方案。
 contentType: theory
-contentId: book-06-mcp-integration
 series: book
+contentId: book-06-mcp-integration
+shortTitle: MCP 协议集成
+summary: 深入 MCP 客户端实现——local/remote 两种连接方式、工具发现与转换、OAuth 认证、资源与提示词管理
+difficulty: intermediate
+estimatedTime: 20 分钟
+learningGoals:
+  - 理解 MCP 协议的设计思想
+  - 掌握 OpenCode 作为 MCP Client 的完整实现
+  - 学会配置和调试 MCP Server
+prerequisites:
+  - 第6章"多模型支持"
+recommendedNext:
+  - /07-tui-interface/
+  - /practice/
+practiceLinks:
+  - /practice/
+  - /reading-map
+searchTags:
+  - MCP 协议集成
+  - OpenCode
+  - 源码阅读
+navigationLabel: MCP 协议集成
+entryMode: read-first
+roleDescription: 深入 MCP 协议集成机制，理解工具扩展的标准化方案。
 ---
-
 <ChapterLearningGuide />
 
 <script setup>

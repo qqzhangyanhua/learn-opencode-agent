@@ -2,11 +2,31 @@
 title: 第32章：性能与成本控制
 description: 理解 Agent 的性能与成本为什么首先是架构问题，而不是“等更强模型出来”以后自然解决的问题。
 contentType: intermediate
-contentId: intermediate-32-performance-cost
 series: book
+contentId: intermediate-32-performance-cost
+shortTitle: 性能与成本控制
+summary: 理解 Agent 的性能与成本为什么首先是架构问题，而不是“等更强模型出来”以后自然解决的问题。
+difficulty: advanced
+estimatedTime: 30 分钟
+learningGoals:
+  - 理解 Agent 的性能与成本为什么首先是架构问题
+  - 而不是“等更强模型出来”以后自然解决的问题。
+prerequisites:
+  - 建议按当前章节顺序继续阅读
+recommendedNext:
+  - /intermediate/
+  - /practice/
+practiceLinks:
+  - /practice/
+  - /intermediate/
+searchTags:
+  - 性能与成本控制
+  - OpenCode
+  - 进阶专题
+navigationLabel: 性能与成本控制
+entryMode: bridge
 roleDescription: 优化性能与成本，理解 Token 计费与缓存策略。
 ---
-
 <ChapterLearningGuide />
 
 

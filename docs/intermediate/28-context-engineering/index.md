@@ -2,11 +2,35 @@
 title: 第28章：Prompt 不够用了，上下文工程实战
 description: 从“选、排、压、拼”四个动作切入，理解为什么决定智能体上限的不是一句 Prompt，而是整个上下文供应系统。
 contentType: intermediate
-contentId: intermediate-28-context-engineering
 series: book
+contentId: intermediate-28-context-engineering
+shortTitle: Prompt 不够用了，上下文工程实战
+summary: 从“选、排、压、拼”四个动作切入，理解为什么决定智能体上限的不是一句 Prompt，而是整个上下文供应系统。
+difficulty: advanced
+estimatedTime: 30 分钟
+learningGoals:
+  - 从“选
+  - 排
+  - 压
+  - 拼”四个动作切入
+  - 理解为什么决定智能体上限的不是一句 Prompt
+  - 而是整个上下文供应系统。
+prerequisites:
+  - 建议按当前章节顺序继续阅读
+recommendedNext:
+  - /intermediate/29-system-prompt-design/
+  - /practice/
+practiceLinks:
+  - /practice/
+  - /intermediate/
+searchTags:
+  - Prompt 不够用了，上下文工程实战
+  - OpenCode
+  - 进阶专题
+navigationLabel: Prompt 不够用了，上下文工程实战
+entryMode: bridge
 roleDescription: 掌握上下文工程技巧，优化 Token 使用与信息密度。
 ---
-
 <ChapterLearningGuide />
 
 

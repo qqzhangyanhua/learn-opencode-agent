@@ -2,11 +2,34 @@
 title: 第26章：让多个 AI 协作起来
 description: 从主从、辩论、流水线三种模式切入，理解多智能体协作为什么能提升复杂任务的可控性，以及它的真实成本与边界。
 contentType: intermediate
-contentId: intermediate-26-multi-agent-collaboration
 series: book
+contentId: intermediate-26-multi-agent-collaboration
+shortTitle: 让多个 AI 协作起来
+summary: 从主从、辩论、流水线三种模式切入，理解多智能体协作为什么能提升复杂任务的可控性，以及它的真实成本与边界。
+difficulty: advanced
+estimatedTime: 30 分钟
+learningGoals:
+  - 从主从
+  - 辩论
+  - 流水线三种模式切入
+  - 理解多智能体协作为什么能提升复杂任务的可控性
+  - 以及它的真实成本与边界。
+prerequisites:
+  - 建议按当前章节顺序继续阅读
+recommendedNext:
+  - /intermediate/27-planning-mechanism/
+  - /practice/
+practiceLinks:
+  - /practice/
+  - /intermediate/
+searchTags:
+  - 让多个 AI 协作起来
+  - OpenCode
+  - 进阶专题
+navigationLabel: 让多个 AI 协作起来
+entryMode: bridge
 roleDescription: 深入多 Agent 协作机制，理解任务分配与状态同步。
 ---
-
 <ChapterLearningGuide />
 
 

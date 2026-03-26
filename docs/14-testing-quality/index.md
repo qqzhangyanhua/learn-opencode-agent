@@ -1,12 +1,36 @@
 ---
 title: 第15章：测试与质量保证
 description: 按系统边界分层的测试体系：核心运行时（Bun Test）、共享前端状态层（Happy DOM 单测）和真实用户流程（Playwright E2E）如何各司其职
-roleDescription: 理解测试策略与质量保证体系，掌握测试工程实践。
 contentType: theory
-contentId: book-14-testing-quality
 series: book
+contentId: book-14-testing-quality
+shortTitle: 测试与质量保证
+summary: 按系统边界分层的测试体系：核心运行时（Bun Test）、共享前端状态层（Happy DOM 单测）和真实用户流程（Playwright E2E）如何各司其职
+difficulty: intermediate
+estimatedTime: 20 分钟
+learningGoals:
+  - 理解 OpenCode 的质量保障不是“写几条单元测试”
+  - 而是把核心运行时
+  - 前端状态层和真实用户流程拆成不同测试面
+  - 再用类型检查和脚本约束收口
+prerequisites:
+  - 第三篇 工具系统
+  - 第八篇 HTTP API 服务器
+  - 第十篇 多端 UI 开发
+recommendedNext:
+  - /15-advanced-topics/
+  - /practice/
+practiceLinks:
+  - /practice/
+  - /reading-map
+searchTags:
+  - 测试与质量保证
+  - OpenCode
+  - 源码阅读
+navigationLabel: 测试与质量保证
+entryMode: read-first
+roleDescription: 理解测试策略与质量保证体系，掌握测试工程实践。
 ---
-
 <ChapterLearningGuide />
 
 <script setup>
@@ -108,6 +132,10 @@ packages/opencode/test 验证核心运行时
 - E2E 不是“最高级所以替代全部测试”，它只是验证真实用户路径的一层。
 - 质量保障不只靠测试文件，还依赖类型检查、脚本约束和统一夹具。
 - 真实 Agent 项目最难测的往往是时序、资源隔离和恢复路径，不只是函数返回值。
+
+**分层演示：** 一次代码变更会经过哪些质量关口，分别由 runtime test、前端单测、E2E、typecheck 与脚本校验覆盖什么问题。
+
+<TestingLayersDemo />
 
 ## 15.1 核心运行时测试：`packages/opencode/test/`
 

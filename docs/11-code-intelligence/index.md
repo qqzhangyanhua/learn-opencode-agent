@@ -1,12 +1,34 @@
 ---
 title: 第12章：代码智能
 description: LSP 客户端的工程实现：懒加载客户端管理、诊断信息注入 AI 响应、LspTool 的九种操作，以及文件编辑与代码分析的协作流水线
-roleDescription: 深入代码智能实现，理解 LSP 集成与语义分析。
 contentType: theory
-contentId: book-11-code-intelligence
 series: book
+contentId: book-11-code-intelligence
+shortTitle: 代码智能
+summary: LSP 客户端的工程实现：懒加载客户端管理、诊断信息注入 AI 响应、LspTool 的九种操作，以及文件编辑与代码分析的协作流水线
+difficulty: intermediate
+estimatedTime: 20 分钟
+learningGoals:
+  - 理解 LSP 客户端的懒加载状态机
+  - 诊断信息如何注入工具返回值
+  - 以及 AI 如何借助 LSP 实现"编译-修复"内循环
+prerequisites:
+  - 第4章 工具系统
+  - 第3章 项目介绍
+recommendedNext:
+  - /12-plugins-extensions/
+  - /practice/
+practiceLinks:
+  - /practice/
+  - /reading-map
+searchTags:
+  - 代码智能
+  - OpenCode
+  - 源码阅读
+navigationLabel: 代码智能
+entryMode: read-first
+roleDescription: 深入代码智能实现，理解 LSP 集成与语义分析。
 ---
-
 <ChapterLearningGuide />
 
 <script setup>

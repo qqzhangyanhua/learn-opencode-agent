@@ -2,11 +2,34 @@
 title: 第24章：实战案例与最佳实践
 description: 四个实战案例带你掌握 oh-my-openagent 插件开发——添加新 Agent、扩展工具、自定义 Hook、调试排错，以及生产环境的性能与可靠性技巧
 contentType: theory
-contentId: book-20-best-practices
 series: book
+contentId: book-20-best-practices
+shortTitle: 实战案例与最佳实践
+summary: 四个实战案例带你掌握 oh-my-openagent 插件开发——添加新 Agent、扩展工具、自定义 Hook、调试排错，以及生产环境的性能与可靠性技巧
+difficulty: intermediate
+estimatedTime: 20 分钟
+learningGoals:
+  - 四个实战案例带你掌握 oh-my-openagent 插件开发——添加新 Agent
+  - 扩展工具
+  - 自定义 Hook
+  - 调试排错
+  - 以及生产环境的性能与可靠性技巧
+prerequisites:
+  - 建议按当前章节顺序继续阅读
+recommendedNext:
+  - /practice/
+  - /reading-map
+practiceLinks:
+  - /practice/
+  - /reading-map
+searchTags:
+  - 实战案例与最佳实践
+  - OpenCode
+  - 源码阅读
+navigationLabel: 实战案例与最佳实践
+entryMode: read-first
 roleDescription: 通过实战案例掌握插件开发技巧，理解生产环境最佳实践。
 ---
-
 <ChapterLearningGuide />
 
 <script setup>
@@ -25,6 +48,10 @@ import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshot
 4. **调试与测试**（排查问题的正确姿势）
 
 ---
+
+**实践清单动画：** 把新增 Agent、Tool、Hook 的最小接线步骤，以及调试、测试和生产约束串成一条检查清单，方便落地时快速对照。
+
+<ExtensionBestPracticeChecklistDemo />
 
 ## 案例 1：添加新 Agent「Reviewer」
 

@@ -2,11 +2,32 @@
 title: 第30章：生产架构与部署
 description: 从“能跑的 Demo”到“可持续运行的产品”，理解 Agent 生产架构真正要补齐的是哪些边界、状态和闭环。
 contentType: intermediate
-contentId: intermediate-30-production-architecture
 series: book
+contentId: intermediate-30-production-architecture
+shortTitle: 生产架构与部署
+summary: 从“能跑的 Demo”到“可持续运行的产品”，理解 Agent 生产架构真正要补齐的是哪些边界、状态和闭环。
+difficulty: advanced
+estimatedTime: 30 分钟
+learningGoals:
+  - 从“能跑的 Demo”到“可持续运行的产品”
+  - 理解 Agent 生产架构真正要补齐的是哪些边界
+  - 状态和闭环。
+prerequisites:
+  - 建议按当前章节顺序继续阅读
+recommendedNext:
+  - /intermediate/31-safety-boundaries/
+  - /practice/
+practiceLinks:
+  - /practice/
+  - /intermediate/
+searchTags:
+  - 生产架构与部署
+  - OpenCode
+  - 进阶专题
+navigationLabel: 生产架构与部署
+entryMode: bridge
 roleDescription: 理解生产环境架构设计，掌握可靠性与可扩展性策略。
 ---
-
 <ChapterLearningGuide />
 
 

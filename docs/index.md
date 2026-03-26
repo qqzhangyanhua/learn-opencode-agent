@@ -15,6 +15,9 @@ hero:
       text: 中级篇
       link: /intermediate/
     - theme: alt
+      text: 发现中心
+      link: /discover/
+    - theme: alt
       text: ⭐ Star 支持本书
       link: https://github.com/qqzhangyanhua/learn-opencode-agent
       target: _blank

@@ -2,11 +2,33 @@
 title: 第31章：安全边界与高风险控制
 description: 把高风险 Agent 的安全问题拆成风险分级、确认机制、最小权限和运行时边界，而不是把一切都压给 Prompt。
 contentType: intermediate
-contentId: intermediate-31-safety-boundaries
 series: book
+contentId: intermediate-31-safety-boundaries
+shortTitle: 安全边界与高风险控制
+summary: 把高风险 Agent 的安全问题拆成风险分级、确认机制、最小权限和运行时边界，而不是把一切都压给 Prompt。
+difficulty: advanced
+estimatedTime: 30 分钟
+learningGoals:
+  - 把高风险 Agent 的安全问题拆成风险分级
+  - 确认机制
+  - 最小权限和运行时边界
+  - 而不是把一切都压给 Prompt。
+prerequisites:
+  - 建议按当前章节顺序继续阅读
+recommendedNext:
+  - /intermediate/32-performance-cost/
+  - /practice/
+practiceLinks:
+  - /practice/
+  - /intermediate/
+searchTags:
+  - 安全边界与高风险控制
+  - OpenCode
+  - 进阶专题
+navigationLabel: 安全边界与高风险控制
+entryMode: bridge
 roleDescription: 建立安全边界机制，防范注入攻击与权限滥用。
 ---
-
 <ChapterLearningGuide />
 
 

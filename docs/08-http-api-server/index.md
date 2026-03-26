@@ -1,12 +1,34 @@
 ---
 title: 第9章：HTTP API 服务器
 description: 深入 Hono 框架驱动的 API 服务器，理解路由组织、SSE 推送、OpenAPI 自动生成与工作区上下文注入机制
-roleDescription: 深入 HTTP API 服务器设计，理解 SSE 流式传输机制。
 contentType: theory
-contentId: book-08-http-api-server
 series: book
+contentId: book-08-http-api-server
+shortTitle: HTTP API 服务器
+summary: 深入 Hono 框架驱动的 API 服务器，理解路由组织、SSE 推送、OpenAPI 自动生成与工作区上下文注入机制
+difficulty: intermediate
+estimatedTime: 20 分钟
+learningGoals:
+  - 理解 Hono 中间件链的设计
+  - SSE 事件总线与 HTTP 流式响应的两种模式
+  - 以及工作区上下文注入机制
+prerequisites:
+  - 第8章 TUI 终端界面
+  - 第5章 会话管理
+recommendedNext:
+  - /09-data-persistence/
+  - /practice/
+practiceLinks:
+  - /practice/
+  - /reading-map
+searchTags:
+  - HTTP API 服务器
+  - OpenCode
+  - 源码阅读
+navigationLabel: HTTP API 服务器
+entryMode: read-first
+roleDescription: 深入 HTTP API 服务器设计，理解 SSE 流式传输机制。
 ---
-
 <ChapterLearningGuide />
 
 <script setup>

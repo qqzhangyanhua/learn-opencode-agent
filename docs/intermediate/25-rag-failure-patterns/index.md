@@ -2,11 +2,34 @@
 title: 第25章：RAG 为什么总是答不准？
 description: 从五个高频翻车场景切入，理解 RAG 系统为何会答偏、漏答、编造，以及如何用工程手段逐个修复。
 contentType: intermediate
-contentId: intermediate-25-rag-failure-patterns
 series: book
+contentId: intermediate-25-rag-failure-patterns
+shortTitle: RAG 为什么总是答不准？
+summary: 从五个高频翻车场景切入，理解 RAG 系统为何会答偏、漏答、编造，以及如何用工程手段逐个修复。
+difficulty: advanced
+estimatedTime: 30 分钟
+learningGoals:
+  - 从五个高频翻车场景切入
+  - 理解 RAG 系统为何会答偏
+  - 漏答
+  - 编造
+  - 以及如何用工程手段逐个修复。
+prerequisites:
+  - 建议按当前章节顺序继续阅读
+recommendedNext:
+  - /intermediate/26-multi-agent-collaboration/
+  - /practice/
+practiceLinks:
+  - /practice/
+  - /intermediate/
+searchTags:
+  - RAG 为什么总是答不准？
+  - OpenCode
+  - 进阶专题
+navigationLabel: RAG 为什么总是答不准？
+entryMode: bridge
 roleDescription: 理解 RAG 系统常见故障模式，掌握排查与修复方法。
 ---
-
 <ChapterLearningGuide />
 
 

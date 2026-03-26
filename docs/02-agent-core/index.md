@@ -1,12 +1,32 @@
 ---
 title: 第3章：OpenCode 项目介绍
 description: 建立 OpenCode 源码地图——从项目定位到代码路径，理解一个真实 AI Coding Agent 的工程结构
-roleDescription: 建立 OpenCode 源码地图，把抽象概念对应到真实代码路径。
 contentType: theory
-contentId: book-02-agent-core
 series: book
+contentId: book-02-agent-core
+shortTitle: OpenCode 项目介绍
+summary: 建立 OpenCode 源码地图——从项目定位到代码路径，理解一个真实 AI Coding Agent 的工程结构
+difficulty: beginner
+estimatedTime: 20 分钟
+learningGoals:
+  - 建立 OpenCode 的整体代码地图
+  - 把第2章的5个概念组件对应到真实源码位置
+prerequisites:
+  - 第2章"AI Agent 的核心组件"
+recommendedNext:
+  - /03-tool-system/
+  - /practice/
+practiceLinks:
+  - /practice/
+  - /reading-map
+searchTags:
+  - OpenCode 项目介绍
+  - OpenCode
+  - 源码阅读
+navigationLabel: OpenCode 项目介绍
+entryMode: read-first
+roleDescription: 建立 OpenCode 源码地图，把抽象概念对应到真实代码路径。
 ---
-
 <ChapterLearningGuide />
 
 <script setup>
@@ -162,6 +182,10 @@ packages/opencode/src/
 ## 3.4 一次任务的完整代码路径
 
 光看目录不够，更重要的是看**代码怎么流动**。我们用一个具体任务追踪完整路径：
+
+**主链路动画：** 用一次真实任务把入口初始化、会话创建、Prompt 装配、主执行循环、工具执行与消息回流串起来。
+
+<TaskExecutionPathDemo />
 
 > **任务**：`opencode "帮我读取 config.ts，把 port 改成 8080"`
 

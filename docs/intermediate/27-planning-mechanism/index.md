@@ -83,6 +83,26 @@ Adaptive Planning
   -> 先有计划，但允许中途重算剩余步骤
 ```
 
+<ChapterActionPanel
+  :action-items="[
+    {
+      title: '回到 P10 对照 ReAct Loop',
+      description: '把这一章讨论的 Planning 与实践里的 ReAct Loop 放在一起比较，观察“边想边做”和“先列计划”在复杂任务中的差异。',
+      href: '/practice/p10-react-loop/'
+    },
+    {
+      title: '再看 P11 的 Planning 实践',
+      description: '用实践项目验证计划生成、执行和状态显式化如何改变任务完成率与可观察性。',
+      href: '/practice/p11-planning/'
+    },
+    {
+      title: '继续进入上下文工程专题',
+      description: '当你理解了 Planning，再往下看上下文工程如何为计划执行提供稳定上下文预算。',
+      href: '/intermediate/28-context-engineering/'
+    }
+  ]"
+/>
+
 <PlanningTreeDemo :tasks="[
   {
     id: 'refactor', title: '重构认证模块', description: '分离关注点，增加可测试性',

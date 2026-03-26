@@ -15,6 +15,9 @@ const bannerNextSteps = [
 ]
 
 const bannerSupportLinks = [
+  { label: '回到发现中心', href: '/discover/', hint: '如果你还没决定是先做项目还是先补理论，先回统一入口重新判断。' },
+  { label: '查看学习路径', href: '/learning-paths/', hint: '按“先看源码 / 先做项目 / 先补工程判断”三条路线重新选起点。' },
+  { label: '完成基础后去中级篇', href: '/intermediate/', hint: '当你已经跑过基础项目并开始关心工程判断时，继续进入中级专题。' },
   { label: '回到阅读地图', href: '/reading-map', hint: '重新判断是否该先做项目，还是先回去补理论主链路。' }
 ]
 </script>

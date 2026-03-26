@@ -1,12 +1,32 @@
 ---
 title: 第8章：TUI 终端界面
 description: 深入 OpenCode TUI 实现——SolidJS 响应式终端渲染、Provider 树、SSE 事件驱动、Sync 状态中心与工具可视化
-roleDescription: 理解终端 UI 的实现原理，掌握 TUI 框架的使用方式。
 contentType: theory
-contentId: book-07-tui-interface
 series: book
+contentId: book-07-tui-interface
+shortTitle: TUI 终端界面
+summary: 深入 OpenCode TUI 实现——SolidJS 响应式终端渲染、Provider 树、SSE 事件驱动、Sync 状态中心与工具可视化
+difficulty: intermediate
+estimatedTime: 20 分钟
+learningGoals:
+  - 理解 OpenCode 如何在终端里渲染一个响应式 UI
+  - 以及 SolidJS Provider 树如何驱动 TUI 的状态管理
+prerequisites:
+  - 第7章"MCP 协议集成"
+recommendedNext:
+  - /08-http-api-server/
+  - /practice/
+practiceLinks:
+  - /practice/
+  - /reading-map
+searchTags:
+  - TUI 终端界面
+  - OpenCode
+  - 源码阅读
+navigationLabel: TUI 终端界面
+entryMode: read-first
+roleDescription: 理解终端 UI 的实现原理，掌握 TUI 框架的使用方式。
 ---
-
 <ChapterLearningGuide />
 
 <script setup>
@@ -131,6 +151,10 @@ SolidJS 的优势在这里体现：
 ---
 
 ## 8.2 启动流程
+
+**状态流动画：** 从 `run.ts` 启动本地 server，到 `SDKProvider` 接收 SSE，再到 `SyncProvider` 更新全局 Store，观察 TUI 为什么既实时又不容易卡顿。
+
+<TuiProviderFlowDemo />
 
 ### run.ts：TUI 的入口
 

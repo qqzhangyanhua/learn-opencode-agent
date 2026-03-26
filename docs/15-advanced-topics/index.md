@@ -1,12 +1,39 @@
 ---
 title: 第16章：高级主题与最佳实践
 description: 从 OpenCode 源码提炼的五条工程原则：先定义边界再给能力、上下文预算化、多 Agent 协作正式协议、长链路可恢复性，以及开源协作约束
-roleDescription: 探索高级主题与最佳实践，提升工程能力与架构视野。
 contentType: theory
-contentId: book-15-advanced-topics
 series: book
+contentId: book-15-advanced-topics
+shortTitle: 高级主题与最佳实践
+summary: 从 OpenCode 源码提炼的五条工程原则：先定义边界再给能力、上下文预算化、多 Agent 协作正式协议、长链路可恢复性，以及开源协作约束
+difficulty: intermediate
+estimatedTime: 20 分钟
+learningGoals:
+  - 把前面各篇拆开的实现重新收束起来
+  - 理解 OpenCode 当前最值得迁移的五条经验：权限边界
+  - 上下文成本控制
+  - 多 Agent 协作
+  - 可恢复性设计
+  - 以及开源协作约束
+prerequisites:
+  - 第二篇 Agent 核心系统
+  - 第三篇 工具系统
+  - 第四篇 会话管理
+  - 第15章 测试与质量保证
+recommendedNext:
+  - /16-plugin-overview/
+  - /practice/
+practiceLinks:
+  - /practice/
+  - /reading-map
+searchTags:
+  - 高级主题与最佳实践
+  - OpenCode
+  - 源码阅读
+navigationLabel: 高级主题与最佳实践
+entryMode: read-first
+roleDescription: 探索高级主题与最佳实践，提升工程能力与架构视野。
 ---
-
 <ChapterLearningGuide />
 
 <script setup>

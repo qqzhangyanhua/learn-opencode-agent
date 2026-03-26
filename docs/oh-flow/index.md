@@ -2,11 +2,34 @@
 title: 第23章：一条消息的完整旅程
 description: 跟着"帮我写一个登录 API"这条消息，从用户按下回车到代码写入文件，逐步追踪它经过了哪些 Hook、哪个 Agent 处理、工具如何被调用——建立整体感的最快方式
 contentType: theory
-contentId: book-oh-flow
 series: book
+contentId: book-oh-flow
+shortTitle: 一条消息的完整旅程
+summary: 跟着"帮我写一个登录 API"这条消息，从用户按下回车到代码写入文件，逐步追踪它经过了哪些 Hook、哪个 Agent 处理、工具如何被调用——建立整体感的最快方式
+difficulty: intermediate
+estimatedTime: 15 分钟
+learningGoals:
+  - 跟着"帮我写一个登录 API"这条消息
+  - 从用户按下回车到代码写入文件
+  - 逐步追踪它经过了哪些 Hook
+  - 哪个 Agent 处理
+  - 工具如何被调用——建立整体感的最快方式
+prerequisites:
+  - 建议按当前章节顺序继续阅读
+recommendedNext:
+  - /20-best-practices/
+  - /practice/p23-production/
+practiceLinks:
+  - /practice/
+  - /17-multi-model-orchestration/
+searchTags:
+  - 一条消息的完整旅程
+  - OpenCode
+  - 源码阅读
+navigationLabel: 一条消息的完整旅程
+entryMode: bridge
 roleDescription: 跟随一条消息的完整旅程，串联整个系统的运行机制。
 ---
-
 <ChapterLearningGuide />
 
 <script setup>

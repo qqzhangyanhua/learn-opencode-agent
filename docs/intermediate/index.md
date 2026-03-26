@@ -20,6 +20,7 @@ description: 面向掌握基础 Agent 理论后想进入工程专题的读者，
   ]"
   :support-links="[
     { label: '回到发现中心', href: '/discover/', hint: '如果你还不确定现在是不是进入工程专题的时机，先回统一入口重新判断。' },
+    { label: '查看学习路径', href: '/learning-paths/', hint: '重新比较三条路线，判断自己是继续专题、回实践还是回理论。' },
     { label: '回到阅读地图', href: '/reading-map', hint: '重新判断自己现在该停在实践篇，还是继续走工程专题路线。' },
     { label: '回到实践篇', href: '/practice/', hint: '如果你还没把最小项目和关键章节跑通，先回去补手感。' }
   ]"

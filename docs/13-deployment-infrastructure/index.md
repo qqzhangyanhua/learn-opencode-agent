@@ -1,12 +1,36 @@
 ---
 title: 第14章：部署与基础设施
 description: OpenCode 的四层基础设施：本地运行时、云端公共 API（Cloudflare Workers）、控制台产品线（PlanetScale + SolidStart）与交付层（Docker + CI/CD）的分层设计
-roleDescription: 理解部署与基础设施方案，掌握云端部署策略。
 contentType: theory
-contentId: book-13-deployment-infrastructure
 series: book
+contentId: book-13-deployment-infrastructure
+shortTitle: 部署与基础设施
+summary: OpenCode 的四层基础设施：本地运行时、云端公共 API（Cloudflare Workers）、控制台产品线（PlanetScale + SolidStart）与交付层（Docker + CI/CD）的分层设计
+difficulty: intermediate
+estimatedTime: 20 分钟
+learningGoals:
+  - 理解 OpenCode 不只是一个本地 CLI
+  - 而是一套同时覆盖本地运行时
+  - 云端 API
+  - 控制台与基础设施编排的多层系统
+prerequisites:
+  - 第一篇 Agent 基础架构
+  - 第八篇 HTTP API 服务器
+  - 第十篇 多端 UI 开发
+recommendedNext:
+  - /14-testing-quality/
+  - /practice/
+practiceLinks:
+  - /practice/
+  - /reading-map
+searchTags:
+  - 部署与基础设施
+  - OpenCode
+  - 源码阅读
+navigationLabel: 部署与基础设施
+entryMode: read-first
+roleDescription: 理解部署与基础设施方案，掌握云端部署策略。
 ---
-
 <ChapterLearningGuide />
 
 <script setup>
@@ -133,6 +157,10 @@ graph TB
 - 基础设施层不是附属物，它直接反映了产品边界和资源切分方式。
 
 ## 14.1 本地运行时与开发环境
+
+**架构动画：** 从“本地产品面”切换到“云端产品面”，看清 `packages/opencode`、`packages/function`、`packages/console` 与 `infra/` 的真实边界。
+
+<LocalCloudTopologyDemo />
 
 ### 先分清“本地 OpenCode”和“云端 OpenCode”
 

@@ -1,12 +1,35 @@
 ---
 title: 第13章：插件与扩展
 description: 插件、Skill、命令和编辑器扩展四种扩展方式的完整对比：何时写代码、何时写 Markdown、何时接外部系统，以及扩展如何进入统一工具和命令边界
-roleDescription: 理解插件系统架构，掌握扩展机制的设计原则。
 contentType: theory
-contentId: book-12-plugins-extensions
 series: book
+contentId: book-12-plugins-extensions
+shortTitle: 插件与扩展
+summary: 插件、Skill、命令和编辑器扩展四种扩展方式的完整对比：何时写代码、何时写 Markdown、何时接外部系统，以及扩展如何进入统一工具和命令边界
+difficulty: intermediate
+estimatedTime: 20 分钟
+learningGoals:
+  - 理解 OpenCode 当前仓库里的真实扩展方式
+  - 知道什么时候该写插件
+  - 什么时候该写 Skill
+  - 什么时候只需要一个命令模板
+prerequisites:
+  - 第六篇 MCP 协议集成
+  - 第三篇 工具系统
+recommendedNext:
+  - /13-deployment-infrastructure/
+  - /practice/
+practiceLinks:
+  - /practice/
+  - /reading-map
+searchTags:
+  - 插件与扩展
+  - OpenCode
+  - 源码阅读
+navigationLabel: 插件与扩展
+entryMode: read-first
+roleDescription: 理解插件系统架构，掌握扩展机制的设计原则。
 ---
-
 <ChapterLearningGuide />
 
 <script setup>
@@ -110,6 +133,10 @@ plugin / skill / command / MCP prompt 等扩展来源
 - 插件接入之后仍然要回到统一权限、工具和会话边界中，不是随意外挂逻辑。
 
 ## 13.1 扩展体系全景
+
+**决策动画：** 从“我想扩展什么能力”出发，沿着需求分支走一遍，快速判断应该写 Plugin、Skill、Command、MCP 还是编辑器扩展。
+
+<ExtensionDecisionFlowDemo />
 
 ### 先从目录理解整体结构
 
