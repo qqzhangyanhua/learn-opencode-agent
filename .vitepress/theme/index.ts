@@ -2,23 +2,8 @@
 import DefaultTheme from 'vitepress/theme'
 import type { Theme } from 'vitepress'
 import { defineAsyncComponent } from 'vue'
-import ReActLoop from './components/ReActLoop.vue'
-import StreamingDemo from './components/StreamingDemo.vue'
-import MessageAccumulator from './components/MessageAccumulator.vue'
-import PermissionFlow from './components/PermissionFlow.vue'
-import McpHandshake from './components/McpHandshake.vue'
-import SseBroadcast from './components/SseBroadcast.vue'
-import ContextCompaction from './components/ContextCompaction.vue'
-import ProviderFallback from './components/ProviderFallback.vue'
-import WorkflowVsAgent from './components/WorkflowVsAgent.vue'
-import LspHover from './components/LspHover.vue'
-import ConnectionGate from './components/ConnectionGate.vue'
+
 import StarCTA from './components/StarCTA.vue'
-import AgentDispatchDemo from './components/AgentDispatchDemo.vue'
-import BackgroundTaskDemo from './components/BackgroundTaskDemo.vue'
-import RuntimeFallbackDemo from './components/RuntimeFallbackDemo.vue'
-import HashlineEditDemo from './components/HashlineEditDemo.vue'
-import TaskDelegationDemo from './components/TaskDelegationDemo.vue'
 import PracticeTerminalHero from './components/PracticeTerminalHero.vue'
 import PracticePhaseGrid from './components/PracticePhaseGrid.vue'
 import PracticeTagCloud from './components/PracticeTagCloud.vue'
@@ -38,65 +23,72 @@ import EntryContextBanner from './components/EntryContextBanner.vue'
 import ChapterLearningGuide from './components/ChapterLearningGuide.vue'
 import ChapterActionPanel from './components/ChapterActionPanel.vue'
 import PracticePreview from './components/PracticePreview.vue'
-import WhatIsAgent from './components/animations/css/WhatIsAgent.vue'
-import MultiTurnDialog from './components/animations/css/MultiTurnDialog.vue'
-import FunctionCalling from './components/animations/lottie/FunctionCalling.vue'
-import FunctionCallingCss from './components/animations/css/FunctionCallingCss.vue'
-import MultiAgentCollab from './components/animations/lottie/MultiAgentCollab.vue'
-import MemorySystem from './components/animations/lottie/MemorySystem.vue'
-import MemorySystemCss from './components/animations/css/MemorySystemCss.vue'
-import RagAccuracyDemo from './components/RagAccuracyDemo.vue'
-import MultiAgentWorkflowDetailed from './components/MultiAgentWorkflowDetailed.vue'
-import PlanningTreeDemo from './components/PlanningTreeDemo.vue'
-import ContextEngineeringExtended from './components/ContextEngineeringExtended.vue'
-import PromptDesignStudio from './components/PromptDesignStudio.vue'
-import ProductionArchitectureDiagram from './components/ProductionArchitectureDiagram.vue'
-import SecurityBoundaryDemo from './components/SecurityBoundaryDemo.vue'
-import CostOptimizationDashboard from './components/CostOptimizationDashboard.vue'
-import RuntimeLifecycleDiagram from './components/RuntimeLifecycleDiagram.vue'
-import HomeExploreLinks from './components/HomeExploreLinks.vue'
-import ToolCallingLifecycle from './components/ToolCallingLifecycle.vue'
-import RagPipelineDemo from './components/RagPipelineDemo.vue'
-import GraphRagDemo from './components/GraphRagDemo.vue'
-import StreamingOutputDemo from './components/StreamingOutputDemo.vue'
-import ContextWindowDemo from './components/ContextWindowDemo.vue'
-import MemoryBankDemo from './components/MemoryBankDemo.vue'
-import ErrorRetryDemo from './components/ErrorRetryDemo.vue'
-import MemoryLayersDemo from './components/MemoryLayersDemo.vue'
-import HybridRetrievalDemo from './components/HybridRetrievalDemo.vue'
-import ReActLoopDemo from './components/ReActLoopDemo.vue'
-import PlanningExecuteDemo from './components/PlanningExecuteDemo.vue'
-import ReflectionCycleDemo from './components/ReflectionCycleDemo.vue'
-import AgentCommunicationModesDemo from './components/AgentCommunicationModesDemo.vue'
-import TraceSpanTimelineDemo from './components/TraceSpanTimelineDemo.vue'
-import EvaluationPipelineDemo from './components/EvaluationPipelineDemo.vue'
-import CodeReviewAgentSystemDemo from './components/CodeReviewAgentSystemDemo.vue'
-import ContextBudgetCompressionDemo from './components/ContextBudgetCompressionDemo.vue'
-import GenerateExecuteRepairLoopDemo from './components/GenerateExecuteRepairLoopDemo.vue'
-import ApprovalInterruptResumeDemo from './components/ApprovalInterruptResumeDemo.vue'
-import MultimodalMessageFlowDemo from './components/MultimodalMessageFlowDemo.vue'
-import PromptLayerComposerDemo from './components/PromptLayerComposerDemo.vue'
-import SchemaConstrainedOutputDemo from './components/SchemaConstrainedOutputDemo.vue'
+
 import './custom.css'
 
-const globalComponents = [
-  ['ReActLoop', ReActLoop],
-  ['StreamingDemo', StreamingDemo],
-  ['MessageAccumulator', MessageAccumulator],
-  ['PermissionFlow', PermissionFlow],
-  ['McpHandshake', McpHandshake],
-  ['SseBroadcast', SseBroadcast],
-  ['ContextCompaction', ContextCompaction],
-  ['ProviderFallback', ProviderFallback],
-  ['WorkflowVsAgent', WorkflowVsAgent],
-  ['LspHover', LspHover],
-  ['ConnectionGate', ConnectionGate],
+const asyncComponent = (loader: Parameters<typeof defineAsyncComponent>[0]) =>
+  defineAsyncComponent(loader)
+
+const asyncGlobalComponents = [
+  ['ReActLoop', asyncComponent(() => import('./components/ReActLoop.vue'))],
+  ['StreamingDemo', asyncComponent(() => import('./components/StreamingDemo.vue'))],
+  ['MessageAccumulator', asyncComponent(() => import('./components/MessageAccumulator.vue'))],
+  ['PermissionFlow', asyncComponent(() => import('./components/PermissionFlow.vue'))],
+  ['McpHandshake', asyncComponent(() => import('./components/McpHandshake.vue'))],
+  ['SseBroadcast', asyncComponent(() => import('./components/SseBroadcast.vue'))],
+  ['ContextCompaction', asyncComponent(() => import('./components/ContextCompaction.vue'))],
+  ['ProviderFallback', asyncComponent(() => import('./components/ProviderFallback.vue'))],
+  ['WorkflowVsAgent', asyncComponent(() => import('./components/WorkflowVsAgent.vue'))],
+  ['LspHover', asyncComponent(() => import('./components/LspHover.vue'))],
+  ['ConnectionGate', asyncComponent(() => import('./components/ConnectionGate.vue'))],
+  ['AgentDispatchDemo', asyncComponent(() => import('./components/AgentDispatchDemo.vue'))],
+  ['BackgroundTaskDemo', asyncComponent(() => import('./components/BackgroundTaskDemo.vue'))],
+  ['RuntimeFallbackDemo', asyncComponent(() => import('./components/RuntimeFallbackDemo.vue'))],
+  ['HashlineEditDemo', asyncComponent(() => import('./components/HashlineEditDemo.vue'))],
+  ['TaskDelegationDemo', asyncComponent(() => import('./components/TaskDelegationDemo.vue'))],
+  ['WhatIsAgent', asyncComponent(() => import('./components/animations/css/WhatIsAgent.vue'))],
+  ['MultiTurnDialog', asyncComponent(() => import('./components/animations/css/MultiTurnDialog.vue'))],
+  ['FunctionCalling', asyncComponent(() => import('./components/animations/lottie/FunctionCalling.vue'))],
+  ['FunctionCallingCss', asyncComponent(() => import('./components/animations/css/FunctionCallingCss.vue'))],
+  ['MultiAgentCollab', asyncComponent(() => import('./components/animations/lottie/MultiAgentCollab.vue'))],
+  ['MemorySystem', asyncComponent(() => import('./components/animations/lottie/MemorySystem.vue'))],
+  ['MemorySystemCss', asyncComponent(() => import('./components/animations/css/MemorySystemCss.vue'))],
+  ['RagAccuracyDemo', asyncComponent(() => import('./components/RagAccuracyDemo.vue'))],
+  ['MultiAgentWorkflowDetailed', asyncComponent(() => import('./components/MultiAgentWorkflowDetailed.vue'))],
+  ['PlanningTreeDemo', asyncComponent(() => import('./components/PlanningTreeDemo.vue'))],
+  ['ContextEngineeringExtended', asyncComponent(() => import('./components/ContextEngineeringExtended.vue'))],
+  ['PromptDesignStudio', asyncComponent(() => import('./components/PromptDesignStudio.vue'))],
+  ['ProductionArchitectureDiagram', asyncComponent(() => import('./components/ProductionArchitectureDiagram.vue'))],
+  ['SecurityBoundaryDemo', asyncComponent(() => import('./components/SecurityBoundaryDemo.vue'))],
+  ['CostOptimizationDashboard', asyncComponent(() => import('./components/CostOptimizationDashboard.vue'))],
+  ['RuntimeLifecycleDiagram', asyncComponent(() => import('./components/RuntimeLifecycleDiagram.vue'))],
+  ['HomeExploreLinks', asyncComponent(() => import('./components/HomeExploreLinks.vue'))],
+  ['ToolCallingLifecycle', asyncComponent(() => import('./components/ToolCallingLifecycle.vue'))],
+  ['RagPipelineDemo', asyncComponent(() => import('./components/RagPipelineDemo.vue'))],
+  ['GraphRagDemo', asyncComponent(() => import('./components/GraphRagDemo.vue'))],
+  ['StreamingOutputDemo', asyncComponent(() => import('./components/StreamingOutputDemo.vue'))],
+  ['ContextWindowDemo', asyncComponent(() => import('./components/ContextWindowDemo.vue'))],
+  ['MemoryBankDemo', asyncComponent(() => import('./components/MemoryBankDemo.vue'))],
+  ['ErrorRetryDemo', asyncComponent(() => import('./components/ErrorRetryDemo.vue'))],
+  ['MemoryLayersDemo', asyncComponent(() => import('./components/MemoryLayersDemo.vue'))],
+  ['HybridRetrievalDemo', asyncComponent(() => import('./components/HybridRetrievalDemo.vue'))],
+  ['ReActLoopDemo', asyncComponent(() => import('./components/ReActLoopDemo.vue'))],
+  ['PlanningExecuteDemo', asyncComponent(() => import('./components/PlanningExecuteDemo.vue'))],
+  ['ReflectionCycleDemo', asyncComponent(() => import('./components/ReflectionCycleDemo.vue'))],
+  ['AgentCommunicationModesDemo', asyncComponent(() => import('./components/AgentCommunicationModesDemo.vue'))],
+  ['TraceSpanTimelineDemo', asyncComponent(() => import('./components/TraceSpanTimelineDemo.vue'))],
+  ['EvaluationPipelineDemo', asyncComponent(() => import('./components/EvaluationPipelineDemo.vue'))],
+  ['CodeReviewAgentSystemDemo', asyncComponent(() => import('./components/CodeReviewAgentSystemDemo.vue'))],
+  ['ContextBudgetCompressionDemo', asyncComponent(() => import('./components/ContextBudgetCompressionDemo.vue'))],
+  ['GenerateExecuteRepairLoopDemo', asyncComponent(() => import('./components/GenerateExecuteRepairLoopDemo.vue'))],
+  ['ApprovalInterruptResumeDemo', asyncComponent(() => import('./components/ApprovalInterruptResumeDemo.vue'))],
+  ['MultimodalMessageFlowDemo', asyncComponent(() => import('./components/MultimodalMessageFlowDemo.vue'))],
+  ['PromptLayerComposerDemo', asyncComponent(() => import('./components/PromptLayerComposerDemo.vue'))],
+  ['SchemaConstrainedOutputDemo', asyncComponent(() => import('./components/SchemaConstrainedOutputDemo.vue'))],
+] as const
+
+const syncGlobalComponents = [
   ['StarCTA', StarCTA],
-  ['AgentDispatchDemo', AgentDispatchDemo],
-  ['BackgroundTaskDemo', BackgroundTaskDemo],
-  ['RuntimeFallbackDemo', RuntimeFallbackDemo],
-  ['HashlineEditDemo', HashlineEditDemo],
-  ['TaskDelegationDemo', TaskDelegationDemo],
   ['PracticeTerminalHero', PracticeTerminalHero],
   ['PracticePhaseGrid', PracticePhaseGrid],
   ['PracticeTagCloud', PracticeTagCloud],
@@ -116,57 +108,23 @@ const globalComponents = [
   ['ChapterLearningGuide', ChapterLearningGuide],
   ['ChapterActionPanel', ChapterActionPanel],
   ['PracticePreview', PracticePreview],
-  ['WhatIsAgent', WhatIsAgent],
-  ['MultiTurnDialog', MultiTurnDialog],
-  ['FunctionCalling', FunctionCalling],
-  ['FunctionCallingCss', FunctionCallingCss],
-  ['MultiAgentCollab', MultiAgentCollab],
-  ['MemorySystem', MemorySystem],
-  ['MemorySystemCss', MemorySystemCss],
-  ['RagAccuracyDemo', RagAccuracyDemo],
-  ['MultiAgentWorkflowDetailed', MultiAgentWorkflowDetailed],
-  ['PlanningTreeDemo', PlanningTreeDemo],
-  ['ContextEngineeringExtended', ContextEngineeringExtended],
-  ['PromptDesignStudio', PromptDesignStudio],
-  ['ProductionArchitectureDiagram', ProductionArchitectureDiagram],
-  ['SecurityBoundaryDemo', SecurityBoundaryDemo],
-  ['CostOptimizationDashboard', CostOptimizationDashboard],
-  ['RuntimeLifecycleDiagram', RuntimeLifecycleDiagram],
-  ['HomeExploreLinks', HomeExploreLinks],
-  ['ToolCallingLifecycle', ToolCallingLifecycle],
-  ['RagPipelineDemo', RagPipelineDemo],
-  ['GraphRagDemo', GraphRagDemo],
-  ['StreamingOutputDemo', StreamingOutputDemo],
-  ['ContextWindowDemo', ContextWindowDemo],
-  ['MemoryBankDemo', MemoryBankDemo],
-  ['ErrorRetryDemo', ErrorRetryDemo],
-  ['MemoryLayersDemo', MemoryLayersDemo],
-  ['HybridRetrievalDemo', HybridRetrievalDemo],
-  ['ReActLoopDemo', ReActLoopDemo],
-  ['PlanningExecuteDemo', PlanningExecuteDemo],
-  ['ReflectionCycleDemo', ReflectionCycleDemo],
-  ['AgentCommunicationModesDemo', AgentCommunicationModesDemo],
-  ['TraceSpanTimelineDemo', TraceSpanTimelineDemo],
-  ['EvaluationPipelineDemo', EvaluationPipelineDemo],
-  ['CodeReviewAgentSystemDemo', CodeReviewAgentSystemDemo],
-  ['ContextBudgetCompressionDemo', ContextBudgetCompressionDemo],
-  ['GenerateExecuteRepairLoopDemo', GenerateExecuteRepairLoopDemo],
-  ['ApprovalInterruptResumeDemo', ApprovalInterruptResumeDemo],
-  ['MultimodalMessageFlowDemo', MultimodalMessageFlowDemo],
-  ['PromptLayerComposerDemo', PromptLayerComposerDemo],
-  ['SchemaConstrainedOutputDemo', SchemaConstrainedOutputDemo],
 ] as const
 
-const AsyncPracticeProjectSourceFiles = defineAsyncComponent(() =>
+const AsyncPracticeProjectSourceFiles = asyncComponent(() =>
   import('./components/PracticeProjectSourceFiles.vue')
 )
 
 export default {
   extends: DefaultTheme,
   enhanceApp({ app }) {
-    for (const [name, component] of globalComponents) {
+    for (const [name, component] of syncGlobalComponents) {
       app.component(name, component)
     }
+
+    for (const [name, component] of asyncGlobalComponents) {
+      app.component(name, component)
+    }
+
     app.component('PracticeProjectSourceFiles', AsyncPracticeProjectSourceFiles)
   }
 } satisfies Theme
