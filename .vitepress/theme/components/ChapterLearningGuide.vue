@@ -4,7 +4,6 @@ import { useData } from 'vitepress'
 import { data as contentIndex } from '../data/content-index.data.js'
 import type {
   ChapterLearningGuideProps,
-  EntryMode,
   LearningContentFrontmatter
 } from './types'
 
@@ -26,22 +25,6 @@ const sectionSummary = computed(() => {
   }
 
   return contentIndex.sectionById[currentNode.value.sectionId]
-})
-
-const estimatedTime = computed(() => {
-  const value = frontmatter.value.estimatedTime
-  return typeof value === 'string' && value.trim() ? value.trim() : '未标注'
-})
-
-const difficultyLabel = computed(() => {
-  const difficulty = (frontmatter.value.difficulty as LearningContentFrontmatter['difficulty'] | undefined) ?? 'beginner'
-  if (difficulty === 'advanced') {
-    return '高阶'
-  }
-  if (difficulty === 'intermediate') {
-    return '进阶'
-  }
-  return '入门'
 })
 </script>
 
@@ -102,6 +85,25 @@ const difficultyLabel = computed(() => {
   line-height: 1.7;
   color: var(--vp-c-text-2);
   max-width: 720px;
+}
+
+.hero-meta {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
+.hero-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--vp-c-bg-alt);
+  border: 1px solid var(--vp-c-divider);
+  color: var(--vp-c-text-2);
+  font-size: 0.82rem;
+  font-weight: 600;
 }
 
 /* Responsive */
