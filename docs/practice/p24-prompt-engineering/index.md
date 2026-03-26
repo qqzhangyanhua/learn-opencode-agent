@@ -33,6 +33,8 @@ Chain-of-Thought       →  触发显式推理，提升复杂任务准确率
 
 有效的 system prompt 包含三层，缺一不可：
 
+<PromptLayerComposerDemo />
+
 | 层级 | 作用 | 举例 |
 |------|------|------|
 | 角色定义 | 你是谁，面向什么用户 | "你是 TypeScript 代码审查专家，服务中级开发者" |

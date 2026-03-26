@@ -46,6 +46,8 @@ Zod + parse()  →  Schema 约束 + 自动类型推导，推荐方案
 
 `client.beta.chat.completions.parse()` 结合 Zod Schema，一步完成调用 + 解析 + 验证：
 
+<SchemaConstrainedOutputDemo />
+
 ```
 你定义 Zod Schema → SDK 把 Schema 转成 JSON Schema 传给模型
 → 模型按 Schema 填充 → SDK 用 Zod 验证并推导 TypeScript 类型

@@ -28,6 +28,8 @@ P12 的 Reflection Agent 解决了"如何让模型输出从凑合提升到达标
 
 OpenAI Chat Completions API 中，消息的 `content` 字段可以是字符串，也可以是 content 数组。每个元素有一个 `type` 字段，文本是 `"text"`，图像是 `"image_url"`。
 
+<MultimodalMessageFlowDemo />
+
 图像的结构：
 
 ```ts

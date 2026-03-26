@@ -74,6 +74,9 @@ import CodeReviewAgentSystemDemo from './components/CodeReviewAgentSystemDemo.vu
 import ContextBudgetCompressionDemo from './components/ContextBudgetCompressionDemo.vue'
 import GenerateExecuteRepairLoopDemo from './components/GenerateExecuteRepairLoopDemo.vue'
 import ApprovalInterruptResumeDemo from './components/ApprovalInterruptResumeDemo.vue'
+import MultimodalMessageFlowDemo from './components/MultimodalMessageFlowDemo.vue'
+import PromptLayerComposerDemo from './components/PromptLayerComposerDemo.vue'
+import SchemaConstrainedOutputDemo from './components/SchemaConstrainedOutputDemo.vue'
 import './custom.css'
 
 const globalComponents = [
@@ -149,6 +152,9 @@ const globalComponents = [
   ['ContextBudgetCompressionDemo', ContextBudgetCompressionDemo],
   ['GenerateExecuteRepairLoopDemo', GenerateExecuteRepairLoopDemo],
   ['ApprovalInterruptResumeDemo', ApprovalInterruptResumeDemo],
+  ['MultimodalMessageFlowDemo', MultimodalMessageFlowDemo],
+  ['PromptLayerComposerDemo', PromptLayerComposerDemo],
+  ['SchemaConstrainedOutputDemo', SchemaConstrainedOutputDemo],
 ] as const
 
 const AsyncPracticeProjectSourceFiles = defineAsyncComponent(() =>
