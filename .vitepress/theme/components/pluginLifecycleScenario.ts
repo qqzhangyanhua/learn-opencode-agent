@@ -1,0 +1,75 @@
+import type { FlowScenario } from './flowScenario'
+
+export const pluginLifecycleScenario: FlowScenario = {
+  title: '插件生命周期与热重载',
+  summary: '从插件入口被调用，到配置加载、管理器初始化、工具与 Hook 组装，再到热重载清理，串起 oh-my-openagent 的完整生命周期。',
+  lanes: [
+    { id: 'entry', label: '插件入口' },
+    { id: 'config', label: '配置与管理器' },
+    { id: 'tools', label: '工具与技能' },
+    { id: 'hooks', label: 'Hook 与接口' },
+    { id: 'reload', label: '热重载' },
+  ],
+  steps: [
+    {
+      id: 'entry-call',
+      title: '调用插件入口',
+      detail: 'OpenCode 在启动或重载时调用插件函数，而不是每次对话都重新执行一遍 async (ctx) => {...}。',
+      lane: 'entry',
+      codeLabel: 'src/index.ts',
+      emphasis: '关键点：插件函数只在启动或重载时执行，后续对话调用的是返回的接口。',
+    },
+    {
+      id: 'config',
+      title: 'loadPluginConfig',
+      detail: '从项目级和用户级 JSONC 配置中加载、校验并合并配置，数组去重，agents/categories 深度合并。',
+      lane: 'config',
+      codeLabel: '.opencode/oh-my-opencode.jsonc / ~/.config/opencode/oh-my-opencode.jsonc',
+    },
+    {
+      id: 'managers',
+      title: 'createManagers',
+      detail: '初始化 BackgroundManager、TmuxSessionManager、SkillMcpManager，这些状态化管理器会贯穿整个插件生命周期。',
+      lane: 'config',
+      codeLabel: 'BackgroundManager / TmuxSessionManager / SkillMcpManager',
+    },
+    {
+      id: 'tools',
+      title: 'createTools',
+      detail: '注册工具并加载技能，产出 filteredTools、mergedSkills、availableSkills，供后续 Hook 依赖。',
+      lane: 'tools',
+      codeLabel: 'filteredTools / mergedSkills / availableSkills',
+    },
+    {
+      id: 'hooks',
+      title: 'createHooks',
+      detail: '基于 mergedSkills 和 availableSkills 创建 Hook 集合，最终形成 10 个核心接口 + 额外压缩接口。',
+      lane: 'hooks',
+      codeLabel: 'tool / chat.message / tool.execute.before / experimental.session.compacting',
+    },
+    {
+      id: 'return',
+      title: '返回 PluginInterface',
+      detail: 'OpenCode 拿到插件接口后，后续对话阶段都会通过这些接口与插件交互，而不是再次执行插件入口。',
+      lane: 'hooks',
+      kind: 'commit',
+      codeLabel: 'PluginInterface',
+    },
+    {
+      id: 'reload',
+      title: 'activePluginDispose',
+      detail: '热重载时先执行 activePluginDispose 清理旧状态，再重新跑四步初始化流程，避免后台 Agent 和 MCP 连接泄漏。',
+      lane: 'reload',
+      kind: 'async',
+      codeLabel: 'let activePluginDispose: PluginDispose | null = null',
+    },
+  ],
+  edges: [
+    { from: 'entry-call', to: 'config' },
+    { from: 'config', to: 'managers' },
+    { from: 'managers', to: 'tools' },
+    { from: 'tools', to: 'hooks' },
+    { from: 'hooks', to: 'return' },
+    { from: 'return', to: 'reload', style: 'dashed', label: '配置变更或重载时' },
+  ],
+}

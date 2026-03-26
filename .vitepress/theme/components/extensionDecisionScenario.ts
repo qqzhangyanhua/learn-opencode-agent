@@ -1,0 +1,92 @@
+import type { FlowScenario } from './flowScenario'
+
+export const extensionDecisionScenario: FlowScenario = {
+  title: '扩展方式选择器',
+  summary: '根据需求类型判断更适合使用 Plugin、Skill、Command、MCP 还是编辑器扩展。',
+  lanes: [
+    { id: 'main', label: '决策路径' },
+  ],
+  steps: [
+    {
+      id: 'start',
+      title: '我要扩展 OpenCode',
+      detail: '先判断你的目标是新增运行时能力、工作流、模板还是宿主集成。',
+      lane: 'main',
+      emphasis: '经验法则：先 Command，再 Skill，再 Plugin，通常成本最低。',
+    },
+    {
+      id: 'logic',
+      title: '需要运行逻辑吗？',
+      detail: '如果要执行真实代码、接 Hook 或新增工具，优先考虑代码型扩展。',
+      lane: 'main',
+      kind: 'decision',
+    },
+    {
+      id: 'plugin',
+      title: 'Plugin',
+      detail: '适合运行时逻辑、Hook、自定义工具和认证处理。',
+      lane: 'main',
+      codeLabel: 'packages/plugin / packages/opencode/src/plugin',
+    },
+    {
+      id: 'teach',
+      title: '需要教模型工作流吗？',
+      detail: '如果重点是让 Agent 学会按步骤做事，而不是执行新代码，继续往 Skill 判断。',
+      lane: 'main',
+      kind: 'decision',
+    },
+    {
+      id: 'skill',
+      title: 'Skill',
+      detail: '适合把方法论、步骤和额外资源组织成可加载工作流。',
+      lane: 'main',
+      codeLabel: 'packages/opencode/src/skill / SKILL.md',
+    },
+    {
+      id: 'template',
+      title: '只是固定提示模板吗？',
+      detail: '如果只是高频复用的一段提示词，没必要上升到 Skill 或 Plugin。',
+      lane: 'main',
+      kind: 'decision',
+    },
+    {
+      id: 'command',
+      title: 'Command',
+      detail: '适合复用固定模板、场景短语和常见操作入口。',
+      lane: 'main',
+      codeLabel: 'packages/opencode/src/command / .opencode/command',
+    },
+    {
+      id: 'external',
+      title: '能力来自外部系统吗？',
+      detail: '如果目标是接入 GitHub、Slack、内部平台或数据库，进入外部系统判断。',
+      lane: 'main',
+      kind: 'decision',
+    },
+    {
+      id: 'mcp',
+      title: 'MCP',
+      detail: '适合通过外部服务器把工具和 Prompt 接入 OpenCode。',
+      lane: 'main',
+      codeLabel: 'MCP Server / tools/list / tools/call',
+    },
+    {
+      id: 'editor',
+      title: '编辑器扩展',
+      detail: '适合把当前文件、选区和 IDE 宿主能力交给 OpenCode。',
+      lane: 'main',
+      codeLabel: 'sdks/vscode / packages/extensions/zed',
+    },
+  ],
+  edges: [
+    { from: 'start', to: 'logic' },
+    { from: 'logic', to: 'plugin', label: '是' },
+    { from: 'logic', to: 'teach', label: '否' },
+    { from: 'teach', to: 'skill', label: '是' },
+    { from: 'teach', to: 'template', label: '否' },
+    { from: 'template', to: 'command', label: '是' },
+    { from: 'template', to: 'external', label: '否' },
+    { from: 'external', to: 'mcp', label: '是' },
+    { from: 'external', to: 'editor', label: '更偏宿主集成' },
+  ],
+}

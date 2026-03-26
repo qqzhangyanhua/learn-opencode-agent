@@ -177,12 +177,24 @@ export default withMermaid(defineConfig({
     },
     ssr: {
       noExternal: ['mermaid']
+    },
+    build: {
+      chunkSizeWarningLimit: 1500,
+      rollupOptions: {
+        onwarn(warning, warn) {
+          // lottie-web uses eval internally; suppress the known false positive
+          if (warning.code === 'EVAL' && warning.id?.includes('lottie')) return
+          warn(warning)
+        }
+      }
     }
   },
 
   themeConfig: {
     nav: [
       { text: '首页', link: '/' },
+      { text: '发现', link: '/discover/', activeMatch: '/discover/' },
+      { text: '学习路径', link: '/learning-paths/', activeMatch: '/learning-paths/' },
       { text: '实践篇', link: '/practice/', activeMatch: '/practice/' },
       { text: '中级篇', link: '/intermediate/', activeMatch: '/intermediate/' },
       { text: '阅读地图', link: '/reading-map', activeMatch: '/reading-map' },
@@ -288,6 +300,8 @@ export default withMermaid(defineConfig({
         },
       ],
       '/': [
+        { text: '发现中心', link: '/discover/' },
+        { text: '学习路径', link: '/learning-paths/' },
         { text: '实践篇总览', link: '/practice/' },
         { text: '中级篇导读', link: '/intermediate/' },
         { text: '阅读地图', link: '/reading-map' },

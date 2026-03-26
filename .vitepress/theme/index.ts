@@ -85,6 +85,16 @@ const asyncGlobalComponents = [
   ['MultimodalMessageFlowDemo', asyncComponent(() => import('./components/MultimodalMessageFlowDemo.vue'))],
   ['PromptLayerComposerDemo', asyncComponent(() => import('./components/PromptLayerComposerDemo.vue'))],
   ['SchemaConstrainedOutputDemo', asyncComponent(() => import('./components/SchemaConstrainedOutputDemo.vue'))],
+  ['TransactionEffectQueueDemo', asyncComponent(() => import('./components/TransactionEffectQueueDemo.vue'))],
+  ['ExtensionDecisionFlowDemo', asyncComponent(() => import('./components/ExtensionDecisionFlowDemo.vue'))],
+  ['TaskExecutionPathDemo', asyncComponent(() => import('./components/TaskExecutionPathDemo.vue'))],
+  ['TestingLayersDemo', asyncComponent(() => import('./components/TestingLayersDemo.vue'))],
+  ['LocalCloudTopologyDemo', asyncComponent(() => import('./components/LocalCloudTopologyDemo.vue'))],
+  ['TuiProviderFlowDemo', asyncComponent(() => import('./components/TuiProviderFlowDemo.vue'))],
+  ['PluginLifecycleDemo', asyncComponent(() => import('./components/PluginLifecycleDemo.vue'))],
+  ['ExtensionBestPracticeChecklistDemo', asyncComponent(() => import('./components/ExtensionBestPracticeChecklistDemo.vue'))],
+  ['ToolExecutionLifecycleDemo', asyncComponent(() => import('./components/ToolExecutionLifecycleDemo.vue'))],
+  ['SessionLoopLifecycleDemo', asyncComponent(() => import('./components/SessionLoopLifecycleDemo.vue'))],
 ] as const
 
 const syncGlobalComponents = [

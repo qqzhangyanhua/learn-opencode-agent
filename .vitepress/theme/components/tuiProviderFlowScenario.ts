@@ -1,0 +1,76 @@
+import type { FlowScenario } from './flowScenario'
+
+export const tuiProviderFlowScenario: FlowScenario = {
+  title: 'TUI Provider 启动与状态流',
+  summary: '从 run.ts 启动本地 server 到 SDKProvider 接收 SSE，再到 SyncProvider 更新全局 Store，串起 TUI 的核心状态流。',
+  lanes: [
+    { id: 'entry', label: '启动入口' },
+    { id: 'provider', label: 'Provider 树' },
+    { id: 'sdk', label: 'SDKProvider' },
+    { id: 'sync', label: 'SyncProvider' },
+    { id: 'ui', label: '界面刷新' },
+  ],
+  steps: [
+    {
+      id: 'run',
+      title: 'run.ts 启动入口',
+      detail: '启动本地 HTTP server、读取 TUI 配置，并把 url 传给 tui()，TUI 本身只依赖这个服务地址。',
+      lane: 'entry',
+      codeLabel: 'packages/opencode/src/cli/cmd/run.ts',
+      emphasis: '关键点：TUI 不关心 server 与自己是否同进程，它只认一个 url。',
+    },
+    {
+      id: 'providers',
+      title: 'Provider 树挂载',
+      detail: 'render() 启动 SolidJS 渲染引擎，并按顺序挂载 RouteProvider、SDKProvider、SyncProvider、KeybindProvider 等上下文。',
+      lane: 'provider',
+      codeLabel: 'packages/opencode/src/cli/cmd/tui/app.tsx',
+    },
+    {
+      id: 'sdk-init',
+      title: 'SDKProvider 建立双通道',
+      detail: '一边保留 REST 命令型调用，一边订阅 SSE 事件流，形成命令与实时推送并存的数据层。',
+      lane: 'sdk',
+      codeLabel: 'packages/opencode/src/cli/cmd/tui/context/sdk.tsx',
+    },
+    {
+      id: 'queue',
+      title: 'SSE 事件进入队列',
+      detail: '流式输出时的 PartDelta 会先进入 queue，避免每个事件都直接触发一次渲染。',
+      lane: 'sdk',
+      kind: 'async',
+      codeLabel: 'handleEvent(event) -> queue.push(event)',
+    },
+    {
+      id: 'flush',
+      title: '批处理 flush()',
+      detail: '一帧内的事件在 batch() 中合并发射，超过 16ms 没有新事件时立即刷新。',
+      lane: 'sdk',
+      kind: 'async',
+      codeLabel: 'flush() / batch() / 16ms',
+    },
+    {
+      id: 'sync-store',
+      title: 'SyncProvider 更新 Store',
+      detail: 'SyncProvider 先拉完整快照，再订阅 session、permission、part delta 等增量事件，把它们写进统一 Store。',
+      lane: 'sync',
+      codeLabel: 'packages/opencode/src/cli/cmd/tui/context/sync.tsx',
+    },
+    {
+      id: 'refresh',
+      title: 'Session / Home 局部刷新',
+      detail: '最终只有依赖这些状态的界面局部刷新，而不是整棵 TUI 组件树重绘。',
+      lane: 'ui',
+      codeLabel: 'RouteProvider / Home / Session',
+      kind: 'commit',
+    },
+  ],
+  edges: [
+    { from: 'run', to: 'providers' },
+    { from: 'providers', to: 'sdk-init' },
+    { from: 'sdk-init', to: 'queue' },
+    { from: 'queue', to: 'flush', label: '16ms 内合并' },
+    { from: 'flush', to: 'sync-store' },
+    { from: 'sync-store', to: 'refresh' },
+  ],
+}

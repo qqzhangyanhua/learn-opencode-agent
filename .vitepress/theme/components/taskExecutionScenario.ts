@@ -1,0 +1,81 @@
+import type { FlowScenario } from './flowScenario'
+
+export const taskExecutionScenario: FlowScenario = {
+  title: '一次任务的完整代码路径',
+  summary: '从用户输入任务到工具执行完成与消息回流，串起 OpenCode 的主执行链路。',
+  lanes: [
+    { id: 'entry', label: '入口' },
+    { id: 'service', label: '共享服务' },
+    { id: 'session', label: '会话' },
+    { id: 'agent', label: 'Agent Loop' },
+    { id: 'tool', label: '工具与存储' },
+  ],
+  steps: [
+    {
+      id: 'input',
+      title: '用户输入任务',
+      detail: 'CLI、TUI、Web 或 Desktop 发起一次具体请求，例如修改 config.ts 的端口。',
+      lane: 'entry',
+      emphasis: '主线目标：不要只看目录结构，而要看代码在不同模块之间如何流动。',
+    },
+    {
+      id: 'boot',
+      title: '入口初始化',
+      detail: '解析命令行参数、初始化运行时，并把 run / serve / web 分发到不同入口。',
+      lane: 'entry',
+      codeLabel: 'packages/opencode/src/index.ts',
+    },
+    {
+      id: 'boundary',
+      title: '进入共享服务边界',
+      detail: '无论来自哪种客户端，最终都通过 HTTP API 进入共享的 server 与路由层。',
+      lane: 'service',
+      codeLabel: 'packages/opencode/src/server/server.ts',
+    },
+    {
+      id: 'session',
+      title: '创建或获取会话',
+      detail: '找到对应 Session，创建用户消息并把本轮请求送进 prompt()。',
+      lane: 'session',
+      codeLabel: 'packages/opencode/src/session/prompt.ts',
+    },
+    {
+      id: 'prompt',
+      title: 'System Prompt 装配',
+      detail: '组合 Agent 基础指令、项目上下文、自定义指令和当前工作目录。',
+      lane: 'agent',
+      codeLabel: 'packages/opencode/src/session/system.ts',
+    },
+    {
+      id: 'loop',
+      title: '主执行循环',
+      detail: 'processor.ts 驱动 llm.ts，不断接收响应并决定是继续思考还是调用工具。',
+      lane: 'agent',
+      codeLabel: 'packages/opencode/src/session/processor.ts',
+    },
+    {
+      id: 'toolcall',
+      title: '工具执行',
+      detail: '经过权限检查和 registry 查找后执行 read / edit 等工具，并把结果写回 messages。',
+      lane: 'tool',
+      codeLabel: 'packages/opencode/src/tool/registry.ts',
+    },
+    {
+      id: 'persist',
+      title: '消息持久化与回流',
+      detail: '每轮用户消息、Assistant 消息和 tool_result 都持久化到存储层，并同步给客户端。',
+      lane: 'tool',
+      codeLabel: 'packages/opencode/src/session/message-v2.ts',
+    },
+  ],
+  edges: [
+    { from: 'input', to: 'boot' },
+    { from: 'boot', to: 'boundary' },
+    { from: 'boundary', to: 'session' },
+    { from: 'session', to: 'prompt' },
+    { from: 'prompt', to: 'loop' },
+    { from: 'loop', to: 'toolcall', label: '需要工具时' },
+    { from: 'toolcall', to: 'loop', style: 'dashed', label: 'tool_result 回到上下文' },
+    { from: 'loop', to: 'persist', label: 'finish_reason = stop' },
+  ],
+}
