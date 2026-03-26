@@ -5,6 +5,8 @@ description: 让 Agent 生成初稿后用评审者角色评估质量，根据反
 
 <PracticeProjectGuide project-id="practice-p12-reflection" />
 
+<ReflectionCycleDemo />
+
 ## 背景与目标
 
 P10 的 ReAct Agent 解决了"如何让模型在行动前显式推理"的问题。但还有另一个常见困境：**模型第一次输出的结果不够好，你知道有问题，但不知道哪里有问题，也不知道怎么改**。
