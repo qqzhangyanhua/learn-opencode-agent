@@ -1,10 +1,10 @@
 <template>
   <div class="td-root">
-    <div class="td-header">task 委托：同步 vs 异步</div>
+    <div class="td-header">{{ titleText }}</div>
     <div class="td-body">
       <!-- 同步 -->
       <div class="td-mode">
-        <div class="td-mode-title sync">同步委托（run_in_background: false）</div>
+        <div class="td-mode-title sync">{{ syncTitleText }}</div>
         <div class="td-timeline">
           <div
             v-for="(seg, i) in syncSegs"
@@ -17,9 +17,9 @@
           </div>
         </div>
         <div class="td-legend">
-          <span class="td-actor sisyphus">Sisyphus</span>
-          <span class="td-actor wait">等待中（阻塞）</span>
-          <span class="td-actor subagent">子 Agent</span>
+          <span class="td-actor sisyphus">{{ managerLabelText }}</span>
+          <span class="td-actor wait">{{ waitingLabelText }}</span>
+          <span class="td-actor subagent">{{ backgroundLabelText }}</span>
         </div>
         <div class="td-note sync-note" v-if="syncNote">{{ syncNote }}</div>
       </div>
@@ -29,10 +29,10 @@
 
       <!-- 异步 -->
       <div class="td-mode">
-        <div class="td-mode-title async">异步委托（run_in_background: true）</div>
+        <div class="td-mode-title async">{{ asyncTitleText }}</div>
         <div class="td-parallel">
           <div class="td-lane">
-            <div class="td-lane-label">Sisyphus</div>
+            <div class="td-lane-label">{{ managerLabelText }}</div>
             <div class="td-timeline">
               <div
                 v-for="(seg, i) in asyncSisSeg"
@@ -46,7 +46,7 @@
             </div>
           </div>
           <div class="td-lane">
-            <div class="td-lane-label">后台 Agent</div>
+            <div class="td-lane-label">{{ backgroundLabelText }}</div>
             <div class="td-timeline">
               <div
                 v-for="(seg, i) in asyncAgentSeg"
@@ -74,7 +74,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 
-interface Seg {
+interface TimelineSeg {
   actor: string
   state: string
   label: string
@@ -82,18 +82,65 @@ interface Seg {
   active: boolean
 }
 
-const syncSegs = ref<Seg[]>([])
-const asyncSisSeg = ref<Seg[]>([])
-const asyncAgentSeg = ref<Seg[]>([])
+const defaultSyncSegments: TimelineSeg[] = [
+  { actor: 'sisyphus', state: '', label: '发出委托', weight: 1, active: false },
+  { actor: 'wait', state: '', label: '等待', weight: 3, active: false },
+  { actor: 'subagent', state: '', label: '子 Agent 执行', weight: 2, active: false },
+  { actor: 'sisyphus', state: 'done', label: '收到结果，继续', weight: 1.5, active: false },
+]
+
+const defaultAsyncManagerSegments: TimelineSeg[] = [
+  { actor: 'sisyphus', state: '', label: '发出委托', weight: 1, active: false },
+  { actor: 'sisyphus', state: '', label: '继续其他工作', weight: 3.5, active: false },
+  { actor: 'sisyphus', state: 'done', label: '收到通知', weight: 1, active: false },
+]
+
+const defaultAsyncAgentSegments: TimelineSeg[] = [
+  { actor: 'idle', state: '', label: '', weight: 1, active: false },
+  { actor: 'subagent', state: '', label: '后台执行中', weight: 2, active: false },
+  { actor: 'subagent', state: 'done', label: '完成', weight: 0.5, active: false },
+]
+
+const props = defineProps<{
+  title?: string
+  syncTitle?: string
+  asyncTitle?: string
+  managerLabel?: string
+  waitingLabel?: string
+  backgroundLabel?: string
+  syncNoteText?: string
+  asyncNoteText?: string
+  idleStatus?: string
+  syncSegments?: TimelineSeg[]
+  asyncManagerSegments?: TimelineSeg[]
+  asyncAgentSegments?: TimelineSeg[]
+}>()
+
+const titleText = computed(() => props.title ?? 'task 委托：同步 vs 异步')
+const syncTitleText = computed(() => props.syncTitle ?? '同步委托（run_in_background: false）')
+const asyncTitleText = computed(() => props.asyncTitle ?? '异步委托（run_in_background: true）')
+const managerLabelText = computed(() => props.managerLabel ?? 'Sisyphus')
+const waitingLabelText = computed(() => props.waitingLabel ?? '等待中（阻塞）')
+const backgroundLabelText = computed(() => props.backgroundLabel ?? '后台 Agent')
+const syncNoteText = computed(() => props.syncNoteText ?? '总耗时 = 委托 + 等待 + 执行 + 返回')
+const asyncNoteText = computed(() => props.asyncNoteText ?? '总耗时 ≈ max(主线程, 后台) — 节省了等待时间')
+const idleStatus = computed(() => props.idleStatus ?? '等待开始...')
+const syncSegmentsProp = computed(() => props.syncSegments ?? defaultSyncSegments)
+const asyncManagerSegmentsProp = computed(() => props.asyncManagerSegments ?? defaultAsyncManagerSegments)
+const asyncAgentSegmentsProp = computed(() => props.asyncAgentSegments ?? defaultAsyncAgentSegments)
+
+const syncSegs = ref<TimelineSeg[]>([])
+const asyncSisSeg = ref<TimelineSeg[]>([])
+const asyncAgentSeg = ref<TimelineSeg[]>([])
 const syncNote = ref('')
 const asyncNote = ref('')
 const phase = ref(0)
 let timer: ReturnType<typeof setTimeout> | null = null
 
 const statusText = computed(() => {
-  if (phase.value === 0) return '等待开始...'
-  if (phase.value === 1) return '同步委托：Sisyphus 发出任务后阻塞等待...'
-  if (phase.value === 2) return '同步委托完成；异步委托：两条线并行进行...'
+  if (phase.value === 0) return idleStatus.value
+  if (phase.value === 1) return `同步路径：${managerLabelText.value} 发出任务后进入等待`
+  if (phase.value === 2) return `异步路径：${managerLabelText.value} 与 ${backgroundLabelText.value} 并行推进`
   return '对比完成：异步委托节省了等待时间'
 })
 
@@ -101,70 +148,37 @@ function delay(ms: number) {
   return new Promise<void>(r => { timer = setTimeout(r, ms) })
 }
 
+function activateSegments(source: TimelineSeg[], activeIndex: number) {
+  return source.slice(0, activeIndex + 1).map((seg, idx) => ({
+    ...seg,
+    active: idx === activeIndex,
+  }))
+}
+
 async function run() {
   phase.value = 1
 
-  // Sync timeline build up
-  syncSegs.value = [
-    { actor: 'sisyphus', state: 'active', label: '发出委托', weight: 1, active: true },
-  ]
-  await delay(600)
-
-  syncSegs.value = [
-    { actor: 'sisyphus', state: '', label: '发出委托', weight: 1, active: false },
-    { actor: 'wait', state: 'active', label: '等待子 Agent...', weight: 3, active: true },
-  ]
-  await delay(1200)
-
-  syncSegs.value = [
-    { actor: 'sisyphus', state: '', label: '发出委托', weight: 1, active: false },
-    { actor: 'wait', state: '', label: '等待', weight: 3, active: false },
-    { actor: 'subagent', state: 'active', label: '子 Agent 执行', weight: 2, active: true },
-  ]
-  await delay(800)
-
-  syncSegs.value = [
-    { actor: 'sisyphus', state: '', label: '发出委托', weight: 1, active: false },
-    { actor: 'wait', state: '', label: '等待', weight: 3, active: false },
-    { actor: 'subagent', state: '', label: '子 Agent 执行', weight: 2, active: false },
-    { actor: 'sisyphus', state: 'done', label: '收到结果，继续', weight: 1.5, active: false },
-  ]
-  syncNote.value = '总耗时 = 委托 + 等待 + 执行 + 返回'
+  for (let i = 0; i < syncSegmentsProp.value.length; i++) {
+    syncSegs.value = activateSegments(syncSegmentsProp.value, i)
+    await delay(i === 0 ? 600 : 900)
+  }
+  syncNote.value = syncNoteText.value
 
   phase.value = 2
 
-  // Async timelines build up simultaneously
   await delay(400)
 
-  asyncSisSeg.value = [
-    { actor: 'sisyphus', state: 'active', label: '发出委托', weight: 1, active: true },
-  ]
-  asyncAgentSeg.value = [
-    { actor: 'idle', state: '', label: '', weight: 1, active: false },
-  ]
-  await delay(500)
-
-  asyncSisSeg.value = [
-    { actor: 'sisyphus', state: '', label: '发出委托', weight: 1, active: false },
-    { actor: 'sisyphus', state: 'active', label: '继续其他工作', weight: 3.5, active: true },
-  ]
-  asyncAgentSeg.value = [
-    { actor: 'idle', state: '', label: '', weight: 1, active: false },
-    { actor: 'subagent', state: 'active', label: '后台执行中', weight: 2, active: true },
-  ]
-  await delay(1000)
-
-  asyncSisSeg.value = [
-    { actor: 'sisyphus', state: '', label: '发出委托', weight: 1, active: false },
-    { actor: 'sisyphus', state: '', label: '继续其他工作', weight: 3.5, active: false },
-    { actor: 'sisyphus', state: 'done', label: '收到通知', weight: 1, active: false },
-  ]
-  asyncAgentSeg.value = [
-    { actor: 'idle', state: '', label: '', weight: 1, active: false },
-    { actor: 'subagent', state: '', label: '后台执行中', weight: 2, active: false },
-    { actor: 'subagent', state: 'done', label: '完成', weight: 0.5, active: false },
-  ]
-  asyncNote.value = '总耗时 ≈ max(主线程, 后台) — 节省了等待时间'
+  const maxSteps = Math.max(asyncManagerSegmentsProp.value.length, asyncAgentSegmentsProp.value.length)
+  for (let i = 0; i < maxSteps; i++) {
+    if (i < asyncManagerSegmentsProp.value.length) {
+      asyncSisSeg.value = activateSegments(asyncManagerSegmentsProp.value, i)
+    }
+    if (i < asyncAgentSegmentsProp.value.length) {
+      asyncAgentSeg.value = activateSegments(asyncAgentSegmentsProp.value, i)
+    }
+    await delay(i === 0 ? 500 : 800)
+  }
+  asyncNote.value = asyncNoteText.value
 
   phase.value = 3
 }

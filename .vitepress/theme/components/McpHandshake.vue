@@ -1,15 +1,15 @@
 <template>
   <div class="mcp-root">
-    <div class="mcp-header">MCP 协议生命周期（stdio 连接）</div>
+    <div class="mcp-header">{{ titleText }}</div>
 
     <div class="mcp-body">
       <!-- 时序轴 -->
       <div class="mcp-timeline">
         <!-- 列头 -->
         <div class="tl-cols">
-          <div class="tl-col oc">OpenCode</div>
+          <div class="tl-col oc">{{ clientLabelText }}</div>
           <div class="tl-col mid"></div>
-          <div class="tl-col ms">MCP Server\nnpx my-db-mcp</div>
+          <div class="tl-col ms">{{ serverLabelText }}</div>
         </div>
 
         <!-- 事件行 -->
@@ -66,7 +66,7 @@
         <div class="reg-title">Tool Registry</div>
         <div class="reg-section">内置工具</div>
         <div class="reg-tool builtin" v-for="t in builtinTools" :key="t">{{ t }}</div>
-        <div class="reg-section" v-if="mcpTools.length > 0">MCP 工具（my-database）</div>
+        <div class="reg-section" v-if="mcpTools.length > 0">MCP 工具（{{ serverLabelText }}）</div>
         <div
           class="reg-tool mcp"
           v-for="(t, i) in mcpTools"
@@ -86,15 +86,14 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 
-interface Event {
+interface McpEvent {
   dir: 'right' | 'left' | 'internal'
   type: string
   label: string
   sub: string
 }
 
-// 握手阶段
-const handshakeEvents: Event[] = [
+const defaultHandshakeEvents: McpEvent[] = [
   { dir: 'internal', type: 'spawn',  label: 'spawn("npx my-db-mcp-server --connection postgresql://...")', sub: '' },
   { dir: 'right',    type: 'init',   label: 'initialize',   sub: '{ protocolVersion, capabilities }' },
   { dir: 'left',     type: 'init',   label: '{ protocolVersion: "2024-11-05", capabilities: { tools: true } }', sub: 'initialize 响应' },
@@ -103,26 +102,43 @@ const handshakeEvents: Event[] = [
   { dir: 'internal', type: 'inject', label: '转换为 Tool.Info 格式，注入 Tool Registry', sub: '' },
 ]
 
-// 调用阶段
-const callEvents: Event[] = [
+const defaultCallEvents: McpEvent[] = [
   { dir: 'right', type: 'call',   label: 'tools/call',   sub: '{ name: "query_table", arguments: { table: "users" } }' },
   { dir: 'left',  type: 'result', label: '{ content: [{ type: "text", text: "id | name\\n1 | Alice\\n2 | Bob" }] }', sub: 'tool result' },
 ]
 
-const mcpToolNames = ['my_database_query_table', 'my_database_run_migration', 'my_database_get_schema', 'my_database_list_tables']
-const builtinTools = ['read', 'write', 'edit', 'bash', 'grep', 'glob', '...']
+const defaultMcpToolNames = ['my_database_query_table', 'my_database_run_migration', 'my_database_get_schema', 'my_database_list_tables']
+const defaultBuiltinTools = ['read', 'write', 'edit', 'bash', 'grep', 'glob', '...']
 
-const visibleEvents = ref<Event[]>([])
-const visibleCallEvents = ref<Event[]>([])
+const props = defineProps<{
+  title?: string
+  clientLabel?: string
+  serverLabel?: string
+  builtinTools?: string[]
+  mcpToolNames?: string[]
+  handshakeEvents?: McpEvent[]
+  callEvents?: McpEvent[]
+}>()
+
+const titleText = computed(() => props.title ?? 'MCP 协议生命周期（stdio 连接）')
+const clientLabelText = computed(() => props.clientLabel ?? 'OpenCode')
+const serverLabelText = computed(() => props.serverLabel ?? 'MCP Server\nnpx my-db-mcp')
+const builtinTools = computed(() => props.builtinTools ?? defaultBuiltinTools)
+const mcpToolNames = computed(() => props.mcpToolNames ?? defaultMcpToolNames)
+const handshakeEvents = computed(() => props.handshakeEvents ?? defaultHandshakeEvents)
+const callEvents = computed(() => props.callEvents ?? defaultCallEvents)
+
+const visibleEvents = ref<McpEvent[]>([])
+const visibleCallEvents = ref<McpEvent[]>([])
 const mcpTools = ref<string[]>([])
 const showDivider = ref(false)
 
 const statusText = computed(() => {
   const total = visibleEvents.value.length + visibleCallEvents.value.length
   if (total === 0) return '等待开始...'
-  if (visibleCallEvents.value.length === callEvents.length) return 'MCP 工具调用完成，结果返回 processor.ts'
-  if (showDivider.value) return 'LLM 调用 my_database_query_table...'
-  if (mcpTools.value.length === mcpToolNames.length) return '工具注入完成，Agent 可调用 MCP 工具'
+  if (visibleCallEvents.value.length === callEvents.value.length) return 'MCP 工具调用完成，结果返回 Agent 主循环'
+  if (showDivider.value) return `Agent 正在调用 ${mcpToolNames.value[0] ?? 'MCP 工具'}...`
+  if (mcpTools.value.length === mcpToolNames.value.length) return '工具注入完成，Agent 可调用 MCP 工具'
   return 'MCP 握手中...'
 })
 
@@ -136,14 +152,14 @@ async function run() {
   await delay(500)
 
   // 握手阶段
-  for (let i = 0; i < handshakeEvents.length; i++) {
-    const ev = handshakeEvents[i]
+  for (let i = 0; i < handshakeEvents.value.length; i++) {
+    const ev = handshakeEvents.value[i]
     await delay(ev.type === 'inject' ? 600 : ev.dir === 'internal' ? 700 : 800)
     visibleEvents.value = [...visibleEvents.value, ev]
 
     // 工具逐个出现
     if (ev.type === 'list' && ev.dir === 'left') {
-      for (const t of mcpToolNames) {
+      for (const t of mcpToolNames.value) {
         await delay(250)
         mcpTools.value = [...mcpTools.value, t]
       }
@@ -156,7 +172,7 @@ async function run() {
   await delay(700)
 
   // 调用阶段
-  for (const ev of callEvents) {
+  for (const ev of callEvents.value) {
     await delay(800)
     visibleCallEvents.value = [...visibleCallEvents.value, ev]
   }

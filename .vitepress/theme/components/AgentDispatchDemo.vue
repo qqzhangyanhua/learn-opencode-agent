@@ -1,6 +1,6 @@
 <template>
   <div class="ad-root">
-    <div class="ad-header">Sisyphus 任务分发决策</div>
+    <div class="ad-header">{{ titleText }}</div>
     <div class="ad-body">
       <!-- 左：任务输入选择 -->
       <div class="ad-tasks">
@@ -21,7 +21,7 @@
       <div class="ad-center">
         <div class="ad-sisyphus" :class="{ thinking: phase === 'think' }">
           <div class="ad-sis-icon">S</div>
-          <div class="ad-sis-label">Sisyphus</div>
+          <div class="ad-sis-label">{{ orchestratorName }}</div>
           <div class="ad-sis-thought" v-if="thought">{{ thought }}</div>
         </div>
         <div class="ad-arrow" v-if="phase === 'dispatch'">
@@ -61,7 +61,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 
-interface TaskType {
+interface DispatchTaskType {
   icon: string
   label: string
   targetAgent: number
@@ -69,12 +69,12 @@ interface TaskType {
   log: string
 }
 
-interface Agent {
+interface DispatchAgent {
   name: string
   role: string
 }
 
-const taskTypes: TaskType[] = [
+const defaultTaskTypes: DispatchTaskType[] = [
   { icon: 'S', label: '代码搜索/探索', targetAgent: 4, thought: '搜索任务 → Explore 更快', log: '委托 Explore：grep/glob，不写文件' },
   { icon: 'W', label: '网络搜索/文档', targetAgent: 3, thought: '需要上网 → Librarian 负责', log: '委托 Librarian：联网查询文档' },
   { icon: 'C', label: '复杂编码实现', targetAgent: 1, thought: '深度编码 → Hephaestus 专注干', log: '委托 Hephaestus：自主深度实现' },
@@ -82,7 +82,7 @@ const taskTypes: TaskType[] = [
   { icon: 'I', label: '图像/PDF 理解', targetAgent: 5, thought: '多模态内容 → Multimodal-Looker', log: '委托 Multimodal-Looker：视觉分析' },
 ]
 
-const agents: Agent[] = [
+const defaultAgents: DispatchAgent[] = [
   { name: 'Sisyphus', role: '主编排器' },
   { name: 'Hephaestus', role: '深度编码' },
   { name: 'Oracle', role: '只读顾问' },
@@ -90,6 +90,20 @@ const agents: Agent[] = [
   { name: 'Explore', role: '代码探索' },
   { name: 'Multimodal', role: '视觉分析' },
 ]
+
+const props = defineProps<{
+  title?: string
+  orchestratorName?: string
+  taskTypes?: DispatchTaskType[]
+  agents?: DispatchAgent[]
+  idleStatus?: string
+}>()
+
+const titleText = computed(() => props.title ?? 'Sisyphus 任务分发决策')
+const orchestratorName = computed(() => props.orchestratorName ?? 'Sisyphus')
+const taskTypes = computed(() => props.taskTypes ?? defaultTaskTypes)
+const agents = computed(() => props.agents ?? defaultAgents)
+const idleStatus = computed(() => props.idleStatus ?? '点击左侧任务类型开始分发')
 
 const selectedTask = ref<number | null>(null)
 const activeAgent = ref<number | null>(null)
@@ -100,9 +114,9 @@ const running = ref(false)
 let timer: ReturnType<typeof setTimeout> | null = null
 
 const statusText = computed(() => {
-  if (phase.value === 'idle') return '点击左侧任务类型开始分发'
-  if (phase.value === 'think') return 'Sisyphus 分析任务类型...'
-  if (phase.value === 'dispatch') return `任务已委托给 ${agents[activeAgent.value!]?.name}`
+  if (phase.value === 'idle') return idleStatus.value
+  if (phase.value === 'think') return `${orchestratorName.value} 正在分析任务类型...`
+  if (phase.value === 'dispatch') return `任务已委托给 ${agents.value[activeAgent.value!]?.name}`
   return ''
 })
 
@@ -116,11 +130,11 @@ function selectTask(i: number) {
   running.value = true
 
   timer = setTimeout(() => {
-    thought.value = taskTypes[i].thought
+    thought.value = taskTypes.value[i].thought
     timer = setTimeout(() => {
       phase.value = 'dispatch'
-      activeAgent.value = taskTypes[i].targetAgent
-      logText.value = taskTypes[i].log
+      activeAgent.value = taskTypes.value[i].targetAgent
+      logText.value = taskTypes.value[i].log
       running.value = false
     }, 1000)
   }, 800)
@@ -137,7 +151,9 @@ function restart() {
 }
 
 onMounted(() => {
-  timer = setTimeout(() => selectTask(0), 800)
+  if (taskTypes.value.length > 0) {
+    timer = setTimeout(() => selectTask(0), 800)
+  }
 })
 
 onUnmounted(() => {

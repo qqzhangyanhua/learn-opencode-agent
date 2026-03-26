@@ -1,6 +1,6 @@
 <template>
   <div class="rf-root">
-    <div class="rf-header">runtimeFallback：模型自动切换</div>
+    <div class="rf-header">{{ titleText }}</div>
     <div class="rf-body">
       <!-- 左：事件时间线 -->
       <div class="rf-timeline">
@@ -20,7 +20,7 @@
 
       <!-- 右：Fallback 链 -->
       <div class="rf-chain">
-        <div class="rf-chain-title">Fallback 链（Sisyphus）</div>
+        <div class="rf-chain-title">{{ chainTitleText }}</div>
         <div
           v-for="(m, i) in models"
           :key="i"
@@ -56,25 +56,49 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 
-interface Event {
+interface FallbackEvent {
   kind: 'request' | 'error' | 'detect' | 'switch' | 'retry' | 'success'
   title: string
   desc: string
+  modelIndex?: number
 }
 
-interface Model {
+interface FallbackModel {
   name: string
   provider: string
 }
 
-const models: Model[] = [
+const defaultModels: FallbackModel[] = [
   { name: 'gpt-4o max', provider: 'OpenAI' },
   { name: 'k2p5', provider: 'Kimi (月之暗面)' },
   { name: 'gpt-5.4 medium', provider: 'OpenAI' },
   { name: 'glm-5', provider: 'Zhipu AI' },
 ]
 
-const visibleEvents = ref<Event[]>([])
+const defaultEvents: FallbackEvent[] = [
+  { kind: 'request', title: '调用 gpt-4o', desc: 'POST api.openai.com/v1/chat/completions', modelIndex: 0 },
+  { kind: 'error', title: '429 Too Many Requests', desc: 'OpenAI API 限流', modelIndex: 0 },
+  { kind: 'detect', title: 'runtimeFallback 检测到错误', desc: '识别为可恢复的 API 限流', modelIndex: 0 },
+  { kind: 'switch', title: '切换到 Kimi (k2p5)', desc: 'Fallback 链第 2 项', modelIndex: 1 },
+  { kind: 'retry', title: '重新提交任务', desc: '同等上下文，换 Kimi 执行', modelIndex: 1 },
+  { kind: 'success', title: '200 OK — 任务继续', desc: 'Kimi 开始流式响应', modelIndex: 1 },
+]
+
+const props = defineProps<{
+  title?: string
+  chainTitle?: string
+  doneText?: string
+  models?: FallbackModel[]
+  events?: FallbackEvent[]
+}>()
+
+const titleText = computed(() => props.title ?? 'runtimeFallback：模型自动切换')
+const chainTitleText = computed(() => props.chainTitle ?? 'Fallback 链（Sisyphus）')
+const doneText = computed(() => props.doneText ?? 'Kimi 接管任务，任务继续执行')
+const models = computed(() => props.models ?? defaultModels)
+const events = computed(() => props.events ?? defaultEvents)
+
+const visibleEvents = ref<FallbackEvent[]>([])
 const currentModel = ref<number | null>(null)
 const failedModels = ref<number[]>([])
 const successModel = ref<number | null>(null)
@@ -82,9 +106,9 @@ let timer: ReturnType<typeof setTimeout> | null = null
 const done = ref(false)
 
 const statusText = computed(() => {
-  if (done.value) return 'Kimi 接管任务，任务继续执行'
+  if (done.value) return doneText.value
   if (successModel.value !== null) return '切换成功，继续执行'
-  if (failedModels.value.length > 0) return 'OpenAI API 限流，切换到下一个模型...'
+  if (failedModels.value.length > 0) return '检测到可恢复错误，准备切换模型...'
   if (currentModel.value !== null) return '调用中...'
   return '等待开始...'
 })
@@ -94,41 +118,30 @@ function delay(ms: number) {
 }
 
 async function run() {
-  // Try first model
-  currentModel.value = 0
-  await delay(700)
-  visibleEvents.value = [...visibleEvents.value, {
-    kind: 'request', title: '调用 gpt-4o', desc: 'POST api.openai.com/v1/chat/completions'
-  }]
+  for (const event of events.value) {
+    if (event.kind === 'request' && event.modelIndex !== undefined) {
+      currentModel.value = event.modelIndex
+    }
 
-  await delay(900)
-  visibleEvents.value = [...visibleEvents.value, {
-    kind: 'error', title: '429 Too Many Requests', desc: 'OpenAI API 限流'
-  }]
-  failedModels.value = [0]
+    await delay(event.kind === 'error' ? 900 : 700)
+    visibleEvents.value = [...visibleEvents.value, event]
 
-  await delay(600)
-  visibleEvents.value = [...visibleEvents.value, {
-    kind: 'detect', title: 'runtimeFallback 检测到错误', desc: '识别为可恢复的 API 限流'
-  }]
+    if (event.kind === 'error') {
+      const failedIndex = event.modelIndex ?? currentModel.value
+      if (failedIndex !== null && failedIndex !== undefined && !failedModels.value.includes(failedIndex)) {
+        failedModels.value = [...failedModels.value, failedIndex]
+      }
+    }
 
-  await delay(800)
-  visibleEvents.value = [...visibleEvents.value, {
-    kind: 'switch', title: '切换到 Kimi (k2p5)', desc: 'Fallback 链第 2 项'
-  }]
-  currentModel.value = 1
+    if (event.kind === 'switch' && event.modelIndex !== undefined) {
+      currentModel.value = event.modelIndex
+    }
 
-  await delay(700)
-  visibleEvents.value = [...visibleEvents.value, {
-    kind: 'retry', title: '重新提交任务', desc: '同等上下文，换 Kimi 执行'
-  }]
-
-  await delay(800)
-  visibleEvents.value = [...visibleEvents.value, {
-    kind: 'success', title: '200 OK — 任务继续', desc: 'Kimi 开始流式响应'
-  }]
-  successModel.value = 1
-  done.value = true
+    if (event.kind === 'success') {
+      successModel.value = event.modelIndex ?? currentModel.value
+      done.value = true
+    }
+  }
 }
 
 function restart() {

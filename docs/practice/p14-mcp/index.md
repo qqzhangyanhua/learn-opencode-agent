@@ -5,6 +5,22 @@ description: 连接标准化工具服务器，让 Agent 接入外部能力生态
 
 <PracticeProjectGuide project-id="practice-p14-mcp" />
 
+<script setup lang="ts">
+const mcpHandshakeEvents = [
+  { dir: 'internal', type: 'spawn', label: 'spawn("bun run practice/p14-mcp-server.ts")', sub: '' },
+  { dir: 'right', type: 'init', label: 'initialize', sub: '{ protocolVersion, capabilities: { tools: true } }' },
+  { dir: 'left', type: 'init', label: '{ serverInfo: "p14-demo-server", capabilities: { tools: true } }', sub: 'initialize 响应' },
+  { dir: 'right', type: 'list', label: 'tools/list', sub: '{}' },
+  { dir: 'left', type: 'list', label: '{ tools: [get_time, get_random_number] }', sub: 'tools/list 响应' },
+  { dir: 'internal', type: 'inject', label: '转换为 ChatCompletionTool 并注入 Agent registry', sub: '' },
+]
+
+const mcpCallEvents = [
+  { dir: 'right', type: 'call', label: 'tools/call', sub: '{ name: "get_random_number", arguments: { min: 1, max: 10 } }' },
+  { dir: 'left', type: 'result', label: '{ content: [{ type: "text", text: "7" }] }', sub: 'tool result' },
+]
+</script>
+
 ## 背景与目标
 
 从 P1 到 P12，工具都是直接写在 Agent 代码里的：一个函数，一个 `tool` 对象，交给 OpenAI SDK 注册。这样做直接简单，但随着工具数量增长，你会撞上一个结构性问题：
@@ -41,6 +57,16 @@ Agent 代码                          工具代码
 ```
 
 Client 运行在 Agent 进程内，负责与 Server 建立连接、获取工具列表、转发工具调用请求。Server 是一个独立进程，负责注册自己有哪些工具、接收调用请求并执行、返回结果。
+
+<McpHandshake
+  title="P14 MCP 工具注入链路"
+  client-label="P14 Agent"
+  server-label="p14-demo-server"
+  :builtin-tools="['agent_loop', 'local_tools']"
+  :mcp-tool-names="['get_time', 'get_random_number']"
+  :handshake-events="mcpHandshakeEvents"
+  :call-events="mcpCallEvents"
+/>
 
 两者之间的通信格式是 **JSON-RPC 2.0**：一种标准的远程调用协议，每次调用包含方法名、参数、请求 ID，响应包含结果或错误。MCP 在 JSON-RPC 之上定义了几个标准方法：
 

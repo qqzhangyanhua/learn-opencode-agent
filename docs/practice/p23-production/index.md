@@ -5,6 +5,29 @@ description: Rate Limiting、Circuit Breaker、超时控制、优雅降级、健
 
 <PracticeProjectGuide project-id="practice-p23-production" />
 
+<script setup lang="ts">
+const productionNodes = [
+  { id: 'client', label: 'Client', role: '请求入口', x: 80, y: 60, width: 110, height: 36, status: 'healthy' },
+  { id: 'gateway', label: 'API Gateway', role: '限流 / 鉴权', x: 250, y: 60, width: 120, height: 36, status: 'healthy' },
+  { id: 'agent', label: 'ProductionAgent', role: '统一包装器', x: 250, y: 150, width: 130, height: 36, status: 'healthy' },
+  { id: 'router', label: 'Model Router', role: '选模型 / 降级', x: 450, y: 100, width: 120, height: 36, status: 'healthy' },
+  { id: 'provider', label: 'Provider', role: '主模型', x: 450, y: 180, width: 110, height: 36, status: 'degraded' },
+  { id: 'health', label: 'Health Check', role: '/health', x: 80, y: 260, width: 110, height: 36, status: 'healthy' },
+  { id: 'obs', label: 'Observability', role: '日志 / 指标', x: 250, y: 260, width: 120, height: 36, status: 'healthy' },
+  { id: 'fallback', label: 'Fallback', role: '兜底响应', x: 450, y: 260, width: 110, height: 36, status: 'healthy' },
+]
+
+const productionLinks = [
+  { source: 'client', target: 'gateway', type: 'data' },
+  { source: 'gateway', target: 'agent', type: 'data' },
+  { source: 'agent', target: 'router', type: 'data' },
+  { source: 'router', target: 'provider', type: 'data' },
+  { source: 'provider', target: 'obs', type: 'alert' },
+  { source: 'agent', target: 'health', type: 'control' },
+  { source: 'agent', target: 'fallback', type: 'control' },
+]
+</script>
+
 ## 背景与目标
 
 走到这里，你已经完成了 22 个练习。从 P1 的 50 行最小 Agent 开始，到 P22 的完整 Code Review Agent，你掌握了多轮对话、流式输出、工具调用、RAG、ReAct 循环、规划、反思、多 Agent 编排、模型路由、安全防注入、可观测性、评估体系……几乎所有构建 AI Agent 需要的核心技术。
@@ -25,6 +48,15 @@ description: Rate Limiting、Circuit Breaker、超时控制、优雅降级、健
 6. 给出一份完整的生产部署清单
 
 ## 核心概念
+
+<ProductionArchitectureDiagram
+  title="P23 ProductionAgent 韧性拓扑"
+  :viewBoxWidth="640"
+  :viewBoxHeight="380"
+  :nodes="productionNodes"
+  :links="productionLinks"
+  :showLegend="true"
+/>
 
 ### 令牌桶限流
 
