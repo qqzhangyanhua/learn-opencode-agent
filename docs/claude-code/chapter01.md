@@ -1,518 +1,213 @@
----
-title: "第1章：项目总览"
-description: "Claude Code 源码解析 - 第1章：项目总览"
-contentType: theory
-series: claude-code
-contentId: claude-code-ch01
-shortTitle: "第1章：项目总览"
-summary: "Claude Code 源码解析：第1章：项目总览"
-difficulty: intermediate
-estimatedTime: 30-45 分钟
-learningGoals:
-  - 理解本章核心实现原理
-  - 掌握相关设计模式
-prerequisites:
-  - 了解 AI Agent 基本概念
-recommendedNext: []
-practiceLinks: []
-searchTags:
-  - claude-code
-  - 源码解析
-navigationLabel: "第1章：项目总览"
-entryMode: read-first
-roleDescription: 想深入理解 Claude Code 架构的工程师
----
+# 第 1 章：Agent 到底是什么，不是什么
 
-
-# 第 1 章：项目总览
-
-## 本章导读
-
-**仓库路径**：`/`（根目录）+ `CLAUDE.md`
-
-**系统职责**：
-- 理解 Claude Code 的整体架构（13 插件 + 自动化 + 配置）
-- 掌握 202 个文件的组织方式
-- 了解 Marketplace 注册机制
-
-**能学到什么**：
-- 如何组织一个多插件系统的目录结构
-- 插件发现机制（约定优于配置）
-- 文档驱动开发（Markdown 即代码）
+> 本章目标：先清理概念污染，建立后续全书都要使用的最小判断标准。  
+> 本章对应总纲：`docs/ebook-outline.md` 中“第 1 章正文写作提纲（2026-03-31 归档）”。
 
 ---
 
-## 1.1 仓库结构速览
+## 1.1 为什么“Agent”这个词被用滥了
 
-### 顶层目录
+这几年，“Agent”几乎成了 AI 圈最廉价的标签。只要一个系统接了大模型、能调用几个工具、再加一点自动执行逻辑，很多人就会立刻把它叫成 Agent。这个问题不是术语洁癖，而是工程判断会因此失真。
 
-当你克隆 Claude Code 仓库后，会看到这样的目录结构：
+如果你连对象是什么都没定义清楚，后面谈架构、谈边界、谈能力，都会飘。把一个问答系统误当成 Agent，你会高估它的自主性；把一个固定工作流误当成 Agent，你会低估任务动态决策的重要性；把一个真正的 Agent 仅仅当成“更强的聊天机器人”，你就会错过它最关键的系统设计问题：状态、反馈、边界和执行闭环。
 
-```bash
-claude-code/
-├── plugins/              # 13 个官方插件
-├── scripts/              # 5 个 TypeScript 自动化脚本
-├── .github/workflows/    # 12 个 GitHub Actions 工作流
-├── .claude/commands/     # 3 个自定义命令
-├── .devcontainer/        # Docker/Podman 开发容器配置
-├── examples/             # 配置示例（3 种安全策略）
-├── .vitepress/           # VitePress 文档站配置
-├── docs/                 # 文档目录
-├── CLAUDE.md             # 项目架构文档（核心）
-├── CHANGELOG.md          # 版本发布记录（当前 v2.1.74）
-├── LICENSE.md            # Anthropic PBC 商业条款
-├── README.md             # 安装指南
-├── SECURITY.md           # HackerOne 漏洞披露计划
-└── package.json          # Node.js 项目配置
-```
+所以这一章的任务，不是给 Agent 贴金，也不是去唱反调，而是做一件更朴素的事：把概念边界拉清楚。只有这样，后面每一章讨论的东西才不会混成一锅粥。
 
-### 核心发现
+常见的误称大概有三类：
 
-**第一眼看到这个结构，你应该注意到**：
+1. **把带工具调用的问答系统叫做 Agent**  
+   这类系统能查资料、能执行几个动作，但本质上还是“问一次，答一次”，缺乏持续推进目标的能力。
+2. **把固定流程自动化叫做 Agent**  
+   例如把一串预先写死的步骤包装起来，前面加个自然语言入口，就自称是智能体。其实那更像 workflow，不是 Agent。
+3. **把任何接了大模型的产品都叫 Agent**  
+   这就更懒了。模型只是部件，不是系统定义。
 
-1. **插件是一等公民**：`plugins/` 目录占据顶层，包含 13 个子目录
-2. **自动化很重要**：`scripts/` 和 `.github/workflows/` 说明这是一个高度自动化的项目
-3. **文档驱动**：`CLAUDE.md` 是核心文档，每个模块都有自己的 `CLAUDE.md`
-4. **安全优先**：`examples/settings/` 提供 3 种安全配置，`SECURITY.md` 说明漏洞披露流程
+真正该问的问题只有一个：
+
+> 这个系统是不是在围绕一个目标，持续感知环境、做决策、采取行动、接收反馈，并根据反馈继续推进？
+
+如果不是，那大概率还谈不上 Agent。
 
 ---
 
-## 1.2 17 个模块的职责分工
+## 1.2 一个可工作的 Agent 定义应该包含什么
 
-Claude Code 由 17 个模块组成，每个模块都有明确的职责：
+工程上没必要追求哲学上最完美的定义。我们只需要一个足够清楚、能指导系统设计、也能用来判断真假的定义。
 
-### 插件模块（13 个）
+本书采用一个非常务实的定义：
 
-| 插件 | 分类 | 职责 | 状态 |
-|------|------|------|------|
-| **hookify** | development | 规则引擎：拦截工具调用并执行自定义规则 | 生产 |
-| **agent-sdk-dev** | development | Agent SDK 开发工具包（TS/Python 双语言） | 生产 |
-| **feature-dev** | development | 7 阶段特性开发工作流 | 生产 |
-| **plugin-dev** | development | 插件开发工具包（7 技能 + 60+ 文件） | 生产 |
-| **code-review** | productivity | 多 Agent PR 审查（9 步流程） | 生产 |
-| **pr-review-toolkit** | productivity | 6 个专业审查 Agent（置信度评分） | 生产 |
-| **commit-commands** | productivity | Git 工作流自动化（3 个命令） | 生产 |
-| **ralph-wiggum** | development | 自引用 AI 循环（实验性） | 实验 |
-| **security-guidance** | security | 安全检查 Hook（9 种模式） | 生产 |
-| **frontend-design** | development | 生产级前端设计技能 | 生产 |
-| **claude-opus-4-5-migration** | development | Opus 4.5 迁移技能 | 生产 |
-| **explanatory-output-style** | learning | 教育性输出风格 | 生产 |
-| **learning-output-style** | learning | 学习式输出风格 | 生产 |
+> **Agent 是一个围绕目标运行的系统。它能够根据当前环境与已有状态做决策，必要时调用外部能力采取行动，并根据行动结果继续调整后续行为，直到任务完成、失败或被中止。**
 
-### 自动化模块（3 个）
+这个定义里有五个关键点。
 
-| 模块 | 职责 | 技术栈 |
-|------|------|--------|
-| **scripts** | GitHub Issue 自动化（去重/分类/关闭/锁定/检查） | TypeScript + Bun |
-| **workflows** | GitHub Actions CI/CD（12 个工作流） | YAML |
-| **commands** | 自定义命令（commit-push-pr/dedupe/triage-issue） | Markdown |
+### 1.2.1 目标
 
-### 开发环境模块（1 个）
+Agent 不是为了“持续输出文本”而存在，而是为了推进某个目标。目标可以很小，比如“提交一个 commit”；也可以很大，比如“完成一次功能开发并通过测试”。
 
-| 模块 | 职责 | 技术栈 |
-|------|------|--------|
-| **devcontainer** | 开发容器配置（Docker/Podman + 沙箱） | Docker |
+没有目标，系统就只是对话；有目标，系统才开始出现“下一步该做什么”的问题。
 
----
+### 1.2.2 环境
 
-## 1.3 插件 Marketplace 架构
+Agent 不是在真空里工作。它总是在某个环境中运行：文件系统、代码仓库、命令行、浏览器、Issue/PR、外部 API、甚至人的反馈，都是环境的一部分。
 
-### Marketplace 注册
+环境决定了它能看见什么，也决定了它能影响什么。
 
-Claude Code 使用 `.claude-plugin/marketplace.json` 注册插件：
+### 1.2.3 动作
 
-```json
-{
-  "plugins": [
-    {
-      "name": "hookify",
-      "version": "1.0.0",
-      "category": "development",
-      "description": "规则引擎：拦截工具调用并执行自定义规则"
-    },
-    {
-      "name": "code-review",
-      "version": "1.0.0",
-      "category": "productivity",
-      "description": "多 Agent PR 审查"
-    }
-    // ... 其他 10 个插件
-  ]
-}
-```
+Agent 不只是“回答”，它还会采取动作。动作可能是：
+- 读取文件
+- 搜索代码
+- 执行命令
+- 发起网络请求
+- 调用其他 Agent
+- 请求人类确认
 
-### 4 种分类
+如果一个系统只能生成建议而不能真正推动任务前进，它的行动能力就仍然是弱的。
 
-| 分类 | 插件数 | 插件列表 |
-|------|--------|---------|
-| **development** | 7 | agent-sdk-dev, claude-opus-4-5-migration, feature-dev, frontend-design, hookify, plugin-dev, ralph-wiggum |
-| **productivity** | 3 | code-review, commit-commands, pr-review-toolkit |
-| **learning** | 2 | explanatory-output-style, learning-output-style |
-| **security** | 1 | security-guidance |
+### 1.2.4 反馈
 
-### 插件发现机制
+动作之后必须有反馈。否则系统不知道自己刚才做得对不对，也不知道是否要继续、修正还是停止。
 
-Claude Code 使用**约定优于配置**的方式发现插件：
+反馈可能来自：
+- 工具执行结果
+- 编译/测试报错
+- 用户回复
+- 外部系统状态变化
 
-1. **扫描 `plugins/` 目录**：自动发现所有子目录
-2. **检查标准结构**：每个插件必须包含以下目录之一
-   - `commands/` - 命令定义（Markdown）
-   - `agents/` - Agent 定义（Markdown）
-   - `skills/` - 技能定义（Markdown + 参考文档）
-   - `hooks/` - Hook 实现（Python/Shell）
-3. **加载元数据**：从 `marketplace.json` 读取版本、分类、描述
-4. **注册到系统**：用户可以通过 `/plugin install <name>` 安装
+没有反馈，所谓 Agent 只是在盲跑。
 
-**这种设计的优势**：
-- **零配置**：只要遵循目录结构，插件自动被发现
-- **可扩展**：添加新插件只需创建新目录
-- **类型安全**：Markdown frontmatter 提供结构化元数据
+### 1.2.5 循环
+
+最关键的是循环。Agent 不是一次推理，而是一轮又一轮的：
+
+**理解当前状态 -> 判断下一步 -> 采取动作 -> 读取反馈 -> 再判断**
+
+这就是它和普通问答系统最本质的区别。
 
 ---
 
-## 1.4 统计数据与语言分布
+## 1.3 Agent、Chatbot、Copilot、Workflow 的边界
 
-### 文件统计
+说概念最好的办法，不是单独定义，而是拿相邻概念来切边界。
 
-| 类别 | 数量 | 说明 |
-|------|------|------|
-| **总文件数** | 202 | 排除 .git/.DS_Store/demo.gif |
-| **已扫描文件** | 194 | 覆盖率 96% |
-| **插件数** | 13 | Marketplace 注册 12 个 |
-| **命令数** | 22 | 插件命令 19 + 自定义命令 3 |
-| **Agent 数** | 17 | 多 Agent 协作、并行搜索、验证子 Agent |
-| **技能数** | 9 | 渐进式披露（SKILL.md + references/ + examples/） |
-| **Hook 数** | 6 | 9 种生命周期事件拦截 |
-| **工作流数** | 12 | GitHub Actions 自动化 |
-| **脚本数** | 5 | TypeScript + Bun 运行时 |
+| 类型 | 核心目标 | 是否能行动 | 是否围绕目标持续推进 | 主要特点 |
+|------|----------|------------|----------------------|----------|
+| Chatbot | 回答问题 | 通常不能或很弱 | 通常不持续 | 以对话为中心 |
+| Copilot | 辅助人完成局部任务 | 有限 | 弱 | 以建议和补全为中心 |
+| Workflow | 执行预定义流程 | 能 | 能，但通常不动态 | 以固定步骤为中心 |
+| Agent | 围绕目标持续推进任务 | 能 | 能，而且会根据反馈调整 | 以闭环决策为中心 |
 
-### 语言分布
+### 1.3.1 Chatbot
 
-```mermaid
-pie title 语言分布（按文件数）
-    "Markdown" : 140
-    "JSON" : 20
-    "Shell" : 18
-    "YAML" : 17
-    "Python" : 8
-    "TypeScript" : 5
-    "其他" : 2
-```
+Chatbot 的本质是对话系统。它擅长回答、解释、总结、改写，但通常不真正承担任务推进责任。你问，它答；你再问，它再答。它可以很聪明，但依然只是问答型系统。
 
-**关键洞察**：
-- **Markdown 占 69%**：说明这是一个文档驱动的项目
-- **JSON 配置占 10%**：规则定义、Marketplace 注册、MCP 示例
-- **Shell 脚本占 9%**：Hook 实现、工具脚本、验证脚本
-- **YAML 占 8%**：GitHub Actions 工作流、Issue 模板
-- **Python 占 4%**：Hook 实现（hookify、security-guidance）
-- **TypeScript 占 2%**：自动化脚本（GitHub API 封装）
+### 1.3.2 Copilot
+
+Copilot 比 Chatbot 更进一步。它通常嵌在某个工作环境里，比如编辑器，能根据上下文给你建议、补代码、补命令、补下一步操作。但它的重心依然是**辅助人**，而不是替人完整承担任务。
+
+### 1.3.3 Workflow
+
+Workflow 解决的是自动化问题。它把一串步骤预先定义好，然后按顺序执行。它很有用，但它并不天然具备动态决策能力。只要路径一变，它就容易卡住，或者需要大量额外分支逻辑。
+
+### 1.3.4 Agent
+
+Agent 的不同之处在于：它不只是按脚本跑，也不只是给建议，而是能在执行过程中根据环境和反馈不断调整路径。它是围绕目标推进，而不是围绕固定步骤执行。
+
+这并不意味着 Agent 一定比 Workflow 更高级。很多场景下，Workflow 更可靠、更便宜、更容易维护。真正的判断标准不是“哪个听起来更高级”，而是：
+
+- 任务是否需要动态决策？
+- 环境是否经常变化？
+- 中途是否需要根据反馈改变路径？
+
+如果答案都是“否”，那 Agent 可能根本不是必要方案。
 
 ---
 
-## 1.5 版本演进
+## 1.4 Agent 的真正分水岭：行动闭环
 
-### 当前版本
+现在可以把最重要的一句话说出来了：
 
-从 `CHANGELOG.md` 可以看到，当前版本是 **v2.1.74**（2026-03-12）。
+> **Agent 的本质，不是更会说，而是能形成行动闭环。**
 
-### 主要功能迭代
+这个闭环至少包含四步：
 
-| 版本 | 日期 | 主要功能 |
-|------|------|---------|
-| v2.1.74 | 2026-03-12 | Bugfix + Feature 更新 |
-| v2.1.x | 2026-03 | 插件系统稳定版 |
-| v2.0.x | 2026-02 | 重构插件架构 |
-| v1.x | 2025-12 | 初始版本 |
+1. **感知**：读取当前状态与环境
+2. **决策**：判断下一步最合适的动作
+3. **行动**：调用能力改变外部世界或推进任务
+4. **反馈**：读取行动结果，并把结果变成下一轮决策输入
 
-### 演进趋势
+这四步连起来，系统才真正具备“推进任务”的能力。
 
-1. **插件化**：从单体应用到插件系统
-2. **自动化**：从手动操作到 GitHub Actions
-3. **安全化**：从无限制到三档安全策略
-4. **文档化**：从代码注释到完整的 CLAUDE.md 体系
+为了看得更直白，我们拿一个简单例子对比。
 
----
+### 普通问答系统
 
-## 1.6 核心设计哲学
+用户说：
 
-### 1. 插件即文档
+> 请帮我修复这个 TypeScript 报错。
 
-**传统方式**：
-```typescript
-// 需要编译
-class MyCommand {
-  name = 'my-command';
-  description = 'My command description';
-  execute() { /* ... */ }
-}
-```
+普通问答系统可能会回答：
+- 这类错误通常是因为类型不匹配
+- 你可以检查一下参数类型
+- 试着加一个类型断言
 
-**Claude Code 方式**：
-```markdown
----
-description: My command description
-allowed-tools: [Read, Write, Bash]
----
+这不是没用，但它仍然只是建议。
 
-# My Command
+### Agent 系统
 
-This command does something useful.
-```
+同样一句话，一个 Agent 会做的事情可能是：
+- 先读取报错位置
+- 跳转类型定义
+- 查看相关调用链
+- 修改代码
+- 运行类型检查
+- 如果还有错，再继续修
+- 没错了才停
 
-**优势**：
-- 零编译：Markdown 直接被解析
-- 可读性：人类和机器都能理解
-- 可维护性：文档和代码在一起
+这就是闭环。它不是“更长的回答”，而是“更完整的系统行为”。
+
+这也是为什么很多人会误判系统能力：他们看见模型输出很像“会做事”，就以为它已经是 Agent。其实不对。真正的分水岭不在文风，不在提示词，不在能不能说出计划，而在于它有没有**把行动和反馈纳入同一个持续运行的结构里**。
 
 ---
 
-### 2. 约定优于配置
+## 1.5 用 Claude Code 看一个现实中的 Agent 样本
 
-**不需要这样**：
-```json
-{
-  "plugins": [
-    {
-      "name": "my-plugin",
-      "commands": ["./commands/my-command.md"],
-      "agents": ["./agents/my-agent.md"],
-      "hooks": ["./hooks/pre_tool_use.py"]
-    }
-  ]
-}
-```
+如果只讲抽象，很容易漂。这里用当前仓库里一个现实例子，把前面的定义落到地上。
 
-**只需要这样**：
-```bash
-plugins/my-plugin/
-├── commands/
-│   └── my-command.md
-├── agents/
-│   └── my-agent.md
-└── hooks/
-    └── pre_tool_use.py
-```
+`plugins/README.md:6` 先把 Claude Code 插件系统说得很直接：插件可以通过 custom commands、specialized agents、hooks、MCP servers 扩展系统能力。这个表述本身就在说明一件事：这里讨论的不是“一个更会聊天的模型”，而是一个**由入口、执行角色、生命周期挂点和外部能力接口共同组成的系统**。
 
-**优势**：
-- 零配置：遵循目录结构即可
-- 可预测：所有插件结构一致
-- 易扩展：添加新插件只需创建目录
+再往下看 `plugins/README.md:48` 的标准插件结构：
+- `commands/`
+- `agents/`
+- `skills/`
+- `hooks/`
+- `.mcp.json`
+
+这套拆法很关键。它说明当前项目在设计上已经默认接受一个事实：**Agent 不是单点能力，而是要靠多层结构把目标、动作、约束和外部能力焊起来。** 如果系统本质只是问答器，根本没必要长出这么清楚的分层。
+
+再看 `plugins/README.md:16` 和 `plugins/README.md:19`，仓库里的 `code-review`、`feature-dev`、`pr-review-toolkit` 都不是“回答一下怎么做”，而是把审查、分析、架构设计、质量检查拆成多个执行角色。这进一步说明现实里的 Agent 关注的不是文本生成本身，而是**任务如何被持续推进、分解和收敛**。
+
+首页 `index.md:23` 也把这个项目的学习价值说得很明：每一章都对应真实代码，每一个设计决策都能在源码里找到答案。这里真正值得学的不是“agentic”这个词，而是背后的几条设计思路：
+- **能持续推进任务的系统，才值得叫 Agent**，不是接了模型就算
+- **动作能力要显式挂在结构里**，不要把“会做事”藏在宣传语里
+- **入口、执行、约束、扩展要分层**，否则系统很快就会概念混乱
+- **Agent 必然是混合系统**，会和命令、Hook、工作流、权限控制缠在一起，不存在真空里的“纯 Agent 产品”
+
+所以拿 Claude Code 当样本，最大的收获不是学到一个定义句，而是看清：一个现实 Agent 系统从第一天起就不是“模型 + 提示词”，而是“目标推进 + 动作接口 + 反馈回路 + 边界治理”这整套东西一起成立。
+
+再往后看你还会发现：当一个系统把入口、执行角色、生命周期挂点和外部能力接口拆得越来越清楚时，它讨论的就不再只是“是不是 Agent”，而会自然走向平台化与扩展面设计。这也是为什么后面几章会继续把 Claude Code 当成结构样本，而不只是概念例子。
 
 ---
 
-### 3. 事件驱动
+## 1.6 本章小结
 
-**9 种 Hook 事件**：
-- `PreToolUse` - 工具执行前拦截
-- `PostToolUse` - 工具执行后处理
-- `Stop` - 会话退出前拦截
-- `SubagentStop` - 子 Agent 退出前拦截
-- `SessionStart` - 会话开始时注入
-- `SessionEnd` - 会话结束时清理
-- `UserPromptSubmit` - 用户提交提示时预处理
-- `PreCompact` - 上下文压缩前保留
-- `Notification` - 外部通知处理
+这一章做的事情很简单，但非常关键：先把“Agent”这个词从噪音里救出来。
 
-**优势**：
-- 解耦：插件不需要修改核心代码
-- 灵活：可以在任何生命周期节点介入
-- 可组合：多个 Hook 可以同时工作
+你现在应该记住四件事：
 
----
+1. **Agent 不是一个营销标签，而是一类围绕目标运行的系统。**
+2. **它和 Chatbot、Copilot、Workflow 有边界重叠，但不相同。**
+3. **真正的分水岭不是更会说，而是有没有行动闭环。**
+4. **理解 Agent，必须从系统视角看，而不是只盯模型输出。**
 
-### 4. 渐进式披露
-
-**技能的三层加载**：
-
-```bash
-skills/my-skill/
-├── SKILL.md              # 第一层：元数据（名称、描述、触发条件）
-├── references/           # 第二层：参考文档（详细说明）
-│   ├── overview.md
-│   ├── api-reference.md
-│   └── best-practices.md
-└── examples/             # 第三层：示例代码
-    ├── basic-example.md
-    └── advanced-example.md
-```
-
-**加载流程**：
-1. 用户调用技能 → 加载 `SKILL.md`（快速）
-2. 需要详细说明 → 加载 `references/`（按需）
-3. 需要示例代码 → 加载 `examples/`（按需）
-
-**优势**：
-- 性能：只加载需要的内容
-- 可读性：信息分层，不会一次性淹没用户
-- 可维护性：每个文件职责单一
-
----
-
-### 5. 安全优先
-
-**三档安全策略**：
-
-| 策略 | 限制 | 适用场景 |
-|------|------|---------|
-| **lax** | 禁用 bypass + 屏蔽市场 | 开发环境 |
-| **strict** | + 仅受管 Hook + 仅受管权限 + 禁止 Web 工具 | 生产环境 |
-| **sandbox** | 强制 Bash 沙箱 | 高安全环境 |
-
-**工具白名单**：
-```yaml
-allowed-tools:
-  - Read
-  - Write
-  - Bash
-```
-
-**优势**：
-- 最小权限：插件只能使用声明的工具
-- 可审计：所有工具调用都可以追踪
-- 可配置：用户可以选择安全级别
-
----
-
-## 1.7 架构洞察
-
-### 洞察 1：文档驱动开发
-
-**传统开发流程**：
-```
-写代码 → 写文档 → 文档过时 → 代码和文档不一致
-```
-
-**Claude Code 流程**：
-```
-写 Markdown → Markdown 即代码 → 文档永远是最新的
-```
-
-**为什么这样设计**：
-- Markdown 是人类可读的
-- Markdown 可以被机器解析
-- Markdown 可以直接渲染成文档站
-
----
-
-### 洞察 2：插件发现机制
-
-**为什么不用配置文件**：
-```json
-// 不需要这样
-{
-  "plugins": [
-    { "name": "hookify", "path": "./plugins/hookify" },
-    { "name": "code-review", "path": "./plugins/code-review" }
-  ]
-}
-```
-
-**为什么用约定**：
-```bash
-# 只需要这样
-plugins/
-├── hookify/
-└── code-review/
-```
-
-**Linus 式思考**：
-> "配置文件是特殊情况。好的设计没有特殊情况。"
-
-- 配置文件需要维护（容易出错）
-- 约定是自解释的（看目录就知道）
-- 约定是可预测的（所有插件一致）
-
----
-
-### 洞察 3：Marketplace 注册
-
-**为什么需要 `marketplace.json`**：
-
-虽然插件通过目录结构自动发现，但 Marketplace 需要额外的元数据：
-- **版本号**：用于更新检查
-- **分类**：用于插件市场展示
-- **描述**：用于搜索和推荐
-
-**这是一个权衡**：
-- 自动发现：零配置，易扩展
-- Marketplace 注册：提供额外元数据
-
-**Linus 式思考**：
-> "这不是特殊情况，这是两个不同的问题。插件加载是运行时问题，Marketplace 是展示问题。"
-
----
-
-## 1.8 实践：浏览仓库
-
-### 任务 1：克隆仓库
-
-```bash
-git clone https://github.com/anthropics/claude-code.git
-cd claude-code
-```
-
-### 任务 2：浏览目录结构
-
-```bash
-# 查看顶层目录
-ls -la
-
-# 查看插件目录
-tree -L 2 plugins/
-
-# 查看自动化目录
-ls -la scripts/
-ls -la .github/workflows/
-```
-
-### 任务 3：阅读核心文档
-
-```bash
-# 项目架构文档
-cat CLAUDE.md
-
-# 插件总览
-cat plugins/README.md
-
-# 版本发布记录
-cat CHANGELOG.md
-```
-
-### 任务 4：查看 Marketplace 注册
-
-```bash
-# Marketplace 注册
-cat .claude-plugin/marketplace.json
-
-# 统计插件数量
-ls -1 plugins/ | wc -l
-```
-
----
-
-## 1.9 小结
-
-### 核心要点
-
-1. **17 个模块**：13 插件 + 3 自动化 + 1 开发环境
-2. **202 个文件**：96% 覆盖率，69% 是 Markdown
-3. **4 种分类**：development(7) + productivity(3) + learning(2) + security(1)
-4. **5 大设计哲学**：插件即文档、约定优于配置、事件驱动、渐进式披露、安全优先
-
-### 与其他章节的关联
-
-- **第 2 章**：深入理解插件系统的四大组件
-- **第 4-6 章**：分析基础插件的实现
-- **第 15-17 章**：研究自动化架构
-
-### 延伸阅读
-
-- [CLAUDE.md](/CLAUDE) - 完整的项目架构文档
-- [plugins/README.md](/plugins/) - 插件总览
-- [CHANGELOG.md](https://github.com/anthropics/claude-code/blob/main/CHANGELOG.md) - 版本发布记录
-
----
-
-## 下一章
-
-[第 2 章：插件系统核心概念](/docs/part1/chapter02) - 理解命令、Agent、Hook、技能的区别和使用场景。
+下一章我们不再停留在概念层，而是把 Agent 拆成最小组成单元：模型、工具、记忆、规划、执行循环。到那时，你会更清楚地看到，为什么“只有一个强模型”永远不等于“已经有了一个完整 Agent 系统”。

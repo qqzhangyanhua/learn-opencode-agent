@@ -216,54 +216,53 @@ export default withMermaid(defineConfig({
         { text: '课程介绍', link: '/claude-code/' },
         { text: '阅读指南', link: '/claude-code/reading-guide' },
         {
-          text: '第一部分：基础架构',
+          text: '第一部分：先把 Agent 这件事想明白',
           collapsed: false,
           items: [
-            { text: '第1章：项目总览', link: '/claude-code/chapter01' },
-            { text: '第2章：插件系统核心概念', link: '/claude-code/chapter02' },
-            { text: '第3章：开发环境与配置', link: '/claude-code/chapter03' },
+            { text: '第1章：Agent 到底是什么，不是什么', link: '/claude-code/chapter01' },
+            { text: '第2章：Agent 的最小组成单元', link: '/claude-code/chapter02' },
+            { text: '第3章：从一次请求看懂 Agent 的闭环', link: '/claude-code/chapter03' },
           ]
         },
         {
-          text: '第二部分：Hook 与自动化',
+          text: '第二部分：把运行时主链路拆开',
           collapsed: false,
           items: [
-            { text: '第4章：hookify - 规则引擎', link: '/claude-code/chapter04' },
-            { text: '第5章：commit-commands - Git 工作流自动化', link: '/claude-code/chapter05' },
-            { text: '第6章：security-guidance - 安全检查 Hook', link: '/claude-code/chapter06' },
+            { text: '第4章：模型在 Agent 里到底负责什么', link: '/claude-code/chapter04' },
+            { text: '第5章：工具不是外挂，而是 Agent 的手和脚', link: '/claude-code/chapter05' },
+            { text: '第6章：记忆、状态与上下文，不是一个东西', link: '/claude-code/chapter06' },
+            { text: '第7章：上下文为什么总会失控', link: '/claude-code/chapter07' },
+            { text: '第8章：规划不是写给人看的漂亮计划', link: '/claude-code/chapter08' },
+            { text: '第9章：什么时候该停，什么时候该问人', link: '/claude-code/chapter09' },
           ]
         },
         {
-          text: '第三部分：多 Agent 协作',
+          text: '第三部分：从单 Agent 走向更复杂系统',
           collapsed: false,
           items: [
-            { text: '第7章：code-review - 多 Agent 协作审查', link: '/claude-code/chapter07' },
-            { text: '第8章：feature-dev - 7阶段开发工作流', link: '/claude-code/chapter08' },
-            { text: '第9章：pr-review-toolkit - 多维度专业审查工具包', link: '/claude-code/chapter09' },
+            { text: '第10章：什么时候真的需要多 Agent', link: '/claude-code/chapter10' },
+            { text: '第11章：为什么 Agent 需要一层协议来接外部世界', link: '/claude-code/chapter11' },
+            { text: '第12章：配置不是参数堆，而是运行时控制面', link: '/claude-code/chapter12' },
+            { text: '第13章：为什么 Agent 一旦产品化，迟早会走向服务化', link: '/claude-code/chapter13' },
+            { text: '第14章：持久化不是顺手存一下，而是让 Agent 真正拥有长期状态', link: '/claude-code/chapter14' },
+            { text: '第15章：交互承载层不是界面皮肤，而是 Agent 的协作表面', link: '/claude-code/chapter15' },
           ]
         },
         {
-          text: '第四部分：SessionStart Hook 应用',
+          text: '第四部分：从应用走向平台',
           collapsed: false,
           items: [
-            { text: '第10章：ralph-wiggum - 自引用循环', link: '/claude-code/chapter10' },
-            { text: '第11章：输出风格插件', link: '/claude-code/chapter11' },
-            { text: '第12章：frontend-design 与 migration', link: '/claude-code/chapter12' },
+            { text: '第16章：什么时候一个 Agent 应用开始平台化', link: '/claude-code/chapter16' },
+            { text: '第17章：扩展点不是一堆名词，而是平台的能力接口', link: '/claude-code/chapter17' },
+            { text: '第18章：多 Agent 一旦落地，真正难的是编排而不是数量', link: '/claude-code/chapter18' },
           ]
         },
         {
-          text: '第五部分：开发工具包',
+          text: '第五部分：工程化闭环与全书收束',
           collapsed: false,
           items: [
-            { text: '第13章：agent-sdk-dev - Agent SDK 应用开发', link: '/claude-code/chapter13' },
-            { text: '第14章：plugin-dev - 插件开发工具包', link: '/claude-code/chapter14' },
-          ]
-        },
-        {
-          text: '第六部分：工程化基础设施',
-          collapsed: false,
-          items: [
-            { text: '第15章：GitHub 自动化与 CI/CD', link: '/claude-code/chapter15' },
+            { text: '第19章：一个 Agent 系统怎样才算真的能长期活着', link: '/claude-code/chapter19' },
+            { text: '第20章：把整本书收束成一个判断框架', link: '/claude-code/chapter20' },
           ]
         },
       ],

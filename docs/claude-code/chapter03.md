@@ -1,902 +1,380 @@
----
-title: "第3章：开发环境与配置"
-description: "Claude Code 源码解析 - 第3章：开发环境与配置"
-contentType: theory
-series: claude-code
-contentId: claude-code-ch03
-shortTitle: "第3章：开发环境与配置"
-summary: "Claude Code 源码解析：第3章：开发环境与配置"
-difficulty: intermediate
-estimatedTime: 30-45 分钟
-learningGoals:
-  - 理解本章核心实现原理
-  - 掌握相关设计模式
-prerequisites:
-  - 了解 AI Agent 基本概念
-recommendedNext: []
-practiceLinks: []
-searchTags:
-  - claude-code
-  - 源码解析
-navigationLabel: "第3章：开发环境与配置"
-entryMode: read-first
-roleDescription: 想深入理解 Claude Code 架构的工程师
----
+# 第 3 章：从一次请求看懂 Agent 的闭环
 
-
-# 第 3 章：开发环境与配置
-
-## 本章导读
-
-**仓库路径**：`.devcontainer/` + `examples/settings/`
-
-**系统职责**：
-- 提供 Docker/Podman 开发容器
-- 定义三种安全策略（lax/strict/sandbox）
-- 配置防火墙沙箱
-
-**能学到什么**：
-- 如何用 DevContainer 隔离开发环境
-- 安全配置的三档设计（工具白名单、权限控制）
-- Bash 沙箱的实现原理
+> 本章目标：不再静态拆部件，而是沿着一次真实任务执行过程，理解 Agent 如何把“目标、状态、动作、反馈”串成闭环。  
+> 本章对应总纲：`docs/ebook-outline.md` 中“第 3 章正文写作提纲（2026-03-31 归档）”。
 
 ---
 
-## 3.1 DevContainer 配置
+## 3.1 为什么必须看“过程”，而不只看“能力清单”
 
-### 什么是 DevContainer？
+上一章我们把 Agent 拆成了模型、工具、状态、规划、执行循环五个部件。
 
-DevContainer（Development Container）是一种使用容器技术隔离开发环境的方式。Claude Code 提供了完整的 DevContainer 配置，支持 Docker 和 Podman 双后端。
+但只知道部件名字还不够。因为很多系统的问题，根本不出在“有没有这些部件”，而出在：
 
-### 目录结构
+- 它们是怎么串起来的
+- 信息是怎么流动的
+- 错误是在哪一轮被发现的
+- 系统为什么会继续、回退、停下，或者问人
 
-```bash
-.devcontainer/
-├── CLAUDE.md              # DevContainer 文档
-├── devcontainer.json      # VS Code DevContainer 配置
-├── Dockerfile             # 容器镜像定义
-└── setup.sh               # 容器初始化脚本
-```
+所以这一章不再讲“Agent 有哪些零件”，而是讲：
 
-### devcontainer.json 配置
+> **当一个真实请求进入系统后，这个系统到底怎么运转？**
 
-```json
-{
-  "name": "Claude Code Development",
-  "build": {
-    "dockerfile": "Dockerfile",
-    "context": ".."
-  },
-  "customizations": {
-    "vscode": {
-      "extensions": [
-        "ms-python.python",
-        "ms-vscode.makefile-tools",
-        "timonwong.shellcheck"
-      ],
-      "settings": {
-        "terminal.integrated.defaultProfile.linux": "bash"
-      }
-    }
-  },
-  "postCreateCommand": "bash .devcontainer/setup.sh",
-  "remoteUser": "vscode"
-}
-```
-
-### Dockerfile 分析
-
-```dockerfile
-FROM mcr.microsoft.com/vscode/devcontainers/base:ubuntu
-
-# 安装依赖
-RUN apt-get update && apt-get install -y \
-    python3 \
-    python3-pip \
-    nodejs \
-    npm \
-    git \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
-
-# 安装 Claude Code
-RUN curl -fsSL https://claude.ai/install.sh | bash
-
-# 配置防火墙沙箱（可选）
-RUN apt-get update && apt-get install -y \
-    iptables \
-    && rm -rf /var/lib/apt/lists/*
-
-# 创建工作目录
-WORKDIR /workspace
-
-# 设置用户
-USER vscode
-```
-
-### 为什么使用 DevContainer？
-
-**优势**：
-1. **环境隔离**：容器内的操作不影响宿主机
-2. **一致性**：所有开发者使用相同的环境
-3. **安全性**：可以配置防火墙规则限制网络访问
-4. **可复现**：环境配置代码化，易于复现
-
-**适用场景**：
-- ✅ 开发 Claude Code 插件
-- ✅ 测试危险操作（rm -rf 等）
-- ✅ 需要特定版本的依赖
-- ✅ 多人协作开发
+只有把过程走一遍，你才会真正明白为什么 Agent 的本质是闭环，而不是“更长的回答”。
 
 ---
 
-## 3.2 三种安全策略
+## 3.2 从一句用户请求开始：目标是怎么被建立的
 
-Claude Code 提供三种预置的安全配置，分别适用于不同的场景。
+假设用户说：
 
-### 配置文件位置
+> 请帮我修复这个 TypeScript 报错。
 
-```bash
-examples/settings/
-├── settings-lax.json           # 宽松模式
-├── settings-strict.json        # 严格模式
-└── settings-bash-sandbox.json  # 沙箱模式
-```
+表面看，这是一句很普通的话。但对一个 Agent 来说，第一件事不是立刻开始写代码，而是建立任务语义。
 
-### 3.2.1 Lax 模式（宽松）
+系统通常要先回答几件事：
+- 用户真正目标是什么？
+- 这是解释型请求，还是执行型请求？
+- 需要读哪些上下文才知道怎么下手？
+- 当前是否有足够信息直接行动？
 
-**适用场景**：开发环境，需要灵活性
+这一步的关键，不是“理解文字”，而是把文字转成可推进的目标状态。
 
-**配置内容**：
-```json
-{
-  "security": {
-    "allowBypass": false,
-    "allowMarketplace": false
-  },
-  "tools": {
-    "allowedTools": "*"
-  },
-  "hooks": {
-    "enabled": true,
-    "allowUnmanaged": true
-  }
-}
-```
+### 3.2.1 一个好系统不会把模糊目标直接拿去执行
 
-**特点**：
-- ❌ 禁用 bypass（不能跳过安全检查）
-- ❌ 禁用 Marketplace（不能安装未审核的插件）
-- ✅ 允许所有工具
-- ✅ 允许未受管的 Hook
+“修复这个报错”本身其实信息不完整。
 
-**权衡**：
-- **灵活性**：⭐⭐⭐⭐⭐
-- **安全性**：⭐⭐⭐
+至少还缺：
+- 报错在哪个文件
+- 报错信息是什么
+- 是类型设计问题，还是调用点问题
+- 用户是要建议，还是要直接修改代码
+
+所以一个靠谱的 Agent 往往会先做目标澄清。澄清不一定非要问用户，也可能通过读取环境补全。
+
+这就是为什么读取文件、搜索代码、检查错误信息，往往会出现在真正行动之前。
 
 ---
 
-### 3.2.2 Strict 模式（严格）
+## 3.3 第一轮：感知当前环境，而不是凭空猜
 
-**适用场景**：生产环境，需要高安全性
+### 3.3.1 闭环的起点一定是感知
 
-**配置内容**：
-```json
-{
-  "security": {
-    "allowBypass": false,
-    "allowMarketplace": false,
-    "allowWebTools": false
-  },
-  "tools": {
-    "allowedTools": [
-      "Read",
-      "Write",
-      "Edit",
-      "Bash",
-      "Glob",
-      "Grep"
-    ]
-  },
-  "hooks": {
-    "enabled": true,
-    "allowUnmanaged": false,
-    "managedHooks": [
-      "hookify",
-      "security-guidance"
-    ]
-  },
-  "permissions": {
-    "requireApproval": [
-      "Bash",
-      "Write",
-      "Edit"
-    ]
-  }
-}
-```
+Agent 的第一轮动作通常不是“修”，而是“看”。
 
-**特点**：
-- ❌ 禁用 bypass
-- ❌ 禁用 Marketplace
-- ❌ 禁用 Web 工具（WebFetch/WebSearch）
-- ✅ 仅允许白名单工具
-- ✅ 仅允许受管 Hook
-- ✅ 危险操作需要用户批准
+因为如果系统对当前环境没有认知，任何后续动作都只是撞大运。
 
-**权衡**：
-- **灵活性**：⭐⭐
-- **安全性**：⭐⭐⭐⭐⭐
+在修 TypeScript 错误这个例子里，感知阶段可能包括：
+- 读取报错文件
+- 查看错误行附近代码
+- 搜索相关类型定义
+- 找调用链
+- 读取测试或构建脚本
+- 查看当前变更范围
+
+这一步回答的问题是：
+
+> **现在到底发生了什么？**
+
+### 3.3.2 为什么感知必须依赖真实环境
+
+普通问答系统最容易犯的毛病，就是拿“常见情况”代替“当前情况”。
+
+比如它会说：
+- 这可能是类型不匹配
+- 可以加类型断言
+- 可以把参数改成可选
+
+这些都不一定错，但它们不基于当前代码状态。
+
+Agent 不一样。它必须优先读取现实，而不是优先输出经验。
+
+这也是为什么一个真正的 coding agent 总要不断读代码、查符号、看报错、跑检查。它不是啰嗦，它是在接地。
 
 ---
 
-### 3.2.3 Sandbox 模式（沙箱）
+## 3.4 第二轮：基于当前状态做局部判断
 
-**适用场景**：高安全环境，需要网络隔离
+当系统已经看到环境后，下一步才轮到判断。
 
-**配置内容**：
-```json
-{
-  "security": {
-    "allowBypass": false,
-    "allowMarketplace": false,
-    "allowWebTools": false
-  },
-  "tools": {
-    "allowedTools": [
-      "Read",
-      "Write",
-      "Edit",
-      "Bash",
-      "Glob",
-      "Grep"
-    ]
-  },
-  "bash": {
-    "sandbox": true,
-    "allowedCommands": [
-      "ls",
-      "cat",
-      "grep",
-      "git",
-      "npm",
-      "python3"
-    ],
-    "blockedCommands": [
-      "rm -rf /",
-      "dd",
-      "mkfs",
-      "fdisk"
-    ],
-    "networkIsolation": true
-  },
-  "hooks": {
-    "enabled": true,
-    "allowUnmanaged": false,
-    "managedHooks": [
-      "security-guidance"
-    ]
-  }
-}
-```
+在这个阶段，模型通常会做几类事：
+- 压缩和整理刚读到的信息
+- 识别最可能的错误源头
+- 判断下一步最有价值的动作
+- 决定是继续搜，还是直接改
 
-**特点**：
-- ❌ 禁用 bypass
-- ❌ 禁用 Marketplace
-- ❌ 禁用 Web 工具
-- ✅ 强制 Bash 沙箱
-- ✅ 命令白名单
-- ✅ 网络隔离
+### 3.4.1 判断不是终局真理，而是当前最优动作选择
 
-**权衡**：
-- **灵活性**：⭐
-- **安全性**：⭐⭐⭐⭐⭐
+这是很多人容易误解的地方。
+
+Agent 并不需要在一开始就“想明白全部问题”。它更常做的是：
+
+> 在当前信息条件下，选出最合理的下一步。
+
+比如：
+- 如果报错点已经很明确，就直接改
+- 如果类型定义不清楚，就继续跳转定义
+- 如果影响范围可能很大，就先找引用
+- 如果风险高，就先确认边界
+
+这是一种局部最优推进，不是一次性全知推理。
+
+### 3.4.2 为什么这一步不能被误解成“想好了再做”
+
+因为真实工程不是考试。
+
+很多问题只有你动手以后，反馈才会暴露更多信息。所以好的 Agent 不会在原地空想太久，而是会在“先想一点”和“赶紧验证”之间找平衡。
+
+这就是实用主义。
 
 ---
 
-### 三种模式对比
+## 3.5 第三轮：执行动作，真正改变系统状态
 
-| 特性 | Lax | Strict | Sandbox |
-|------|-----|--------|---------|
-| **允许所有工具** | ✅ | ❌ | ❌ |
-| **工具白名单** | - | ✅ | ✅ |
-| **允许 Web 工具** | ✅ | ❌ | ❌ |
-| **允许未受管 Hook** | ✅ | ❌ | ❌ |
-| **危险操作需批准** | ❌ | ✅ | ✅ |
-| **Bash 沙箱** | ❌ | ❌ | ✅ |
-| **命令白名单** | ❌ | ❌ | ✅ |
-| **网络隔离** | ❌ | ❌ | ✅ |
-| **适用场景** | 开发 | 生产 | 高安全 |
+### 3.5.1 动作是闭环的转折点
 
----
+到这一步，系统才从“理解问题”进入“推进任务”。
 
-## 3.3 工具白名单机制
+在修错误的例子里，动作可能是：
+- 编辑类型定义
+- 修改调用点
+- 补充返回值约束
+- 删除错误的断言
+- 调整泛型参数
 
-### 什么是工具白名单？
+一旦动作发生，系统状态就真的变了。文件被改了，仓库被改了，环境被推进了。
 
-工具白名单是一种安全机制，限制插件只能使用声明的工具。
+这就是 Agent 和纯建议系统之间最现实的差别。
 
-### 工作原理
+### 3.5.2 为什么动作必须受边界约束
 
-**命令定义**：
-```markdown
----
-description: Commit changes and create PR
-allowed-tools:
-  - Read
-  - Write
-  - Bash
----
+一个系统能行动，不代表它应该乱动。
 
-# Commit Push PR Command
-```
+动作层必须受到至少三种约束：
+- **能力边界**：它到底能调哪些工具
+- **权限边界**：哪些操作需要确认
+- **任务边界**：用户让它修错，不代表它可以顺手重构半个项目
 
-**执行流程**：
-```mermaid
-sequenceDiagram
-    participant Command
-    participant Security
-    participant Tool
+Claude Code 这类系统之所以适合作为样本，就是因为它把这些边界写得很明：
+- 风险操作要确认
+- 能用专用工具就别滥用 shell
+- 不要超范围改动
+- 不要顺手做一堆“改进”
 
-    Command->>Security: 请求调用 Bash 工具
-    Security->>Security: 检查 allowed-tools
-    alt 在白名单中
-        Security->>Tool: 允许调用
-        Tool-->>Command: 返回结果
-    else 不在白名单中
-        Security-->>Command: 拒绝调用（错误）
-    end
-```
-
-### 内置工具列表
-
-| 工具 | 功能 | 风险等级 |
-|------|------|---------|
-| **Read** | 读取文件 | 低 |
-| **Write** | 写入文件 | 中 |
-| **Edit** | 编辑文件 | 中 |
-| **Bash** | 执行 Shell 命令 | 高 |
-| **Glob** | 文件模式匹配 | 低 |
-| **Grep** | 内容搜索 | 低 |
-| **WebFetch** | 获取网页内容 | 中 |
-| **WebSearch** | 搜索网页 | 中 |
-| **Agent** | 启动子 Agent | 中 |
-| **AskUserQuestion** | 询问用户 | 低 |
-
-### 最佳实践
-
-**最小权限原则**：
-```markdown
-# ❌ 不好：允许所有工具
----
-allowed-tools: "*"
----
-
-# ✅ 好：只允许需要的工具
----
-allowed-tools:
-  - Read
-  - Grep
----
-```
-
-**分级授权**：
-```markdown
-# 只读命令
----
-allowed-tools:
-  - Read
-  - Glob
-  - Grep
----
-
-# 读写命令
----
-allowed-tools:
-  - Read
-  - Write
-  - Edit
----
-
-# 危险命令（需要用户批准）
----
-allowed-tools:
-  - Read
-  - Write
-  - Bash
----
-```
+这很重要。没有边界的 Agent，不是强，是危险。
 
 ---
 
-## 3.4 Bash 沙箱实现
+## 3.6 第四轮：读取反馈，判断刚才那一步有没有真的生效
 
-### 什么是 Bash 沙箱？
+### 3.6.1 没有反馈，动作就只是碰运气
 
-Bash 沙箱是一种限制 Shell 命令执行的机制，通过命令白名单和网络隔离来提高安全性。
+真正把 Agent 和 workflow 拉开差距的，不只是它会执行，而是它执行完会看结果。
 
-### 实现原理
+比如代码改完后，系统通常不会凭感觉宣布成功，而会继续：
+- 运行类型检查
+- 重新查看错误输出
+- 检查是否引入新错误
+- 对照原目标判断是否已经完成
 
-**1. 命令拦截**
+这一步的核心问题是：
 
-在 Bash 工具执行前，Hook 拦截命令：
+> **刚才那一步，真的把问题推进了吗？**
 
-```python
-# hooks/bash_sandbox.py
-import sys
-import json
-import re
+### 3.6.2 反馈为什么是下一轮决策的输入
 
-# 读取 Hook 输入
-hook_input = json.loads(sys.stdin.read())
-command = hook_input.get("arguments", {}).get("command", "")
+如果检查通过，说明当前路径可能是对的。
 
-# 命令白名单
-ALLOWED_COMMANDS = [
-    "ls", "cat", "grep", "git", "npm", "python3"
-]
+如果检查失败，系统就会获得新信息：
+- 原假设错了
+- 只修了一半
+- 改动影响了别的地方
+- 当前修法引入了新类型冲突
 
-# 命令黑名单
-BLOCKED_COMMANDS = [
-    r"rm\s+-rf\s+/",
-    r"dd\s+",
-    r"mkfs",
-    r"fdisk"
-]
+这些信息不会被浪费，而会直接变成下一轮判断输入。
 
-# 检查黑名单
-for pattern in BLOCKED_COMMANDS:
-    if re.search(pattern, command):
-        print(f"⚠️  危险操作被阻止：{command}")
-        sys.exit(2)
+于是闭环开始形成：
+- 先动作
+- 再看反馈
+- 再调整路径
 
-# 检查白名单
-command_name = command.split()[0]
-if command_name not in ALLOWED_COMMANDS:
-    print(f"⚠️  命令不在白名单中：{command_name}")
-    sys.exit(2)
-
-# 允许执行
-sys.exit(0)
-```
-
-**2. 网络隔离**
-
-使用 iptables 限制网络访问：
-
-```bash
-# setup-network-isolation.sh
-#!/bin/bash
-
-# 禁止所有出站连接
-iptables -P OUTPUT DROP
-
-# 允许本地回环
-iptables -A OUTPUT -o lo -j ACCEPT
-
-# 允许已建立的连接
-iptables -A OUTPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
-
-# 允许 DNS（可选）
-iptables -A OUTPUT -p udp --dport 53 -j ACCEPT
-
-# 允许特定域名（可选）
-# iptables -A OUTPUT -d github.com -j ACCEPT
-```
-
-**3. 文件系统隔离**
-
-使用 chroot 限制文件系统访问：
-
-```bash
-# setup-chroot.sh
-#!/bin/bash
-
-# 创建 chroot 环境
-mkdir -p /tmp/sandbox/{bin,lib,lib64,usr,proc,dev}
-
-# 复制必要的二进制文件
-cp /bin/bash /tmp/sandbox/bin/
-cp /bin/ls /tmp/sandbox/bin/
-cp /bin/cat /tmp/sandbox/bin/
-
-# 复制必要的库文件
-ldd /bin/bash | grep -o '/lib[^ ]*' | xargs -I {} cp {} /tmp/sandbox/lib/
-
-# 挂载 proc 和 dev
-mount -t proc proc /tmp/sandbox/proc
-mount --bind /dev /tmp/sandbox/dev
-
-# 进入 chroot 环境
-chroot /tmp/sandbox /bin/bash
-```
-
-### 沙箱执行流程
-
-```mermaid
-sequenceDiagram
-    participant User
-    participant Bash
-    participant Hook
-    participant Sandbox
-    participant System
-
-    User->>Bash: 执行命令
-    Bash->>Hook: 触发 PreToolUse Hook
-    Hook->>Hook: 检查命令白名单
-    Hook->>Hook: 检查命令黑名单
-    alt 命令允许
-        Hook->>Sandbox: 进入沙箱环境
-        Sandbox->>System: 执行命令（受限）
-        System-->>Sandbox: 返回结果
-        Sandbox-->>Hook: 返回结果
-        Hook-->>Bash: 允许执行
-        Bash-->>User: 显示结果
-    else 命令禁止
-        Hook-->>Bash: 阻止执行
-        Bash-->>User: 显示错误
-    end
-```
+这不是“失败了再说”，而是系统设计里的基本回路。
 
 ---
 
-## 3.5 权限控制机制
+## 3.7 第五轮：更新状态，并决定继续、回退、停机还是求助
 
-### 权限级别
+当反馈回来以后，Agent 不只是看到结果，还要更新自己的状态视图。
 
-Claude Code 定义了三种权限级别：
+它需要知道：
+- 这个问题现在是否已解决
+- 哪条路径已经证伪
+- 哪些中间结论值得保留
+- 当前任务是否进入新阶段
 
-| 级别 | 说明 | 示例工具 |
-|------|------|---------|
-| **自动允许** | 无风险，自动执行 | Read, Glob, Grep |
-| **需要批准** | 有风险，需要用户确认 | Write, Edit, Bash |
-| **始终拒绝** | 高风险，始终拒绝 | - |
+然后它要做一个比“成功/失败”更细的决策。
 
-### 配置权限
+### 3.7.1 四种典型去向
 
-**在 settings.json 中配置**：
-```json
-{
-  "permissions": {
-    "autoAllow": [
-      "Read",
-      "Glob",
-      "Grep"
-    ],
-    "requireApproval": [
-      "Write",
-      "Edit",
-      "Bash"
-    ],
-    "alwaysDeny": []
-  }
-}
-```
+一个成熟的 Agent，在每轮反馈后通常会进入四种去向之一：
 
-### 用户批准流程
+1. **继续当前路径**  
+   说明方向对，只需要再补一刀。
 
-```mermaid
-sequenceDiagram
-    participant Command
-    participant Permission
-    participant User
-    participant Tool
+2. **回退并换路**  
+   说明刚才的判断有问题，得重新定位原因。
 
-    Command->>Permission: 请求调用 Bash 工具
-    Permission->>Permission: 检查权限级别
-    alt 自动允许
-        Permission->>Tool: 直接执行
-    else 需要批准
-        Permission->>User: 显示批准对话框
-        User-->>Permission: 批准/拒绝
-        alt 批准
-            Permission->>Tool: 执行
-        else 拒绝
-            Permission-->>Command: 拒绝执行
-        end
-    else 始终拒绝
-        Permission-->>Command: 拒绝执行
-    end
-```
+3. **停机并交付**  
+   说明目标已经满足，可以结束任务。
+
+4. **请求人类输入**  
+   说明现在缺的是决策授权、业务判断或额外信息，不该乱猜。
+
+### 3.7.2 人类介入不是失败，而是闭环的一部分
+
+很多人误以为真正的 Agent 应该“全自动到底”。这很幼稚。
+
+现实世界里，很多任务天然需要 human-in-the-loop：
+- 删除重要文件前要确认
+- 改 API 行为前要确认兼容性
+- 多种合理实现之间可能需要用户拍板
+- 权限不足时必须请人介入
+
+所以“问人”不是破坏闭环，而是闭环的一种合法分支。
+
+好系统知道什么时候该自主，什么时候该停下来问。
 
 ---
 
-## 3.6 PowerShell 启动脚本（Windows）
+## 3.8 用一个简化流程图看懂完整闭环
 
-### 脚本位置
+现在可以把前面的过程压缩成一个最小运行模型：
 
-```bash
-Script/run_devcontainer_claude_code.ps1
-```
+1. 用户提出目标
+2. 系统感知当前环境
+3. 模型判断下一步动作
+4. 工具执行动作
+5. 系统读取反馈
+6. 更新状态
+7. 判断：继续 / 回退 / 结束 / 求助
+8. 如果未结束，回到第 2 步
 
-### 脚本功能
+你会发现，这个结构并不玄学。它甚至很朴素。
 
-1. **检测容器后端**（Docker/Podman）
-2. **构建容器镜像**
-3. **启动容器**
-4. **挂载工作目录**
-5. **配置网络隔离**（可选）
-
-### 脚本内容
-
-```powershell
-# run_devcontainer_claude_code.ps1
-param(
-    [Parameter(Mandatory=$false)]
-    [ValidateSet("docker", "podman")]
-    [string]$Backend = "docker"
-)
-
-Write-Host "Starting Claude Code DevContainer with $Backend..." -ForegroundColor Green
-
-# 检查后端是否安装
-$backendPath = Get-Command $Backend -ErrorAction SilentlyContinue
-if (-not $backendPath) {
-    Write-Host "Error: $Backend is not installed" -ForegroundColor Red
-    exit 1
-}
-
-# 构建镜像
-Write-Host "Building container image..." -ForegroundColor Yellow
-& $Backend build -t claude-code-dev -f .devcontainer/Dockerfile .
-
-# 启动容器
-Write-Host "Starting container..." -ForegroundColor Yellow
-& $Backend run -it --rm `
-    -v "${PWD}:/workspace" `
-    -w /workspace `
-    --name claude-code-dev `
-    claude-code-dev
-
-Write-Host "Container stopped" -ForegroundColor Green
-```
-
-### 使用方法
-
-```powershell
-# 使用 Docker
-.\Script\run_devcontainer_claude_code.ps1 -Backend docker
-
-# 使用 Podman
-.\Script\run_devcontainer_claude_code.ps1 -Backend podman
-```
+Agent 的神秘感，很多时候只是因为大家平时只看到了“模型输出”，没有看到后面的这条运行链。
 
 ---
 
-## 3.7 VS Code 集成
+## 3.9 为什么很多系统看起来像 Agent，却经常不是
 
-### extensions.json 配置
+因为它们往往只覆盖了这条链的前几步：
+- 理解请求
+- 生成解释
+- 给出建议
 
-```json
-{
-  "recommendations": [
-    "ms-python.python",
-    "ms-vscode.makefile-tools",
-    "timonwong.shellcheck",
-    "yzhang.markdown-all-in-one",
-    "redhat.vscode-yaml"
-  ]
-}
-```
+但没有真正把：
+- 动作
+- 反馈
+- 状态更新
+- 继续迭代
 
-### 推荐插件说明
+串起来。
 
-| 插件 | 功能 | 为什么需要 |
-|------|------|-----------|
-| **Python** | Python 语言支持 | Hook 使用 Python 实现 |
-| **Makefile Tools** | Makefile 支持 | 构建脚本 |
-| **ShellCheck** | Shell 脚本检查 | Hook 使用 Shell 实现 |
-| **Markdown All in One** | Markdown 增强 | 命令/Agent 使用 Markdown |
-| **YAML** | YAML 语言支持 | frontmatter 使用 YAML |
+于是用户会产生错觉：
+- 它说得很像会做事
+- 它也能列步骤
+- 它还能解释每一步为什么
 
-### 使用 DevContainer
+但这仍然不等于它真的在推进任务。
 
-**步骤 1：打开项目**
-```bash
-code .
-```
+一句难听但准确的话是：
 
-**步骤 2：重新打开在容器中**
-- 命令面板（Cmd/Ctrl + Shift + P）
-- 输入 "Remote-Containers: Reopen in Container"
-- 等待容器构建和启动
+> **很多系统不是在执行任务，只是在模仿执行任务时该说的话。**
 
-**步骤 3：开始开发**
-- 容器内的终端自动配置
-- 所有依赖已安装
-- 防火墙沙箱已配置
+真正的分水岭，不在它能不能把步骤讲出来，而在它有没有把步骤跑起来。
 
 ---
 
-## 3.8 实践：配置安全策略
+## 3.10 用 Claude Code 看一个现实中的闭环样本
 
-### 任务 1：使用 Lax 模式
+这一套逻辑，放到当前项目里看就很直观。
 
-```bash
-# 复制配置文件
-cp examples/settings/settings-lax.json ~/.claude/settings.json
+Claude Code 这类环境里，一个典型任务往往会经过：
+- 用户给出目标
+- 系统先读相关文件和上下文
+- 搜索定义、引用和约束
+- 必要时补足上下文
+- 编辑文件
+- 运行测试或检查
+- 根据结果继续修正
+- 在风险操作前请求确认
+- 完成后停止
 
-# 启动 Claude Code
-claude
+表面上看，这像一串朴素动作；但如果对照当前仓库，你会发现它背后其实有几条很硬的闭环设计规则。
 
-# 测试：所有工具都可用
-/commit-push-pr
-```
+先看 `plugins/README.md:16` 与 `plugins/README.md:19`。`code-review`、`feature-dev`、`pr-review-toolkit` 这些插件都不是一次性吐出结论，而是把分析、审查、架构、复核拆成多段执行角色。这说明当前项目默认的不是“一次想完”，而是：**先做一轮动作，再根据回来的信息继续推进。**
 
-### 任务 2：使用 Strict 模式
+再看 `examples/settings/settings-strict.json:1`，它把 `Bash` 放进 `ask`，把 `WebSearch` / `WebFetch` 放进 `deny`。这不是权限配置的小细节，而是在告诉你闭环里有几种分叉必须被显式建模：
+- **可以直接继续的路径**
+- **必须停下来确认的路径**
+- **当前运行根本不允许走的路径**
 
-```bash
-# 复制配置文件
-cp examples/settings/settings-strict.json ~/.claude/settings.json
+也就是说，一个成熟闭环不是只有“做完再看结果”这么简单，它还要把**继续、停机、求助、禁止**都纳入同一运行结构里。
 
-# 启动 Claude Code
-claude
+如果再把 `plugins/README.md:48` 的标准目录结构一起看，你会更容易看清设计思路：
+- `commands/` 负责给任务建立入口
+- `agents/` 负责承载独立执行角色
+- `hooks/` 负责在生命周期节点插手
+- `.mcp.json` 负责接外部能力
 
-# 测试：危险操作需要批准
-/commit-push-pr  # 会提示批准 Bash 工具
-```
+这几层合起来，才让“闭环”变成可运行的系统，而不是脑子里的流程图。
 
-### 任务 3：使用 Sandbox 模式
+所以当前项目真正值得学的，不是某个提示词写法，而是它怎么把闭环压成几条可重复使用的规则：
+- **先读现实，再做判断**，别拿经验代替当前状态
+- **动作之后一定要接反馈**，别把“我觉得应该好了”当完成
+- **继续、回退、停机、求助都要显式存在**，别把异常路径留给运气
+- **风险边界要进入闭环本身**，而不是等出事了再补一个安全说明
 
-```bash
-# 复制配置文件
-cp examples/settings/settings-bash-sandbox.json ~/.claude/settings.json
-
-# 启动 Claude Code
-claude
-
-# 测试：危险命令被阻止
-# 尝试执行 "rm -rf /" 会被拦截
-```
-
-### 任务 4：自定义配置
-
-创建自己的配置文件：
-
-```json
-{
-  "security": {
-    "allowBypass": false,
-    "allowMarketplace": true
-  },
-  "tools": {
-    "allowedTools": [
-      "Read",
-      "Write",
-      "Bash",
-      "Glob",
-      "Grep"
-    ]
-  },
-  "hooks": {
-    "enabled": true,
-    "allowUnmanaged": false,
-    "managedHooks": [
-      "hookify",
-      "security-guidance"
-    ]
-  },
-  "permissions": {
-    "autoAllow": [
-      "Read",
-      "Glob",
-      "Grep"
-    ],
-    "requireApproval": [
-      "Write",
-      "Bash"
-    ]
-  }
-}
-```
+这条链说明它不是“增强聊天”，而是“受控执行系统”。
 
 ---
 
-## 3.9 架构洞察
+## 3.11 一个系统什么时候才算“真的在推进任务”
 
-### 洞察 1：分级安全策略
+判断标准其实可以非常简单。
 
-**为什么需要三档配置？**
+如果一个系统面对任务时：
+- 会先读当前状态
+- 能选择并执行动作
+- 会检查动作结果
+- 会根据结果继续调整
+- 在完成、失败或需要授权时才停下
 
-**Linus 式思考**：
-> "安全不是二元的（安全/不安全），而是一个权衡。开发环境需要灵活性，生产环境需要安全性。"
+那它就在推进任务。
 
-**权衡**：
-- **Lax**：灵活性 > 安全性（开发）
-- **Strict**：安全性 > 灵活性（生产）
-- **Sandbox**：安全性 >> 灵活性（高安全）
+反过来，如果它只是：
+- 输出建议
+- 列一个计划
+- 说“你可以这样做”
+- 然后把剩下的全留给人
 
-**这不是特殊情况**，这是三个不同的使用场景。
+那它更像顾问，而不是 Agent。
 
----
-
-### 洞察 2：工具白名单 vs 命令白名单
-
-**为什么有两层白名单？**
-
-1. **工具白名单**（插件级别）
-   - 限制插件可以使用的工具
-   - 在插件定义时声明
-   - 静态检查
-
-2. **命令白名单**（沙箱级别）
-   - 限制 Bash 工具可以执行的命令
-   - 在运行时检查
-   - 动态拦截
-
-**Linus 式思考**：
-> "这是两个不同的问题。工具白名单是插件权限问题，命令白名单是沙箱隔离问题。"
+顾问也有价值，但别叫错名字。
 
 ---
 
-### 洞察 3：DevContainer 的价值
+## 3.12 本章小结
 
-**为什么不直接在宿主机开发？**
+这一章真正想让你看到的，不是某个酷炫功能，而是一条朴素但决定性的运行链。
 
-**传统方式的问题**：
-```bash
-# 开发者 A
-$ python --version
-Python 3.8.10
+你现在应该记住六件事：
 
-# 开发者 B
-$ python --version
-Python 3.11.5
+1. **理解 Agent，不能只看能力清单，必须看任务是如何被推进的。**
+2. **一次请求进入系统后，第一步通常是感知环境，而不是直接输出答案。**
+3. **判断的目标不是一次想明白全部，而是选出当前最合理的下一步。**
+4. **动作之后必须读取反馈，否则系统只是碰运气。**
+5. **反馈会更新状态，并决定继续、回退、停机还是请求人类介入。**
+6. **真正的 Agent，不是更会描述任务，而是真的把这条闭环跑起来。**
 
-# 结果：环境不一致，难以复现问题
-```
-
-**DevContainer 的解决方案**：
-```dockerfile
-FROM ubuntu:22.04
-RUN apt-get install -y python3.10
-# 所有开发者使用相同的 Python 3.10
-```
-
-**Linus 式思考**：
-> "环境不一致是特殊情况。好的设计消除特殊情况。DevContainer 让所有环境一致。"
-
----
-
-## 3.10 小结
-
-### 核心要点
-
-1. **DevContainer**：
-   - Docker/Podman 双后端支持
-   - 环境隔离、一致性、安全性
-   - VS Code 集成
-
-2. **三种安全策略**：
-   - Lax：开发环境，灵活性优先
-   - Strict：生产环境，安全性优先
-   - Sandbox：高安全环境，网络隔离
-
-3. **工具白名单**：
-   - 最小权限原则
-   - 分级授权
-   - 静态检查
-
-4. **Bash 沙箱**：
-   - 命令白名单/黑名单
-   - 网络隔离
-   - 文件系统隔离
-
-### 与其他章节的关联
-
-- **第 2 章**：理解了四大组件，现在学习安全配置
-- **第 4 章**：hookify 使用 Hook 实现规则引擎
-- **第 6 章**：security-guidance 使用 Hook 实现安全检查
-- **第 18 章**：深入研究安全策略与沙箱设计
-
-### 延伸阅读
-
-- [.devcontainer/CLAUDE.md](/.devcontainer/CLAUDE) - DevContainer 文档
-- [examples/settings/](https://github.com/anthropics/claude-code/tree/main/examples/settings) - 安全配置示例
-- [第 18 章：安全策略与沙箱设计](/docs/part6/chapter18) - 深入分析
-
----
-
-## 下一章
-
-[第 4 章：hookify - 规则引擎的实现](/docs/part2/chapter04) - 学习最简单的 Hook 实现，理解规则引擎的设计模式。
+下一章我们进入更底层的问题：模型在这个闭环里到底承担什么责任，又有哪些事情是再强的模型也不该替系统结构背锅的。

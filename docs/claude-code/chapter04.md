@@ -1,960 +1,327 @@
----
-title: "第4章：hookify - 规则引擎"
-description: "Claude Code 源码解析 - 第4章：hookify - 规则引擎"
-contentType: theory
-series: claude-code
-contentId: claude-code-ch04
-shortTitle: "第4章：hookify - 规则引擎"
-summary: "Claude Code 源码解析：第4章：hookify - 规则引擎"
-difficulty: intermediate
-estimatedTime: 30-45 分钟
-learningGoals:
-  - 理解本章核心实现原理
-  - 掌握相关设计模式
-prerequisites:
-  - 了解 AI Agent 基本概念
-recommendedNext: []
-practiceLinks: []
-searchTags:
-  - claude-code
-  - 源码解析
-navigationLabel: "第4章：hookify - 规则引擎"
-entryMode: read-first
-roleDescription: 想深入理解 Claude Code 架构的工程师
----
+# 第 4 章：模型在 Agent 里到底负责什么
 
-
-# 第 4 章：hookify - 规则引擎的实现
-
-## 本章导读
-
-**仓库路径**：`plugins/hookify/`
-
-**系统职责**：
-- 提供声明式规则匹配（regex/contains/equals）
-- 拦截工具调用并执行自定义规则
-- 支持 4 种规则示例（console-log/dangerous-rm/require-tests/sensitive-files）
-
-**能学到什么**：
-- 如何设计一个规则引擎（条件匹配 + 动作执行）
-- PreToolUse Hook 的阻止机制（退出码 2）
-- 规则优先级与组合逻辑
+> 本章目标：把模型从神话里拉下来，讲清它在 Agent 系统里的真实职责、能力边界与常见误判。  
+> 本章对应总纲：`docs/ebook-outline.md` 中“第 4 章正文写作提纲（2026-03-31 归档）”。
 
 ---
 
-## 4.1 规则引擎概述
+## 4.1 为什么很多人会把 Agent 问题误判成模型问题
 
-### 什么是规则引擎？
+这一章要专门回答一个常见误解：
 
-规则引擎是一种将业务逻辑从代码中分离出来的设计模式。用户通过声明式规则定义行为，引擎负责匹配和执行。
+> **只要模型足够强，Agent 的大部分问题就会自然消失。**
 
-**传统方式**（硬编码）：
-```python
-# 需要修改代码
-if "rm -rf" in command:
-    print("危险操作！")
-    sys.exit(2)
-```
+这是错的。
 
-**hookify 方式**（声明式）：
-```markdown
----
-name: block-dangerous-rm
-enabled: true
-event: bash
-pattern: rm\s+-rf
-action: block
----
+一遇到 Agent 做不好，最常见的反应就是：
+- 模型不够强
+- 上下文太短
+- 推理能力不够
+- 换个更大的模型试试
 
-⚠️ **Dangerous rm command detected!**
-```
+这种反应不一定错，但多数时候太懒。
 
-**优势**：
-- 无需编程：用 Markdown 定义规则
-- 热更新：修改规则文件立即生效
-- 可组合：多个规则可以同时工作
-- 可维护：规则和代码分离
+因为在真实系统里，失败来源往往根本不只在模型。它也可能是：
+- 工具描述不清
+- 状态没保存好
+- 权限边界太乱
+- 决策逻辑没接住反馈
+- 目标定义本身就含糊
+
+所以在分析 Agent 时，一个重要纪律是：
+
+> **先区分这是模型问题，还是系统结构问题。**
+
+如果不做这一步，后面就很容易把所有毛病都怪到模型头上。
 
 ---
 
-## 4.2 规则定义格式
+## 4.2 模型在闭环里真正负责哪几件事
 
-### 规则文件位置
+如果把 Agent 看成一套运行系统，那么模型主要负责四类事情：
 
-规则文件必须放在 `.claude/` 目录，命名格式为 `hookify.*.local.md`：
+1. **理解**：理解用户目标、上下文、工具描述、反馈信号
+2. **判断**：在当前状态下决定下一步最合适的动作
+3. **生成**：生成自然语言、结构化参数、计划片段或调用指令
+4. **压缩**：把大量上下文提炼成后续可用的中间表示
 
-```bash
-.claude/
-├── hookify.dangerous-rm.local.md
-├── hookify.console-log.local.md
-└── hookify.sensitive-files.local.md
-```
+这四件事合起来，决定了模型是 Agent 的认知核心。
 
-### 规则文件结构
+但注意，这里说的是“认知核心”，不是“系统本体”。
 
-```markdown
----
-name: 规则名称（唯一标识）
-enabled: true/false（是否启用）
-event: bash|file|stop|all（事件类型）
-action: warn|block（动作类型）
-conditions:
-  - field: command|new_text|file_path（字段名）
-    operator: regex_match|contains|equals（操作符）
-    pattern: 匹配模式（字符串或正则）
----
+系统本体还包括：
+- 工具接口
+- 状态层
+- 执行循环
+- 权限边界
+- 停机条件
 
-规则触发时显示的消息内容（支持 Markdown）
-```
-
-### Frontmatter 字段说明
-
-| 字段 | 必需 | 类型 | 说明 |
-|------|------|------|------|
-| `name` | ✅ | string | 规则的唯一标识 |
-| `enabled` | ✅ | boolean | 是否启用规则 |
-| `event` | ✅ | string | 事件类型（bash/file/stop/all） |
-| `action` | ✅ | string | 动作类型（warn/block） |
-| `conditions` | ✅ | array | 条件列表 |
-| `tool_matcher` | ❌ | string | 工具匹配器（Bash/Edit/Write/*） |
-| `pattern` | ❌ | string | 简单模式（遗留，不推荐） |
-
-### Condition 字段说明
-
-| 字段 | 必需 | 类型 | 说明 |
-|------|------|------|------|
-| `field` | ✅ | string | 要检查的字段名 |
-| `operator` | ✅ | string | 操作符 |
-| `pattern` | ✅ | string | 匹配模式 |
-
-**支持的 field**：
-- `command` - Bash 命令（Bash 工具）
-- `new_text` / `new_string` - 新文本（Edit 工具）
-- `old_text` / `old_string` - 旧文本（Edit 工具）
-- `content` - 文件内容（Write 工具）
-- `file_path` - 文件路径（Edit/Write 工具）
-- `reason` - 退出原因（Stop Hook）
-- `transcript` - 会话记录（Stop Hook）
-
-**支持的 operator**：
-- `regex_match` - 正则表达式匹配
-- `contains` - 包含字符串
-- `equals` - 完全相等
-- `not_contains` - 不包含字符串
-- `starts_with` - 以...开头
-- `ends_with` - 以...结尾
+模型只负责其中一层。
 
 ---
 
-## 4.3 四种规则示例
+## 4.3 理解：模型先把输入世界变成可判断的问题
 
-### 4.3.1 dangerous-rm - 阻止危险命令
+### 4.3.1 不是看见文字，而是建立任务语义
 
-**文件**：`examples/dangerous-rm.local.md`
+用户说一句：
 
-```markdown
----
-name: block-dangerous-rm
-enabled: true
-event: bash
-pattern: rm\s+-rf
-action: block
----
+> 帮我修一下这个测试失败。
 
-⚠️ **Dangerous rm command detected!**
+模型要做的第一件事，不是立即输出方案，而是把这句话转成一个更可操作的问题：
+- 当前目标是什么
+- 这是修改请求还是解释请求
+- 要先读取什么上下文
+- 当前是否已经有足够信息行动
 
-This command could delete important files. Please:
-- Verify the path is correct
-- Consider using a safer approach
-- Make sure you have backups
-```
+也就是说，模型先把松散输入整理成任务语义。
 
-**工作原理**：
-1. 监听 `bash` 事件（Bash 工具调用）
-2. 检查命令是否匹配 `rm\s+-rf` 正则
-3. 如果匹配，**阻止执行**并显示警告
+### 4.3.2 为什么工具描述也属于模型要理解的输入
 
-**测试**：
-```bash
-# 这个命令会被阻止
-rm -rf /tmp/test
+很多人低估了一件事：在 Agent 里，工具描述本身就是模型的重要输入。
 
-# 输出：
-# ⚠️ **Dangerous rm command detected!**
-# This command could delete important files...
-```
+因为模型必须理解：
+- 这个工具能做什么
+- 什么时候该用它
+- 输入格式是什么
+- 输出意味着什么
+- 和别的工具相比该怎么选
+
+所以工具系统设计差，常常不是“工具少”，而是“模型根本看不懂该怎么用”。
+
+这时你再去怪模型智商不够，方向就歪了。
 
 ---
 
-### 4.3.2 console-log-warning - 警告调试代码
+## 4.4 判断：模型最核心的价值，是在当前局面里选下一步
 
-**文件**：`examples/console-log-warning.local.md`
+### 4.4.1 模型不是负责一次想明白全部，而是负责局部决策
 
-```markdown
----
-name: warn-console-log
-enabled: true
-event: file
-pattern: console\.log\(
-action: warn
----
+这也是 Agent 思维和传统 prompt 思维很不一样的地方。
 
-🔍 **Console.log detected**
+传统 prompt 更像是：
+- 尽量把问题一次说全
+- 期待模型一次答全
+- 输出结束，任务基本结束
 
-You're adding a console.log statement. Please consider:
-- Is this for debugging or should it be proper logging?
-- Will this ship to production?
-- Should this use a logging library instead?
-```
+而 Agent 里的模型更像一个带反馈的决策器：
+- 先基于当前状态做局部判断
+- 选择下一步动作
+- 接住动作结果
+- 再进入下一轮判断
 
-**工作原理**：
-1. 监听 `file` 事件（Edit/Write 工具调用）
-2. 检查文件内容是否包含 `console.log(`
-3. 如果匹配，**显示警告但允许执行**
+所以在真实运行里，模型更常做的不是“完成整道大题”，而是：
 
-**测试**：
-```javascript
-// 编辑文件添加这行代码
-console.log('debug info');
+> 在当前这轮状态下，选出最值得做的下一步。
 
-// 输出：
-// 🔍 **Console.log detected**
-// You're adding a console.log statement...
-// （但文件仍然会被保存）
-```
+例如：
+- 先读文件还是先搜定义？
+- 先修改还是先验证？
+- 继续当前路径还是回退？
+- 该自主处理还是该问用户？
 
----
+这类判断看起来不惊天动地，但它们决定了系统是不是能稳着往前走。
 
-### 4.3.3 require-tests-stop - 要求测试通过
+### 4.4.2 好模型和差模型，差别常体现在局部判断质量
 
-**文件**：`examples/require-tests-stop.local.md`
+一个模型可能写得很能说，但在执行场景里表现很差。原因通常不是它不会表达，而是它的局部判断质量不稳定。
 
-```markdown
----
-name: require-tests-before-exit
-enabled: true
-event: stop
-action: block
-conditions:
-  - field: transcript
-    operator: not_contains
-    pattern: "All tests passed"
----
+常见症状有：
+- 明明该先读上下文，却直接开始改
+- 明明该验证结果，却提前宣布成功
+- 明明遇到权限边界，却继续硬做
+- 明明路径已经错了，却不回头
 
-⚠️ **Tests not run or failing!**
-
-Before exiting, please ensure:
-- All tests have been run
-- All tests are passing
-- No test failures in the transcript
-
-Run tests with: `npm test` or `pytest`
-```
-
-**工作原理**：
-1. 监听 `stop` 事件（会话退出前）
-2. 检查会话记录是否包含 "All tests passed"
-3. 如果不包含，**阻止退出**并提醒运行测试
-
-**测试**：
-```bash
-# 尝试退出会话
-exit
-
-# 如果没有运行测试，输出：
-# ⚠️ **Tests not run or failing!**
-# Before exiting, please ensure...
-# （会话不会退出）
-
-# 运行测试后
-npm test
-# ✓ All tests passed
-
-# 再次退出
-exit
-# （成功退出）
-```
+所以做 Agent，不要只看模型写出来的话漂不漂亮，而要看它选下一步动作时稳不稳。
 
 ---
 
-### 4.3.4 sensitive-files-warning - 敏感文件警告
+## 4.5 生成：模型不只生成文本，还生成动作接口
 
-**文件**：`examples/sensitive-files-warning.local.md`
+### 4.5.1 在 Agent 里，“生成”不是单纯写文章
 
-```markdown
----
-name: warn-sensitive-files
-enabled: true
-event: file
-action: warn
-conditions:
-  - field: file_path
-    operator: regex_match
-    pattern: \.(env|key|pem|p12|pfx)$
----
+在普通聊天里，生成通常意味着输出一段自然语言。
 
-🔒 **Sensitive file detected!**
+但在 Agent 里，生成还常常意味着：
+- 生成工具调用参数
+- 生成结构化结果
+- 生成计划片段
+- 生成对环境状态的中间描述
+- 生成给用户的澄清问题
 
-You're modifying a file that may contain sensitive data:
-- `.env` files often contain API keys
-- `.key`, `.pem` files contain private keys
-- `.p12`, `.pfx` files contain certificates
+所以模型输出并不只是“最终答案”，它经常只是系统内部下一步动作的接口材料。
 
-Please ensure:
-- This file is in `.gitignore`
-- Sensitive data is not committed
-- Consider using a secrets manager
-```
+### 4.5.2 为什么结构化生成尤其关键
 
-**工作原理**：
-1. 监听 `file` 事件（Edit/Write 工具调用）
-2. 检查文件路径是否匹配敏感文件扩展名
-3. 如果匹配，**显示警告但允许执行**
+如果模型生成结果太散、太含糊，系统就很难稳定接住。
 
-**测试**：
-```bash
-# 编辑 .env 文件
-vim .env
+比如：
+- 工具调用参数不稳定
+- 状态摘要忽长忽短
+- 计划表达风格每轮都变
+- 反馈归纳前后不一致
 
-# 输出：
-# 🔒 **Sensitive file detected!**
-# You're modifying a file that may contain sensitive data...
-# （但文件仍然可以编辑）
-```
+这些问题单看像小毛病，叠起来就会把 Agent 的执行稳定性打烂。
+
+所以从系统设计角度看，模型生成能力最值钱的地方，不是文采，而是**可接入性和可复用性**。
 
 ---
 
-## 4.4 规则引擎实现
+## 4.6 压缩：模型还承担上下文整理器的角色
 
-### 4.4.1 核心类设计
+### 4.6.1 为什么 Agent 一定会遇到上下文膨胀
 
-**数据模型**（`core/config_loader.py`）：
+只要任务不是一句话结束，系统就会不断积累：
+- 用户需求
+- 文件内容
+- 工具输出
+- 错误日志
+- 中间判断
+- 历史尝试
 
-```python
-from dataclasses import dataclass
-from typing import List, Optional
+这些信息不可能无限堆着不整理。否则上下文越跑越肿，系统会越来越笨。
 
-@dataclass
-class Condition:
-    """规则条件"""
-    field: str       # 字段名
-    operator: str    # 操作符
-    pattern: str     # 匹配模式
+所以模型除了理解和判断，还要承担一件非常现实的事：
 
-@dataclass
-class Rule:
-    """规则定义"""
-    name: str                      # 规则名称
-    enabled: bool                  # 是否启用
-    event: str                     # 事件类型
-    action: str                    # 动作类型
-    conditions: List[Condition]    # 条件列表
-    message: str                   # 消息内容
-    tool_matcher: Optional[str]    # 工具匹配器
-    pattern: Optional[str]         # 简单模式（遗留）
-```
+> **把旧信息压缩成后面还用得上的表示。**
 
-**规则引擎**（`core/rule_engine.py`）：
+### 4.6.2 压缩不是摘要好看，而是保留后续最需要的东西
 
-```python
-class RuleEngine:
-    """规则评估引擎"""
+真正有价值的压缩，不是把原文缩短，而是保留：
+- 当前目标
+- 已完成步骤
+- 已证伪路径
+- 尚未解决的问题
+- 关键约束和边界
 
-    def evaluate_rules(self, rules: List[Rule], input_data: Dict) -> Dict:
-        """评估所有规则并返回组合结果"""
-        blocking_rules = []
-        warning_rules = []
+压缩得好，后面的判断就稳；压缩得差，系统就会开始遗忘重要事实，然后重复犯错。
 
-        # 1. 匹配所有规则
-        for rule in rules:
-            if self._rule_matches(rule, input_data):
-                if rule.action == 'block':
-                    blocking_rules.append(rule)
-                else:
-                    warning_rules.append(rule)
-
-        # 2. 阻止规则优先于警告规则
-        if blocking_rules:
-            return self._build_block_response(blocking_rules, input_data)
-
-        # 3. 只有警告规则
-        if warning_rules:
-            return self._build_warn_response(warning_rules)
-
-        # 4. 无匹配规则
-        return {}
-```
+所以“摘要”在 Agent 里不是附属功能，而是连续执行的基础设施。
 
 ---
 
-### 4.4.2 规则匹配逻辑
+## 4.7 哪些事再强的模型也不该独自背锅
 
-**匹配流程**：
+现在反过来说：模型不负责什么。
 
-```mermaid
-graph TD
-    A[开始匹配] --> B{检查 tool_matcher}
-    B -->|不匹配| C[返回 False]
-    B -->|匹配| D{检查所有 conditions}
-    D -->|任一不匹配| C
-    D -->|全部匹配| E[返回 True]
+### 4.7.1 模型不负责提供真实外部能力
 
-    style E fill:#90EE90
-    style C fill:#FF6347
-```
+模型不会凭空读文件、运行命令、访问网络。
 
-**代码实现**：
+这些能力来自工具层。
 
-```python
-def _rule_matches(self, rule: Rule, input_data: Dict) -> bool:
-    """检查规则是否匹配"""
-    tool_name = input_data.get('tool_name', '')
-    tool_input = input_data.get('tool_input', {})
+如果系统根本没有对应工具，或者工具权限被限制，那不是模型不够强，而是系统能力边界就在那里。
 
-    # 1. 检查工具匹配器
-    if rule.tool_matcher:
-        if not self._matches_tool(rule.tool_matcher, tool_name):
-            return False
+### 4.7.2 模型不负责保证动作真的生效
 
-    # 2. 检查条件列表
-    if not rule.conditions:
-        return False
+模型可以建议改法，也可以生成改动，但“改完后到底有没有修好”，必须靠反馈层验证。
 
-    # 3. 所有条件必须匹配
-    for condition in rule.conditions:
-        if not self._check_condition(condition, tool_name, tool_input):
-            return False
+没有验证，模型再自信也没用。
 
-    return True
-```
+### 4.7.3 模型不负责决定全部风险边界
+
+删除文件要不要确认、能不能推送远端、是否允许写敏感路径，这些都属于系统级边界控制。
+
+如果这些边界全靠模型自由发挥，那系统迟早出事。
+
+### 4.7.4 模型不负责长期一致性
+
+长期记忆、项目偏好、跨会话规则、持久状态，这些都不能只寄托在“模型自己记住”。
+
+该存储的就得存储，该索引的就得索引。
+
+靠模型自然记忆，是不负责任的设计。
 
 ---
 
-### 4.4.3 条件检查实现
+## 4.8 为什么“模型更强”仍然很重要
 
-**支持的操作符**：
+前面说了这么多边界，不是为了贬低模型，而是为了把责任分清。
 
-```python
-def _check_condition(self, condition: Condition, tool_name: str,
-                    tool_input: Dict) -> bool:
-    """检查单个条件"""
-    # 1. 提取字段值
-    field_value = self._extract_field(condition.field, tool_name, tool_input)
-    if field_value is None:
-        return False
+模型仍然极其重要，因为它直接影响：
+- 理解是否准确
+- 判断是否稳定
+- 工具选择是否合理
+- 参数生成是否可靠
+- 压缩是否保留关键事实
 
-    # 2. 应用操作符
-    operator = condition.operator
-    pattern = condition.pattern
+你可以这么理解：
 
-    if operator == 'regex_match':
-        return self._regex_match(pattern, field_value)
-    elif operator == 'contains':
-        return pattern in field_value
-    elif operator == 'equals':
-        return pattern == field_value
-    elif operator == 'not_contains':
-        return pattern not in field_value
-    elif operator == 'starts_with':
-        return field_value.startswith(pattern)
-    elif operator == 'ends_with':
-        return field_value.endswith(pattern)
-    else:
-        return False
-```
+- **系统结构决定上限能不能成立**
+- **模型质量决定这个上限能不能稳定达到**
+
+两者不是替代关系，而是乘法关系。
+
+结构烂，强模型也救不回来。
+模型差，好结构也跑不顺。
 
 ---
 
-### 4.4.4 正则缓存优化
+## 4.9 用 Claude Code 看模型的现实位置
 
-**为什么需要缓存？**
+在 Claude Code 这样的系统里，模型显然不是孤立工作的。
 
-正则表达式编译是昂贵的操作。如果每次匹配都重新编译，性能会很差。
+先看当前仓库怎么描述自己。`plugins/README.md:6` 把系统扩展面拆成 custom commands、specialized agents、hooks、MCP servers；`plugins/README.md:48` 又把插件结构固定为 `commands/`、`agents/`、`skills/`、`hooks/`、`.mcp.json`。这种结构本身就在表达一个很重要的判断：**模型不是系统本体，它只是被放进多个控制层之间的认知引擎。**
 
-**传统方式**（每次编译）：
-```python
-def _regex_match(self, pattern: str, text: str) -> bool:
-    regex = re.compile(pattern)  # 每次都编译
-    return bool(regex.search(text))
-```
+再看 `plugins/README.md:16`、`plugins/README.md:19`、`plugins/README.md:24`。这里的 `code-review`、`feature-dev`、`pr-review-toolkit` 都把任务拆给不同执行角色。甚至连审查这种事，都不是让一个模型“一次想完”，而是让多个角色分别做 bug detection、architecture design、quality review、comments analysis、type design analysis。
 
-**hookify 方式**（LRU 缓存）：
-```python
-from functools import lru_cache
+这背后说明两件事：
+- **模型负责局部高价值判断，不负责包打天下**
+- **一旦任务复杂，系统会优先拆执行角色，而不是指望单个模型裸奔解决所有问题**
 
-@lru_cache(maxsize=128)
-def compile_regex(pattern: str) -> re.Pattern:
-    """编译正则表达式并缓存"""
-    return re.compile(pattern, re.IGNORECASE)
+再往风险边界看，`examples/settings/settings-strict.json:1` 把 `Bash` 放进 `ask`，把 `WebSearch` / `WebFetch` 放进 `deny`。这又说明：模型即使判断“应该这么做”，也不等于系统就允许它直接这么做。**模型给出的是候选动作，系统边界才决定动作能不能落地。**
 
-def _regex_match(self, pattern: str, text: str) -> bool:
-    regex = compile_regex(pattern)  # 使用缓存
-    return bool(regex.search(text))
-```
+所以 Claude Code 这个样本真正值得学的，不是“模型很强”这句废话，而是它把模型放在了一个更大的控制结构里，并默认遵守几条规则：
+- **模型负责理解、判断、压缩，不负责定义边界**
+- **动作是否允许执行，要由工具层和权限层决定**
+- **复杂任务优先拆角色，不要把所有复杂度都压给同一个模型**
+- **模型能力提升是收益项，但不是替代结构设计的借口**
 
-**性能提升**：
-- 第一次：编译 + 匹配（慢）
-- 后续：直接使用缓存（快）
-- 最多缓存 128 个模式
+这才是现实系统里模型的正确位置：它很重要，但它永远是结构中的一层，不是结构本身。
 
 ---
 
-## 4.5 Hook 执行流程
+## 4.10 设计 Agent 时，应该怎样正确看待模型
 
-### 4.5.1 PreToolUse Hook
+工程上，一个更稳的态度是：
 
-**文件**：`hooks/pretooluse.py`
+### 第一，把模型当认知引擎，不当万能核心
 
-**执行流程**：
+它非常重要，但不是所有责任都归它。
 
-```mermaid
-sequenceDiagram
-    participant Claude
-    participant Hook
-    participant RuleEngine
-    participant Tool
+### 第二，把模型能力浪费在真正值得的地方
 
-    Claude->>Hook: 准备调用 Bash 工具
-    Hook->>Hook: 读取 stdin（JSON）
-    Hook->>Hook: 确定事件类型（bash/file）
-    Hook->>RuleEngine: 加载规则
-    RuleEngine-->>Hook: 返回规则列表
-    Hook->>RuleEngine: 评估规则
-    RuleEngine-->>Hook: 返回结果
-    alt 阻止规则匹配
-        Hook->>Claude: 输出 JSON（permissionDecision: deny）
-        Claude-->>User: 显示警告，阻止执行
-    else 警告规则匹配
-        Hook->>Claude: 输出 JSON（systemMessage）
-        Claude->>Tool: 执行工具
-        Claude-->>User: 显示警告 + 结果
-    else 无匹配规则
-        Hook->>Claude: 输出空 JSON
-        Claude->>Tool: 执行工具
-        Claude-->>User: 显示结果
-    end
-```
+比如：
+- 理解模糊需求
+- 进行局部推理
+- 选择下一步动作
+- 压缩复杂状态
 
-**代码实现**：
+而不是让它做一堆本该由固定机制保证的事。
 
-```python
-def main():
-    """PreToolUse Hook 入口"""
-    try:
-        # 1. 读取输入
-        input_data = json.load(sys.stdin)
+### 第三，把系统问题和模型问题分开诊断
 
-        # 2. 确定事件类型
-        tool_name = input_data.get('tool_name', '')
-        event = None
-        if tool_name == 'Bash':
-            event = 'bash'
-        elif tool_name in ['Edit', 'Write', 'MultiEdit']:
-            event = 'file'
+看到失败，先问：
+- 是模型理解错了？
+- 还是工具定义太差？
+- 是状态丢了？
+- 还是闭环没接住反馈？
 
-        # 3. 加载规则
-        rules = load_rules(event=event)
-
-        # 4. 评估规则
-        engine = RuleEngine()
-        result = engine.evaluate_rules(rules, input_data)
-
-        # 5. 输出结果
-        print(json.dumps(result), file=sys.stdout)
-
-    except Exception as e:
-        # 6. 错误处理：允许操作
-        error_output = {"systemMessage": f"Hookify error: {str(e)}"}
-        print(json.dumps(error_output), file=sys.stdout)
-
-    finally:
-        # 7. 始终退出 0（不阻止操作）
-        sys.exit(0)
-```
+这样你才能真正优化系统，而不是只会喊“换更大的模型”。
 
 ---
 
-### 4.5.2 阻止机制
+## 4.11 本章小结
 
-**如何阻止工具执行？**
+这一章的核心，不是讨论哪个模型更强，而是把模型在 Agent 里的责任边界讲清楚。
 
-通过返回特定的 JSON 格式：
+你现在应该记住六件事：
 
-```json
-{
-  "hookSpecificOutput": {
-    "hookEventName": "PreToolUse",
-    "permissionDecision": "deny"
-  },
-  "systemMessage": "⚠️ **Dangerous rm command detected!**"
-}
-```
+1. **模型是 Agent 的认知核心，但不是 Agent 全部。**
+2. **模型主要负责理解、判断、生成和压缩。**
+3. **很多所谓“模型问题”，其实是工具、状态或闭环设计问题。**
+4. **再强的模型，也替代不了真实工具、反馈验证和权限边界。**
+5. **模型质量决定系统判断是否稳定，但系统结构决定这些判断能否落地。**
+6. **做 Agent 设计时，最蠢的做法就是把所有毛病都怪到模型头上。**
 
-**关键字段**：
-- `permissionDecision: "deny"` - 阻止执行
-- `systemMessage` - 显示给用户的消息
-
-**警告机制**：
-
-只返回 `systemMessage`，不设置 `permissionDecision`：
-
-```json
-{
-  "systemMessage": "🔍 **Console.log detected**"
-}
-```
-
----
-
-### 4.5.3 优雅降级
-
-**设计原则**：Hook 错误不应阻止用户操作。
-
-**实现方式**：
-
-1. **捕获所有异常**
-```python
-try:
-    # 规则评估逻辑
-    result = engine.evaluate_rules(rules, input_data)
-except Exception as e:
-    # 允许操作，只显示错误
-    result = {"systemMessage": f"Hookify error: {str(e)}"}
-```
-
-2. **始终退出 0**
-```python
-finally:
-    sys.exit(0)  # 不使用退出码 2
-```
-
-3. **导入失败时允许操作**
-```python
-try:
-    from hookify.core.config_loader import load_rules
-except ImportError as e:
-    print(json.dumps({"systemMessage": f"Import error: {e}"}))
-    sys.exit(0)  # 允许操作
-```
-
-**为什么这样设计？**
-
-**Linus 式思考**：
-> "工具应该帮助用户，而不是阻碍用户。如果 Hook 有 bug，用户应该能继续工作，而不是被卡住。"
-
----
-
-## 4.6 规则优先级
-
-### 优先级规则
-
-1. **阻止规则 > 警告规则**
-   - 如果有阻止规则匹配，忽略警告规则
-   - 显示所有匹配的阻止规则消息
-
-2. **多个阻止规则**
-   - 组合所有消息
-   - 用 `\n\n` 分隔
-
-3. **多个警告规则**
-   - 组合所有消息
-   - 用 `\n\n` 分隔
-
-### 示例
-
-**规则 1**（阻止）：
-```markdown
----
-name: block-rm-root
-action: block
-pattern: rm\s+-rf\s+/
----
-⚠️ Deleting root directory!
-```
-
-**规则 2**（警告）：
-```markdown
----
-name: warn-rm
-action: warn
-pattern: rm\s+-rf
----
-🔍 Using rm -rf
-```
-
-**测试**：
-```bash
-# 命令：rm -rf /tmp
-# 匹配：规则 1（阻止）+ 规则 2（警告）
-# 结果：只显示规则 1，阻止执行
-
-# 命令：rm -rf /
-# 匹配：规则 1（阻止）
-# 结果：显示规则 1，阻止执行
-```
-
----
-
-## 4.7 实践：创建自定义规则
-
-### 任务 1：阻止 git push --force
-
-**需求**：阻止强制推送到 main 分支
-
-**规则文件**：`.claude/hookify.no-force-push.local.md`
-
-```markdown
----
-name: block-force-push-main
-enabled: true
-event: bash
-action: block
-conditions:
-  - field: command
-    operator: regex_match
-    pattern: git\s+push\s+.*--force
-  - field: command
-    operator: contains
-    pattern: main
----
-
-⚠️ **Force push to main branch detected!**
-
-Force pushing to main can cause problems:
-- Overwrites history
-- Breaks other developers' work
-- May lose commits
-
-Please:
-- Use a feature branch instead
-- Or get team approval first
-```
-
-**测试**：
-```bash
-# 这个命令会被阻止
-git push origin main --force
-
-# 这个命令允许
-git push origin feature-branch --force
-```
-
----
-
-### 任务 2：警告大文件提交
-
-**需求**：警告提交超过 1MB 的文件
-
-**规则文件**：`.claude/hookify.large-file-warning.local.md`
-
-```markdown
----
-name: warn-large-files
-enabled: true
-event: bash
-action: warn
-conditions:
-  - field: command
-    operator: regex_match
-    pattern: git\s+add
----
-
-🔍 **Large file warning**
-
-You're adding files to git. Please check:
-- Are there any files larger than 1MB?
-- Should large files use Git LFS?
-- Are binary files in .gitignore?
-
-Check file sizes: `ls -lh`
-```
-
-**测试**：
-```bash
-# 这个命令会显示警告
-git add large-file.zip
-
-# 输出：
-# 🔍 **Large file warning**
-# You're adding files to git...
-# （但命令仍然执行）
-```
-
----
-
-### 任务 3：要求代码格式化
-
-**需求**：退出前要求运行代码格式化
-
-**规则文件**：`.claude/hookify.require-format.local.md`
-
-```markdown
----
-name: require-format-before-exit
-enabled: true
-event: stop
-action: block
-conditions:
-  - field: transcript
-    operator: not_contains
-    pattern: "prettier --write"
-  - field: transcript
-    operator: not_contains
-    pattern: "black ."
----
-
-⚠️ **Code not formatted!**
-
-Before exiting, please format your code:
-
-For JavaScript/TypeScript:
-```bash
-npx prettier --write .
-```
-
-For Python:
-```bash
-black .
-```
-
-Then try exiting again.
-```
-
-**测试**：
-```bash
-# 尝试退出
-exit
-# 输出：⚠️ **Code not formatted!**
-
-# 运行格式化
-npx prettier --write .
-
-# 再次退出
-exit
-# （成功退出）
-```
-
----
-
-## 4.8 架构洞察
-
-### 洞察 1：声明式 vs 命令式
-
-**命令式**（传统 Hook）：
-```python
-# 需要编程
-if "rm -rf" in command:
-    print("危险操作！")
-    sys.exit(2)
-```
-
-**声明式**（hookify）：
-```markdown
----
-pattern: rm\s+-rf
-action: block
----
-危险操作！
-```
-
-**Linus 式思考**：
-> "声明式消除了特殊情况。你不需要为每个规则写代码，只需要声明'什么情况下做什么'。"
-
-**优势**：
-- 无需编程技能
-- 规则即文档
-- 易于维护
-
----
-
-### 洞察 2：正则缓存的价值
-
-**为什么用 LRU 缓存？**
-
-**性能测试**（假设）：
-```python
-# 无缓存：每次编译
-# 1000 次匹配 = 1000 次编译 = 100ms
-
-# 有缓存：编译一次
-# 1000 次匹配 = 1 次编译 + 999 次查找 = 10ms
-```
-
-**Linus 式思考**：
-> "正则编译是昂贵的。缓存是简单的。为什么不缓存？"
-
-**权衡**：
-- 内存：最多 128 个模式（可接受）
-- 性能：10 倍提升（值得）
-
----
-
-### 洞察 3：优雅降级的重要性
-
-**为什么 Hook 错误不阻止操作？**
-
-**场景**：
-```python
-# Hook 有 bug
-try:
-    result = engine.evaluate_rules(rules, input_data)
-except Exception:
-    # 选项 1：阻止操作（用户被卡住）
-    sys.exit(2)
-
-    # 选项 2：允许操作（用户可以继续工作）
-    sys.exit(0)
-```
-
-**Linus 式思考**：
-> "工具的 bug 不应该阻止用户工作。如果 Hook 坏了，用户应该能继续，而不是被卡住。"
-
-**设计原则**：
-- 用户体验 > 规则执行
-- 降级 > 失败
-- 警告 > 阻止
-
----
-
-## 4.9 小结
-
-### 核心要点
-
-1. **规则引擎**：
-   - 声明式规则定义（Markdown + YAML）
-   - 条件匹配（regex/contains/equals）
-   - 动作执行（warn/block）
-
-2. **PreToolUse Hook**：
-   - 工具执行前拦截
-   - 返回 `permissionDecision: deny` 阻止执行
-   - 返回 `systemMessage` 显示警告
-
-3. **正则缓存**：
-   - 使用 `@lru_cache` 缓存编译的正则
-   - 最多缓存 128 个模式
-   - 10 倍性能提升
-
-4. **优雅降级**：
-   - Hook 错误不阻止用户操作
-   - 始终退出 0
-   - 捕获所有异常
-
-### 与其他章节的关联
-
-- **第 2 章**：理解了 Hook 的概念，现在看到具体实现
-- **第 3 章**：理解了安全策略，hookify 是规则引擎的实现
-- **第 6 章**：security-guidance 也是 Hook，但检测安全问题
-- **第 18 章**：深入研究安全策略与沙箱设计
-
-### 延伸阅读
-
-- [plugins/hookify/CLAUDE.md](/plugins/hookify/CLAUDE) - hookify 文档
-- [第 6 章：security-guidance](/docs/part2/chapter06) - 安全检查 Hook
-- [第 18 章：安全策略与沙箱设计](/docs/part6/chapter18) - 深入分析
-
----
-
-## 下一章
-
-[第 5 章：commit-commands - Git 工作流自动化](/docs/part2/chapter05) - 学习命令的实现方式，理解 worktree 的处理逻辑。
+下一章我们继续往下走，专门看工具这一层：为什么工具不是随便挂几个 API 就完事，而是整个 Agent 系统最容易做烂、也最决定行动质量的一层。

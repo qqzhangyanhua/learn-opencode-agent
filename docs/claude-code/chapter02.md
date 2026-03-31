@@ -1,833 +1,368 @@
----
-title: "第2章：插件系统核心概念"
-description: "Claude Code 源码解析 - 第2章：插件系统核心概念"
-contentType: theory
-series: claude-code
-contentId: claude-code-ch02
-shortTitle: "第2章：插件系统核心概念"
-summary: "Claude Code 源码解析：第2章：插件系统核心概念"
-difficulty: intermediate
-estimatedTime: 30-45 分钟
-learningGoals:
-  - 理解本章核心实现原理
-  - 掌握相关设计模式
-prerequisites:
-  - 了解 AI Agent 基本概念
-recommendedNext: []
-practiceLinks: []
-searchTags:
-  - claude-code
-  - 源码解析
-navigationLabel: "第2章：插件系统核心概念"
-entryMode: read-first
-roleDescription: 想深入理解 Claude Code 架构的工程师
----
+# 第 2 章：Agent 的最小组成单元
 
-
-# 第 2 章：插件系统核心概念
-
-## 本章导读
-
-**仓库路径**：`plugins/README.md` + 各插件的 `CLAUDE.md`
-
-**系统职责**：
-- 定义插件的四大组件：命令（Command）、Agent、Hook、技能（Skill）
-- 说明插件的标准目录结构
-- 解释插件加载与执行流程
-
-**能学到什么**：
-- 命令 vs Agent vs 技能的区别（何时用哪个）
-- Hook 的 9 种事件类型（PreToolUse/PostToolUse/Stop 等）
-- YAML frontmatter 的设计模式
+> 本章目标：把“Agent”从一个模糊名词拆成几个可操作的系统部件，建立后续章节共同使用的分析框架。  
+> 本章对应总纲：`docs/ebook-outline.md` 中“第 2 章正文写作提纲（2026-03-31 归档）”。
 
 ---
 
-## 2.1 命令（Command）- 用户可调用的操作
+## 2.1 为什么必须先拆结构，再谈能力
 
-### 什么是命令？
+很多人一谈 Agent，就喜欢直接谈“这个模型强不强”“会不会自动做事”“能不能自己完成任务”。这种讨论很容易失焦。
 
-命令是用户可以直接调用的操作，通过 `/command-name` 的方式触发。
+原因很简单：**系统能力从来不是某一个部件单独决定的，而是由部件之间如何组织决定的。**
 
-**示例**：
-```bash
-/commit-push-pr
-/code-review --comment
-/feature-dev "实现用户认证"
-```
+同样一个模型：
+- 放在纯问答系统里，它只是回答器
+- 放在带工具的交互系统里，它变成执行协调者
+- 放在有状态、有反馈、有权限边界的循环里，它才开始接近 Agent
 
-### 命令的定义
+所以工程上更有价值的问题不是：
 
-命令使用 Markdown 文件定义，包含 YAML frontmatter：
+> 这个模型是不是足够聪明？
 
-```markdown
----
-description: Commit changes, push to remote, and create a pull request
-allowed-tools:
-  - Read
-  - Write
-  - Bash
-argument-hint: "[commit message]"
----
+而是：
 
-# Commit, Push, and Create PR
+> 这个系统到底由哪些最小部件组成？这些部件如何配合，才能把一个目标持续推进下去？
 
-This command automates the Git workflow:
-1. Stage changes
-2. Create commit
-3. Push to remote
-4. Open pull request
-```
-
-### Frontmatter 字段说明
-
-| 字段 | 必需 | 说明 | 示例 |
-|------|------|------|------|
-| `description` | ✅ | 命令的简短描述 | "Commit changes and create PR" |
-| `allowed-tools` | ❌ | 允许使用的工具白名单 | `[Read, Write, Bash]` |
-| `argument-hint` | ❌ | 参数提示 | "[commit message]" |
-| `model` | ❌ | 指定使用的模型 | "claude-opus-4-6" |
-
-### 命令的执行流程
-
-```mermaid
-sequenceDiagram
-    participant User
-    participant CLI
-    participant Command
-    participant Tools
-
-    User->>CLI: /commit-push-pr
-    CLI->>Command: 加载命令定义
-    Command->>CLI: 返回 frontmatter + 内容
-    CLI->>Command: 执行命令逻辑
-    Command->>Tools: 调用 Bash 工具
-    Tools-->>Command: 返回执行结果
-    Command-->>CLI: 返回命令输出
-    CLI-->>User: 显示结果
-```
-
-### 何时使用命令？
-
-**使用命令的场景**：
-- ✅ 用户需要主动触发的操作
-- ✅ 有明确的输入和输出
-- ✅ 执行流程相对固定
-- ✅ 需要工具白名单控制
-
-**示例**：
-- Git 操作：`/commit`, `/push-pr`, `/commit-push-pr`
-- 代码审查：`/code-review`
-- 特性开发：`/feature-dev`
-
-**不使用命令的场景**：
-- ❌ 需要自动触发（用 Hook）
-- ❌ 需要复杂的多步骤推理（用 Agent）
-- ❌ 需要渐进式披露文档（用技能）
+如果这个问题答不清，后面所有“增强 Agent”的讨论都容易变成堆概念、堆名词、堆幻觉。
 
 ---
 
-## 2.2 Agent - 自主子进程
+## 2.2 一个最小 Agent 至少包含哪几部分
 
-### 什么是 Agent？
+本书采用一个非常务实的拆法。一个可工作的 Agent，最少可以拆成五类部件：
 
-Agent 是自主运行的子进程，可以根据触发条件自动启动，执行复杂的多步骤任务。
+1. **模型（Model）**
+2. **工具（Tools）**
+3. **记忆/状态（Memory / State）**
+4. **规划与决策（Planning / Decision）**
+5. **执行循环（Execution Loop）**
 
-**示例**：
-```bash
-# 用户不需要显式调用，Agent 自动触发
-"请帮我审查这个 PR"  # 触发 code-review Agent
-"去重这个 Issue"     # 触发 dedupe Agent
-```
+这五个部件不是为了教学好看，而是因为它们刚好对应了一个 Agent 系统最核心的五个问题：
 
-### Agent 的定义
+- 用什么来理解和推理？
+- 用什么和外部世界交互？
+- 用什么保存上下文和历史？
+- 用什么决定下一步？
+- 用什么把这一切串成闭环？
 
-Agent 使用 Markdown 文件定义，包含触发条件和系统提示词：
-
-```markdown
----
-name: verification-agent
-description: Verify code review quality
-model: claude-sonnet-4-5-20250929
-color: blue
----
-
-# Verification Agent
-
-You are a verification agent responsible for ensuring code review quality.
-
-## Your Task
-1. Read the code review comments
-2. Check if all issues are addressed
-3. Verify the review follows best practices
-4. Report any missing items
-
-## Guidelines
-- Be thorough but concise
-- Focus on critical issues
-- Provide actionable feedback
-```
-
-### Frontmatter 字段说明
-
-| 字段 | 必需 | 说明 | 示例 |
-|------|------|------|------|
-| `name` | ✅ | Agent 的唯一标识 | "verification-agent" |
-| `description` | ✅ | Agent 的简短描述 | "Verify code review quality" |
-| `model` | ❌ | 指定使用的模型 | "claude-opus-4-6" |
-| `color` | ❌ | UI 显示颜色 | "blue" |
-| `isolation` | ❌ | 隔离模式 | "worktree" |
-
-### Agent 的执行流程
-
-```mermaid
-sequenceDiagram
-    participant User
-    participant MainAgent
-    participant SubAgent
-    participant Tools
-
-    User->>MainAgent: "请审查这个 PR"
-    MainAgent->>MainAgent: 检测到需要子 Agent
-    MainAgent->>SubAgent: 启动 verification-agent
-    SubAgent->>Tools: 调用 Read 工具
-    Tools-->>SubAgent: 返回代码内容
-    SubAgent->>SubAgent: 分析代码质量
-    SubAgent-->>MainAgent: 返回审查结果
-    MainAgent-->>User: 显示审查报告
-```
-
-### 何时使用 Agent？
-
-**使用 Agent 的场景**：
-- ✅ 需要复杂的多步骤推理
-- ✅ 需要自动触发（根据用户意图）
-- ✅ 需要并行执行（多个 Agent 协作）
-- ✅ 需要隔离环境（worktree）
-
-**示例**：
-- 代码审查：`verification-agent`（验证审查质量）
-- Issue 去重：5 个并行搜索 Agent
-- PR 审查：6 个专业领域 Agent（安全/性能/可读性等）
-
-**不使用 Agent 的场景**：
-- ❌ 简单的单步操作（用命令）
-- ❌ 需要拦截工具调用（用 Hook）
-- ❌ 需要大量参考文档（用技能）
+少了其中任何一个，系统能力都会明显塌陷。
 
 ---
 
-## 2.3 Hook - 生命周期事件拦截
+## 2.3 模型：负责理解、判断与生成，但不等于 Agent
 
-### 什么是 Hook？
+### 2.3.1 模型的职责是什么
 
-Hook 是在特定生命周期事件触发的脚本，可以拦截、修改或阻止操作。
+模型是 Agent 的认知核心。它通常负责：
+- 理解用户目标
+- 解释当前上下文
+- 根据已有信息做判断
+- 生成下一步动作建议
+- 在必要时生成要执行的工具调用参数
 
-**示例**：
-```python
-# PreToolUse Hook - 在工具执行前拦截
-if tool_name == "Bash" and "rm -rf" in arguments:
-    print("⚠️  危险操作：rm -rf")
-    sys.exit(2)  # 退出码 2 阻止工具执行
-```
+所以模型确实很重要。但重要不等于它可以独立定义整个系统。
 
-### 9 种 Hook 事件
+### 2.3.2 为什么“只有强模型”仍然不够
 
-| Hook 类型 | 触发时机 | 可以做什么 | 退出码 |
-|-----------|---------|-----------|--------|
-| **PreToolUse** | 工具执行前 | 拦截、修改参数、阻止执行 | 2=阻止 |
-| **PostToolUse** | 工具执行后 | 处理结果、记录日志 | - |
-| **Stop** | 会话退出前 | 清理资源、保存状态、阻止退出 | 2=阻止 |
-| **SubagentStop** | 子 Agent 退出前 | 验证结果、阻止退出 | 2=阻止 |
-| **SessionStart** | 会话开始时 | 注入系统提示词、初始化状态 | - |
-| **SessionEnd** | 会话结束时 | 清理资源、保存日志 | - |
-| **UserPromptSubmit** | 用户提交提示时 | 预处理输入、添加上下文 | - |
-| **PreCompact** | 上下文压缩前 | 保留关键信息 | - |
-| **Notification** | 外部通知时 | 处理外部事件 | - |
+只靠模型，你最多得到一个更聪明的回答器。
 
-### Hook 的实现
+它也许能：
+- 分析问题
+- 写出计划
+- 提供建议
+- 生成代码草案
 
-Hook 使用 Python 或 Shell 脚本实现：
+但它未必能：
+- 真的去读取文件
+- 真的去运行测试
+- 真的根据测试失败继续修复
+- 真的记住中间状态
+- 真的在风险动作前停下来请求确认
 
-**Python 示例**（`hooks/pre_tool_use.py`）：
-```python
-#!/usr/bin/env python3
-import sys
-import json
+这就是一个基本事实：
 
-# 读取 Hook 输入
-hook_input = json.loads(sys.stdin.read())
-tool_name = hook_input.get("tool_name")
-arguments = hook_input.get("arguments", {})
+> **模型负责“想”，但 Agent 还必须负责“做”与“继续做”。**
 
-# 检查危险操作
-if tool_name == "Bash":
-    command = arguments.get("command", "")
-    if "rm -rf /" in command:
-        print("⚠️  危险操作：rm -rf /")
-        print("此操作已被阻止")
-        sys.exit(2)  # 退出码 2 阻止工具执行
+### 2.3.3 一个常见误区：把模型升级误当成系统升级
 
-# 允许执行
-sys.exit(0)
-```
+工程里最常见的误判之一，就是把“模型更强了”直接等同于“Agent 更成熟了”。
 
-**Shell 示例**（`hooks/session_start.sh`）：
-```bash
-#!/bin/bash
+这通常只说明一件事：认知核心可能变强了。
 
-# 注入系统提示词
-cat <<EOF
-You are in explanatory output style mode.
+但系统层面的问题仍然还在：
+- 工具有没有被正确定义
+- 状态有没有被保存
+- 决策有没有边界
+- 执行有没有反馈闭环
 
-Please:
-- Explain your reasoning step by step
-- Use clear, educational language
-- Provide examples when helpful
-EOF
-
-exit 0
-```
-
-### Hook 的执行流程
-
-```mermaid
-sequenceDiagram
-    participant Agent
-    participant HookSystem
-    participant Hook
-    participant Tool
-
-    Agent->>HookSystem: 准备调用 Bash 工具
-    HookSystem->>Hook: 触发 PreToolUse Hook
-    Hook->>Hook: 检查命令是否危险
-    alt 危险操作
-        Hook-->>HookSystem: 退出码 2（阻止）
-        HookSystem-->>Agent: 工具调用被阻止
-    else 安全操作
-        Hook-->>HookSystem: 退出码 0（允许）
-        HookSystem->>Tool: 执行工具
-        Tool-->>HookSystem: 返回结果
-        HookSystem->>Hook: 触发 PostToolUse Hook
-        Hook-->>HookSystem: 处理完成
-        HookSystem-->>Agent: 返回最终结果
-    end
-```
-
-### 何时使用 Hook？
-
-**使用 Hook 的场景**：
-- ✅ 需要拦截工具调用（安全检查）
-- ✅ 需要修改工具参数（预处理）
-- ✅ 需要处理工具结果（后处理）
-- ✅ 需要注入系统提示词（改变行为）
-- ✅ 需要在特定生命周期节点执行逻辑
-
-**示例**：
-- 安全检查：`security-guidance`（检测 SQL 注入/XSS）
-- 规则引擎：`hookify`（自定义规则匹配）
-- 输出风格：`explanatory-output-style`（注入提示词）
-- 自引用循环：`ralph-wiggum`（阻止退出）
-
-**不使用 Hook 的场景**：
-- ❌ 用户主动触发的操作（用命令）
-- ❌ 复杂的多步骤推理（用 Agent）
-- ❌ 需要大量文档（用技能）
+所以判断一个 Agent 系统，不要只盯模型型号，而要看模型被放进了什么结构里。
 
 ---
 
-## 2.4 技能（Skill）- 渐进式披露的知识库
+## 2.4 工具：让系统不只会说，还能真的动手
 
-### 什么是技能？
+### 2.4.1 工具为什么是 Agent 的第一道分水岭
 
-技能是一种特殊的命令，使用渐进式披露的方式提供大量参考文档和示例。
+没有工具，系统几乎只能停留在文本世界里。
 
-**示例**：
-```bash
-/plugin-dev:create-plugin "数据库迁移插件"
-/new-sdk-app my-agent
-```
+有了工具，它才开始具备改变外部状态的能力。常见动作包括：
+- 读文件
+- 搜代码
+- 改文件
+- 运行命令
+- 调接口
+- 打开网页
+- 请求用户确认
+- 调用其他 Agent
 
-### 技能的目录结构
+工具的意义不是“功能更多”，而是：
 
-```bash
-skills/create-plugin/
-├── SKILL.md              # 第一层：元数据
-├── references/           # 第二层：参考文档
-│   ├── overview.md
-│   ├── frontmatter-fields.md
-│   ├── hook-migration.md
-│   ├── mcp-auth.md
-│   └── manifest-fields.md
-├── examples/             # 第三层：示例代码
-│   ├── basic-plugin.md
-│   ├── hook-example.md
-│   └── agent-example.md
-└── scripts/              # 第四层：工具脚本
-    ├── validate.sh
-    └── test.sh
-```
+> **系统第一次从“解释任务”变成“推进任务”。**
 
-### 三层加载机制
+### 2.4.2 工具不是越多越好
 
-```mermaid
-graph TD
-    A[用户调用技能] --> B[加载 SKILL.md]
-    B --> C{需要详细说明?}
-    C -->|是| D[加载 references/]
-    C -->|否| E[执行技能]
-    D --> F{需要示例?}
-    F -->|是| G[加载 examples/]
-    F -->|否| E
-    G --> E
+很多人一设计 Agent 就想把一堆工具全挂上去，结果很快把系统做成垃圾堆。
 
-    style B fill:#90EE90
-    style D fill:#FFD700
-    style G fill:#FF6347
-```
+问题在于：
+- 工具越多，选择空间越大
+- 选择空间越大，误用概率越高
+- 误用概率越高，系统就越不稳定
 
-### SKILL.md 的定义
+好品味不是“什么都能调”，而是**只暴露完成任务真正需要的能力**。
 
-```markdown
----
-name: create-plugin
-description: Create a new Claude Code plugin with guided workflow
-category: plugin-development
-difficulty: intermediate
-estimated-time: 30-60 minutes
----
+### 2.4.3 Claude Code 的现实例子
 
-# Create Plugin Skill
+当前仓库把工具层暴露得非常直白：Read、Edit、Write、Grep、Glob、Bash、Agent、AskUserQuestion 这些能力都不是混成一个“大工具箱”，而是被刻意拆成不同接口。
 
-This skill guides you through creating a new Claude Code plugin.
+这种拆法背后不是形式主义，而是几条很硬的设计规则：
+- **读、写、搜索、执行要分开建模**，这样系统才知道自己现在是在感知环境，还是在改变环境
+- **高风险动作不能和低风险动作混成同一层**，所以 `Bash` 这种能力天然更接近风险边界
+- **能用专用工具解决的问题，就不要退化成通用 shell**，否则动作语义会变脏，反馈也更难约束
+- **工具不是越多越强，而是越清楚越稳**
 
-## What You'll Learn
-- Plugin directory structure
-- Command and Agent definitions
-- Hook implementation
-- Testing and validation
+再看 `examples/settings/settings-strict.json:1`，这个项目甚至把工具权限直接写成了策略对象：
+- `ask: ["Bash"]`
+- `deny: ["WebSearch", "WebFetch"]`
+- `allowManagedPermissionRulesOnly: true`
+- `allowManagedHooksOnly: true`
 
-## Prerequisites
-- Basic understanding of Markdown
-- Familiarity with YAML frontmatter
-- Python or Shell scripting (for Hooks)
+这说明一个成熟 Agent 的工具层从来不是“模型想调什么就调什么”。真正的设计思路是：**工具先按能力和风险分层，再由配置层决定本次运行到底开放到哪。**
 
-## Steps
-1. Define plugin structure
-2. Create commands
-3. Add Agents (optional)
-4. Implement Hooks (optional)
-5. Write tests
-6. Validate plugin
-7. Publish to Marketplace
-```
+所以工具层真正回答的，不只是“系统能做什么”，还包括：
+- 哪些动作只是读取
+- 哪些动作会改状态
+- 哪些动作风险高
+- 哪些动作必须先问人
+- 哪些动作在当前环境根本不该放开
 
-### 何时使用技能？
-
-**使用技能的场景**：
-- ✅ 需要大量参考文档（20+ 页）
-- ✅ 需要示例代码（10+ 个示例）
-- ✅ 需要分步指导（工作流）
-- ✅ 需要渐进式披露（避免信息过载）
-
-**示例**：
-- 插件开发：`plugin-dev`（7 个技能 + 60+ 文件）
-- SDK 开发：`agent-sdk-dev`（TypeScript/Python 双语言）
-- 前端设计：`frontend-design`（生产级设计指南）
-- Opus 迁移：`claude-opus-4-5-migration`（6 步迁移指南）
-
-**不使用技能的场景**：
-- ❌ 简单的单步操作（用命令）
-- ❌ 需要自动触发（用 Agent）
-- ❌ 需要拦截工具调用（用 Hook）
+这才是现实里的动作接口层。没有这层分化，所谓“工具调用”最后通常只会退化成一堆不受控的万能命令。
 
 ---
 
-## 2.5 四大组件对比
+## 2.5 记忆与状态：没有状态，系统就只能重复失忆
 
-### 对比表
+### 2.5.1 为什么状态不是“可选增强”
 
-| 特性 | 命令 | Agent | Hook | 技能 |
-|------|------|-------|------|------|
-| **触发方式** | 用户主动调用 | 自动触发 | 事件驱动 | 用户主动调用 |
-| **执行环境** | 主进程 | 子进程 | 主进程 | 主进程 |
-| **复杂度** | 简单 | 复杂 | 中等 | 复杂 |
-| **文档量** | 少（1 个文件） | 少（1 个文件） | 少（1 个文件） | 多（10+ 文件） |
-| **工具白名单** | ✅ 支持 | ✅ 支持 | ❌ 不适用 | ✅ 支持 |
-| **可阻止操作** | ❌ 否 | ❌ 否 | ✅ 是 | ❌ 否 |
-| **并行执行** | ❌ 否 | ✅ 是 | ❌ 否 | ❌ 否 |
-| **隔离环境** | ❌ 否 | ✅ 是（worktree） | ❌ 否 | ❌ 否 |
+很多人把记忆理解成“聊天记录保存”或者“长期记住用户偏好”。这太浅了。
 
-### 决策树
+对 Agent 来说，状态首先意味着：
+- 当前目标是什么
+- 已经做到了哪一步
+- 哪些动作做过了
+- 哪些结果失败了
+- 当前环境是什么状态
+- 后面该延续什么上下文
 
-```mermaid
-graph TD
-    A[需要实现什么功能?] --> B{用户主动触发?}
-    B -->|是| C{需要大量文档?}
-    B -->|否| D{需要拦截操作?}
+如果这些东西没有被保存，系统每一轮都像刚醒来一样重新猜。
 
-    C -->|是| E[使用技能]
-    C -->|否| F[使用命令]
+那就根本谈不上持续推进任务。
 
-    D -->|是| G[使用 Hook]
-    D -->|否| H[使用 Agent]
+### 2.5.2 状态不只有一种
 
-    style E fill:#87CEEB
-    style F fill:#90EE90
-    style G fill:#FFD700
-    style H fill:#FF6347
-```
+工程上至少可以分几层：
 
-### 实际案例
+1. **瞬时上下文**：当前轮对话、当前工具输出
+2. **会话状态**：这一轮任务的中间结果、任务列表、暂存结论
+3. **持久记忆**：用户偏好、项目背景、长期规则
+4. **外部状态**：文件系统、Git 状态、Issue 状态、服务响应
 
-| 功能 | 选择 | 原因 |
-|------|------|------|
-| Git 提交并创建 PR | 命令 | 用户主动触发，流程固定 |
-| 代码审查验证 | Agent | 需要复杂推理，自动触发 |
-| 危险命令检测 | Hook | 需要拦截工具调用 |
-| 插件开发指南 | 技能 | 需要大量文档和示例 |
-| Issue 去重 | Agent | 需要并行搜索，复杂推理 |
-| 安全检查 | Hook | 需要在工具执行前拦截 |
-| 7 阶段开发工作流 | 命令 | 用户主动触发，有明确步骤 |
-| 输出风格改变 | Hook | 需要注入系统提示词 |
+真正的 Agent 往往同时依赖这几层，而不是只靠聊天历史。
+
+### 2.5.3 为什么状态层最容易被低估
+
+很多入门讨论会把注意力都放在模型和工具上，因为它们最显眼。
+
+但真正让系统从“一次回答”变成“持续推进”的，往往恰恰是状态层。因为只要状态管理做不好，系统就会不断出现这些问题：
+- 重复做已经做过的事
+- 忘记前一轮为什么失败
+- 无法判断任务当前处于哪个阶段
+- 不能稳定地把反馈接到下一轮
+
+所以状态不是锦上添花，而是执行连续性的地基。
 
 ---
 
-## 2.6 插件的标准目录结构
+## 2.6 规划与决策：不是为了好看，而是为了少走弯路
 
-### 完整结构
+### 2.6.1 规划的本质
 
-```bash
-plugins/my-plugin/
-├── CLAUDE.md                 # 插件文档（必需）
-├── commands/                 # 命令目录（可选）
-│   ├── my-command.md
-│   └── another-command.md
-├── agents/                   # Agent 目录（可选）
-│   ├── my-agent.md
-│   └── verification-agent.md
-├── skills/                   # 技能目录（可选）
-│   └── my-skill/
-│       ├── SKILL.md
-│       ├── references/
-│       ├── examples/
-│       └── scripts/
-├── hooks/                    # Hook 目录（可选）
-│   ├── pre_tool_use.py
-│   ├── post_tool_use.py
-│   └── session_start.sh
-├── rules/                    # 规则目录（可选，hookify 专用）
-│   └── my-rule.json
-└── tests/                    # 测试目录（可选）
-    └── test_plugin.sh
-```
+规划不是让模型写一段漂亮计划书。规划真正的价值是：
+- 降低盲动
+- 把任务拆成可执行步骤
+- 在多种路径里选一条更合理的路
+- 在执行前识别风险和依赖
 
-### 最小插件
+如果没有规划层，系统很容易陷入两种坏状态：
+1. 一上来就乱做
+2. 说得头头是道，但根本不落地
 
-一个最小的插件只需要：
+### 2.6.2 决策发生在每一轮，而不只在开头
 
-```bash
-plugins/my-plugin/
-├── CLAUDE.md                 # 插件文档
-└── commands/                 # 至少一个命令
-    └── my-command.md
-```
+很多人把规划理解成“任务开始前生成一个计划”。这只说对了一半。
 
-### 约定规则
+真正的 Agent 还需要持续决策：
+- 现在该读文件还是直接改？
+- 是继续当前路径，还是回退重查？
+- 是该问用户，还是可以自主处理？
+- 是该启动子 Agent，还是自己完成？
+- 当前错误说明代码逻辑错了，还是上下文还不够？
 
-1. **目录名即插件名**：`plugins/my-plugin/` → 插件名是 `my-plugin`
-2. **CLAUDE.md 必需**：每个插件必须有文档
-3. **至少一个组件**：必须包含 commands/agents/skills/hooks 之一
-4. **文件名即标识**：`commands/my-command.md` → 命令名是 `my-command`
-5. **Markdown 优先**：命令/Agent/技能使用 Markdown 定义
-6. **脚本语言灵活**：Hook 可以用 Python 或 Shell
+所以更准确地说，规划层包含两部分：
+- **前置规划**：先设计路径
+- **过程决策**：边执行边修正
+
+### 2.6.3 这层为什么不能硬编码成固定流程
+
+固定流程当然有价值，但它解决的是“已知路径问题”。
+
+而 Agent 更擅长处理的是：
+- 信息不完整
+- 反馈会改变路径
+- 环境不断变化
+- 需要临场判断
+
+当任务具备这些特点时，规划与决策就不再是装饰，而是核心能力。
 
 ---
 
-## 2.7 插件加载流程
+## 2.7 执行循环：把前面四部分真正焊接起来
 
-### 加载流程图
+### 2.7.1 为什么循环才是系统的骨架
 
-```mermaid
-sequenceDiagram
-    participant CLI
-    participant PluginLoader
-    participant FileSystem
-    participant Registry
+现在把前面四部分摆在一起：
+- 模型负责理解与判断
+- 工具负责行动
+- 状态负责连续性
+- 规划负责选择路径
 
-    CLI->>PluginLoader: 启动时扫描插件
-    PluginLoader->>FileSystem: 读取 plugins/ 目录
-    FileSystem-->>PluginLoader: 返回插件列表
+但这些部件如果不被串起来，只是零件，不是系统。
 
-    loop 每个插件
-        PluginLoader->>FileSystem: 读取 CLAUDE.md
-        PluginLoader->>FileSystem: 扫描 commands/
-        PluginLoader->>FileSystem: 扫描 agents/
-        PluginLoader->>FileSystem: 扫描 skills/
-        PluginLoader->>FileSystem: 扫描 hooks/
-        PluginLoader->>Registry: 注册插件组件
-    end
+真正把它们焊成 Agent 的，是执行循环。
 
-    Registry-->>CLI: 插件加载完成
-```
+最小循环可以写成：
 
-### 加载步骤
+**读取状态 -> 理解目标 -> 选择动作 -> 执行动作 -> 接收反馈 -> 更新状态 -> 再判断**
 
-1. **扫描 `plugins/` 目录**
-   ```python
-   plugin_dirs = os.listdir("plugins/")
-   # ['hookify', 'code-review', 'commit-commands', ...]
-   ```
+只要这个回路存在，系统就可以持续推进任务。
 
-2. **读取 `CLAUDE.md`**
-   ```python
-   with open("plugins/hookify/CLAUDE.md") as f:
-       plugin_doc = f.read()
-   ```
+### 2.7.2 为什么很多“伪 Agent”会失真
 
-3. **扫描组件目录**
-   ```python
-   commands = glob("plugins/hookify/commands/*.md")
-   agents = glob("plugins/hookify/agents/*.md")
-   skills = glob("plugins/hookify/skills/*/SKILL.md")
-   hooks = glob("plugins/hookify/hooks/*.py")
-   ```
+因为它们通常只做了前半段：
+- 理解问题
+- 生成建议
+- 给出计划
 
-4. **解析 frontmatter**
-   ```python
-   import yaml
+但没有后半段：
+- 真正执行
+- 接收反馈
+- 根据反馈继续迭代
 
-   with open("plugins/hookify/commands/hookify.md") as f:
-       content = f.read()
-       frontmatter, body = parse_frontmatter(content)
-       # frontmatter = {
-       #     'description': '...',
-       #     'allowed-tools': ['Read', 'Write']
-       # }
-   ```
+于是看上去像在做事，实际上只是更复杂的文字表演。
 
-5. **注册到系统**
-   ```python
-   registry.register_command(
-       name="hookify",
-       plugin="hookify",
-       description=frontmatter['description'],
-       allowed_tools=frontmatter.get('allowed-tools', []),
-       content=body
-   )
-   ```
+### 2.7.3 停机条件同样属于执行循环的一部分
 
-### 执行流程
+很多人只关心系统怎么开始跑，却很少认真设计它怎么停。
 
-**命令执行**：
-```mermaid
-graph LR
-    A[用户输入 /commit] --> B[查找命令]
-    B --> C[加载 frontmatter]
-    C --> D[检查 allowed-tools]
-    D --> E[执行命令逻辑]
-    E --> F[返回结果]
-```
+但一个成熟 Agent 的循环一定包含停机条件，例如：
+- 目标已经完成
+- 当前路径已经证伪
+- 风险动作需要授权
+- 缺少关键上下文，必须请求外部输入
+- 达到明确的失败边界
 
-**Hook 执行**：
-```mermaid
-graph LR
-    A[工具调用] --> B[触发 PreToolUse Hook]
-    B --> C[执行 Hook 脚本]
-    C --> D{退出码?}
-    D -->|0| E[允许执行]
-    D -->|2| F[阻止执行]
-    E --> G[调用工具]
-    G --> H[触发 PostToolUse Hook]
-```
+如果没有停机条件，循环就会退化成盲目试错；如果停得太早，系统又只会做半截事。
+
+所以执行循环不是“不断重复”，而是“有边界地持续推进”。
 
 ---
 
-## 2.8 YAML Frontmatter 设计模式
+## 2.8 这五个部件之间是什么关系
 
-### 为什么用 YAML Frontmatter？
+现在可以把它们之间的关系压缩成一句话：
 
-**传统方式**（需要编译）：
-```typescript
-class MyCommand {
-  name = 'my-command';
-  description = 'My command description';
-  allowedTools = ['Read', 'Write'];
-}
-```
+> **模型负责判断，工具负责行动，状态负责连续，规划负责选路，循环负责把一切变成持续运行。**
 
-**Claude Code 方式**（零编译）：
-```markdown
----
-description: My command description
-allowed-tools:
-  - Read
-  - Write
----
+如果你愿意再工程化一点，可以这样理解：
 
-# My Command
-```
+| 部件 | 回答的问题 | 缺失后会怎样 |
+|------|------------|--------------|
+| 模型 | 现在该怎么理解与推理？ | 系统不会判断 |
+| 工具 | 现在能做什么动作？ | 系统只能建议 |
+| 状态 | 已经发生了什么？ | 系统持续失忆 |
+| 规划 | 下一步为什么这样走？ | 系统容易乱撞 |
+| 循环 | 如何持续推进直到停机？ | 系统只能做一轮 |
 
-**优势**：
-1. **人类可读**：Markdown 格式，易于编辑
-2. **机器可解析**：YAML 结构化，易于解析
-3. **零编译**：直接加载，无需构建步骤
-4. **文档即代码**：文档和元数据在一起
+这张表的意义在于：以后你看到任何一个所谓 Agent 系统，都可以先别听营销词，直接拿这五项去查。
 
-### 常用字段
+如果它说自己是 Agent，但：
+- 没有工具，只会输出建议
+- 没有状态，每轮重来
+- 没有反馈闭环，只跑一步
+- 没有决策层，只是固定脚本
 
-| 字段 | 类型 | 适用组件 | 说明 |
-|------|------|---------|------|
-| `description` | string | 命令/Agent/技能 | 简短描述 |
-| `allowed-tools` | array | 命令/技能 | 工具白名单 |
-| `argument-hint` | string | 命令 | 参数提示 |
-| `model` | string | 命令/Agent | 指定模型 |
-| `name` | string | Agent/技能 | 唯一标识 |
-| `color` | string | Agent | UI 颜色 |
-| `isolation` | string | Agent | 隔离模式 |
-| `category` | string | 技能 | 分类 |
-| `difficulty` | string | 技能 | 难度 |
-| `estimated-time` | string | 技能 | 预计时间 |
-
-### 最佳实践
-
-1. **保持简洁**：只包含必需字段
-2. **使用数组**：多个值用 YAML 数组
-3. **引号可选**：简单字符串不需要引号
-4. **缩进一致**：使用 2 空格缩进
-5. **注释清晰**：用 `#` 添加注释
-
-**好的示例**：
-```yaml
----
-description: Commit changes and create PR
-allowed-tools:
-  - Read
-  - Write
-  - Bash
-argument-hint: "[commit message]"
-model: claude-opus-4-6
----
-```
-
-**不好的示例**：
-```yaml
----
-description: "Commit changes and create PR"  # 不需要引号
-allowed-tools: ["Read", "Write", "Bash"]     # 不推荐单行数组
-argument-hint: [commit message]              # 缺少引号
-model: "claude-opus-4-6"                     # 不需要引号
-extra-field: "unused"                        # 不需要的字段
----
-```
+那它大概率就不是一个成熟的 Agent。
 
 ---
 
-## 2.9 实践：创建一个简单插件
+## 2.9 从“部件视角”看系统设计，为什么更稳
 
-### 任务：创建 "hello-world" 插件
+当你开始用“最小组成单元”去看系统，会获得两个好处。
 
-**目标**：创建一个最简单的插件，包含一个命令。
+### 第一，你不会再被营销词带偏
 
-**步骤 1：创建目录结构**
-```bash
-mkdir -p plugins/hello-world/commands
-```
+别人说“我们有 Agent”。你不用吵概念，只要追问：
+- 模型是什么？
+- 工具是什么？
+- 状态存哪？
+- 怎么决策？
+- 闭环怎么跑？
 
-**步骤 2：创建 CLAUDE.md**
-```bash
-cat > plugins/hello-world/CLAUDE.md <<'EOF'
-# Hello World Plugin
+对方答不上来，基本就露馅了。
 
-A simple example plugin for learning purposes.
+### 第二，你能更稳地做设计取舍
 
-## Components
-- 1 command: `hello`
+因为很多问题会变得非常具体：
+- 当前问题是模型不够强，还是工具描述太差？
+- 是状态管理有洞，还是规划层没起作用？
+- 是工具太少，还是执行循环没有接住反馈？
 
-## Usage
-```bash
-/hello
-```
-EOF
-```
+这比一句“Agent 不够智能”有用得多。
 
-**步骤 3：创建命令**
-```bash
-cat > plugins/hello-world/commands/hello.md <<'EOF'
----
-description: Say hello to the world
-allowed-tools:
-  - Read
----
-
-# Hello Command
-
-Please say "Hello, World!" and explain what this plugin does.
-EOF
-```
-
-**步骤 4：测试插件**
-```bash
-# 启动 Claude Code
-claude
-
-# 使用命令
-/hello
-```
-
-**预期输出**：
-```
-Hello, World!
-
-This is a simple example plugin that demonstrates the basic structure
-of a Claude Code plugin. It contains a single command that uses the
-Read tool to access files.
-```
+“Agent 不够智能”这话通常是懒。
 
 ---
 
-## 2.10 小结
+## 2.10 本章小结
 
-### 核心要点
+这一章真正做的，不是介绍一堆术语，而是建立一把拆系统的刀。
 
-1. **四大组件**：
-   - 命令：用户主动触发，流程固定
-   - Agent：自动触发，复杂推理
-   - Hook：事件驱动，拦截操作
-   - 技能：渐进式披露，大量文档
+你现在应该记住五件事：
 
-2. **标准目录结构**：
-   - `commands/` - 命令定义
-   - `agents/` - Agent 定义
-   - `skills/` - 技能定义
-   - `hooks/` - Hook 实现
-   - `CLAUDE.md` - 插件文档
+1. **Agent 不是一个单点能力，而是多个部件协作形成的系统。**
+2. **模型很重要，但模型绝不等于 Agent。**
+3. **工具让系统具备行动能力，状态让系统具备连续性。**
+4. **规划负责选路，执行循环负责把各部件焊成闭环。**
+5. **以后判断一个系统是不是 Agent，先看这五个部件是否成立。**
 
-3. **YAML Frontmatter**：
-   - 人类可读，机器可解析
-   - 零编译，直接加载
-   - 文档即代码
-
-4. **插件加载**：
-   - 约定优于配置
-   - 自动扫描目录
-   - 解析 frontmatter
-   - 注册到系统
-
-### 与其他章节的关联
-
-- **第 1 章**：理解了整体架构，现在深入组件细节
-- **第 4-6 章**：分析基础插件的实现（hookify/commit-commands/security-guidance）
-- **第 9 章**：使用 plugin-dev 工具包开发插件
-- **第 19 章**：从零开发一个完整插件
-
-### 延伸阅读
-
-- [plugins/README.md](/plugins/) - 插件总览
-- [第 4 章：hookify](/docs/part2/chapter04) - 规则引擎实现
-- [第 9 章：plugin-dev](/docs/part3/chapter09) - 插件开发工具包
-
----
-
-## 下一章
-
-[第 3 章：开发环境与配置](/docs/part1/chapter03) - 理解三种安全策略、DevContainer 配置、Bash 沙箱实现。
+下一章我们不再只讲静态结构，而是沿着一次真实请求往下走：从用户提出任务开始，看一个 Agent 到底如何一步步形成完整闭环。

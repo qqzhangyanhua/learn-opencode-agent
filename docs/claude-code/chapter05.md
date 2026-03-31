@@ -1,850 +1,306 @@
----
-title: "第5章：commit-commands - Git 工作流自动化"
-description: "Claude Code 源码解析 - 第5章：commit-commands - Git 工作流自动化"
-contentType: theory
-series: claude-code
-contentId: claude-code-ch05
-shortTitle: "第5章：commit-commands - Git 工作流自动化"
-summary: "Claude Code 源码解析：第5章：commit-commands - Git 工作流自动化"
-difficulty: intermediate
-estimatedTime: 30-45 分钟
-learningGoals:
-  - 理解本章核心实现原理
-  - 掌握相关设计模式
-prerequisites:
-  - 了解 AI Agent 基本概念
-recommendedNext: []
-practiceLinks: []
-searchTags:
-  - claude-code
-  - 源码解析
-navigationLabel: "第5章：commit-commands - Git 工作流自动化"
-entryMode: read-first
-roleDescription: 想深入理解 Claude Code 架构的工程师
----
+# 第 5 章：工具不是外挂，而是 Agent 的手和脚
 
-
-# 第 5 章：commit-commands - Git 工作流自动化
-
-## 本章导读
-
-**仓库路径**：`plugins/commit-commands/`
-
-**系统职责**：
-- 提供 3 个 Git 命令（commit/commit-push-pr/clean_gone）
-- 处理 worktree 场景
-- 自动生成 Conventional Commit 消息
-
-**能学到什么**：
-- 如何封装复杂的 Git 操作为简单命令
-- worktree 的检测与处理
-- 命令的参数传递（argument-hint）
+> 本章目标：讲清工具层在 Agent 系统中的真实地位，解释为什么“接了工具”不等于“做好了工具系统”。  
+> 本章对应总纲：`docs/ebook-outline.md` 中“第 5 章正文写作提纲（2026-03-31 归档）”。
 
 ---
 
-## 5.1 Git 工作流痛点
+## 5.1 为什么工具层决定 Agent 能不能真正做事
 
-### 传统 Git 工作流的问题
+这一章要拆掉的误解也很常见：
 
-**场景 1：创建提交**
-```bash
-# 需要 5 个步骤
-git status                    # 查看状态
-git diff                      # 查看更改
-git add .                     # 暂存文件
-git commit -m "fix: bug"      # 创建提交
-git log --oneline -5          # 查看历史
-```
+> **只要接上几个 API 或 function calling，工具层就算做完了。**
 
-**场景 2：创建 PR**
-```bash
-# 需要 8 个步骤
-git status
-git checkout -b feature-branch  # 创建分支
-git add .
-git commit -m "feat: new feature"
-git push origin feature-branch
-gh pr create --title "..." --body "..."
-# 还要手动填写 PR 标题和描述
-```
+这也是错的。
 
-**场景 3：清理分支**
-```bash
-# 需要手动识别和删除
-git branch -v                 # 查看分支
-git branch -D old-branch      # 删除分支
-# 如果有 worktree，还要先删除 worktree
-git worktree remove /path/to/worktree
-```
+如果说模型负责想，那工具就负责把想法变成动作。
 
-### commit-commands 的解决方案
+没有工具，系统只能：
+- 给建议
+- 写说明
+- 列计划
+- 模拟执行
 
-**一个命令完成所有操作**：
-```bash
-# 创建提交
-/commit
+有了工具，系统才开始能：
+- 读文件
+- 搜索代码
+- 修改内容
+- 运行检查
+- 请求外部服务
+- 调起其他执行单元
 
-# 提交 + 推送 + 创建 PR
-/commit-push-pr
+所以工具层真正带来的，不是“功能变多”，而是：
 
-# 清理已删除的远程分支
-/clean_gone
-```
+> **系统第一次具备了干预外部世界的能力。**
+
+这就是为什么工具是 Agent 和普通对话系统之间第一道很硬的分水岭。
 
 ---
 
-## 5.2 三个命令的职责分工
+## 5.2 但“接上工具”本身，其实很廉价
 
-### 命令对比
+现在很多系统喜欢宣传：
+- 支持 function calling
+- 支持外部 API
+- 支持工具调用
+- 支持自动执行
 
-| 命令 | 功能 | 步骤数 | 适用场景 |
-|------|------|--------|---------|
-| `/commit` | 创建本地提交 | 1 | 本地开发，不需要推送 |
-| `/commit-push-pr` | 提交 + 推送 + PR | 1 | 完成功能，需要代码审查 |
-| `/clean_gone` | 清理过期分支 | 1 | 定期清理本地分支 |
+这些都不稀奇。
 
-### 工作流程图
+真正难的不是“能不能接工具”，而是下面这些事：
+- 模型知不知道什么时候该用哪个工具
+- 工具描述是否清楚到足以被正确使用
+- 工具输出是否稳定到足以进入下一轮判断
+- 工具之间是否有清晰边界
+- 风险动作有没有权限控制
+- 失败结果能不能变成有用反馈
 
-```mermaid
-graph TD
-    A[开始开发] --> B{需要推送?}
-    B -->|否| C[/commit]
-    B -->|是| D[/commit-push-pr]
-    C --> E[继续开发]
-    D --> F[等待审查]
-    F --> G[合并 PR]
-    G --> H[/clean_gone]
-    H --> A
-
-    style C fill:#90EE90
-    style D fill:#FFD700
-    style H fill:#87CEEB
-```
+也就是说，工具层的难点不在接线，而在设计。
 
 ---
 
-## 5.3 /commit - 创建 Git 提交
+## 5.3 一个好工具系统，至少要回答五个问题
 
-### 命令定义
+设计工具层时，最少要把五件事说清楚：
 
-**文件**：`commands/commit.md`
+1. **能做什么**  
+   工具能力范围是什么？
 
-```markdown
----
-allowed-tools:
-  - Bash(git add:*)
-  - Bash(git status:*)
-  - Bash(git commit:*)
-description: Create a git commit
----
+2. **什么时候用**  
+   在什么场景下它是合适的选择？
 
-## Context
+3. **怎么调用**  
+   输入参数、调用格式、前置条件是什么？
 
-- Current git status: !`git status`
-- Current git diff: !`git diff HEAD`
-- Current branch: !`git branch --show-current`
-- Recent commits: !`git log --oneline -10`
+4. **返回什么**  
+   输出是文本、结构化数据、状态信号，还是副作用结果？
 
-## Your task
+5. **风险是什么**  
+   这个工具会不会改外部状态？是否需要确认？
 
-Based on the above changes, create a single git commit.
+如果这五件事说不清，工具系统大概率会烂。
 
-Stage and create the commit using a single message.
-Do not send any other text or messages besides these tool calls.
-```
-
-### 关键设计
-
-**1. 工具白名单**
-```yaml
-allowed-tools:
-  - Bash(git add:*)      # 暂存文件
-  - Bash(git status:*)   # 查看状态
-  - Bash(git commit:*)   # 创建提交
-```
-
-**为什么限制工具？**
-- 安全性：只允许 Git 操作
-- 可预测性：不会执行其他命令
-- 可审计性：所有操作都在白名单中
+因为模型不是靠读心术调用工具，它只能根据描述和上下文去猜。
 
 ---
 
-**2. 上下文注入**
+## 5.4 工具描述为什么比很多人想得更重要
 
-使用 `!` 语法自动执行命令并注入结果：
+### 5.4.1 模型是通过描述理解工具，不是通过源代码理解工具
 
-```markdown
-- Current git status: !`git status`
-```
+这是一个常被忽略的现实。
 
-等价于：
-```markdown
-- Current git status:
-  On branch main
-  Changes not staged for commit:
-    modified: src/index.js
-```
+在运行时，模型并不是先读工具实现源码，再决定怎么用。它通常先接触的是工具的接口定义和说明信息。
 
-**优势**：
-- 自动收集上下文
-- 无需手动执行命令
-- 结果直接可用
+所以工具描述如果写得差，就会直接导致：
+- 该用的时候不用
+- 不该用的时候乱用
+- 参数填错
+- 输出解释错
+- 明明有更合适的工具，却选了更笨的路径
 
----
+### 5.4.2 好工具描述的标准是什么
 
-**3. 原子化操作**
+一个好工具描述至少应该做到：
+- 能力边界明确
+- 输入输出明确
+- 适用场景明确
+- 不该怎么用也明确
 
-```markdown
-Stage and create the commit using a single message.
-```
+最糟糕的写法就是那种“万能型描述”：
+- 可以做很多事情
+- 适合多种场景
+- 灵活处理各类任务
 
-**为什么要求单次响应？**
-- 减少交互次数
-- 避免中间状态
-- 提高效率
+这种描述看起来很高级，实际上等于没说。
+
+好系统不靠模糊描述装聪明，而靠清晰边界减少误判。
 
 ---
 
-### 执行流程
+## 5.5 工具选择为什么是 Agent 里最容易做烂的一步
 
-```mermaid
-sequenceDiagram
-    participant User
-    participant Command
-    participant Git
+在真实任务里，很多失败并不是模型完全不懂任务，而是选错了动作。
 
-    User->>Command: /commit
-    Command->>Git: git status
-    Git-->>Command: 返回状态
-    Command->>Git: git diff HEAD
-    Git-->>Command: 返回 diff
-    Command->>Git: git branch --show-current
-    Git-->>Command: 返回分支名
-    Command->>Git: git log --oneline -10
-    Git-->>Command: 返回历史
-    Command->>Command: 分析更改，生成提交信息
-    Command->>Git: git add . && git commit -m "..."
-    Git-->>Command: 提交成功
-    Command-->>User: 显示提交哈希
-```
+比如明明应该：
+- 先读文件
+- 再定位定义
+- 再做局部修改
+- 最后跑检查
 
-### 提交信息生成
+结果系统却：
+- 一上来就直接改
+- 或者先跑了不必要的大命令
+- 或者重复搜索已经知道的内容
+- 或者用高风险工具去做低风险任务
 
-**Conventional Commit 格式**：
-```
-<type>(<scope>): <subject>
+这些问题本质上都不是“不会做”，而是“不会选”。
 
-<body>
+而工具选择一旦错了，后面整条链都会跟着歪。
 
-<footer>
-```
-
-**示例**：
-```bash
-# 修复 bug
-fix(auth): resolve login timeout issue
-
-- Increase timeout from 5s to 10s
-- Add retry logic for network errors
-
-Closes #123
-
-# 新功能
-feat(api): add user profile endpoint
-
-- GET /api/users/:id
-- Returns user profile data
-- Includes avatar URL
-
-# 重构
-refactor(database): optimize query performance
-
-- Use indexed queries
-- Reduce N+1 queries
-- Add connection pooling
-```
+所以在 Agent 里，工具选择其实就是一种动作层决策能力。
 
 ---
 
-## 5.4 /commit-push-pr - 提交并创建 PR
+## 5.6 工具不是越多越好，动作空间膨胀会把系统拖死
 
-### 命令定义
+很多人设计 Agent 的第一反应，就是尽可能给它更多工具。
 
-**文件**：`commands/commit-push-pr.md`
+表面上看，这像是在增强系统；实际上常常是在制造混乱。
 
-```markdown
----
-allowed-tools:
-  - Bash(git checkout --branch:*)
-  - Bash(git add:*)
-  - Bash(git status:*)
-  - Bash(git push:*)
-  - Bash(git commit:*)
-  - Bash(gh pr create:*)
-description: Commit, push, and open a PR
----
+因为工具越多，就意味着：
+- 候选动作越多
+- 判断成本越高
+- 误用概率越高
+- 重叠能力越多
+- 系统行为越不稳定
 
-## Context
+最后就会出现典型垃圾味：
+- 明明三步能做完，系统兜了一大圈
+- 同样任务每次走不同路径
+- 一点简单活，调用一堆没必要的能力
 
-- Current git status: !`git status`
-- Current git diff: !`git diff HEAD`
-- Current branch: !`git branch --show-current`
+所以工具系统的目标不是“覆盖所有可能性”，而是：
 
-## Your task
+> **为当前任务提供最小但足够的动作集合。**
 
-1. Create a new branch if on main
-2. Create a single commit
-3. Push the branch to origin
-4. Create a pull request using `gh pr create`
-5. Do all of the above in a single message
-```
-
-### 关键设计
-
-**1. 自动分支管理**
-
-```bash
-# 如果在 main 分支
-if [ "$(git branch --show-current)" = "main" ]; then
-  git checkout -b feature/new-feature
-fi
-```
-
-**为什么需要？**
-- 避免直接提交到 main
-- 保持 main 分支干净
-- 符合 Git Flow 最佳实践
+这才叫好品味。
 
 ---
 
-**2. GitHub CLI 集成**
+## 5.7 工具层必须有边界，不然早晚出事故
 
-```bash
-gh pr create \
-  --title "feat: add new feature" \
-  --body "Description of changes" \
-  --base main
-```
+工具一旦具备真实副作用，边界问题就不能再装死。
 
-**为什么用 `gh` CLI？**
-- 无需打开浏览器
-- 自动填充 PR 信息
-- 支持模板和标签
+至少要区分三类工具：
 
----
+### 5.7.1 只读工具
 
-**3. 原子化操作**
+例如：
+- 读文件
+- 搜索内容
+- 查定义
+- 看网页内容
 
-```markdown
-Do all of the above in a single message
-```
+这类工具风险相对低，主要问题是信息质量和范围控制。
 
-**执行顺序**：
-1. 检查当前分支
-2. 如果在 main，创建新分支
-3. 暂存并提交
-4. 推送到 origin
-5. 创建 PR
+### 5.7.2 可写工具
 
-**为什么要原子化？**
-- 减少失败点
-- 避免部分完成状态
-- 提高成功率
+例如：
+- 改文件
+- 写文件
+- 编辑配置
+- 更新状态记录
 
----
+这类工具开始改变系统状态，必须控制修改范围。
 
-### 执行流程
+### 5.7.3 高风险工具
 
-```mermaid
-sequenceDiagram
-    participant User
-    participant Command
-    participant Git
-    participant GitHub
+例如：
+- 执行 shell 命令
+- 推送远端
+- 删除文件
+- 修改外部服务
+- 触发共享基础设施动作
 
-    User->>Command: /commit-push-pr
-    Command->>Git: git branch --show-current
-    Git-->>Command: main
-    Command->>Git: git checkout -b feature/new
-    Git-->>Command: 切换成功
-    Command->>Git: git add . && git commit -m "..."
-    Git-->>Command: 提交成功
-    Command->>Git: git push origin feature/new
-    Git-->>Command: 推送成功
-    Command->>GitHub: gh pr create
-    GitHub-->>Command: PR URL
-    Command-->>User: 显示 PR 链接
-```
+这类工具如果没有确认、审计或权限限制，系统迟早翻车。
 
-### PR 信息生成
+所以一个成熟 Agent 的工具层，绝不只是能力列表，而是**能力列表加风险分级**。
 
-**标题**：
-```
-feat(api): add user profile endpoint
-```
-
-**描述**：
-```markdown
-## Changes
-- Add GET /api/users/:id endpoint
-- Return user profile data
-- Include avatar URL
-
-## Testing
-- Unit tests added
-- Integration tests passed
-
-## Related Issues
-Closes #123
-```
+再往前走一步，这里其实已经能看到第 12 章要集中展开的那条母线：工具权限、确认策略和可见能力，本质上都属于运行时控制面的一部分；只是这一章先从动作接口层看它。
 
 ---
 
-## 5.5 /clean_gone - 清理过期分支
+## 5.8 为什么工具输出也必须被设计，而不是随便返回一坨文本
 
-### 命令定义
+工具设计里最容易偷懒的地方，是输出。
 
-**文件**：`commands/clean_gone.md`
+很多人觉得只要工具能返回结果就行。错。
 
-```markdown
----
-description: Cleans up all git branches marked as [gone]
----
+如果工具输出：
+- 太乱
+- 太长
+- 没结构
+- 没重点
+- 信号和噪音混在一起
 
-## Your Task
+那后续模型判断就会明显变差。
 
-Execute the following bash commands to clean up stale local branches.
+### 5.8.1 好输出的标准
 
-## Commands to Execute
+一个好工具输出，至少应该满足：
+- 结果边界清楚
+- 关键字段稳定
+- 错误信号可识别
+- 便于下一轮决策接入
 
-1. List branches to identify [gone] status
-   ```bash
-   git branch -v
-   ```
+比如：
+- 成功还是失败要清楚
+- 返回的是路径列表还是全文内容要清楚
+- 错误原因要能被后续判断使用
+- 不能让模型还得先猜“这段输出到底是什么意思”
 
-2. Identify worktrees that need to be removed
-   ```bash
-   git worktree list
-   ```
+### 5.8.2 为什么反馈质量直接受工具输出影响
 
-3. Remove worktrees and delete [gone] branches
-   ```bash
-   git branch -v | grep '\[gone\]' | sed 's/^[+* ]//' | awk '{print $1}' | while read branch; do
-     echo "Processing branch: $branch"
-     worktree=$(git worktree list | grep "\\[$branch\\]" | awk '{print $1}')
-     if [ ! -z "$worktree" ]; then
-       echo "  Removing worktree: $worktree"
-       git worktree remove --force "$worktree"
-     fi
-     echo "  Deleting branch: $branch"
-     git branch -D "$branch"
-   done
-   ```
-```
+闭环里，反馈不是凭空产生的。它很多时候就是工具输出的再解释。
 
-### 什么是 [gone] 分支？
+如果工具输出质量差，反馈层就会失真；反馈层一失真，后面整轮判断都会变垃圾。
 
-**场景**：
-```bash
-# 在 GitHub 上合并并删除分支
-# 本地执行 git fetch
-git fetch --prune
-
-# 查看分支状态
-git branch -v
-# * main                abc1234 Latest commit
-#   feature/old-feature def5678 [gone] Old feature
-#   feature/new-feature ghi9012 New feature
-```
-
-**[gone] 标记**：
-- 远程分支已删除
-- 本地分支仍存在
-- 需要手动清理
+所以工具输出其实是闭环质量的一部分，不是实现细节。
 
 ---
 
-### worktree 处理
+## 5.10 用 Claude Code 看一个现实中的工具分层样本
 
-**什么是 worktree？**
+Claude Code 这个案例很适合看工具层，因为它没有把动作能力做成一坨“万能执行器”。
 
-Git worktree 允许同时检出多个分支到不同目录：
+当前环境里，Read、Edit、Write、Grep、Glob、Bash、Agent、AskUserQuestion 这些能力是分开的。这个分法不是文档好看，而是在强迫系统承认几件事：
+- **读和写不是一回事**
+- **搜索和执行不是一回事**
+- **本地改动和外部访问不是一回事**
+- **自动继续和请求用户确认不是一回事**
 
-```bash
-# 主仓库在 /project
-cd /project
+再看 `examples/settings/settings-strict.json:1`，工具层上面还压了一层显式治理：
+- `ask: ["Bash"]`
+- `deny: ["WebSearch", "WebFetch"]`
+- `allowManagedPermissionRulesOnly: true`
+- `allowManagedHooksOnly: true`
 
-# 创建 worktree
-git worktree add ../project-feature feature/new
+这里能直接抽出几条非常硬的工具设计规则：
+- **工具要先按动作性质分层，再谈开放范围**
+- **高风险工具必须比低风险工具更难触发**
+- **能力存在，不等于默认放开**
+- **工具治理也要可配置、可审查、可复制，不能靠口头纪律**
 
-# 现在有两个工作目录
-# /project (main 分支)
-# /project-feature (feature/new 分支)
-```
+如果再结合 `plugins/README.md:48` 的插件结构，你会发现工具层还被放进了更大的系统分工里：
+- `commands/` 给触发入口
+- `agents/` 组织执行角色
+- `hooks/` 在生命周期节点拦截
+- `.mcp.json` 接入外部能力
 
-**为什么需要特殊处理？**
+这说明好工具系统不是“给模型挂更多 API”，而是让动作接口在整套系统里各就各位。真正成熟的设计思路是：
+- **工具回答“能做什么动作”**
+- **命令回答“从哪触发”**
+- **Hook 回答“在哪拦截”**
+- **Agent 回答“谁来执行”**
+- **配置回答“这次运行放到什么边界”**
 
-```bash
-# 直接删除分支会失败
-git branch -D feature/new
-# error: Cannot delete branch 'feature/new' checked out at '/project-feature'
-
-# 必须先删除 worktree
-git worktree remove /project-feature
-git branch -D feature/new
-```
-
----
-
-### 清理流程
-
-```mermaid
-graph TD
-    A[开始清理] --> B[列出所有分支]
-    B --> C{有 [gone] 分支?}
-    C -->|否| D[无需清理]
-    C -->|是| E[列出 worktree]
-    E --> F[遍历 [gone] 分支]
-    F --> G{有 worktree?}
-    G -->|是| H[删除 worktree]
-    G -->|否| I[删除分支]
-    H --> I
-    I --> J{还有分支?}
-    J -->|是| F
-    J -->|否| K[清理完成]
-
-    style D fill:#90EE90
-    style K fill:#90EE90
-```
-
-### 代码分析
-
-**1. 识别 [gone] 分支**
-
-```bash
-git branch -v | grep '\[gone\]'
-#   feature/old-feature def5678 [gone] Old feature
-```
-
-**2. 提取分支名**
-
-```bash
-sed 's/^[+* ]//'  # 移除前缀（+, *, 空格）
-awk '{print $1}'  # 提取第一列（分支名）
-```
-
-**前缀含义**：
-- `*` - 当前分支
-- `+` - 有 worktree 的分支
-- ` ` - 普通分支
-
-**3. 查找 worktree**
-
-```bash
-worktree=$(git worktree list | grep "\\[$branch\\]" | awk '{print $1}')
-```
-
-**4. 删除 worktree**
-
-```bash
-if [ ! -z "$worktree" ]; then
-  git worktree remove --force "$worktree"
-fi
-```
-
-**5. 删除分支**
-
-```bash
-git branch -D "$branch"
-```
+这才叫工具系统。否则所谓工具层，最后通常只会退化成一堆没有风险分级、没有语义边界、没有治理壳层的裸 API。
 
 ---
 
-## 5.6 工具白名单设计
+## 5.11 本章小结
 
-### 为什么需要白名单？
+这一章真正想讲清的是：工具不是外挂，而是 Agent 的动作接口层；但动作接口层要是没分层、没描述、没风险边界，那它就只是在制造事故入口。
 
-**安全性**：
-```yaml
-# ❌ 不好：允许所有 Bash 命令
-allowed-tools:
-  - Bash
+你现在应该记住六件事：
 
-# ✅ 好：只允许特定 Git 命令
-allowed-tools:
-  - Bash(git add:*)
-  - Bash(git commit:*)
-```
+1. **工具让系统第一次真正具备干预外部世界的能力。**
+2. **“接上工具”很廉价，真正难的是把工具系统设计清楚。**
+3. **好工具至少要说清能力、适用时机、调用方式、返回形式和风险。**
+4. **工具选择本身就是 Agent 的动作层决策能力。**
+5. **成熟工具层一定包含风险分级，而不是只给能力列表。**
+6. **工具层不是孤岛，它必须和入口、Hook、Agent、配置一起形成完整动作结构。**
 
-**可预测性**：
-- 用户知道命令会做什么
-- 不会执行意外操作
-- 易于审计
+下一章我们继续往下走，把另一个最容易被混掉的三件事拆开：记忆、状态与上下文到底分别是什么。
 
----
-
-### 白名单语法
-
-**格式**：`Bash(command:pattern)`
-
-**示例**：
-```yaml
-# 允许所有 git add 命令
-Bash(git add:*)
-
-# 允许特定参数
-Bash(git commit:-m)
-
-# 允许多个命令
-Bash(git status:*)
-Bash(git diff:*)
-```
-
----
-
-### 三个命令的白名单对比
-
-| 命令 | 白名单 | 原因 |
-|------|--------|------|
-| `/commit` | `git add`, `git status`, `git commit` | 只需要本地操作 |
-| `/commit-push-pr` | + `git checkout`, `git push`, `gh pr create` | 需要远程操作 |
-| `/clean_gone` | `git branch`, `git worktree` | 需要分支管理 |
-
----
-
-## 5.7 实践：使用 commit-commands
-
-### 任务 1：创建本地提交
-
-**场景**：修复了一个 bug，想创建提交但不推送
-
-```bash
-# 修改代码
-vim src/auth.js
-
-# 创建提交
-/commit
-```
-
-**预期输出**：
-```
-✓ Created commit: fix(auth): resolve login timeout issue (abc1234)
-
-Changes:
-- src/auth.js
-
-Commit message:
-fix(auth): resolve login timeout issue
-
-- Increase timeout from 5s to 10s
-- Add retry logic for network errors
-```
-
----
-
-### 任务 2：创建 PR
-
-**场景**：完成新功能，需要代码审查
-
-```bash
-# 修改代码
-vim src/api/users.js
-
-# 提交并创建 PR
-/commit-push-pr
-```
-
-**预期输出**：
-```
-✓ Created branch: feature/user-profile-endpoint
-✓ Created commit: feat(api): add user profile endpoint (def5678)
-✓ Pushed to origin: feature/user-profile-endpoint
-✓ Created PR: https://github.com/user/repo/pull/123
-
-PR Title: feat(api): add user profile endpoint
-
-PR Description:
-## Changes
-- Add GET /api/users/:id endpoint
-- Return user profile data
-- Include avatar URL
-```
-
----
-
-### 任务 3：清理过期分支
-
-**场景**：合并了多个 PR，需要清理本地分支
-
-```bash
-# 更新远程分支状态
-git fetch --prune
-
-# 清理过期分支
-/clean_gone
-```
-
-**预期输出**：
-```
-Found 3 branches marked as [gone]:
-- feature/old-feature-1
-- feature/old-feature-2
-- feature/old-feature-3
-
-Processing branch: feature/old-feature-1
-  No worktree found
-  Deleting branch: feature/old-feature-1
-  ✓ Deleted
-
-Processing branch: feature/old-feature-2
-  Removing worktree: /path/to/worktree
-  ✓ Worktree removed
-  Deleting branch: feature/old-feature-2
-  ✓ Deleted
-
-Processing branch: feature/old-feature-3
-  No worktree found
-  Deleting branch: feature/old-feature-3
-  ✓ Deleted
-
-Summary: Cleaned up 3 branches (1 with worktree)
-```
-
----
-
-## 5.8 架构洞察
-
-### 洞察 1：原子化操作的价值
-
-**为什么要求单次响应？**
-
-**传统方式**（多次交互）：
-```
-User: /commit
-AI: 我看到你修改了 src/auth.js，要创建提交吗？
-User: 是的
-AI: 提交信息是什么？
-User: fix(auth): resolve timeout
-AI: 好的，正在创建提交...
-```
-
-**commit-commands 方式**（单次响应）：
-```
-User: /commit
-AI: [直接执行所有操作]
-✓ Created commit: fix(auth): resolve timeout (abc1234)
-```
-
-**Linus 式思考**：
-> "交互是特殊情况。好的工具消除特殊情况。用户说'提交'，就应该直接提交，不要问东问西。"
-
-**优势**：
-- 减少交互次数（5 次 → 1 次）
-- 避免中间状态（部分完成）
-- 提高效率（秒级完成）
-
----
-
-### 洞察 2：上下文注入的设计
-
-**为什么用 `!` 语法？**
-
-**传统方式**（手动执行）：
-```markdown
-## Context
-
-Please run these commands first:
-1. git status
-2. git diff HEAD
-3. git branch --show-current
-
-Then create a commit based on the output.
-```
-
-**commit-commands 方式**（自动注入）：
-```markdown
-## Context
-
-- Current git status: !`git status`
-- Current git diff: !`git diff HEAD`
-- Current branch: !`git branch --show-current`
-```
-
-**Linus 式思考**：
-> "为什么要让用户手动执行命令？系统应该自动收集上下文。"
-
-**优势**：
-- 自动化：无需手动执行
-- 一致性：每次都收集相同的上下文
-- 可靠性：不会遗漏信息
-
----
-
-### 洞察 3：worktree 的复杂性
-
-**为什么需要特殊处理？**
-
-**Git 的设计**：
-- 一个分支只能被一个工作目录检出
-- worktree 允许多个工作目录
-- 删除分支前必须先删除 worktree
-
-**Linus 式思考**：
-> "这不是特殊情况，这是 Git 的设计。worktree 是一等公民，必须正确处理。"
-
-**实现**：
-1. 检测分支是否有 worktree（`+` 前缀）
-2. 查找 worktree 路径
-3. 先删除 worktree
-4. 再删除分支
-
-**为什么不简化？**
-- Git 不允许简化（会报错）
-- 必须遵循 Git 的规则
-- 正确处理比简化更重要
-
----
-
-## 5.9 小结
-
-### 核心要点
-
-1. **三个命令**：
-   - `/commit` - 创建本地提交
-   - `/commit-push-pr` - 提交 + 推送 + PR
-   - `/clean_gone` - 清理过期分支
-
-2. **工具白名单**：
-   - 限制允许的 Git 命令
-   - 提高安全性和可预测性
-   - 易于审计
-
-3. **原子化操作**：
-   - 单次响应完成所有步骤
-   - 减少交互次数
-   - 避免中间状态
-
-4. **worktree 处理**：
-   - 检测 `+` 前缀
-   - 先删除 worktree
-   - 再删除分支
-
-### 与其他章节的关联
-
-- **第 2 章**：理解了命令的概念，现在看到具体实现
-- **第 3 章**：理解了工具白名单，commit-commands 使用白名单限制操作
-- **第 4 章**：hookify 使用 Hook 拦截，commit-commands 使用命令封装
-- **第 7 章**：code-review 也使用命令，但更复杂（多 Agent 协作）
-
-### 延伸阅读
-
-- [plugins/commit-commands/CLAUDE.md](/plugins/commit-commands/CLAUDE) - commit-commands 文档
-- [Git Worktree 文档](https://git-scm.com/docs/git-worktree) - 官方文档
-- [Conventional Commits](https://www.conventionalcommits.org/) - 提交信息规范
-
----
-
-## 下一章
-
-[第 6 章：security-guidance - 安全检查 Hook](/docs/part2/chapter06) - 学习安全检查的实现，理解 9 种安全模式的检测逻辑。

@@ -1,441 +1,307 @@
----
-title: "第15章：GitHub 自动化与 CI/CD"
-description: "Claude Code 源码解析 - 第15章：GitHub 自动化与 CI/CD"
-contentType: theory
-series: claude-code
-contentId: claude-code-ch15
-shortTitle: "第15章：GitHub 自动化与 CI/CD"
-summary: "Claude Code 源码解析：第15章：GitHub 自动化与 CI/CD"
-difficulty: intermediate
-estimatedTime: 30-45 分钟
-learningGoals:
-  - 理解本章核心实现原理
-  - 掌握相关设计模式
-prerequisites:
-  - 了解 AI Agent 基本概念
-recommendedNext: []
-practiceLinks: []
-searchTags:
-  - claude-code
-  - 源码解析
-navigationLabel: "第15章：GitHub 自动化与 CI/CD"
-entryMode: read-first
-roleDescription: 想深入理解 Claude Code 架构的工程师
----
+# 第 15 章：交互承载层不是界面皮肤，而是 Agent 的协作表面
 
-
-# 第15章：GitHub 自动化与 CI/CD - 工程化基础设施
-
-## 本章导读
-
-**仓库路径**：`.github/workflows/`、`scripts/`、`.claude/commands/`
-
-**系统职责**：
-- 12 个 GitHub 工作流自动化 CI/CD 流程
-- 5 个 TypeScript 脚本处理文档生成和验证
-- 3 个自定义命令提供项目级操作
-
-**能学到什么**：
-- Claude Code 项目的 CI/CD 架构设计
-- 自动化文档生成的实现模式
-- 自定义命令（Custom Commands）的项目级应用
-- 工程化基础设施的最佳实践
+> 本章目标：讲清 TUI、Web、Desktop 这些交互承载层在 Agent 系统里真正负责什么，以及为什么 Agent 界面的核心从来不只是组件排版，而是任务状态、流式反馈和 human-in-the-loop 的承载。  
+> 本章对应总纲：`docs/ebook-outline.md` 中“第 15 章正文写作提纲（2026-03-31 归档）”。
 
 ---
 
-## 15.1 整体架构
+## 15.1 为什么 Agent 的界面问题不能被理解成“做个前端”
 
-### 三层自动化体系
+很多人一说交互层，第一反应还是传统软件那套：
+- 页面怎么排
+- 按钮放哪
+- 列表怎么画
+- 主题色怎么选
 
-```
-层 1：GitHub Actions（云端自动化）
-├── 12 个工作流
-├── 触发：push/PR/schedule/手动
-└── 职责：CI/CD、文档部署、质量检查
+这些当然都属于界面问题，但对 Agent 来说，这只碰到了表皮。
 
-层 2：TypeScript 脚本（本地自动化）
-├── 5 个脚本
-├── 触发：手动执行或 CI 调用
-└── 职责：文档生成、数据处理、验证
+因为 Agent 不是一个一次点击、一次返回的系统。
 
-层 3：自定义命令（Claude Code 集成）
-├── 3 个命令
-├── 触发：/命令名
-└── 职责：项目级操作、快捷工作流
-```
+它经常会：
+- 长时间运行
+- 中途切换阶段
+- 调用外部能力
+- 不断返回新信息
+- 在关键处停下来等用户确认
+- 允许用户中途打断、补充、改方向
 
----
+所以 Agent 的界面真正要承载的，不只是视觉元素，而是：
 
-## 15.2 GitHub Actions 工作流
-
-### 工作流分类
-
-```
-文档相关（4 个）：
-├── deploy-docs.yml          # 部署 VitePress 文档站
-├── generate-docs.yml        # 自动生成文档
-├── validate-docs.yml        # 验证文档格式
-└── update-changelog.yml     # 更新 CHANGELOG
-
-质量检查（4 个）：
-├── lint.yml                 # 代码规范检查
-├── type-check.yml           # TypeScript 类型检查
-├── test.yml                 # 运行测试套件
-└── security-scan.yml        # 安全扫描
-
-插件管理（2 个）：
-├── validate-plugins.yml     # 验证所有插件配置
-└── plugin-registry.yml      # 更新插件注册表
-
-发布流程（2 个）：
-├── release.yml              # 创建发布版本
-└── publish.yml              # 发布到 Marketplace
-```
-
-### deploy-docs.yml 详解
-
-```yaml
-name: Deploy VitePress Docs
-
-on:
-  push:
-    branches: [main]
-  workflow_dispatch:
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-      - run: pnpm install
-      - run: pnpm docs:build
-      - uses: actions/deploy-pages@v4
-```
-
-### validate-plugins.yml 详解
-
-```yaml
-name: Validate Plugins
-
-on:
-  push:
-    paths:
-      - 'plugins/**'
-  pull_request:
-    paths:
-      - 'plugins/**'
-
-jobs:
-  validate:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - run: node scripts/validate-plugins.ts
-```
+> **用户和一个持续运行中的系统如何协作。**
 
 ---
 
-## 15.3 TypeScript 脚本
+## 15.2 为什么 Agent 天然需要比传统应用更强的过程可见性
 
-### 5 个脚本的职责
+传统 CRUD 应用里，很多时候用户只关心结果。
 
-```
-scripts/
-├── generate-index.ts        # 生成插件索引
-├── validate-plugins.ts      # 验证插件配置
-├── generate-docs.ts         # 生成文档内容
-├── update-changelog.ts      # 更新变更日志
-└── check-versions.ts        # 检查依赖版本
-```
+但 Agent 任务往往不行。
 
-### generate-index.ts
+因为用户通常还关心：
+- 它现在在干什么
+- 为什么卡住了
+- 刚才做了哪些动作
+- 现在是不是在等我
+- 我还能不能改主意
+- 这一步有没有风险
 
-```typescript
-// 功能：扫描所有插件，生成 .claude/index.json
-// 输入：plugins/ 目录
-// 输出：.claude/index.json
+这说明 Agent 的交互层必须把“过程”暴露出来，而不只是把“结果”端出来。
 
-interface PluginIndex {
-  plugins: PluginEntry[];
-  lastUpdated: string;
-  totalCount: number;
-}
+如果过程不可见，用户很快就会把系统理解成：
+- 要么在瞎跑
+- 要么在卡死
+- 要么在偷偷做不该做的事
 
-interface PluginEntry {
-  name: string;
-  path: string;
-  version: string;
-  commands: string[];
-  agents: string[];
-  skills: string[];
-  hooks: string[];
-}
-```
-
-### validate-plugins.ts
-
-```typescript
-// 功能：验证所有插件的配置正确性
-// 检查项：
-// 1. plugin.json 格式
-// 2. 引用的文件是否存在
-// 3. 命令/Agent/技能的 frontmatter 格式
-// 4. Hook 脚本的可执行性
-
-// 输出：验证报告（成功/失败/警告）
-```
-
-### generate-docs.ts
-
-```typescript
-// 功能：从插件代码自动生成文档
-// 输入：plugins/ 目录中的所有文件
-// 输出：docs/ 目录中的 markdown 文件
-
-// 生成内容：
-// - 插件概览
-// - 命令参考
-// - Agent 列表
-// - 技能目录
-```
+所以好的交互承载层，本质上是在建立过程信任。
 
 ---
 
-## 15.4 自定义命令
+## 15.3 交互承载层真正要承载的，通常有四类东西
 
-### 3 个项目级命令
+### 15.3.1 当前任务状态
 
-```
-.claude/commands/
-├── update-docs.md           # 更新项目文档
-├── validate-all.md          # 验证所有插件
-└── release-prep.md          # 发布准备检查
-```
+这是最基础的。
 
-### /update-docs 命令
+用户至少要能知道：
+- 当前任务是什么
+- 任务进行到哪一阶段
+- 当前步骤是什么
+- 是否完成、失败、暂停或等待中
 
-```markdown
----
-description: 更新项目文档，包括 CLAUDE.md 和插件索引
-allowed-tools: Read, Write, Bash, Glob, Grep
----
+如果连状态都看不见，所谓协作基本就是空话。
 
-# 更新项目文档
+### 15.3.2 流式反馈
 
-## 执行步骤
+Agent 很多输出不是最后一锤子买卖，而是逐步产生的。
 
-1. 扫描所有插件目录
-2. 统计命令、Agent、技能、Hook 数量
-3. 更新根目录 CLAUDE.md 的统计数据
-4. 重新生成 .claude/index.json
-5. 验证更新结果
-```
+例如：
+- 正在搜索
+- 正在读取文件
+- 正在调用工具
+- 正在等待外部返回
+- 已发现新问题
+- 已完成某个子阶段
 
-### /validate-all 命令
+流式反馈的价值，不只是“让界面更活”。
 
-```markdown
----
-description: 验证所有插件配置的正确性
-allowed-tools: Read, Bash, Glob, Grep
----
+它真正解决的是：让用户知道系统还在可控地前进。
 
-# 验证所有插件
+### 15.3.3 人类介入点
 
-## 执行步骤
+前面已经讲过 human-in-the-loop。
 
-1. 运行 scripts/validate-plugins.ts
-2. 检查每个插件的 plugin.json
-3. 验证所有引用文件存在
-4. 报告验证结果
-```
+到了交互层，这件事必须有明确落点：
+- 哪里可以确认
+- 哪里可以拒绝
+- 哪里可以补信息
+- 哪里可以改目标
+- 哪里可以中断执行
 
-### /release-prep 命令
+如果这些入口不清晰，系统就会出现两个极端：
+- 该问时问不出来
+- 不该问时到处打断用户
 
-```markdown
----
-description: 准备发布，检查所有必要条件
-allowed-tools: Read, Bash, Glob, Grep, WebFetch
----
+### 15.3.4 产物与证据
 
-# 发布准备检查
+Agent 不是只输出一段话，它往往还会产出：
+- 文件修改
+- 报告
+- 日志
+- 搜索证据
+- 执行结果
 
-## 检查清单
-
-1. 所有插件验证通过
-2. CHANGELOG.md 已更新
-3. 版本号一致性
-4. 文档完整性
-5. 测试全部通过
-```
+交互层要做的，不只是显示“完成了”，还要让用户能看到：
+- 它到底完成了什么
+- 证据从哪来
+- 结果在哪
+- 哪些是建议，哪些是已执行动作
 
 ---
 
-## 15.5 CI/CD 流程设计
+## 15.4 为什么 TUI、Web、Desktop 只是不同承载壳，而不是不同系统本质
 
-### 完整的 CI/CD 流水线
+很多讨论会把 TUI、Web、Desktop 当成三种完全不同的系统。
 
-```
-代码提交
-    │
-    ▼
-┌─────────────────┐
-│  质量检查阶段    │
-│  - lint         │
-│  - type-check   │
-│  - test         │
-│  - security     │
-└────────┬────────┘
-         │ 通过
-         ▼
-┌─────────────────┐
-│  验证阶段        │
-│  - validate-    │
-│    plugins      │
-│  - validate-    │
-│    docs         │
-└────────┬────────┘
-         │ 通过
-         ▼
-┌─────────────────┐
-│  构建阶段        │
-│  - generate-    │
-│    docs         │
-│  - build-       │
-│    vitepress    │
-└────────┬────────┘
-         │ 成功
-         ▼
-┌─────────────────┐
-│  部署阶段        │
-│  - deploy-docs  │
-│  - update-      │
-│    changelog    │
-└─────────────────┘
-```
+其实对 Agent 来说，它们更像是三种不同壳层，底下承载的核心问题很接近：
+- 怎么展示任务状态
+- 怎么承载流式反馈
+- 怎么接住用户确认
+- 怎么暴露中间产物
+- 怎么处理中断和恢复
 
-### 触发策略
+它们的差异主要在交互条件上。
 
-```
-push to main：
-- 完整流水线
-- 自动部署文档
+### TUI 更擅长
+- 贴近终端工作流
+- 贴近开发者本地环境
+- 快速反馈与直接操作
 
-pull_request：
-- 质量检查 + 验证
-- 不部署
+### Web 更擅长
+- 远程访问
+- 多端共享
+- 更强的可视化组织
 
-schedule（每日）：
-- check-versions
-- security-scan
+### Desktop 更擅长
+- 本地能力与图形交互结合
+- 稳定的常驻使用体验
+- 与系统级能力更紧密集成
 
-workflow_dispatch（手动）：
-- release
-- publish
-```
+但不管壳层怎么换，Agent 交互层的本质任务都没变。
 
 ---
 
-## 15.6 工程化最佳实践
+## 15.5 为什么 Agent UI 必须围绕状态，而不是围绕消息堆叠
 
-### 1. 自动化优先
+很多系统一开始都偷懒，把 Agent 界面直接做成聊天窗口：
+- 一条用户消息
+- 一条助手回复
+- 再一条用户消息
+- 再一条助手回复
 
-```
-原则：能自动化的不手动做
-实践：
-- 文档从代码自动生成
-- 版本号自动更新
-- 变更日志自动维护
-```
+这在简单问答里没问题。
 
-### 2. 快速失败
+但任务一长，问题就来了。
 
-```
-原则：尽早发现问题
-实践：
-- 提交时运行 lint
-- PR 时运行完整检查
-- 合并前必须通过所有检查
-```
+因为消息堆叠天然不擅长表达这些东西：
+- 当前执行位置
+- 子任务结构
+- 未决事项
+- 风险动作等待确认
+- 产物列表
+- 执行时间线
 
-### 3. 可观测性
+所以 Agent UI 如果只剩消息流，很快就会把任务状态淹没。
 
-```
-原则：知道发生了什么
-实践：
-- 详细的工作流日志
-- 验证报告
-- 部署状态通知
-```
+> **聊天流可以承载对话，但很难独自承载复杂任务。**
 
-### 4. 幂等性
-
-```
-原则：重复执行结果相同
-实践：
-- 文档生成是幂等的
-- 索引更新是幂等的
-- 验证是幂等的
-```
+成熟 Agent 的交互层，通常都会逐渐从“纯聊天界面”演化成“聊天 + 状态视图 + 产物视图 + 控制入口”的组合。
 
 ---
 
-## 15.7 与插件系统的集成
+## 15.6 交互层为什么会反过来影响系统设计
 
-### 自动化如何支持插件生态
+这也是一个常被低估的事实。
 
-```
-插件开发者工作流：
-1. 创建新插件（使用 plugin-dev）
-2. 提交 PR
-3. CI 自动验证插件配置
-4. 合并后自动更新索引
-5. 文档自动生成和部署
-6. 插件在 Marketplace 可见
-```
+很多人以为界面只是后接一层展示。
 
-### 关键集成点
+其实不是。
 
-```
-scripts/generate-index.ts
-    ↓ 读取
-plugins/*/plugin.json
-    ↓ 生成
-.claude/index.json
-    ↓ 被读取
-Claude Code（插件发现）
-```
+因为一旦你认真设计交互层，就会反过来逼系统把这些东西说清楚：
+- 当前阶段到底叫什么
+- 哪些动作值得展示
+- 哪些状态需要结构化暴露
+- 哪些事件需要流出来
+- 哪些确认点必须可被 UI 捕获
+
+如果底层系统根本没有这些结构，UI 就只能瞎猜或者硬拼文本。
+
+所以交互层不是纯消费端，它会倒逼运行时模型更清晰。
 
 ---
 
-## 相关文件清单
+## 15.7 一个坏的 Agent 交互层通常会发出什么味道
 
-```
-.github/workflows/
-├── deploy-docs.yml
-├── generate-docs.yml
-├── validate-docs.yml
-├── update-changelog.yml
-├── lint.yml
-├── type-check.yml
-├── test.yml
-├── security-scan.yml
-├── validate-plugins.yml
-├── plugin-registry.yml
-├── release.yml
-└── publish.yml
+有几种味道，一看就知道设计没做透。
 
-scripts/
-├── generate-index.ts
-├── validate-plugins.ts
-├── generate-docs.ts
-├── update-changelog.ts
-└── check-versions.ts
+### 第一种：只有最终答案，没有过程
 
-.claude/commands/
-├── update-docs.md
-├── validate-all.md
-└── release-prep.md
-```
+用户只能看到“完成了”或“失败了”，完全不知道中间发生了什么。
+
+### 第二种：只有消息，没有状态
+
+所有信息都堆在聊天流里，任务一长就彻底失控。
+
+### 第三种：确认入口模糊
+
+系统需要用户拍板时，界面却没有清楚的确认/拒绝/修改入口。
+
+### 第四种：产物不可见
+
+系统说“已经处理好了”，但用户找不到文件、报告、修改结果或证据。
+
+### 第五种：中断和恢复没有设计
+
+任务可以跑很久，但用户无法取消、稍后继续或回看执行轨迹。
+
+这种界面表面上像 Agent，实质上只是给长任务套了个聊天壳。
+
+---
+
+## 15.8 用 Claude Code 看一个现实中的交互承载样本
+
+Claude Code 很适合拿来理解这一层，因为它并不只是“返回答案”。
+
+从当前仓库就能看到几个很具体的交互承载信号：
+- 根级 `package.json` 只有 `docs:dev`、`docs:build`、`docs:preview` 三个脚本，说明这个文档站本质上是一个独立壳层，而不是把交互逻辑和内容写死在同一处
+- `.vitepress/config.ts` 单独维护 `nav`、`sidebar`、`search`、`outline`、`editLink`、`lastUpdated`，说明“怎么让用户看见内容、定位内容、继续协作”本身就是一层独立结构
+- 同一个配置文件还用 `srcExclude` 主动排除 `agents/commands/skills/hooks/examples`，这说明交互层不是无脑展示全部内容，而是在替系统控制噪音和可见性
+- `docs/README.md` 把本地开发、构建、预览、部署拆开写，说明面向用户的可见界面背后其实依赖一整套交付路径
+
+你能明显看到它在交互上承载了几类东西：
+- 当前消息流
+- 工具调用反馈
+- 风险动作前确认
+- 任务和计划的独立追踪
+- 长会话中的上下文延续
+- 文档站里的导航、搜索、目录和最近更新时间这些协作辅助结构
+
+这说明一个现实里的 Agent 界面，真正要服务的不是文本展示，而是：
+- 任务推进
+- 状态透明
+- 风险可控
+- 用户介入
+- 信息检索与持续阅读
+
+界面是否花哨是次要的，协作面是否清楚才是关键。
+
+---
+
+## 15.9 什么时候你该认真设计交互承载层
+
+不是所有 Agent 原型一开始都要做很重的 UI。
+
+但只要出现这些信号，就说明不能再把界面只当聊天框了：
+- 任务明显变长
+- 有多个阶段需要展示
+- 中途需要用户确认或补充信息
+- 会生成多个产物或证据
+- 用户开始抱怨“不知道系统在干嘛”
+- 同一个任务需要被反复查看、回放、接续
+
+一旦这些信号出现，交互层就已经不只是表现层，而是系统能力的一部分。
+
+---
+
+## 15.10 一个好的 Agent 界面，不是更炫，而是更可协作
+
+最后把标准压缩一下。
+
+一个好的 Agent 交互承载层，不是动画更炫、组件更多、页面更像产品海报。
+
+它真正该做到的是：
+- 用户知道系统当前在干什么
+- 用户知道什么时候该自己介入
+- 用户知道系统做过什么、产出了什么
+- 用户知道如何打断、恢复、继续
+- 用户能在长任务里维持清晰心智模型
+
+所以交互层的目标，不是“好看”，而是：
+
+> **让用户能够和一个持续运行中的系统稳定协作。**
+
+---
+
+## 15.11 本章小结
+
+这一章真正想讲清的是：TUI、Web、Desktop 这些交互承载层不是 Agent 的外壳皮肤，而是用户与运行中系统协作的表面。它们真正要承载的是任务状态、流式反馈、人类介入点和可见产物。
+
+你现在应该记住六件事：
+
+1. **Agent 的界面问题，本质上不是组件排版，而是协作承载。**
+2. **Agent 天然比传统应用更需要过程可见性。**
+3. **任务状态、流式反馈、人类介入点和产物证据，是交互层的四个核心承载对象。**
+4. **TUI、Web、Desktop 只是不同壳层，底层交互本质很接近。**
+5. **只靠聊天消息流，很难承载复杂 Agent 任务。**
+6. **好的交互层会反过来逼系统把状态、事件和确认点设计清楚。**
+
+下一章我们继续往下走，进入平台化问题：什么时候一个 Agent 应用不再只是单体功能集合，而开始长出稳定的扩展点，变成一个真正的平台。
