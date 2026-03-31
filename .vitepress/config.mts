@@ -135,6 +135,14 @@ export default withMermaid(defineConfig({
   description: siteDescription,
   lang: 'zh-CN',
   lastUpdated: true,
+  ignoreDeadLinks: [
+    /\/docs\//,
+    /\/plugins\//,
+    /\/scripts\//,
+    /\/\.github\//,
+    /\/\.devcontainer\//,
+    /^\/CLAUDE$/,
+  ],
   transformPageData(pageData) {
     const pageTitle = pageData.frontmatter.layout === 'home'
       ? siteTitle
@@ -197,11 +205,68 @@ export default withMermaid(defineConfig({
       { text: '学习路径', link: '/learning-paths/', activeMatch: '/learning-paths/' },
       { text: '实践篇', link: '/practice/', activeMatch: '/practice/' },
       { text: '中级篇', link: '/intermediate/', activeMatch: '/intermediate/' },
+      { text: 'Claude Code 拆解', link: '/claude-code/', activeMatch: '/claude-code/' },
       { text: '阅读地图', link: '/reading-map', activeMatch: '/reading-map' },
       { text: '本书仓库', link: bookRepository },
     ],
 
     sidebar: {
+      '/claude-code/': [
+        { text: '← 返回首页', link: '/' },
+        { text: '课程介绍', link: '/claude-code/' },
+        { text: '阅读指南', link: '/claude-code/reading-guide' },
+        {
+          text: '第一部分：基础架构',
+          collapsed: false,
+          items: [
+            { text: '第1章：项目总览', link: '/claude-code/chapter01' },
+            { text: '第2章：插件系统核心概念', link: '/claude-code/chapter02' },
+            { text: '第3章：开发环境与配置', link: '/claude-code/chapter03' },
+          ]
+        },
+        {
+          text: '第二部分：Hook 与自动化',
+          collapsed: false,
+          items: [
+            { text: '第4章：hookify - 规则引擎', link: '/claude-code/chapter04' },
+            { text: '第5章：commit-commands - Git 工作流自动化', link: '/claude-code/chapter05' },
+            { text: '第6章：security-guidance - 安全检查 Hook', link: '/claude-code/chapter06' },
+          ]
+        },
+        {
+          text: '第三部分：多 Agent 协作',
+          collapsed: false,
+          items: [
+            { text: '第7章：code-review - 多 Agent 协作审查', link: '/claude-code/chapter07' },
+            { text: '第8章：feature-dev - 7阶段开发工作流', link: '/claude-code/chapter08' },
+            { text: '第9章：pr-review-toolkit - 多维度专业审查工具包', link: '/claude-code/chapter09' },
+          ]
+        },
+        {
+          text: '第四部分：SessionStart Hook 应用',
+          collapsed: false,
+          items: [
+            { text: '第10章：ralph-wiggum - 自引用循环', link: '/claude-code/chapter10' },
+            { text: '第11章：输出风格插件', link: '/claude-code/chapter11' },
+            { text: '第12章：frontend-design 与 migration', link: '/claude-code/chapter12' },
+          ]
+        },
+        {
+          text: '第五部分：开发工具包',
+          collapsed: false,
+          items: [
+            { text: '第13章：agent-sdk-dev - Agent SDK 应用开发', link: '/claude-code/chapter13' },
+            { text: '第14章：plugin-dev - 插件开发工具包', link: '/claude-code/chapter14' },
+          ]
+        },
+        {
+          text: '第六部分：工程化基础设施',
+          collapsed: false,
+          items: [
+            { text: '第15章：GitHub 自动化与 CI/CD', link: '/claude-code/chapter15' },
+          ]
+        },
+      ],
       '/practice/': [
         { text: '← 返回首页', link: '/' },
         { text: '课程介绍', link: '/practice/' },
