@@ -1,0 +1,54 @@
+<h2>理论篇动画方向</h2>
+<p class="subtitle">只确认一个问题：你希望后续补的章节动画，主要采用哪些表达语言？可多选。</p>
+
+<div class="options" data-multiselect>
+  <div class="option" data-choice="flow" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>流程流转型</h3>
+      <p>强调输入、决策、输出和调用链路，适合工具系统、Provider、MCP、HTTP API 一类章节。</p>
+    </div>
+  </div>
+  <div class="option" data-choice="state" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>状态变化型</h3>
+      <p>强调状态切换、上下文变化、界面同步，适合会话管理、多端 UI、会话恢复这类章节。</p>
+    </div>
+  </div>
+  <div class="option" data-choice="structure" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>结构分层型</h3>
+      <p>强调模块边界、层次关系和职责拆分，适合核心组件、代码智能、进阶专题这类章节。</p>
+    </div>
+  </div>
+  <div class="option" data-choice="mixed" onclick="toggleSelect(this)">
+    <div class="letter">D</div>
+    <div class="content">
+      <h3>按章节混搭</h3>
+      <p>不追求统一风格，每章按内容选最合适的表现方式，差异最大，但实现也最分散。</p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>我当前的推荐</h3>
+  <div class="pros-cons">
+    <div class="pros">
+      <h4>推荐：A + B + C + D</h4>
+      <ul>
+        <li>保留统一的交互骨架，但每章呈现逻辑不同。</li>
+        <li>能避免“所有章节只是换文案”的假动画感。</li>
+        <li>适合你现在的要求：根据章节内容，各做各的动画。</li>
+      </ul>
+    </div>
+    <div class="cons">
+      <h4>代价</h4>
+      <ul>
+        <li>我需要逐章设计，不会是一次性批量套模板。</li>
+        <li>组件数量会更多，但我会控制在最小必要范围。</li>
+      </ul>
+    </div>
+  </div>
+</div>
