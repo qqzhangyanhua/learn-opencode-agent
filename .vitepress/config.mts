@@ -142,6 +142,7 @@ export default withMermaid(defineConfig({
     /\/\.github\//,
     /\/\.devcontainer\//,
     /^\/CLAUDE$/,
+    /restored-src/,
   ],
   transformPageData(pageData) {
     const pageTitle = pageData.frontmatter.layout === 'home'
@@ -205,7 +206,8 @@ export default withMermaid(defineConfig({
       { text: '学习路径', link: '/learning-paths/', activeMatch: '/learning-paths/' },
       { text: '实践篇', link: '/practice/', activeMatch: '/practice/' },
       { text: '中级篇', link: '/intermediate/', activeMatch: '/intermediate/' },
-      { text: 'Claude Code 拆解', link: '/claude-code/', activeMatch: '/claude-code/' },
+      { text: 'Claude Code 架构思维', link: '/claude-code/', activeMatch: '/claude-code/' },
+      { text: 'Claude Code 源码业务流', link: '/new-claude/', activeMatch: '/new-claude/' },
       { text: '阅读地图', link: '/reading-map', activeMatch: '/reading-map' },
       { text: '本书仓库', link: bookRepository },
     ],
@@ -263,6 +265,54 @@ export default withMermaid(defineConfig({
           items: [
             { text: '第19章：一个 Agent 系统怎样才算真的能长期活着', link: '/claude-code/chapter19' },
             { text: '第20章：把整本书收束成一个判断框架', link: '/claude-code/chapter20' },
+          ]
+        },
+      ],
+      '/new-claude/': [
+        { text: '← 返回首页', link: '/' },
+        { text: '课程介绍', link: '/new-claude/' },
+        { text: '阅读指南', link: '/new-claude/00-阅读指南' },
+        { text: '系统全景与学习路线', link: '/new-claude/01-系统全景与学习路线' },
+        {
+          text: 'Part 1：主业务流',
+          collapsed: false,
+          items: [
+            { text: '01 CLI 启动与入口分流', link: '/new-claude/part-1-主业务流/01-CLI-启动与入口分流' },
+            { text: '02 初始化、配置、环境、遥测', link: '/new-claude/part-1-主业务流/02-初始化-配置-环境-遥测' },
+            { text: '03 会话上下文与消息模型', link: '/new-claude/part-1-主业务流/03-会话上下文与消息模型' },
+            { text: '04 query：主循环如何驱动整个系统', link: '/new-claude/part-1-主业务流/04-query-主循环如何驱动整个系统' },
+            { text: '05 tool：编排、执行、权限、结果回填', link: '/new-claude/part-1-主业务流/05-tool-编排-执行-权限-结果回填' },
+            { text: '06 输出渲染、Stop Hooks、任务摘要、请求收尾', link: '/new-claude/part-1-主业务流/06-输出渲染-stop-hooks-任务摘要-请求收尾' },
+          ]
+        },
+        {
+          text: 'Part 2：扩展能力流',
+          collapsed: false,
+          items: [
+            { text: '07 MCP：如何把外部能力接进来', link: '/new-claude/part-2-扩展能力流/07-MCP-如何把外部能力接进来' },
+            { text: '08 Skills：如何把方法论接进主流程', link: '/new-claude/part-2-扩展能力流/08-Skills-如何把方法论接进主流程' },
+            { text: '09 Plugins / Hooks：如何做能力扩展', link: '/new-claude/part-2-扩展能力流/09-Plugins-Hooks-如何做能力扩展' },
+            { text: '10 权限、策略、安全边界', link: '/new-claude/part-2-扩展能力流/10-权限-策略-安全边界' },
+          ]
+        },
+        {
+          text: 'Part 3：远程协同流',
+          collapsed: false,
+          items: [
+            { text: '11 Bridge：远程控制主链路', link: '/new-claude/part-3-远程协同流/11-Bridge-远程控制主链路' },
+            { text: '12 Remote Session：会话接管与连接管理', link: '/new-claude/part-3-远程协同流/12-Remote-Session-与连接管理' },
+            { text: '13 后台会话与并发托管', link: '/new-claude/part-3-远程协同流/13-后台会话与并发托管' },
+            { text: '14 多代理、子任务与协同机制', link: '/new-claude/part-3-远程协同流/14-多代理-子任务-协同机制' },
+          ]
+        },
+        {
+          text: 'Part 4：附录',
+          collapsed: false,
+          items: [
+            { text: '90 源码地图：按目录反查系统能力', link: '/new-claude/part-4-附录/90-源码地图-按目录反查系统能力' },
+            { text: '91 核心文件索引', link: '/new-claude/part-4-附录/91-核心文件索引' },
+            { text: '92 关键类型与核心抽象', link: '/new-claude/part-4-附录/92-关键类型与核心抽象' },
+            { text: '99 每章练习题与复刻建议', link: '/new-claude/part-4-附录/99-每章练习题与复刻建议' },
           ]
         },
       ],

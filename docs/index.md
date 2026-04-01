@@ -15,8 +15,11 @@ hero:
       text: 中级篇
       link: /intermediate/
     - theme: alt
-      text: Claude Code 拆解
+      text: Claude Code 架构思维
       link: /claude-code/
+    - theme: alt
+      text: Claude Code 源码业务流
+      link: /new-claude/
     - theme: alt
       text: ⭐ Star 支持本书
       link: https://github.com/qqzhangyanhua/learn-opencode-agent
