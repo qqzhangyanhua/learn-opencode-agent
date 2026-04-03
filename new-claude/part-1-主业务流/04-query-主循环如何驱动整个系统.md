@@ -7,15 +7,33 @@
 
 这一章终于要进入 Claude Code 的真正心脏：`restored-src/src/query.ts`。
 
-如果说前面几章回答的是“系统如何启动、初始化、拿到上下文”，那这一章要回答的就是：
+## 概念前置（Agent 入门看这里）
 
-**当一次用户输入真正开始跑起来时，Claude Code 到底靠什么把它推进成一个可能多轮、可恢复、可压缩、可继续、可收尾的主循环？**
+你在前置知识章节写过一个 while 循环：调用模型 → 有工具就执行 → 没工具就结束。`query.ts` 里的 `queryLoop()` 就是这个循环的生产级版本。
 
-最重要的一句结论先写在前面：
+理解它之前，先认识一个 Python/JavaScript 里的概念：**AsyncGenerator（异步生成器）**。
 
-> **一个用户回合，在 Claude Code 里通常不等于一次 API 请求。**
+普通函数：调用一次，等待，返回一个结果。
 
-它更像是一轮不断推进的 `query loop`：先准备消息窗口，再流式调用模型；如果 assistant 发出 `tool_use`，就执行工具、回填结果，再继续下一轮；如果遇到上下文过长、输出被截断、stop hook 阻塞、token budget 继续等情况，还会进入专门的恢复或继续分支。
+```python
+def get_answer():
+    return “42”
+```
+
+AsyncGenerator：调用一次，可以在运行过程中”吐出”多个中间结果，然后继续跑。
+
+```python
+async def stream_answer():
+    yield “正在思考...”        # 第 1 次吐出
+    yield “调用了工具...”      # 第 2 次吐出
+    yield “最终答案是 42”      # 第 3 次吐出
+```
+
+Claude Code 用 AsyncGenerator 是因为：流式输出、工具调用事件、权限确认、进度更新，这些事件都要”边运行边往外传”——普通函数做不到这件事。
+
+> **源码对应**：`restored-src/src/query.ts` 里 `query()` 函数的签名是 `AsyncGenerator`，`queryLoop()` 是它的实现主体。
+
+**一个用户回合，在 Claude Code 里通常不等于一次 API 请求。** 它是一轮不断推进的循环：准备消息窗口 → 调用模型 → 有工具就执行回填再继续 → 没工具再判断是否真的结束。
 
 ## 1. 本章要解决什么问题
 
@@ -46,32 +64,20 @@
 
 ```mermaid
 flowchart TB
-  A["query(params)\n进入 queryLoop()"] --> B["初始化 State\nmessages / toolUseContext / tracking / turnCount"]
-  B --> C["buildQueryConfig() + productionDeps()"]
-  C --> D["从 compact boundary 后取消息\n得到 messagesForQuery"]
-
-  D --> E["tool result budget / snip / microcompact / context collapse / autocompact"]
-  E --> F["刷新 toolUseContext.messages\n准备 assistantMessages / toolResults / toolUseBlocks"]
-
-  F --> G["callModel(streaming)\n流式接收 assistant 消息"]
-  G --> H{"出现 tool_use ?"}
-
-  H -->|是| I["记录 toolUseBlocks\nneedsFollowUp = true"]
-  I --> J["StreamingToolExecutor 或 runTools()\n执行工具并生成 tool_result"]
-  J --> K["toolResults 追加回历史\n更新 newContext"]
-  K --> L["state = next\n继续下一轮 query"]
-
-  H -->|否| M{"需要恢复/继续 ?"}
-  M -->|prompt too long / reactive compact| N["改写 messages\n继续下一轮"]
-  M -->|max output tokens| O["注入 recovery meta message\n继续下一轮"]
-  M -->|stop hooks blocking| P["追加 blocking error\n继续下一轮"]
-  M -->|token budget continuation| Q["注入继续提示\n继续下一轮"]
-  M -->|都不需要| R["终止并返回 Terminal reason"]
+  A[“进入 queryLoop()”] --> B[“整理消息窗口\nmessagesForQuery”]
+  B --> C[“调用模型\n流式接收输出”]
+  C --> D{“有 tool_use ?”}
+  D -->|是| E[“执行工具\n生成 tool_result”]
+  E --> F[“追加结果到消息历史”]
+  F --> B
+  D -->|否| G{“需要继续 ?\nstop hooks / token budget”}
+  G -->|是| F
+  G -->|否| H[“返回终止原因\ncompleted / max_turns / ...”]
 ```
 
 一句话概括这张图：
 
-**`query.ts` 不是“单次采样函数”，而是“围绕一次用户回合不断重入自身的推进器”。**
+**`query.ts` 不是”单次采样函数”，而是”围绕一次用户回合不断重入自身的推进器”。**
 
 ## 3. 源码入口
 

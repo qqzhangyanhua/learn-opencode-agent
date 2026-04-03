@@ -4,9 +4,25 @@
 
 > “连上一个外部 server，把远端工具列表塞给模型就行了。”
 
-但真实源码做得远比这复杂。Claude Code 并不是把 MCP 当成“额外工具数组”，而是把它当成一条**可连接、可断开、可热更新、可治理的外部能力接入总线**。这一章就围绕这个问题展开：
+但真实源码做得远比这复杂。Claude Code 并不是把 MCP 当成”额外工具数组”，而是把它当成一条**可连接、可断开、可热更新、可治理的外部能力接入总线**。这一章就围绕这个问题展开：
 
 **Claude Code 到底怎样把外部 MCP server 接进来，同时又不把主流程写死在远端连接上？**
+
+## 概念前置（Agent 入门看这里）
+
+你写了一个 Agent，里面有工具：读文件、执行命令。现在你想让它也能查数据库、控制浏览器——但你不想把这些实现代码都写进 Agent 里。
+
+**MCP（Model Context Protocol）解决的就是这个问题**：用标准协议连接外部服务，Agent 不需要知道工具的内部实现，只需要知道”有这个工具、这是参数格式”。
+
+把 MCP server 理解成”外部工具服务”：运行在别处，暴露一组工具接口；Agent 连上去就能用这些工具，就像本地工具一样。
+
+但”连上去拉工具”只是最基础的一步。Claude Code 还要处理：
+
+- **连接不稳定**：server 可能断开、重连，工具列表可能更新
+- **能力不止工具**：一个 MCP server 还可能提供命令（commands）和资源（resources）
+- **不能绕过治理**：外部能力接进来后，仍然要经过本地权限系统，不能直接执行
+
+> **源码对应**：`restored-src/src/services/mcp/useManageMCPConnections.ts`（连接管理）、`restored-src/src/hooks/useMergedTools.ts`（并入主流程）。
 
 ## 1. 本章要解决什么问题
 
@@ -32,36 +48,20 @@
 
 ```mermaid
 flowchart TB
-  CFG["dynamicMcpConfig / 本地配置 / 插件注入配置"] --> MANAGER["MCPConnectionManager\n包裹 React 上下文"]
-  MANAGER --> HOOK["useManageMCPConnections()"]
-
-  HOOK --> RECON["reconnectMcpServerImpl()\n建立 / 重连 MCP client"]
-  RECON --> FETCH["fetchToolsForClient\nfetchCommandsForClient\nfetchResourcesForClient"]
-  FETCH --> STATE["updateServer(...)\n写回 AppState.mcp"]
-
-  STATE --> MCPSTATE["AppState.mcp\nclients / tools / commands / resources"]
-
-  MCPSTATE --> TOOLS["useMergedTools()\n合并内建工具 + MCP tools"]
-  MCPSTATE --> CMDS["useMergedCommands()\n合并初始 commands + MCP commands"]
-  MCPSTATE --> SKILL["SkillTool.getAllCommands()\n额外纳入 loadedFrom='mcp' 的 skills"]
-
-  TOOLS --> LOOP["query / runAgent\n下一轮可见新工具"]
-  CMDS --> UI["命令菜单 / Slash Command"]
-  SKILL --> LOOP
-
-  MCPSTATE --> LISTCHANGED["tools/prompts/resources list_changed"]
-  LISTCHANGED --> REFRESH["失效缓存并重新 fetch"]
-  REFRESH --> STATE
-
-  MCPSTATE --> CHANNEL["可选 channels / permission relay"]
-  CHANNEL --> CONTROL["作为扩展控制面参与通知与权限协同"]
+  CFG[“MCP server 配置”] --> CONN[“建立连接\nuseManageMCPConnections”]
+  CONN --> FETCH[“拉取能力\ntools / commands / resources”]
+  FETCH --> STATE[“写入 AppState.mcp\n本地能力镜像”]
+  STATE --> MERGE[“合并到统一工具池\nuseMergedTools”]
+  MERGE --> LOOP[“主循环可用这些工具”]
+  STATE --> UPDATE[“server 推送 list_changed”]
+  UPDATE --> FETCH
 ```
 
 读图时抓住三个点：
 
-1. `AppState.mcp` 不是日志仓库，而是**主流程真正消费的运行时状态**。
-2. MCP 接入的是一整组能力：`clients + tools + commands + resources`。
-3. “接进来”不是一次性动作，而是一个**可热更新的持续同步过程**。
+1. **`AppState.mcp` 是能力镜像**，主流程消费的是本地快照，不是实时远端查询。
+2. **接入的不止工具**，还有 commands 和 resources。
+3. **热更新是常态**，`list_changed` 通知触发重新拉取，能力镜像持续同步。
 
 ## 3. 源码入口
 

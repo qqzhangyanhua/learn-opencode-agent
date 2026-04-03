@@ -6,9 +6,44 @@
 
 核心结论先写在前面：**`cli.tsx` 本质是一个“轻量 bootstrap + 入口分流器”**。它用大量 fast-path 和动态 import，把“重初始化”推迟到必须发生时才发生，从而同时满足启动性能、模式多样性与可治理边界。
 
+## 概念前置（Agent 入门看这里）
+
+想象你写了一个命令行工具 `mytool`，它要同时支持三种场景：
+
+- `mytool --version`：立刻打印版本号就退出（不需要任何配置或 UI）
+- `mytool --daemon`：以服务进程方式在后台长跑（需要网络、日志、进程管理）
+- `mytool start`：打开交互界面（需要配置、权限、UI 全套基础设施）
+
+这三种模式的”初始化成本”差异极大。如果每次都全量初始化，`--version` 会慢得离谱；如果不区分，代码会成为一团乱麻。
+
+Claude Code 的解法是**入口分流**（early dispatch）：
+
+1. 先判断是否命中 fast-path（如 `--version`）——命中就直接执行后退出，不加载任何额外模块。
+2. 再判断是否命中特殊子命令（如 `daemon`、`bridge`）——命中就只加载该模式所需的子系统。
+3. 均未命中才走”常规交互路径”——此时才值得付出完整初始化的代价。
+
+```python
+# 伪代码：入口分流的核心逻辑
+args = sys.argv[1:]
+
+if “--version” in args:
+    print(VERSION)          # fast-path：零额外模块，直接退出
+    return
+
+if args[0] == “daemon”:
+    start_daemon(args)      # 特殊子命令：只加载 daemon 子系统
+    return
+
+# 常规路径：才值得初始化完整 CLI
+init_full_config()
+start_interactive_session()
+```
+
+> **对 Agent 学习者的意义**：这一章不涉及 AI 推理，但它决定了 Agent 主循环从哪条路径启动。读完这章你会知道：当你运行 `claude` 并输入第一句话时，系统在背后先做了哪些判断，才把你带到真正的 Agent 主循环入口。
+
 ## 1. 本章要解决什么问题
 
-如果你把 Claude Code 想象成“一个终端聊天程序”，那么一个直觉问题就是：CLI 入口不就是 `main()` 然后开始渲染 UI 吗？
+如果你把 Claude Code 想象成”一个终端聊天程序”，那么一个直觉问题就是：CLI 入口不就是 `main()` 然后开始渲染 UI 吗？
 
 但真实工程会遇到一组矛盾需求：
 

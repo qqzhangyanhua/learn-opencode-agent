@@ -1,6 +1,6 @@
 # 11 Bridge：远程控制主链路
 
-Part 1 讲清了“本地一次请求怎么跑完”，Part 2 讲清了“能力怎么扩进来”。
+Part 1 讲清了”本地一次请求怎么跑完”，Part 2 讲清了”能力怎么扩进来”。
 
 但 Claude Code 还有一个非常不一样的面向：
 
@@ -8,16 +8,25 @@ Part 1 讲清了“本地一次请求怎么跑完”，Part 2 讲清了“能力
 
 这个能力就是 `Bridge`。
 
-如果你从产品角度看，它对应的是：
+## 概念前置（Agent 入门看这里）
 
-- `claude remote-control`
-- Web 端 / 移动端继续接管这台机器上的代码会话
-- 会话断开后还能 resume
-- 多 session 模式下还能在同一台机器上同时跑多个远程会话
+你在本地跑着 Claude Code 做代码任务。现在你想从手机上看到这台机器上的 Agent 正在做什么，甚至发指令让它继续干活——但你不在机器旁边。
 
-如果你从源码角度看，它回答的是一个更工程化的问题：
+**Bridge 把你的本地 Claude Code 变成”可被远程调度的工作节点”**。
 
-**Claude Code 如何把“远端来活了”这件事，转成“本地生成或接管一个 CLI session 去跑”，并在中间维持 poll、ack、spawn、heartbeat、archive、deregister 这整套环境生命周期？**
+类比：Bridge 像把你的机器注册成外卖骑手。平台（服务端）知道你在线、能接单。有任务下来时（来自 Web 端或手机），Bridge 在本地接单并启动 Agent 执行，把进度同步回服务端。
+
+三个关键概念：
+
+| 概念 | 含义 |
+|---|---|
+| **environment** | 你注册给服务端的”这台机器” |
+| **work item** | 服务端下发的一次任务 |
+| **session** | 本地为这次任务启动的 Agent 执行上下文 |
+
+Bridge 做的事：注册 environment → 轮询 work item → 为每个 work 在本地启动 session → 任务完成后清理或保留以供 resume。
+
+> **源码对应**：`restored-src/src/bridge/bridgeMain.ts`（主流程）、`restored-src/src/bridge/SessionSpawner.ts`（session 生命周期）。
 
 ## 1. 本章要解决什么问题
 
@@ -48,32 +57,16 @@ Part 1 讲清了“本地一次请求怎么跑完”，Part 2 讲清了“能力
 
 ```mermaid
 flowchart TB
-  A["CLI fast path\nentrypoints/cli.tsx"] --> B["bridgeMain(args)"]
-  B --> C["解析参数\nspawnMode / capacity / --continue / --session-id"]
-  C --> D["createBridgeApiClient()"]
-  D --> E["registerBridgeEnvironment()"]
-  E --> F{"需要预创建 session ?"}
-  F -->|是| G["createBridgeSession()"]
-  F -->|否| H["直接进入 runBridgeLoop()"]
-  G --> H
-
-  H --> I["pollForWork()"]
-  I --> J{"拿到 work ?"}
-  J -->|否| K["按容量与心跳策略 sleep / heartbeat"]
-  K --> I
-
-  J -->|是| L["decodeWorkSecret()"]
-  L --> M{"work.data.type"}
-  M -->|healthcheck| N["acknowledgeWork() 后返回轮询"]
-  M -->|session| O["acknowledgeWork()"]
-  O --> P["buildSdkUrl / buildCCRv2SdkUrl"]
-  P --> Q["registerWorker() if CCR v2"]
-  Q --> R["SessionSpawner.spawn()"]
-  R --> S["activeSessions / timers / token refresh / UI status"]
-  S --> T["onSessionDone()"]
-  T --> U{"single-session 可恢复退出?"}
-  U -->|是| V["保留 session + environment\n输出 resume 提示"]
-  U -->|否| W["archiveSession() + deregisterEnvironment()"]
+  A["启动 Bridge\nbridgeMain()"] --> B["注册 environment\n告诉服务端这台机器在线"]
+  B --> C["轮询 work item\npollForWork()"]
+  C --> D{"拿到任务?"}
+  D -->|没有| E["等待 / 心跳\n继续轮询"]
+  E --> C
+  D -->|有| F["在本地启动 Agent\nSessionSpawner.spawn()"]
+  F --> G["session 运行中\n同步进度到服务端"]
+  G --> H{"任务完成\n能否 resume?"}
+  H -->|能| I["保留 session\n等待下次接管"]
+  H -->|不能| J["清理 session\n注销 environment"]
 ```
 
 这张图有两个重点：

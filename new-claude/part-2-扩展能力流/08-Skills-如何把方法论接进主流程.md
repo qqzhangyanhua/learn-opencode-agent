@@ -1,12 +1,37 @@
 # 08 Skills：如何把方法论接进主流程
 
-如果说 MCP 解决的是“把外部能力接进来”，那 Skills 解决的就是另一个问题：
+如果说 MCP 解决的是”把外部能力接进来”，那 Skills 解决的就是另一个问题：
 
-> Claude Code 怎样把一套方法论、流程模板、操作约束，以“可发现、可调用、可隔离执行”的方式注入主流程？
+> Claude Code 怎样把一套方法论、流程模板、操作约束，以”可发现、可调用、可隔离执行”的方式注入主流程？
 
-这也是为什么我不建议把 skill 简单理解成“提示词片段”。在源码里，skill 更像是一种**面向模型与子代理的流程化能力封装**。这一章要回答的核心问题就是：
+这也是为什么我不建议把 skill 简单理解成”提示词片段”。在源码里，skill 更像是一种**面向模型与子代理的流程化能力封装**。这一章要回答的核心问题就是：
 
 **Skills 到底如何从一份 Markdown，演化成主流程里真正可执行的能力？**
+
+## 概念前置（Agent 入门看这里）
+
+你在给 Agent 做代码 review 任务时，发现每次都要手动说：”先看整体架构，再看每个函数，再检查边界情况……”——重复且不一致。
+
+**Skills 解决的就是这个问题**：把”做某件事的正确方法”写成一个 Markdown 文件，Agent 调用这个 Skill 就自动按这套方法执行。
+
+Skill 不是普通 prompt 片段，它是”带结构元数据的方法论文件”：
+
+```markdown
+---
+description: 代码 review 专用流程
+allowed-tools: Read, Glob, Grep
+context: fork
+---
+
+先用 Glob 列出所有文件，再逐个 Read 查看...
+```
+
+- **Markdown 正文**：给人看，可读可编辑
+- **frontmatter**：给系统看，声明允许的工具、执行模式（inline 还是独立子 Agent）、适用场景
+
+当 `context: fork` 时，Skill 会在独立子 Agent 里执行，不污染主会话的上下文。
+
+> **源码对应**：`restored-src/src/skills/loadSkillsDir.ts`（加载解析）、`restored-src/src/tools/SkillTool/SkillTool.ts`（执行入口）。
 
 ## 1. 本章要解决什么问题
 
@@ -32,39 +57,20 @@ Claude Code 走的是第三条路：
 
 ```mermaid
 flowchart TB
-  subgraph SRC["Skill 来源"]
-    SD["/skills/ 目录\ngetSkillDirCommands()"]
-    PLG["插件 skills\ngetPluginSkills()"]
-    BND["bundled skills\ngetBundledSkills()"]
-    DYN["dynamic skills\ngetDynamicSkills()"]
-    MCP["MCP skills\n运行时挂在 AppState.mcp.commands"]
-  end
-
-  SD --> LOAD["commands.ts / getCommands()"]
-  PLG --> LOAD
-  BND --> LOAD
-  DYN --> LOAD
-
-  LOAD --> CMD["统一 Command 列表\nname / description / allowedTools / context ..."]
-  MCP --> SKTOOL["SkillTool.getAllCommands()"]
-  CMD --> SKTOOL
-
-  SKTOOL --> INVOKE["SkillTool 调用某个 prompt command"]
-  INVOKE --> PREP["createSkillCommand / prepareForkedCommandContext"]
-
-  PREP --> INLINE["inline 执行\n直接返回 prompt"]
-  PREP --> FORK["fork 执行\nrunAgent() 在隔离 agent 中运行"]
-
-  FORK --> PROGRESS["skill_progress / 子 agent 消息流"]
-  INLINE --> RESULT["返回 skill 文本结果"]
-  PROGRESS --> RESULT
+  A[“本地 /skills/ 目录\n插件 / bundled / MCP skills”] --> B[“统一 Command 列表\ngetCommands()”]
+  B --> C[“SkillTool 执行入口\ngetAllCommands()”]
+  C --> D{“context: fork ?”}
+  D -->|是| E[“runAgent()\n独立子 Agent 执行”]
+  D -->|否| F[“inline 执行\n直接返回 prompt 文本”]
+  E --> G[“结果回流主会话”]
+  F --> G
 ```
 
-这张图想表达的重点不是“来源很多”，而是：
+这张图想表达的重点：
 
-- **skill 最终会收敛成统一的 `Command` 抽象**；
-- **MCP skills 是运行时注入，和本地 skill 不在同一条启动加载链上**；
-- **执行 skill 时，Claude Code 可以选择 inline，也可以 fork 一个隔离 agent。**
+- **所有来源的 Skill 最终收敛成统一 `Command` 抽象**，SkillTool 只关心这个统一接口
+- **MCP skills 运行时注入**，和本地 skill 来自不同加载链，但最终都进同一个集合
+- **执行时可以选 inline 或 fork**，fork 意味着在独立子 Agent 里跑，不污染主会话
 
 ## 3. 源码入口
 

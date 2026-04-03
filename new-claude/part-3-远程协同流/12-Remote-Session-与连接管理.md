@@ -2,7 +2,7 @@
 
 第 11 章讲的是：
 
-> Claude Code 如何把“这台机器”注册成一个可远程调度的工作环境。
+> Claude Code 如何把”这台机器”注册成一个可远程调度的工作环境。
 
 但只把机器注册出去还不够，用户真正感知到的体验是另一件事：
 
@@ -10,16 +10,19 @@
 
 这就是 `remote/` 这一层要解决的问题。
 
-如果从产品角度看，这条链路对应的是：
+## 概念前置（Agent 入门看这里）
 
-- `claude assistant` 只读接入远程会话
-- Web / 移动端触发的远程 session 被本地终端继续接管
-- 远程 agent 还在跑，但本地 UI 需要显示消息、工具进度、权限确认、后台任务数
-- WebSocket 掉线后，尽量自动重连而不是直接判死
+Bridge 让机器变成了”工作节点”，任务在远端跑着。这一章回答：**另一个终端（或另一个人）怎么”接管”正在跑的远程会话？**
 
-如果从源码角度看，这章回答的是：
+类比：Bridge 是”工厂在生产”，Remote Session 是”你拿着平板走进工厂，实时看到流水线状态、在关键节点按下确认按钮”。
 
-**Claude Code 如何把远端 CCR session 发来的 SDK 消息流，转成本地 REPL 可消费的消息、权限请求、连接状态与历史分页能力？**
+这里有三个非直觉的工程问题：
+
+1. **消息格式不一样**：远端发来的是 SDK 格式，本地 REPL 认识的是自己的 Message 格式，需要适配层转换。
+2. **权限在本地点，执行在远端**：当远端 Agent 需要执行危险操作时，权限确认弹窗出现在你本地终端，你点了 allow，响应才会发回远端执行。
+3. **断线要能续连**：WebSocket 掉了不能直接报错，要有重连机制，并且重连后历史消息能补回来。
+
+> **源码对应**：`restored-src/src/remote/RemoteSessionManager.ts`（连接管理）、`restored-src/src/remote/sdkMessageAdapter.ts`（消息适配）。
 
 ## 1. 本章要解决什么问题
 
@@ -54,28 +57,16 @@
 
 ```mermaid
 flowchart TB
-  A["main.tsx\ncreateRemoteSessionConfig()"] --> B["REPL/useRemoteSession()"]
-  B --> C["new RemoteSessionManager(config, callbacks)"]
-  C --> D["new SessionsWebSocket(sessionId, orgUuid, tokenGetter)"]
-  D --> E["connect() -> /v1/sessions/ws/{id}/subscribe"]
-  E --> F["收到 SDKMessage / control_request / control_cancel_request"]
-
-  F --> G["RemoteSessionManager.handleMessage()"]
-  G -->|SDK message| H["convertSDKMessage()"]
-  H --> I["setMessages / handleMessageFromStream"]
-
-  G -->|permission request| J["createSyntheticAssistantMessage() + createToolStub()"]
-  J --> K["塞入 ToolUseConfirmQueue"]
-  K --> L["用户 allow / deny"]
-  L --> M["respondToPermissionRequest()"]
-  M --> N["SessionsWebSocket.sendControlResponse()"]
-
-  G -->|cancel| O["清理 pending permission"]
-  G -->|control_response| P["仅记日志 / ACK"]
-
-  I --> Q["更新 loading / streaming tool uses / remote task count"]
-  D --> R["onClose / onReconnecting / ping / reconnect"]
-  R --> Q
+  A["创建远程 session 连接\nRemoteSessionManager"] --> B["WebSocket 订阅\n远端消息流"]
+  B --> C{"收到消息类型"}
+  C -->|SDK 消息| D["格式适配\nsdkMessageAdapter"]
+  D --> E["本地 REPL 显示"]
+  C -->|权限请求| F["生成本地确认弹窗"]
+  F --> G["用户 allow / deny"]
+  G --> H["响应发回远端\n远端继续执行"]
+  B --> I{"连接断开?"}
+  I -->|是| J["自动重连\n补回历史消息"]
+  J --> B
 ```
 
 这张图里最关键的不是 `connect()`，而是两次“翻译”：

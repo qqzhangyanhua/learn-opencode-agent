@@ -7,19 +7,26 @@
 
 但真实系统还差最后一块：
 
-**一次请求什么时候才算真的“结束”？**
+**一次请求什么时候才算真的”结束”？**
 
-这是很多人读源码时容易低估的地方。因为在 Claude Code 里，“模型已经吐完字”不等于结束，“工具已经跑完”也不等于结束。后面还可能继续发生：
+## 概念前置（Agent 入门看这里）
 
-- stop hooks 追加阻塞错误，要求下一轮重试
-- token budget 触发继续提示，再跑一轮
-- tool use summary 异步生成完成，在下一轮流式开头插入
-- attachment / queued command / memory / skill discovery 被补进消息流
-- max turns 命中，当前回合强制终止
+直觉上：模型把字说完了，或者工具都跑完了，这一轮就结束了。
 
-所以这一章的目标是：
+**实际上不是。** 在 Claude Code 里，主循环不会”自然结束”——它必须经过一系列判断，才会返回一个明确的”结束原因”。
 
-**把 Claude Code 一次请求从“工具结果回来”到“真正返回 terminal reason”为止的收尾链路彻底讲明白。**
+想象你是这个循环的”裁判”，你要回答这些问题：
+
+- 模型输出被截断了（token 超限）？→ 要不要帮它接着说一轮
+- stop hook 说”这个回答不符合规范”？→ 要不要强制再给模型一次修正机会
+- token budget 说”你还没真正完成”？→ 要不要继续推一轮
+- 工具跑完了，还有没有”附件消息”要补进来？→ 收集完了再说结束
+
+只有这些都判断完，循环才会返回一个明确的结束原因：`completed`、`max_turns`、`aborted`……
+
+**核心认知：Claude Code 的”结束”是判定出来的，不是自然发生的。**
+
+> **源码对应**：主要在 `restored-src/src/query.ts` 的收尾段落，以及 `restored-src/src/query/stopHooks.ts`。
 
 ## 1. 本章要解决什么问题
 
@@ -50,50 +57,19 @@
 
 ```mermaid
 flowchart TB
-  A["assistant 流式输出结束"] --> B{"needsFollowUp ?"}
-
-  B -->|否| C["无工具收尾分支"]
-  C --> D["prompt too long / media / max output tokens 恢复判断"]
-  D --> E["executePostSamplingHooks()"]
-  E --> F["handleStopHooks()"]
-  F --> G{"stop hooks 阻塞或阻止继续?"}
-  G -->|阻塞| H["把 blockingErrors 注入 messages\n下一轮重试"]
-  G -->|阻止继续| I["return stop_hook_prevented"]
-  G -->|通过| J["checkTokenBudget()"]
-  J --> K{"需要 continuation ?"}
-  K -->|是| L["注入 meta nudge\n继续下一轮"]
-  K -->|否| M["return completed"]
-
-  B -->|是| N["工具执行阶段已完成"]
-  N --> O["toolResults + newContext 收集"]
-  O --> P["生成 nextPendingToolUseSummary"]
-  P --> Q["getAttachmentMessages() + memory + skill discovery"]
-  Q --> R["刷新 tools / 生成 task summary"]
-  R --> S{"maxTurns 命中?"}
-  S -->|是| T["return max_turns"]
-  S -->|否| U["messages = [...messagesForQuery, ...assistantMessages, ...toolResults]\ntransition = next_turn"]
-  U --> V["递归进入下一轮 query"]
+  A[“一轮输出结束”] --> B{“有工具调用?”}
+  B -->|有| C[“等工具跑完\n收集 tool_result + 附件”]
+  C --> D[“进入下一轮循环”]
+  B -->|没有| E[“运行 stop hooks\n检查是否需要继续”]
+  E --> F{“需要继续?”}
+  F -->|stop hook 阻塞\ntoken budget 未完成| D
+  F -->|不需要| G[“返回终止原因”]
+  G --> H[“completed / max_turns\naborted / hook_stopped”]
 ```
 
 这张图最重要的不是分支数量，而是一个统一事实：
 
-> **Claude Code 的“结束”是被判定出来的，而不是自然发生的。**
-
-再看一张更偏“terminal reason”的图，把这章里各种结束方式压缩到一起：
-
-```mermaid
-flowchart LR
-  A["queryLoop 收尾阶段"] --> B{"恢复/继续分支?"}
-  B -->|prompt too long / media| C["return prompt_too_long / image_error"]
-  B -->|max output recovery| D["继续下一轮"]
-  B -->|stop hook blocked| E["继续下一轮"]
-  B -->|token budget continue| F["继续下一轮"]
-  B -->|tool follow-up| G["继续下一轮"]
-  B -->|用户中断| H["return aborted_streaming / aborted_tools"]
-  B -->|hook 明确阻止继续| I["return hook_stopped / stop_hook_prevented"]
-  B -->|max turns| J["return max_turns"]
-  B -->|都没有| K["return completed"]
-```
+> **Claude Code 的”结束”是被判定出来的，而不是自然发生的。**
 
 ## 3. 源码入口
 

@@ -8,11 +8,30 @@
 
 这一章要回答的就是：
 
-**Claude Code 在“模型决定调用工具”之后，究竟如何把多个 `tool_use` 变成一批可控执行的工具调用，并最终再包装成 `tool_result` 回填给下一轮模型？**
+**Claude Code 在”模型决定调用工具”之后，究竟如何把多个 `tool_use` 变成一批可控执行的工具调用，并最终再包装成 `tool_result` 回填给下一轮模型？**
 
-如果说第 4 章解决的是“主循环怎么跑”，那么这一章解决的就是：
+## 概念前置（Agent 入门看这里）
 
-**主循环为什么敢把工具系统嵌进自己内部，而且还能维持权限、安全、上下文一致性。**
+假设模型一次发出了 3 个工具申请：读文件 A、读文件 B、删除文件 C。
+
+**可以同时跑的**：读文件 A 和读文件 B（互不影响）。
+
+**必须排队的**：删除文件 C 不能和读取并行——可能读到一半文件就没了。
+
+这就是**工具编排**要解决的第一个问题：哪些工具可以并发，哪些必须串行。Claude Code 用 `isConcurrencySafe()` 来判断这件事（`toolOrchestration.ts`）。
+
+第二个问题是**执行流水线**：每个工具执行前都要过一系列关卡——
+
+1. 输入格式对不对？（`inputSchema.safeParse`）
+2. 业务上允许这样调吗？（`validateInput`）
+3. 有没有权限？（`canUseTool`）
+4. Hook 有没有拦截？（`runPreToolUseHooks`）
+
+全部通过才会真正执行 `tool.call()`。
+
+第三个问题：**不管成功还是失败，结果都要包装成 `tool_result` 消息**，回填进主循环。这是 Agent 闭环的关键——模型必须”看到”工具执行的结果，才能决定下一步怎么做。
+
+> **源码对应**：`restored-src/src/services/tools/toolOrchestration.ts`（编排）、`toolExecution.ts`（执行）、`restored-src/src/hooks/useCanUseTool.tsx`（权限）。
 
 ## 1. 本章要解决什么问题
 
@@ -43,49 +62,18 @@
 
 ```mermaid
 flowchart TB
-  A["query.ts\nassistantMessages + toolUseBlocks"] --> B{"streamingToolExecutor\n是否启用?"}
-  B -->|是| C["StreamingToolExecutor.getRemainingResults()"]
-  B -->|否| D["runTools()\nrestored-src/src/services/tools/toolOrchestration.ts"]
-
-  D --> E["partitionToolCalls()\n按 isConcurrencySafe 分批"]
-  E --> F{"并发安全批次?"}
-  F -->|是| G["runToolsConcurrently()\n并发执行只读/安全工具"]
-  F -->|否| H["runToolsSerially()\n逐个执行危险或会改上下文的工具"]
-
-  G --> I["runToolUse()\nrestored-src/src/services/tools/toolExecution.ts"]
-  H --> I
-
-  I --> J["inputSchema + validateInput"]
-  J --> K["runPreToolUseHooks()"]
-  K --> L["resolveHookPermissionDecision()"]
-  L --> M["canUseTool() / 交互权限"]
-  M --> N["tool.call()"]
-  N --> O["runPostToolUseHooks()\n或 runPostToolUseFailureHooks()"]
-  O --> P["createUserMessage({ type: 'tool_result' })"]
-  P --> Q["query.ts 收集 toolResults\n更新 newContext"]
-  Q --> R["进入下一轮 query"]
+  A[“tool_use 申请列表”] --> B[“分批判断\nisConcurrencySafe()”]
+  B -->|可以并发| C[“并发执行\nrunToolsConcurrently”]
+  B -->|必须串行| D[“逐个执行\nrunToolsSerially”]
+  C --> E[“单个工具执行流水线\ntoolExecution.ts”]
+  D --> E
+  E --> F[“校验输入 → 权限判断 → tool.call()”]
+  F --> G[“包装为 tool_result 消息\n回填主循环”]
 ```
 
 如果你想先抓一句总纲，可以记成：
 
-> **`query.ts` 负责“什么时候进入工具阶段”，`toolOrchestration.ts` 负责“怎么排队”，`toolExecution.ts` 负责“一个工具调用内部要经过哪些关卡”。**
-
-再看一张更偏工程实现的批次图，理解为什么 Claude Code 不会简单地 `Promise.all(toolUses)`：
-
-```mermaid
-flowchart LR
-  A["toolUseBlocks[]"] --> B["partitionToolCalls()"]
-  B --> C["连续的 concurrency-safe 工具\n合并成一个批次"]
-  B --> D["非 concurrency-safe 工具\n单独形成串行批次"]
-  C --> E["并发执行"]
-  D --> F["串行执行"]
-  E --> G["contextModifier 先排队\n批次结束后按原 tool 顺序回放"]
-  F --> H["contextModifier 立即写回 currentContext"]
-```
-
-这张图背后有一句非常关键的设计原则：
-
-**并发安全不等于“完全没有副作用”，而是“即使先并发跑，最后也能用受控方式把上下文修改按顺序回放”。**
+> **`query.ts` 决定”什么时候进入工具阶段”，`toolOrchestration.ts` 决定”怎么排队”，`toolExecution.ts` 决定”单个工具要过哪些关卡”。**
 
 ## 3. 源码入口
 
