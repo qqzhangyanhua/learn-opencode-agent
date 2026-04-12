@@ -1,8 +1,8 @@
-# 从零构建 AI Coding Agent — OpenCode 源码剖析与实战
+# 从零理解如何构建 AI Agent — OpenCode 源码剖析与实战
 
 基于 VitePress 构建的电子书站点，包含两条主线：
 
-- 理论篇：系统剖析基于 commit 快照的 [OpenCode 源码基线](https://github.com/anomalyco/opencode/tree/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc)，涵盖 AI Agent 基础架构、工具系统、多模型支持、TUI 界面等 24 个章节，以及 oh-my-openagent 插件系统实战
+- OpenCode 拆解：系统剖析基于 commit 快照的 [OpenCode 源码基线](https://github.com/anomalyco/opencode/tree/f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc)，涵盖 AI Agent 基础架构、工具系统、多模型支持、TUI 界面等 24 个章节，以及 oh-my-openagent 插件系统实战
 - 实践篇：23 个项目，按章节拆解 TypeScript Agent 实现，从工具调用到生产部署逐步展开
 
 默认阅读入口以 commit 锚定源码为准，只有在需要追踪 OpenCode 最新实现时，才额外回到 [`dev` 分支](https://github.com/anomalyco/opencode/tree/dev) 对照差异。
@@ -19,7 +19,7 @@
 
 如果你从仓库首页进入，建议这样走：
 
-1. 先看理论篇：理解 OpenCode 的源码结构和工程边界
+1. 先看OpenCode 拆解：理解 OpenCode 的源码结构和工程边界
 2. 再看实践篇：按 P1 -> P23 的顺序，把核心 Agent 模式逐步跑通并对照实现
 
 ## 站点入口

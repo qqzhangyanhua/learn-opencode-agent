@@ -26,7 +26,7 @@ const SECTION_META: Record<
 > = {
   theory: {
     sectionId: 'theory',
-    title: '理论篇',
+    title: 'OpenCode 拆解',
     roleDescription: '看懂真实 AI Agent 系统为什么这样设计',
     entryMode: 'read-first',
     recommendedStart: '/00-what-is-ai-agent/'

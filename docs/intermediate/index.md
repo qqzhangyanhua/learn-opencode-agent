@@ -5,7 +5,7 @@ description: 面向掌握基础 Agent 理论后想进入工程专题的读者，
 
 # 中级篇导读
 
-中级篇是理论篇与实践篇之后的工程深化入口：它不是额外追加的专题栏目，而是当你已经看懂基础架构、也开始自己动手实现后，用来处理稳定性、协作、安全、成本这些真实工程问题的下一站。
+中级篇是OpenCode 拆解与实践篇之后的工程深化入口：它不是额外追加的专题栏目，而是当你已经看懂基础架构、也开始自己动手实现后，用来处理稳定性、协作、安全、成本这些真实工程问题的下一站。
 
 > **当前定位**：处理稳定性、协作、安全与成本等工程专题。如果你还没决定是否应该现在进入专题页，可以先回到 [阅读地图](/reading-map) 看看哪条路线最适合你。
 
@@ -42,7 +42,7 @@ description: 面向掌握基础 Agent 理论后想进入工程专题的读者，
 
 进入中级篇前，不需要把全书全部看完，但至少建议满足下面三条路径中的一条：
 
-- 已读完理论篇第 1-4 章，能描述最小 Agent 闭环、工具调用与会话管理
+- 已读完OpenCode 拆解第 1-4 章，能描述最小 Agent 闭环、工具调用与会话管理
 - 已跑通实践篇 `P1-P4`，对最小可运行 Agent 有基本手感
 - 正在处理某个明确工程问题，例如 RAG 稳定性、多智能体协作、上线安全或成本控制
 
@@ -74,7 +74,7 @@ description: 面向掌握基础 Agent 理论后想进入工程专题的读者，
 | 中级篇章节 | 对应现有理论／实践篇 | 说明 |
 | --- | --- | --- |
 | [RAG 五大翻车场景](/intermediate/25-rag-failure-patterns/) | [P7：RAG 基础](/practice/p07-rag-basics/) / [P8：GraphRAG](/practice/p08-graphrag/) / [P9：混合检索策略](/practice/p09-hybrid-retrieval/) | 将 RAG 的稳定性与答案准确性问题与基本检索策略对应，延续原始抓取、验证与融合链路。 |
-| [多智能体协作](/intermediate/26-multi-agent-collaboration/) | [P15：多 Agent 编排](/practice/p15-multi-agent/) / [P16：子 Agent 与任务分解](/practice/p16-subagent/) / [P17：Agent 间通信与状态共享](/practice/p17-agent-comm/) / [第16章：高级主题与最佳实践](/15-advanced-topics/) | 高亮多 Agent 协作中的指令、状态与通信机制，补全理论篇中的“分工”与“通信”技巧。 |
+| [多智能体协作](/intermediate/26-multi-agent-collaboration/) | [P15：多 Agent 编排](/practice/p15-multi-agent/) / [P16：子 Agent 与任务分解](/practice/p16-subagent/) / [P17：Agent 间通信与状态共享](/practice/p17-agent-comm/) / [第16章：高级主题与最佳实践](/15-advanced-topics/) | 高亮多 Agent 协作中的指令、状态与通信机制，补全OpenCode 拆解中的“分工”与“通信”技巧。 |
 | [Planning 机制](/intermediate/27-planning-mechanism/) | [P10：ReAct Loop 实现](/practice/p10-react-loop/) / [P11：Planning 机制](/practice/p11-planning/) | 直接承接 ReAct 与 Planning 的结构，扩充为多阶段计划与执行评估。 |
 | [上下文工程实战](/intermediate/28-context-engineering/) | [第5章：会话管理](/04-session-management/) / [P6：记忆增强检索](/practice/p06-memory-retrieval/) | 给予高频上下文结构与记忆策略的工程实践版本，将抽象章节中的管理体系具体化。 |
 | [System Prompt 设计指南](/intermediate/29-system-prompt-design/) | [第2章：AI Agent 的核心组件](/01-agent-basics/) / [第16章：高级主题与最佳实践](/15-advanced-topics/) | 说明 Prompt 作为 Agent 核心说明书，其设计思路需要在核心组件与高级实践之间平衡。 |

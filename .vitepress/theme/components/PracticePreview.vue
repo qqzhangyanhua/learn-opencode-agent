@@ -14,13 +14,13 @@ const practiceProjectCount = computed(() =>
 const entryCards = computed(() => [
   {
     key: 'theory',
-    label: '理论篇',
+    label: 'OpenCode 拆解',
     title: theoryEntry.value.title,
     subtitle: theoryEntry.value.countLabel,
     description: '先建立概念地图，再带着主链路进入后续项目和中级专题。',
     href: theoryEntry.value.recommendedStart,
     tone: 'theory',
-    cta: '进入理论篇'
+    cta: '进入 OpenCode 拆解'
   },
   {
     key: 'practice',

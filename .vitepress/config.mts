@@ -6,7 +6,7 @@ import {
   normalizeLearningFrontmatter
 } from './theme/data/content-meta'
 
-const siteTitle = '从零构建 AI Coding Agent'
+const siteTitle = '从零理解如何构建 AI Agent'
 const siteDescription = 'OpenCode 源码剖析与实战'
 const bookRepository = 'https://github.com/qqzhangyanhua/learn-opencode-agent'
 const sourceCommit = 'f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc'
@@ -201,14 +201,16 @@ export default withMermaid(defineConfig({
 
   themeConfig: {
     nav: [
-      { text: '首页', link: '/' },
-      { text: '发现', link: '/discover/', activeMatch: '/discover/' },
-      { text: '学习路径', link: '/learning-paths/', activeMatch: '/learning-paths/' },
       { text: '实践篇', link: '/practice/', activeMatch: '/practice/' },
       { text: '中级篇', link: '/intermediate/', activeMatch: '/intermediate/' },
-      { text: 'Claude Code 架构思维', link: '/claude-code/', activeMatch: '/claude-code/' },
-      { text: 'Claude Code 源码业务流', link: '/new-claude/', activeMatch: '/new-claude/' },
-      { text: '阅读地图', link: '/reading-map', activeMatch: '/reading-map' },
+      {
+        text: '专栏',
+        items: [
+          { text: 'Claude Code 架构思维', link: '/claude-code/' },
+          { text: 'Claude Code 源码业务流', link: '/new-claude/' },
+          { text: 'Hermes Agent 拆解', link: '/hermes-agent/' },
+        ],
+      },
       { text: '本书仓库', link: bookRepository },
     ],
 
@@ -265,6 +267,107 @@ export default withMermaid(defineConfig({
           items: [
             { text: '第19章：一个 Agent 系统怎样才算真的能长期活着', link: '/claude-code/chapter19' },
             { text: '第20章：把整本书收束成一个判断框架', link: '/claude-code/chapter20' },
+          ]
+        },
+      ],
+      '/hermes-agent/': [
+        { text: '← 返回首页', link: '/' },
+        { text: '课程介绍', link: '/hermes-agent/' },
+        {
+          text: '概念准备',
+          collapsed: false,
+          items: [
+            { text: '第1章：先别急着看代码：你到底在学什么是 Agent', link: '/hermes-agent/00-先别急着看代码-你到底在学什么是Agent' },
+            { text: '第2章：5 分钟看懂 Hermes Agent', link: '/hermes-agent/01-5分钟看懂Hermes-Agent-先建立全局地图' },
+          ]
+        },
+        {
+          text: '核心机制',
+          collapsed: false,
+          items: [
+            { text: '第3章：拆开 run_agent 看执行闭环', link: '/hermes-agent/02-Hermes-Agent-是怎么跑起来的-拆开run_agent看执行闭环' },
+            { text: '第4章：工具系统', link: '/hermes-agent/03-工具系统-为什么说Tool-Use才是Agent工程的地基' },
+            { text: '第5章：记忆系统', link: '/hermes-agent/04-记忆系统-Hermes为什么不是每次都失忆的Agent' },
+            { text: '第6章：SessionDB 与会话系统', link: '/hermes-agent/05-SessionDB与会话系统-Hermes如何拥有跨会话连续性' },
+          ]
+        },
+        {
+          text: '系统扩展',
+          collapsed: false,
+          items: [
+            { text: '第7章：CLI 与 Gateway', link: '/hermes-agent/06-CLI与Gateway-为什么一个好Agent不能只活在终端里' },
+            { text: '第8章：Skills 技能体系', link: '/hermes-agent/07-Skills-Hermes最像会成长的Agent的地方' },
+            { text: '第9章：子 Agent 与并行执行', link: '/hermes-agent/08-子Agent与并行执行-Hermes如何把复杂任务拆开做' },
+            { text: '第10章：Cron 后台任务与自动化', link: '/hermes-agent/09-Cron后台任务与自动化-从会聊天到会持续工作' },
+          ]
+        },
+        {
+          text: '工程落地',
+          collapsed: false,
+          items: [
+            { text: '第11章：安全约束与工程现实', link: '/hermes-agent/10-安全约束与工程现实-为什么真正能用的Agent必须麻烦一点' },
+            { text: '第12章：自己做 Agent 先抄哪几层', link: '/hermes-agent/11-如果你也想做一个自己的Agent-应该先抄Hermes的哪几层' },
+          ]
+        },
+        {
+          text: '附录：Prompt 与上下文',
+          collapsed: true,
+          items: [
+            { text: '附录 A：上下文压缩与 Prompt 稳定性', link: '/hermes-agent/附录A-上下文压缩与Prompt稳定性-为什么Agent不是上下文越长越好' },
+            { text: '附录 B：Prompt Builder 专章', link: '/hermes-agent/附录B-Prompt-Builder专章-系统提示词为什么在Hermes里是一条装配流水线' },
+            { text: '附录 L：Context Compression 后状态恢复', link: '/hermes-agent/附录L-Context-Compression后状态恢复专章-Hermes为什么压缩上下文不等于删历史' },
+            { text: '附录 V：Ephemeral System Prompt', link: '/hermes-agent/附录V-Ephemeral-System-Prompt专章-Hermes为什么自己保留临时system通道却不把它当长期前缀' },
+            { text: '附录 W：多层上下文装配顺序', link: '/hermes-agent/附录W-多层上下文装配顺序专章-Hermes一次API调用前到底按什么顺序拼上下文' },
+            { text: '附录 X：Prompt Cache', link: '/hermes-agent/附录X-Prompt-Cache专章-Hermes为什么很多边界设计最后都指向前缀稳定' },
+            { text: '附录 Y：Trajectory 与 Prompt 边界', link: '/hermes-agent/附录Y-Trajectory与Prompt边界专章-Hermes为什么有些上下文给模型看却故意不入轨迹' },
+          ]
+        },
+        {
+          text: '附录：工具与能力层',
+          collapsed: true,
+          items: [
+            { text: '附录 E：Terminal 工具与执行环境', link: '/hermes-agent/附录E-Terminal工具与执行环境-Hermes为什么不直接subprocess-run' },
+            { text: '附录 F：Code Execution 与 Terminal 的边界', link: '/hermes-agent/附录F-Code-Execution与Terminal的边界-Hermes为什么同时保留两套执行能力' },
+            { text: '附录 I：Tool / Toolset / Skill 的边界', link: '/hermes-agent/附录I-Tool与Toolset和Skill的边界-Hermes为什么要把能力拆成三层' },
+            { text: '附录 K：Agent Loop 接管工具', link: '/hermes-agent/附录K-Agent-Loop接管工具专章-Hermes为什么有些工具不能走普通Registry-Dispatch' },
+            { text: '附录 AD：Tool Registry 与插件注册', link: '/hermes-agent/附录AD-Tool-Registry与插件注册专章-Hermes为什么工具系统不是一堆if-else而是一条统一注册总线' },
+            { text: '附录 AE：Skills Prompt 生成', link: '/hermes-agent/附录AE-Skills-Prompt生成专章-Hermes为什么系统提示词里的技能索引要跟着当前可用tools和toolsets动态变化' },
+          ]
+        },
+        {
+          text: '附录：记忆与会话',
+          collapsed: true,
+          items: [
+            { text: '附录 J：Memory / Skill / Session Search 的边界', link: '/hermes-agent/附录J-Memory与Skill和Session-Search的边界-Hermes怎么区分事实记忆历史检索和流程沉淀' },
+            { text: '附录 N：会话持久化边界', link: '/hermes-agent/附录N-会话持久化边界专章-Hermes为什么SessionDB-Gateway-Transcript-ACP-Session和API-Responses-Store不是一回事' },
+            { text: '附录 O：Session Search', link: '/hermes-agent/附录O-Session-Search专章-Hermes为什么查的是正式会话账本而不是当前Transcript或Memory' },
+            { text: '附录 P：Session Lineage', link: '/hermes-agent/附录P-Resume-Branch-Compression的Session-Lineage专章-Hermes怎么把一段对话长成一棵会话树' },
+            { text: '附录 Q：Tool Call 持久化', link: '/hermes-agent/附录Q-Tool-Call持久化专章-Hermes为什么不只存最终回答而要存消息-工具调用-工具结果-推理痕迹' },
+            { text: '附录 S：Memory Flush', link: '/hermes-agent/附录S-Memory-Flush专章-Hermes为什么记忆沉淀不是每轮顺手改system-prompt' },
+            { text: '附录 T：Prefetch Recall', link: '/hermes-agent/附录T-Prefetch-Recall专章-Hermes为什么把外部记忆召回做成API-call-time临时注入而不是并回system-prompt' },
+          ]
+        },
+        {
+          text: '附录：运行时与执行',
+          collapsed: true,
+          items: [
+            { text: '附录 C：测试一个 Agent Runtime', link: '/hermes-agent/附录C-测试一个Agent-Runtime-Hermes为什么不是只靠Demo验证' },
+            { text: '附录 D：模型切换与 Provider Fallback', link: '/hermes-agent/附录D-模型切换与Provider-Fallback-Hermes怎么把模型差异变成运行时策略' },
+            { text: '附录 M：多入口同一 Runtime', link: '/hermes-agent/附录M-多入口同一Runtime专章-Hermes为什么CLI-Gateway-ACP和API-Server共用一颗Agent内核' },
+            { text: '附录 R：Auxiliary Model', link: '/hermes-agent/附录R-Auxiliary-Model专章-Hermes为什么不让主模型包办摘要压缩视觉和副任务' },
+            { text: '附录 AA：Interrupt 与 Queue', link: '/hermes-agent/附录AA-Interrupt与Queue专章-Hermes为什么消息平台里的新消息不能直接塞进正在运行的Agent回合' },
+            { text: '附录 AB：Activity 与 Inactivity Timeout', link: '/hermes-agent/附录AB-Activity与Inactivity-Timeout专章-Hermes为什么不是给Agent一个固定超时而是盯住它是否还在推进' },
+          ]
+        },
+        {
+          text: '附录：扩展与接入',
+          collapsed: true,
+          items: [
+            { text: '附录 G：Gateway 会话注入', link: '/hermes-agent/附录G-Gateway会话注入专章-Hermes怎么把消息来源变成运行时上下文' },
+            { text: '附录 H：Skills 运行时', link: '/hermes-agent/附录H-Skills运行时专章-Hermes为什么不把技能直接塞进system-prompt' },
+            { text: '附录 U：Plugin Hook 注入边界', link: '/hermes-agent/附录U-Plugin-Hook注入边界专章-Hermes为什么不开放system-prompt给插件随便改' },
+            { text: '附录 AC：Skill 与 Plugin 加载', link: '/hermes-agent/附录AC-Skill与Plugin加载专章-Hermes怎么把可扩展能力接进运行时而不是简单读目录拼提示词' },
+            { text: '附录 Z：Gateway Agent Cache', link: '/hermes-agent/附录Z-Gateway-Agent-Cache专章-Hermes为什么在消息平台里宁可缓存整颗AIAgent也不愿每条消息重建一次运行时' },
           ]
         },
       ],
@@ -415,10 +518,8 @@ export default withMermaid(defineConfig({
       ],
       '/': [
         { text: '发现中心', link: '/discover/' },
-        { text: '学习路径', link: '/learning-paths/' },
         { text: '实践篇总览', link: '/practice/' },
         { text: '中级篇导读', link: '/intermediate/' },
-        { text: '阅读地图', link: '/reading-map' },
         { text: '术语表', link: '/glossary' },
         {
           text: '第一部分：AI Agent 基础',

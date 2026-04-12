@@ -63,6 +63,7 @@ const asyncGlobalComponents = [
   ['CostOptimizationDashboard', asyncComponent(() => import('./components/CostOptimizationDashboard.vue'))],
   ['RuntimeLifecycleDiagram', asyncComponent(() => import('./components/RuntimeLifecycleDiagram.vue'))],
   ['HomeExploreLinks', asyncComponent(() => import('./components/HomeExploreLinks.vue'))],
+  ['HomeSeriesStrip', asyncComponent(() => import('./components/HomeSeriesStrip.vue'))],
   ['ToolCallingLifecycle', asyncComponent(() => import('./components/ToolCallingLifecycle.vue'))],
   ['RagPipelineDemo', asyncComponent(() => import('./components/RagPipelineDemo.vue'))],
   ['GraphRagDemo', asyncComponent(() => import('./components/GraphRagDemo.vue'))],

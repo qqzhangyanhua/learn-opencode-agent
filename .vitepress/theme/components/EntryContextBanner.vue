@@ -56,49 +56,39 @@ const props = withDefaults(defineProps<EntryContextBannerProps>(), {
 
 <style scoped>
 .entry-context-banner {
-  display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr);
-  gap: 12px;
-  margin: 24px 0 40px;
-  padding: 0;
-  border: none;
-  background: transparent;
+  margin: 20px 0 36px;
+  padding: 16px 20px;
+  border-left: 3px solid var(--vp-c-brand-1);
+  background: var(--vp-c-bg-soft);
+  border-radius: 0 6px 6px 0;
 }
 
-.entry-context-main,
-.entry-context-panel {
-  padding: 16px;
-  border-radius: 8px;
-  border: 1px solid var(--vp-c-divider);
-  background: var(--vp-c-bg-soft);
+.entry-context-banner.intermediate {
+  border-left-color: #3b82f6;
+}
+
+.entry-context-banner.practice {
+  border-left-color: #ea580c;
+}
+
+.entry-context-main {
+  margin-bottom: 14px;
 }
 
 .entry-context-header {
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
   gap: 8px;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.entry-context-badge,
-.entry-context-section {
-  display: inline-flex;
-  align-items: center;
-  border-radius: 4px;
-  padding: 4px 10px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  margin-bottom: 8px;
 }
 
 .entry-context-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 3px;
   background: var(--vp-c-brand-soft);
   color: var(--vp-c-brand-1);
-}
-
-.entry-context-banner.practice .entry-context-badge {
-  background: rgba(234, 88, 12, 0.1);
-  color: #ea580c;
 }
 
 .entry-context-banner.intermediate .entry-context-badge {
@@ -106,45 +96,60 @@ const props = withDefaults(defineProps<EntryContextBannerProps>(), {
   color: #3b82f6;
 }
 
+.entry-context-banner.practice .entry-context-badge {
+  background: rgba(234, 88, 12, 0.1);
+  color: #ea580c;
+}
+
 .entry-context-section {
   margin: 0;
-  background: transparent;
-  color: var(--vp-c-text-1);
+  font-size: 0.85rem;
   font-weight: 700;
+  color: var(--vp-c-text-1);
 }
 
 .entry-context-summary {
   margin: 0;
+  font-size: 0.9rem;
   color: var(--vp-c-text-2);
-  line-height: 1.7;
-  font-size: 0.95rem;
+  line-height: 1.65;
+}
+
+.entry-context-panel {
+  border-top: 1px solid var(--vp-c-divider);
+  padding-top: 12px;
+  margin-top: 12px;
 }
 
 .entry-context-title {
-  margin: 0 0 10px;
-  font-size: 0.9rem;
+  margin: 0 0 8px;
+  font-size: 0.8rem;
   font-weight: 600;
-  color: var(--vp-c-text-1);
+  color: var(--vp-c-text-3);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .entry-context-list {
   margin: 0;
   padding: 0;
   list-style: none;
-  display: grid;
-  gap: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 20px;
 }
 
 .entry-context-list li {
-  display: grid;
-  gap: 3px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .entry-context-list a {
-  color: var(--vp-c-text-1);
+  font-size: 0.875rem;
   font-weight: 600;
+  color: var(--vp-c-text-1);
   text-decoration: none;
-  font-size: 0.9rem;
 }
 
 .entry-context-list a:hover {
@@ -152,25 +157,8 @@ const props = withDefaults(defineProps<EntryContextBannerProps>(), {
 }
 
 .entry-context-list span {
-  color: var(--vp-c-text-2);
-  line-height: 1.6;
-  font-size: 0.85rem;
-}
-
-@media (max-width: 1100px) {
-  .entry-context-banner {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 640px) {
-  .entry-context-banner {
-    margin-bottom: 32px;
-  }
-
-  .entry-context-main,
-  .entry-context-panel {
-    padding: 14px;
-  }
+  font-size: 0.8rem;
+  color: var(--vp-c-text-3);
+  line-height: 1.5;
 }
 </style>

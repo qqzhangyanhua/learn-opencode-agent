@@ -58,22 +58,22 @@ type ProjectSeed = Omit<
 
 const THEORY_LINKS = {
   agentIntro: {
-    label: '理论篇 00：什么是 AI Agent',
+    label: 'OpenCode 拆解 00：什么是 AI Agent',
     href: '/00-what-is-ai-agent/',
     description: '把当前项目重新映射回 Agent、模型和工具系统的整体骨架。'
   },
   agentBasics: {
-    label: '理论篇 01：Agent 基础架构',
+    label: 'OpenCode 拆解 01：Agent 基础架构',
     href: '/01-agent-basics/',
     description: '回看组件边界，理解消息、工具、记忆和规划各自负责什么。'
   },
   toolSystem: {
-    label: '理论篇 03：工具系统',
+    label: 'OpenCode 拆解 03：工具系统',
     href: '/03-tool-system/',
     description: '理解为什么模型能行动、工具调用如何在工程上落地。'
   },
   sessionManagement: {
-    label: '理论篇 04：会话管理',
+    label: 'OpenCode 拆解 04：会话管理',
     href: '/04-session-management/',
     description: '把消息流、上下文管理和执行循环与当前项目的行为对齐。'
   },

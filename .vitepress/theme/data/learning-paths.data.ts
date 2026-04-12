@@ -13,7 +13,7 @@ export const learningPaths: LearningPathDefinition[] = [
     entryCriteria: ['想先知道每一章为什么读，再开始动手做项目'],
     outcomes: [
       '知道 Agent、工具系统和会话循环之间的关系',
-      '能从理论篇切到第一个可运行实践项目'
+      '能从 OpenCode 拆解切到第一个可运行实践项目'
     ],
     steps: [
       { order: 1, contentId: 'book-00-agent-intro', reason: '先把 Agent 是什么、不是什讲清楚。' },

@@ -1,6 +1,6 @@
 ---
 title: 发现中心
-description: 按目标、起点和主题快速找到最适合你的阅读入口，先决定从哪里开始，再进入理论篇、实践篇和中级专题。
+description: 按目标、起点和主题快速找到最适合你的阅读入口，先决定从哪里开始，再进入OpenCode 拆解、实践篇和中级专题。
 contentType: support
 series: support
 contentId: support-discover-center
@@ -10,7 +10,7 @@ difficulty: beginner
 estimatedTime: 10 分钟
 learningGoals:
   - 按目标快速选择最适合自己的起步路线
-  - 理解理论篇、实践篇和中级篇之间的衔接关系
+  - 理解OpenCode 拆解、实践篇和中级篇之间的衔接关系
   - 按主题继续深入浏览全站内容
 prerequisites:
   - 无，可直接从此页开始

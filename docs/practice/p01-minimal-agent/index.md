@@ -29,7 +29,7 @@ searchTags:
   - Agent Loop
 navigationLabel: P1 最小 Agent
 entryMode: build-first
-roleDescription: 用一个最短可运行项目先把工具调用和 Agent 循环亲手跑通，再回头理解理论篇里的系统抽象。
+roleDescription: 用一个最短可运行项目先把工具调用和 Agent 循环亲手跑通，再回头理解OpenCode 拆解里的系统抽象。
 ---
 
 <PracticeProjectGuide project-id="practice-p01-minimal-agent" />

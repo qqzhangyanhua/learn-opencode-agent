@@ -5,7 +5,7 @@ contentType: support
 series: support
 contentId: support-learning-paths
 shortTitle: 学习路径
-summary: 用三条路线把理论篇、实践篇和中级篇串起来，帮助你按当前目标稳步推进。
+summary: 用三条路线把OpenCode 拆解、实践篇和中级篇串起来，帮助你按当前目标稳步推进。
 difficulty: beginner
 estimatedTime: 12 分钟
 learningGoals:

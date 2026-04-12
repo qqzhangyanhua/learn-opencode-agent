@@ -47,7 +47,7 @@ const bannerSupportLinks = [
   section="实践篇"
   badge="当前位置"
   tone="practice"
-  summary="你现在在全站的项目跟练入口。这里负责把理论篇里抽象的 Agent 结构拆成可运行项目，并在完成基础闭环后把你送往中级专题。"
+  summary="你现在在全站的项目跟练入口。这里负责把OpenCode 拆解里抽象的 Agent 结构拆成可运行项目，并在完成基础闭环后把你送往中级专题。"
   :next-steps="bannerNextSteps"
   :support-links="bannerSupportLinks"
 />
