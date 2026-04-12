@@ -48,20 +48,13 @@ const topics = computed(() => {
 <style scoped>
 .discovery-topic-hub {
   display: grid;
-  gap: 18px;
-  margin: 24px 0 32px;
+  gap: 16px;
+  margin: 12px 0 20px;
 }
 
 .topic-card {
   display: grid;
-  gap: 18px;
-  padding: 22px;
-  border-radius: 24px;
-  border: 1px solid var(--vp-c-divider);
-  background:
-    radial-gradient(circle at top left, rgba(13, 148, 136, 0.08), transparent 30%),
-    linear-gradient(180deg, var(--vp-c-bg-soft), var(--vp-c-bg));
-  box-shadow: var(--card-shadow-light);
+  gap: 8px;
 }
 
 .topic-copy h3,
@@ -70,53 +63,68 @@ const topics = computed(() => {
 }
 
 .topic-copy {
-  display: grid;
-  gap: 10px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--vp-c-divider);
 }
 
 .topic-kicker {
-  color: var(--vp-c-brand-1);
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  display: none;
+}
+
+.topic-copy h3 {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--vp-c-text-1);
+}
+
+.topic-copy > p {
+  font-size: 0.78rem;
+  color: var(--vp-c-text-3);
 }
 
 .topic-item-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 14px;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 6px;
 }
 
 .topic-item {
-  display: grid;
-  gap: 10px;
-  padding: 18px;
-  border-radius: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  border-radius: 6px;
   border: 1px solid var(--vp-c-divider);
-  background: var(--vp-c-bg-alt);
+  background: transparent;
   text-decoration: none;
+  transition: background 0.15s;
 }
 
 .topic-item:hover {
+  background: var(--vp-c-bg-alt);
   border-color: var(--vp-c-brand-1);
 }
 
 .topic-item-head {
   display: flex;
   justify-content: space-between;
-  gap: 12px;
-  align-items: flex-start;
+  gap: 6px;
+  align-items: center;
 }
 
 .topic-item-title {
   color: var(--vp-c-text-1);
-  font-weight: 700;
+  font-size: 0.82rem;
+  font-weight: 500;
 }
 
 .topic-item p {
   margin: 0;
-  color: var(--vp-c-text-2);
-  line-height: 1.7;
+  font-size: 0.75rem;
+  color: var(--vp-c-text-3);
+  line-height: 1.5;
 }
 </style>

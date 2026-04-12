@@ -53,21 +53,18 @@ const routes = computed(() => {
 <style scoped>
 .discovery-start-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 18px;
-  margin: 24px 0 32px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 8px;
+  margin: 12px 0 20px;
 }
 
 .start-card {
   display: grid;
-  gap: 14px;
-  padding: 22px;
-  border-radius: 22px;
-  border: 1px solid var(--vp-c-divider);
-  background:
-    linear-gradient(180deg, rgba(59, 130, 246, 0.08), transparent 36%),
-    linear-gradient(180deg, var(--vp-c-bg-soft), var(--vp-c-bg));
-  box-shadow: var(--card-shadow-light);
+  gap: 8px;
+  padding: 12px 14px;
+  border-left: 3px solid var(--vp-c-divider);
+  border-radius: 0 6px 6px 0;
+  background: var(--vp-c-bg-alt);
 }
 
 .start-card-copy h3,
@@ -77,60 +74,76 @@ const routes = computed(() => {
 }
 
 .start-card-kicker {
-  color: var(--vp-c-brand-1);
-  font-size: 0.85rem;
-  font-weight: 700;
+  color: var(--vp-c-text-3);
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.start-card-copy h3 {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--vp-c-text-2);
 }
 
 .start-primary-link {
-  color: var(--vp-c-text-1);
-  font-size: 1.05rem;
-  font-weight: 700;
+  color: var(--vp-c-brand-1);
+  font-size: 0.85rem;
+  font-weight: 500;
   text-decoration: none;
 }
 
 .start-primary-link:hover,
 .continue-list a:hover {
-  color: var(--vp-c-brand-1);
+  text-decoration: underline;
 }
 
 .start-summary {
   margin: 0;
+  font-size: 0.78rem;
   color: var(--vp-c-text-2);
-  line-height: 1.7;
+  line-height: 1.55;
 }
 
 .start-meta {
   display: flex;
-  gap: 10px;
+  gap: 6px;
   flex-wrap: wrap;
   align-items: center;
   color: var(--vp-c-text-3);
-  font-size: 0.88rem;
+  font-size: 0.72rem;
+}
+
+.continue-list p {
+  font-size: 0.72rem;
+  color: var(--vp-c-text-3);
 }
 
 .continue-list ul {
-  margin: 10px 0 0;
+  margin: 4px 0 0;
   padding: 0;
   list-style: none;
   display: grid;
-  gap: 10px;
+  gap: 4px;
 }
 
 .continue-list li {
   display: flex;
   justify-content: space-between;
-  gap: 12px;
+  gap: 6px;
   align-items: center;
-  padding: 12px 14px;
-  border-radius: 16px;
+  padding: 5px 8px;
+  border-radius: 4px;
   border: 1px solid var(--vp-c-divider);
-  background: var(--vp-c-bg-alt);
 }
 
 .continue-list a {
-  color: var(--vp-c-text-1);
-  font-weight: 600;
+  color: var(--vp-c-text-2);
+  font-size: 0.78rem;
+  font-weight: 400;
   text-decoration: none;
+}
+
+.continue-list a:hover {
+  color: var(--vp-c-brand-1);
 }
 </style>
