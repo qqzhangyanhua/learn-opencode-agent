@@ -50,6 +50,10 @@ if (!themeIndex.includes('ChapterActionPanel')) {
   issues.push('主题入口尚未注册 ChapterActionPanel')
 }
 
+if (!themeIndex.includes('PlanningFlowSimulator')) {
+  issues.push('主题入口尚未注册 PlanningFlowSimulator')
+}
+
 const guideSource = readFileSync(guidePath, 'utf8')
 if (!guideSource.includes('LearningProgressToggle')) {
   issues.push('ChapterLearningGuide.vue 尚未内嵌 LearningProgressToggle')
@@ -84,6 +88,13 @@ for (const relativePath of guideTargetPages) {
 
   if (pageContent.includes('<ChapterActionPanel') && !pageContent.includes('actionItems')) {
     issues.push(`${relativePath} 尚未声明 ChapterActionPanel.actionItems`)
+  }
+
+  if (
+    relativePath === 'docs/intermediate/27-planning-mechanism/index.md' &&
+    !pageContent.includes('<PlanningFlowSimulator')
+  ) {
+    issues.push('第27章尚未接入 PlanningFlowSimulator 试点组件')
   }
 }
 
