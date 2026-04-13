@@ -187,12 +187,12 @@ function choose(choiceId: string) {
 
 .planning-main-grid {
   display: grid;
-  grid-template-columns: 260px minmax(0, 1fr) 260px;
+  grid-template-columns: minmax(220px, 250px) minmax(320px, 1fr) minmax(220px, 250px);
   gap: 0.75rem;
   align-items: start;
 }
 
-@media (max-width: 1080px) {
+@media (max-width: 1380px) {
   .planning-main-grid {
     grid-template-columns: 1fr;
   }

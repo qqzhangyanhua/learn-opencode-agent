@@ -2,11 +2,7 @@
 import { computed } from 'vue'
 import { useData } from 'vitepress'
 import { data as contentIndex } from '../data/content-index.data.js'
-import LearningProgressToggle from './LearningProgressToggle.vue'
-import type {
-  ChapterLearningGuideProps,
-  LearningContentFrontmatter
-} from './types'
+import type { ChapterLearningGuideProps } from './types'
 
 const props = defineProps<ChapterLearningGuideProps>()
 const { frontmatter, title } = useData()
@@ -27,15 +23,6 @@ const sectionSummary = computed(() => {
 
   return contentIndex.sectionById[currentNode.value.sectionId]
 })
-
-const learningProgressMeta = computed(() => {
-  const pageFrontmatter = frontmatter.value as Partial<LearningContentFrontmatter>
-
-  return {
-    contentId: pageFrontmatter.contentId?.trim() ?? currentNode.value?.contentId ?? '',
-    contentType: pageFrontmatter.contentType ?? currentNode.value?.contentType ?? 'support'
-  }
-})
 </script>
 
 <template>
@@ -45,11 +32,6 @@ const learningProgressMeta = computed(() => {
     <p class="hero-description">
       {{ currentNode?.roleDescription ?? sectionSummary?.roleDescription ?? '帮助你快速判断本章定位、前置要求与学习目标。' }}
     </p>
-
-    <LearningProgressToggle
-      :content-id="learningProgressMeta.contentId"
-      :content-type="learningProgressMeta.contentType"
-    />
   </section>
 </template>
 

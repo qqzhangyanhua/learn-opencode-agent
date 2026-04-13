@@ -109,15 +109,17 @@ ul {
 }
 
 .planning-node-main {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   gap: 0.5rem;
-  align-items: center;
+  align-items: start;
 }
 
 strong {
   color: var(--vp-c-text-1);
   font-size: 0.9rem;
+  min-width: 0;
+  line-height: 1.5;
 }
 
 em {
@@ -126,6 +128,7 @@ em {
   padding: 0.1rem 0.4rem;
   border-radius: 999px;
   color: inherit;
+  white-space: nowrap;
 }
 
 .planning-tree-legend {
