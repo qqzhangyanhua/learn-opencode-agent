@@ -199,6 +199,66 @@ export interface LearningProgressRecord {
   updatedAt: number
 }
 
+// ===== Planning 模拟场景契约 =====
+// ===== Planning 模拟场景契约 =====
+
+export type PlanningStageKey = 'goal' | 'outline' | 'decompose' | 'execute' | 'replan' | 'review'
+
+export type PlanningNodeStatus = 'pending' | 'current' | 'completed' | 'blocked'
+
+export interface PlanningChoice {
+  id: string
+  label: string
+  summary: string
+  consequenceKey: string
+}
+
+export interface PlanningTreeNodeSnapshot {
+  id: string
+  label: string
+  status: PlanningNodeStatus
+  parentId?: string
+}
+
+export interface PlanningReplayModule {
+  name: string
+  purpose: string
+}
+
+export interface PlanningReplaySummary {
+  headline: string
+  takeaways: string[]
+  modules: PlanningReplayModule[]
+}
+
+export interface PlanningStepState {
+  screen: number
+  stage: PlanningStageKey
+  title: string
+  prompt: string
+  hint?: string
+  choices: PlanningChoice[]
+  feedback: string
+  tree?: PlanningTreeNodeSnapshot[]
+  stageLabel: string
+  feedbackByChoice?: Partial<Record<PlanningChoice['id'], string>>
+  replaySummary?: PlanningReplaySummary
+  context?: string
+}
+
+export interface PlanningScenario {
+  missionTitle: string
+  missionDescription: string
+  screens: PlanningStepState[]
+}
+
+export interface PlanningFlowSimulatorProps {
+  scenario: PlanningScenario
+  activeScreen?: number
+  onChoiceSelected?: (choiceId: string, screen: PlanningStepState) => void
+  onStageChange?: (stage: PlanningStageKey) => void
+}
+
 export interface LearningProgressToggleProps {
   contentId?: string | null
   contentType: ContentType
