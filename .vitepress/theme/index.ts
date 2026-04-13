@@ -56,7 +56,6 @@ const asyncGlobalComponents = [
   ['RagAccuracyDemo', asyncComponent(() => import('./components/RagAccuracyDemo.vue'))],
   ['MultiAgentWorkflowDetailed', asyncComponent(() => import('./components/MultiAgentWorkflowDetailed.vue'))],
   ['PlanningTreeDemo', asyncComponent(() => import('./components/PlanningTreeDemo.vue'))],
-  ['PlanningFlowSimulator', asyncComponent(() => import('./components/PlanningFlowSimulator.vue'))],
   ['ContextEngineeringExtended', asyncComponent(() => import('./components/ContextEngineeringExtended.vue'))],
   ['PromptDesignStudio', asyncComponent(() => import('./components/PromptDesignStudio.vue'))],
   ['ProductionArchitectureDiagram', asyncComponent(() => import('./components/ProductionArchitectureDiagram.vue'))],
@@ -125,6 +124,9 @@ const syncGlobalComponents = [
 const AsyncPracticeProjectSourceFiles = asyncComponent(() =>
   import('./components/PracticeProjectSourceFiles.vue')
 )
+const AsyncPlanningFlowSimulator = asyncComponent(() =>
+  import('./components/PlanningFlowSimulator.vue')
+)
 
 export default {
   extends: DefaultTheme,
@@ -138,5 +140,6 @@ export default {
     }
 
     app.component('PracticeProjectSourceFiles', AsyncPracticeProjectSourceFiles)
+    app.component('PlanningFlowSimulator', AsyncPlanningFlowSimulator)
   }
 } satisfies Theme
