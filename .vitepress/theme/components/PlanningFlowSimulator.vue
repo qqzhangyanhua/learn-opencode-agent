@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { planningSimulatorScenario } from '../data/planning-simulator-scenario'
-import type { PlanningChoice, PlanningStepState } from './types'
+import type { PlanningChoice, PlanningFlowSimulatorProps, PlanningStepState } from './types'
 import PlanningMissionCard from './PlanningMissionCard.vue'
 import PlanningDecisionPanel from './PlanningDecisionPanel.vue'
 import PlanningTreeCanvas from './PlanningTreeCanvas.vue'
@@ -9,14 +9,16 @@ import PlanningFeedbackPanel from './PlanningFeedbackPanel.vue'
 import PlanningStageBar from './PlanningStageBar.vue'
 import PlanningReplaySummary from './PlanningReplaySummary.vue'
 
-const scenario = planningSimulatorScenario
+const props = withDefaults(defineProps<PlanningFlowSimulatorProps>(), {
+  scenario: () => planningSimulatorScenario
+})
 
-const currentScreen = ref(1)
+const currentScreen = ref(props.activeScreen ?? 1)
 const selectedPath = ref<string[]>([])
 const didReplan = ref(false)
 
 const currentStep = computed<PlanningStepState | undefined>(() =>
-  scenario.screens.find(step => step.screen === currentScreen.value)
+  props.scenario.screens.find(step => step.screen === currentScreen.value)
 )
 
 const latestChoiceLabel = computed(() => {
@@ -26,7 +28,7 @@ const latestChoiceLabel = computed(() => {
 })
 
 function findChoiceById(choiceId: string): PlanningChoice | undefined {
-  for (const step of scenario.screens) {
+  for (const step of props.scenario.screens) {
     const choice = step.choices.find(item => item.id === choiceId)
     if (choice) return choice
   }
@@ -42,7 +44,7 @@ function choose(choiceId: string) {
     didReplan.value = true
   }
 
-  const isLastScreen = currentScreen.value >= scenario.screens.length
+  const isLastScreen = currentScreen.value >= props.scenario.screens.length
   if (!isLastScreen) {
     currentScreen.value += 1
   }
@@ -52,8 +54,8 @@ function choose(choiceId: string) {
 <template>
   <section class="planning-flow-simulator">
     <PlanningMissionCard
-      :mission-title="scenario.missionTitle"
-      :mission-description="scenario.missionDescription"
+      :mission-title="props.scenario.missionTitle"
+      :mission-description="props.scenario.missionDescription"
       :step-title="currentStep?.title"
       :stage-label="currentStep?.stageLabel"
     />
@@ -87,7 +89,7 @@ function choose(choiceId: string) {
     />
 
     <PlanningStageBar
-      :screens="scenario.screens"
+      :screens="props.scenario.screens"
       :current-screen="currentScreen"
     />
   </section>

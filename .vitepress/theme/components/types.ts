@@ -253,7 +253,7 @@ export interface PlanningScenario {
 }
 
 export interface PlanningFlowSimulatorProps {
-  scenario: PlanningScenario
+  scenario?: PlanningScenario
   activeScreen?: number
   onChoiceSelected?: (choiceId: string, screen: PlanningStepState) => void
   onStageChange?: (stage: PlanningStageKey) => void
