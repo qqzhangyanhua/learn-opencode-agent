@@ -3,6 +3,7 @@ node_modules/
 .vitepress/dist/
 dist/
 .worktrees/
+.superpowers/
 *.local
 .DS_Store
 .claude/settings.local.json
