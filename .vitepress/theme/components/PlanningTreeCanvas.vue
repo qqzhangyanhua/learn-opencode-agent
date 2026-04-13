@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { PlanningTreeNodeSnapshot } from './types'
 
 interface PlanningTreeCanvasProps {
@@ -6,29 +7,60 @@ interface PlanningTreeCanvasProps {
   nodes: PlanningTreeNodeSnapshot[]
 }
 
-defineProps<PlanningTreeCanvasProps>()
+const props = defineProps<PlanningTreeCanvasProps>()
 
-const statusTextMap = {
-  pending: '待处理',
-  current: '进行中',
-  completed: '已完成',
-  blocked: '阻塞'
+const statusMetaMap = {
+  pending: { label: '待处理', className: 'status-pending' },
+  current: { label: '进行中', className: 'status-current' },
+  completed: { label: '已完成', className: 'status-completed' },
+  blocked: { label: '阻塞', className: 'status-blocked' }
 } as const
+
+const treeRows = computed(() => {
+  const nodeMap = new Map(props.nodes.map(node => [node.id, node]))
+
+  return props.nodes.map(node => {
+    let depth = 0
+    let parent = node.parentId ? nodeMap.get(node.parentId) : undefined
+    while (parent) {
+      depth += 1
+      parent = parent.parentId ? nodeMap.get(parent.parentId) : undefined
+    }
+
+    return {
+      ...node,
+      depth,
+      parentLabel: node.parentId ? nodeMap.get(node.parentId)?.label : undefined
+    }
+  })
+})
 </script>
 
 <template>
   <section class="planning-tree-canvas">
     <header>
       <h4>任务树</h4>
-      <span>{{ stageLabel }}</span>
+      <span>{{ props.stageLabel }}</span>
     </header>
+    <p class="planning-tree-legend">
+      <i class="status-current"></i> 当前推进
+      <i class="status-blocked"></i> 阻塞路径
+      <i class="status-completed"></i> 已完成
+      <i class="status-pending"></i> 待执行
+    </p>
     <ul>
-      <li v-for="node in nodes" :key="node.id" class="planning-tree-node">
+      <li
+        v-for="node in treeRows"
+        :key="node.id"
+        class="planning-tree-node"
+        :class="statusMetaMap[node.status].className"
+        :style="{ '--node-depth': `${node.depth}` }"
+      >
         <div class="planning-node-main">
           <strong>{{ node.label }}</strong>
-          <em :class="`status-${node.status}`">{{ statusTextMap[node.status] }}</em>
+          <em>{{ statusMetaMap[node.status].label }}</em>
         </div>
-        <p v-if="node.parentId" class="planning-node-parent">依赖父节点：{{ node.parentId }}</p>
+        <p v-if="node.parentLabel" class="planning-node-parent">来源节点：{{ node.parentLabel }}</p>
       </li>
     </ul>
   </section>
@@ -64,14 +96,16 @@ ul {
   padding: 0;
   list-style: none;
   display: grid;
-  gap: 0.45rem;
+  gap: 0.5rem;
 }
 
 .planning-tree-node {
-  border: 1px solid var(--vp-c-divider);
+  border: 1px solid color-mix(in srgb, var(--vp-c-divider) 88%, transparent);
   border-radius: 8px;
   padding: 0.55rem 0.65rem;
   background: var(--vp-c-bg-soft);
+  border-left-width: 4px;
+  margin-left: calc(var(--node-depth) * 14px);
 }
 
 .planning-node-main {
@@ -91,26 +125,56 @@ em {
   font-size: 0.75rem;
   padding: 0.1rem 0.4rem;
   border-radius: 999px;
+  color: inherit;
 }
 
-.status-pending {
+.planning-tree-legend {
+  display: flex;
+  gap: 0.7rem;
+  flex-wrap: wrap;
+  margin: 0 0 0.75rem;
+  font-size: 0.76rem;
+  color: var(--vp-c-text-3);
+}
+
+.planning-tree-legend i {
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  display: inline-block;
+  margin-right: 0.25rem;
+}
+
+.status-pending,
+.status-pending em,
+.planning-tree-legend .status-pending {
   color: var(--vp-c-text-2);
-  background: var(--vp-c-default-soft);
+  border-left-color: #64748b;
+  background: color-mix(in srgb, #64748b 10%, var(--vp-c-bg-soft));
 }
 
-.status-current {
+.status-current,
+.status-current em,
+.planning-tree-legend .status-current {
   color: #155e75;
-  background: #cffafe;
+  border-left-color: #0891b2;
+  background: #ecfeff;
 }
 
-.status-completed {
+.status-completed,
+.status-completed em,
+.planning-tree-legend .status-completed {
   color: #166534;
-  background: #dcfce7;
+  border-left-color: #16a34a;
+  background: #f0fdf4;
 }
 
-.status-blocked {
+.status-blocked,
+.status-blocked em,
+.planning-tree-legend .status-blocked {
   color: #991b1b;
-  background: #fee2e2;
+  border-left-color: #dc2626;
+  background: #fff1f2;
 }
 
 .planning-node-parent {

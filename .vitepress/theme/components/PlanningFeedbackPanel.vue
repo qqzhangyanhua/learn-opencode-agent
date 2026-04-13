@@ -1,19 +1,30 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+
 interface PlanningFeedbackPanelProps {
   title: string
   feedback: string
+  feedbackByChoice?: Partial<Record<string, string>>
+  activeChoiceId?: string
   latestChoiceLabel?: string
 }
 
-defineProps<PlanningFeedbackPanelProps>()
+const props = defineProps<PlanningFeedbackPanelProps>()
+
+const resolvedFeedback = computed(() => {
+  if (props.activeChoiceId && props.feedbackByChoice?.[props.activeChoiceId]) {
+    return props.feedbackByChoice[props.activeChoiceId] ?? props.feedback
+  }
+  return props.feedback
+})
 </script>
 
 <template>
   <aside class="planning-feedback-panel">
-    <h4>{{ title }}</h4>
-    <p>{{ feedback }}</p>
-    <p v-if="latestChoiceLabel" class="planning-feedback-choice">
-      最近一次选择：{{ latestChoiceLabel }}
+    <h4>{{ props.title }}</h4>
+    <p>{{ resolvedFeedback }}</p>
+    <p v-if="props.latestChoiceLabel" class="planning-feedback-choice">
+      最近一次选择：{{ props.latestChoiceLabel }}
     </p>
   </aside>
 </template>

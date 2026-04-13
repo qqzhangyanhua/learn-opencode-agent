@@ -1,13 +1,29 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { planningSimulatorScenario } from '../data/planning-simulator-scenario'
-import type { PlanningChoice, PlanningFlowSimulatorProps, PlanningStepState } from './types'
+import type {
+  PlanningChoice,
+  PlanningFlowSimulatorProps,
+  PlanningStepState,
+  PlanningTreeNodeSnapshot
+} from './types'
 import PlanningMissionCard from './PlanningMissionCard.vue'
 import PlanningDecisionPanel from './PlanningDecisionPanel.vue'
 import PlanningTreeCanvas from './PlanningTreeCanvas.vue'
 import PlanningFeedbackPanel from './PlanningFeedbackPanel.vue'
 import PlanningStageBar from './PlanningStageBar.vue'
 import PlanningReplaySummary from './PlanningReplaySummary.vue'
+
+interface PlanningChoiceMeta {
+  granularity?: '粗粒度' | '中粒度' | '细粒度'
+  didReplan?: boolean
+}
+
+type PlanningBranchingStep = PlanningStepState & {
+  treeByChoice?: Partial<Record<string, PlanningTreeNodeSnapshot[]>>
+  feedbackByChoice?: Partial<Record<string, string>>
+  choiceMeta?: Partial<Record<string, PlanningChoiceMeta>>
+}
 
 const props = withDefaults(defineProps<PlanningFlowSimulatorProps>(), {
   scenario: () => planningSimulatorScenario
@@ -16,13 +32,31 @@ const props = withDefaults(defineProps<PlanningFlowSimulatorProps>(), {
 const currentScreen = ref(props.activeScreen ?? 1)
 const selectedPath = ref<string[]>([])
 const didReplan = ref(false)
+const selectedGranularity = ref<PlanningChoiceMeta['granularity']>()
 
-const currentStep = computed<PlanningStepState | undefined>(() =>
-  props.scenario.screens.find(step => step.screen === currentScreen.value)
+const currentStep = computed<PlanningBranchingStep | undefined>(() =>
+  props.scenario.screens.find(step => step.screen === currentScreen.value) as
+    | PlanningBranchingStep
+    | undefined
 )
 
+const activeChoiceId = computed(() => {
+  if (!currentStep.value) return undefined
+  return resolveChoiceForStep(currentStep.value)
+})
+
+const currentFeedback = computed(() => {
+  if (!currentStep.value) return ''
+  return resolveCurrentFeedback(currentStep.value)
+})
+
+const currentTree = computed(() => {
+  if (!currentStep.value) return []
+  return resolveCurrentTree(currentStep.value)
+})
+
 const latestChoiceLabel = computed(() => {
-  const latestChoiceId = selectedPath.value[selectedPath.value.length - 1]
+  const latestChoiceId = activeChoiceId.value ?? selectedPath.value[selectedPath.value.length - 1]
   if (!latestChoiceId) return ''
   return findChoiceById(latestChoiceId)?.label ?? latestChoiceId
 })
@@ -35,12 +69,59 @@ function findChoiceById(choiceId: string): PlanningChoice | undefined {
   return undefined
 }
 
+function resolveChoiceForStep(step: PlanningBranchingStep): string | undefined {
+  const choiceForCurrent = selectedPath.value[step.screen - 1]
+  const choiceForPrevious = selectedPath.value[step.screen - 2]
+  const candidateChoices = [choiceForCurrent, choiceForPrevious].filter(Boolean) as string[]
+
+  const hasTreeByChoice = Boolean(step.treeByChoice)
+  const hasFeedbackByChoice = Boolean(step.feedbackByChoice)
+
+  if (!hasTreeByChoice && !hasFeedbackByChoice) {
+    return candidateChoices[0]
+  }
+
+  for (const choiceId of candidateChoices) {
+    if (step.feedbackByChoice?.[choiceId] || step.treeByChoice?.[choiceId]) {
+      return choiceId
+    }
+  }
+
+  return candidateChoices[0]
+}
+
+function resolveCurrentFeedback(step: PlanningBranchingStep): string {
+  const resolvedChoiceId = resolveChoiceForStep(step)
+  if (resolvedChoiceId && step.feedbackByChoice?.[resolvedChoiceId]) {
+    return step.feedbackByChoice[resolvedChoiceId] ?? step.feedback
+  }
+
+  if (selectedGranularity.value && step.screen >= 4) {
+    return `${step.feedback} 当前任务粒度：${selectedGranularity.value}。`
+  }
+
+  return step.feedback
+}
+
+function resolveCurrentTree(step: PlanningBranchingStep): PlanningTreeNodeSnapshot[] {
+  const resolvedChoiceId = resolveChoiceForStep(step)
+  if (resolvedChoiceId && step.treeByChoice?.[resolvedChoiceId]) {
+    return step.treeByChoice[resolvedChoiceId] ?? []
+  }
+  return step.tree ?? []
+}
+
 function choose(choiceId: string) {
   if (!currentStep.value) return
 
   selectedPath.value.push(choiceId)
 
-  if (choiceId === 'replan') {
+  const choiceMeta = currentStep.value.choiceMeta?.[choiceId]
+  if (choiceMeta?.granularity) {
+    selectedGranularity.value = choiceMeta.granularity
+  }
+
+  if (choiceId === 'replan' || choiceMeta?.didReplan) {
     didReplan.value = true
   }
 
@@ -71,12 +152,14 @@ function choose(choiceId: string) {
 
       <PlanningTreeCanvas
         :stage-label="currentStep?.stageLabel ?? ''"
-        :nodes="currentStep?.tree ?? []"
+        :nodes="currentTree"
       />
 
       <PlanningFeedbackPanel
         :title="`${currentStep?.stageLabel ?? '阶段'}反馈`"
-        :feedback="currentStep?.feedback ?? ''"
+        :feedback="currentFeedback"
+        :feedback-by-choice="currentStep?.feedbackByChoice"
+        :active-choice-id="activeChoiceId"
         :latest-choice-label="latestChoiceLabel"
       />
     </div>
