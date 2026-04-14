@@ -1,0 +1,62 @@
+docs/12-plugins-extensions/index.md
+  63c751f988015bb3 65-66,86-100
+scripts/check-chapter-experience.mjs
+  ba6c69e601e5f575 17-21,103-137,214-233,281-285,287-292,370-382,386-441,519-543
+docs/08-http-api-server/index.md
+  ba6c69e601e5f575 172,190
+  63c751f988015bb3 171,173-189,454,456-467,469
+.vitepress/theme/index.ts
+  ba6c69e601e5f575 38,93-94
+docs/11-code-intelligence/index.md
+  ba6c69e601e5f575 198
+  537d0f898b8eed6e 197
+docs/13-deployment-infrastructure/index.md
+  ba6c69e601e5f575 314-317
+  63c751f988015bb3 161
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "07f1d307c3a78ecbdb27c3dad076dddc75cfa2bc",
+  "prompts": {
+    "537d0f898b8eed6e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "10df6efb-c131-42c3-921f-d0ff458f970d",
+        "model": "claude-sonnet-4.5"
+      },
+      "human_author": "张艳华",
+      "messages": [],
+      "total_additions": 2,
+      "total_deletions": 5,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    },
+    "63c751f988015bb3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e8462a0a-4a96-4d7c-b217-e6239ebcde23",
+        "model": "claude-sonnet-4.5"
+      },
+      "human_author": "张艳华",
+      "messages": [],
+      "total_additions": 62,
+      "total_deletions": 17,
+      "accepted_lines": 62,
+      "overriden_lines": 0
+    },
+    "ba6c69e601e5f575": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d8bc4-3ce6-7b32-8a9c-7114008e1fc7",
+        "model": "gpt-5.1-codex-mini"
+      },
+      "human_author": "张艳华",
+      "messages": [],
+      "total_additions": 4517,
+      "total_deletions": 17,
+      "accepted_lines": 3871,
+      "overriden_lines": 0
+    }
+  }
+}
