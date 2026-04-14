@@ -3,7 +3,8 @@ import { computed, ref } from 'vue'
 import { planningSimulatorScenario } from '../data/planning-simulator-scenario'
 import type {
   PlanningChoice,
-  PlanningFlowSimulatorProps,
+  PlanningScenario,
+  PlanningStageKey,
   PlanningStepState,
   PlanningTreeNodeSnapshot
 } from './types'
@@ -25,7 +26,12 @@ type PlanningBranchingStep = PlanningStepState & {
   choiceMeta?: Partial<Record<string, PlanningChoiceMeta>>
 }
 
-const props = withDefaults(defineProps<PlanningFlowSimulatorProps>(), {
+const props = withDefaults(defineProps<{
+  scenario?: PlanningScenario
+  activeScreen?: number
+  onChoiceSelected?: (choiceId: string, screen: PlanningStepState) => void
+  onStageChange?: (stage: PlanningStageKey) => void
+}>(), {
   scenario: () => planningSimulatorScenario
 })
 
@@ -111,24 +117,55 @@ function resolveCurrentTree(step: PlanningBranchingStep): PlanningTreeNodeSnapsh
   return step.tree ?? []
 }
 
+function syncChoiceMeta() {
+  selectedGranularity.value = undefined
+  didReplan.value = false
+
+  selectedPath.value.forEach((choiceId, index) => {
+    if (!choiceId) return
+
+    const step = props.scenario.screens[index] as PlanningBranchingStep | undefined
+    const choiceMeta = step?.choiceMeta?.[choiceId]
+
+    if (choiceMeta?.granularity) {
+      selectedGranularity.value = choiceMeta.granularity
+    }
+
+    if (choiceId === 'replan' || choiceMeta?.didReplan) {
+      didReplan.value = true
+    }
+  })
+}
+
+function setCurrentScreen(screen: number) {
+  currentScreen.value = screen
+
+  const currentStage = props.scenario.screens.find(step => step.screen === screen)?.stage
+  if (currentStage) {
+    props.onStageChange?.(currentStage)
+  }
+}
+
 function choose(choiceId: string) {
   if (!currentStep.value) return
 
-  selectedPath.value.push(choiceId)
+  const screenIndex = currentScreen.value - 1
+  const nextSelectedPath = selectedPath.value.slice(0, screenIndex)
+  nextSelectedPath[screenIndex] = choiceId
+  selectedPath.value = nextSelectedPath
+  syncChoiceMeta()
 
-  const choiceMeta = currentStep.value.choiceMeta?.[choiceId]
-  if (choiceMeta?.granularity) {
-    selectedGranularity.value = choiceMeta.granularity
-  }
-
-  if (choiceId === 'replan' || choiceMeta?.didReplan) {
-    didReplan.value = true
-  }
+  props.onChoiceSelected?.(choiceId, currentStep.value)
 
   const isLastScreen = currentScreen.value >= props.scenario.screens.length
   if (!isLastScreen) {
-    currentScreen.value += 1
+    setCurrentScreen(currentScreen.value + 1)
   }
+}
+
+function changeScreen(screen: number) {
+  if (screen < 1 || screen > props.scenario.screens.length) return
+  setCurrentScreen(screen)
 }
 </script>
 
@@ -174,6 +211,7 @@ function choose(choiceId: string) {
     <PlanningStageBar
       :screens="props.scenario.screens"
       :current-screen="currentScreen"
+      @select-screen="changeScreen"
     />
   </section>
 </template>

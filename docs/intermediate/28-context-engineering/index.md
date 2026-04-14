@@ -82,6 +82,8 @@ system prompt
 拼：最后如何组装成 messages
 ```
 
+先依次切换“选 / 排 / 压 / 拼”，再观察同一组候选上下文在不同阶段是怎样变化的。
+
 <ContextEngineeringExtended
   :candidates="[
     { id: 'sys', label: 'System Prompt', type: 'conversation', relevanceScore: 0.99, recencyScore: 1.0, tokens: 450, preview: '你是一个专业代码助手...' },

@@ -262,7 +262,9 @@ Remote Server 配置示例：
 
 ## 7.3 工具发现与转换
 
-**MCP 协议生命周期动画：** 从 spawn 子进程、initialize 握手、tools/list 发现工具，到最终 tools/call 执行，完整演示一次 MCP 通信过程。
+先把下面组件顶部那条“接入主链”记住：`读取配置 -> 选 transport -> 建立连接 -> tools/list -> 转 Tool.Info -> 注入 registry -> Agent 调用`。
+
+下面的握手时序只是这条主链在 `stdio` 场景中的一个子过程。真正要记住的是：OpenCode 作为 **MCP Client**，会先把外部 MCP Server 暴露的工具发现出来，再转换成内部统一工具接口。
 
 <McpHandshake />
 

@@ -8,6 +8,9 @@ interface PlanningStageBarProps {
 }
 
 const props = defineProps<PlanningStageBarProps>()
+const emit = defineEmits<{
+  (event: 'select-screen', screen: number): void
+}>()
 
 const stageItems = computed(() =>
   props.screens.map(step => ({
@@ -28,8 +31,15 @@ const stageItems = computed(() =>
           done: item.screen < currentScreen
         }"
       >
-        <span class="planning-stage-index">{{ item.screen }}</span>
-        <span class="planning-stage-label">{{ item.label }}</span>
+        <button
+          type="button"
+          :aria-current="item.screen === currentScreen ? 'step' : undefined"
+          :aria-label="`切换到${item.label}`"
+          @click="emit('select-screen', item.screen)"
+        >
+          <span class="planning-stage-index">{{ item.screen }}</span>
+          <span class="planning-stage-label">{{ item.label }}</span>
+        </button>
       </li>
     </ol>
   </nav>
@@ -55,11 +65,27 @@ ol {
 li {
   border: 1px solid var(--vp-c-divider);
   border-radius: 8px;
+  min-height: 3rem;
+  overflow: hidden;
+}
+
+button {
+  width: 100%;
+  min-height: 3rem;
+  border: 0;
   padding: 0.4rem 0.45rem;
+  background: transparent;
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
-  min-height: 3rem;
+  text-align: left;
+  color: inherit;
+  cursor: pointer;
+}
+
+button:focus-visible {
+  outline: 2px solid var(--vp-c-brand-1);
+  outline-offset: -2px;
 }
 
 li.done {

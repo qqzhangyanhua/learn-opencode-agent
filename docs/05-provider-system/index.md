@@ -553,6 +553,8 @@ function wrapSSE(res: Response, ms: number, ctl: AbortController) {
 
 **限流重试动画：** 演示 429 限流响应 → retryable() 分类 → retry-after 倒计时 → 重试成功的完整路径，以及哪些错误会被判定为不可重试。
 
+先看统一调用主链，再把下面的 retry 演示当成“请求已经发出后，Provider 如何按统一规则处理失败”的子场景。
+
 <ProviderFallback />
 
 ---

@@ -55,6 +55,7 @@ const asyncGlobalComponents = [
   ['MemorySystemCss', asyncComponent(() => import('./components/animations/css/MemorySystemCss.vue'))],
   ['RagAccuracyDemo', asyncComponent(() => import('./components/RagAccuracyDemo.vue'))],
   ['MultiAgentWorkflowDetailed', asyncComponent(() => import('./components/MultiAgentWorkflowDetailed.vue'))],
+  ['MultiAgentModeSimulator', asyncComponent(() => import('./components/MultiAgentModeSimulator.vue'))],
   ['PlanningTreeDemo', asyncComponent(() => import('./components/PlanningTreeDemo.vue'))],
   ['ContextEngineeringExtended', asyncComponent(() => import('./components/ContextEngineeringExtended.vue'))],
   ['PromptDesignStudio', asyncComponent(() => import('./components/PromptDesignStudio.vue'))],

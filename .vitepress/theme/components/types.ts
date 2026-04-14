@@ -388,6 +388,47 @@ export interface MultiAgentWorkflowDetailedProps {
   autoPlay?: boolean
 }
 
+export type MultiAgentModeKey = 'orchestrator' | 'debate' | 'pipeline'
+
+export interface MultiAgentModeAgent {
+  id: string
+  name: string
+  role: string
+  summary: string
+}
+
+export type MultiAgentModeEventType = 'task' | 'result' | 'debate' | 'artifact' | 'decision'
+
+export interface MultiAgentModeEvent {
+  id: string
+  from: string
+  to?: string
+  type: MultiAgentModeEventType
+  content: string
+  metadata?: Record<string, string | number>
+}
+
+export interface MultiAgentModeStage {
+  id: string
+  label: string
+  headline: string
+  insight: string
+  risk: string
+  events: MultiAgentModeEvent[]
+}
+
+export interface MultiAgentModeScenario {
+  id: MultiAgentModeKey
+  label: string
+  summary: string
+  agents: MultiAgentModeAgent[]
+  stages: MultiAgentModeStage[]
+}
+
+export interface MultiAgentModeSimulatorProps {
+  initialModeId?: MultiAgentModeKey
+}
+
 // ===== Ch27: Planning 机制 =====
 
 export interface PlanTaskNode {

@@ -85,6 +85,8 @@ Agent 角色定义
   -> 最后让权限和工具系统兜底
 ```
 
+点击左侧不同 section，观察它在运行时更接近 `system.ts`、`instruction.ts`、`prompt.ts` 还是 `llm.ts`。
+
 <PromptDesignStudio :templates="[
   {
     id: 'code-agent',

@@ -76,6 +76,8 @@ roleDescription: 建立安全边界机制，防范注入攻击与权限滥用。
   -> 工具执行前再做运行时校验
 ```
 
+先切换四个安全阶段，再观察同一个请求是怎样被逐层收口的。
+
 <SecurityBoundaryDemo
   :rules="[
     { id: 'injection', name: 'Prompt Injection', level: 'critical', description: '检测输入中的越权指令尝试', triggerKeyword: 'ignore previous' },
