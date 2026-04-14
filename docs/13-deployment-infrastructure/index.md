@@ -158,11 +158,7 @@ graph TB
 
 ## 14.1 本地运行时与开发环境
 
-**架构动画：** 从“本地产品面”切换到“云端产品面”，看清 `packages/opencode`、`packages/function`、`packages/console` 与 `infra/` 的真实边界。
-
-<LocalCloudTopologyDemo />
-
-### 先分清“本地 OpenCode”和“云端 OpenCode”
+### 先分清”本地 OpenCode”和”云端 OpenCode”
 
 如果只看产品表层，很容易把 OpenCode 理解成“一个 CLI，再加一点云端能力”。但从仓库结构看，本地部分本身就已经拆成了多入口：
 
@@ -314,6 +310,10 @@ args.bindings = $resolve(args.bindings).apply((bindings) => [
 ---
 
 ## 14.3 `packages/function` 与 `packages/console` 的云端架构
+
+先不要把这些目录都看成“云端后端”，先用一条账号 / 订阅 / 模型配置链路，分清每一层到底负责什么。
+
+<CloudLayerResponsibilityDemo />
 
 ### `packages/function` 更像产品级公共 API
 

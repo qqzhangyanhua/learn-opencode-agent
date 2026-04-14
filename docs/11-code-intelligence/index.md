@@ -194,6 +194,8 @@ const state = Instance.state(
 
 ## 12.4 懒加载客户端：getClients 的状态机
 
+先记住这条主链：AI 改完文件后，不是直接”自动修复”，而是先通过 `touchFile` 和 `getClients` 把对应语言服务器拉起来，再由 `didChange` 触发诊断。
+
 每当工具需要对某个文件执行 LSP 操作，都会调用 `getClients(file)`：
 
 ```typescript

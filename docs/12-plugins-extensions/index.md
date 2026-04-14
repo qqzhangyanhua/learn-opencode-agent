@@ -62,8 +62,8 @@ graph LR
 
 如果你是 Agent 开发初学者，这一章最重要的目标不是背概念，而是先分清楚 OpenCode 里几种扩展方式各自负责什么：
 
-- **插件（Plugin）**：写 TypeScript 代码，接入 Hook、认证逻辑、自定义工具，适合“要运行逻辑”的扩展
-- **Skill**：写 `SKILL.md`，给 Agent 注入一整套工作流和额外资源，适合“要教模型怎么做”的扩展
+- **插件（Plugin）**：写 TypeScript 代码，接入 Hook、认证逻辑、自定义工具，适合”要运行逻辑”的扩展
+- **Skill**：写 `SKILL.md`，给 Agent 注入一整套工作流和额外资源，适合”要教模型怎么做”的扩展
 - **命令（Command）**：写 Markdown 模板，生成固定提示词，适合高频场景复用
 - **MCP Prompt / Tool**：来自外部 MCP 服务器，适合把外部系统能力接进来
 - **编辑器扩展**：如 VS Code / Zed，把 OpenCode 接到具体开发环境里
@@ -83,7 +83,21 @@ packages/opencode/src/tool/registry.ts -> 把插件工具接入 Agent
 sdks/vscode/src/extension.ts -> 把编辑器上下文送进 opencode TUI
 ```
 
-这也是 OpenCode 值得写进电子书的地方：它不是抽象地谈“Agent 可扩展”，而是把扩展能力拆成了几种成本不同、适用范围不同的工程手段。
+这也是 OpenCode 值得写进电子书的地方：它不是抽象地谈”Agent 可扩展”，而是把扩展能力拆成了几种成本不同、适用范围不同的工程手段。
+
+### 扩展方式选择指南
+
+先不要急着看技术实现，先按”我要扩展什么能力”来选最合适的扩展方式：
+
+| 你的目标 | 最合适的方式 | 原因 |
+| --- | --- | --- |
+| 复用一段固定提示词 | **Command** | 最低成本，只需写 Markdown 模板 |
+| 让 Agent 学会一套稳定步骤 | **Skill** | 适合注入完整工作流和资源 |
+| 给 Agent 增加可执行能力 | **Plugin Tool** | 需要真正的运行时代码能力 |
+| 接入 GitHub、Slack 等外部系统 | **MCP 或 Plugin** | 优先看是否有标准化服务边界 |
+| 把编辑器选区、文件送进 OpenCode | **编辑器扩展** | 需要 IDE 宿主环境上下文 |
+
+**推荐学习顺序**：先写 Command → 再写 Skill → 最后写 Plugin。这是成本最低、最适合建立扩展手感的路径。
 
 ---
 
@@ -133,10 +147,6 @@ plugin / skill / command / MCP prompt 等扩展来源
 - 插件接入之后仍然要回到统一权限、工具和会话边界中，不是随意外挂逻辑。
 
 ## 13.1 扩展体系全景
-
-**决策动画：** 从“我想扩展什么能力”出发，沿着需求分支走一遍，快速判断应该写 Plugin、Skill、Command、MCP 还是编辑器扩展。
-
-<ExtensionDecisionFlowDemo />
 
 ### 先从目录理解整体结构
 
