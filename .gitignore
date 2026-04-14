@@ -9,3 +9,4 @@ dist/
 .claude/settings.local.json
 .claude/worktrees/
 .env
+.playwright-cli/
