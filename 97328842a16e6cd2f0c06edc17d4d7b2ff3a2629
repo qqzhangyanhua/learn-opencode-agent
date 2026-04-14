@@ -1,0 +1,74 @@
+docs/superpowers/plans/2026-04-14-extension-capability-selector-implementation.md
+  ba6c69e601e5f575 1-165
+docs/superpowers/specs/2026-04-14-extension-capability-selector-design.md
+  ba6c69e601e5f575 1-198
+docs/superpowers/specs/2026-04-14-http-api-permission-gate-design.md
+  ba6c69e601e5f575 1-195
+docs/superpowers/specs/2026-04-14-testing-fixture-boundary-demo-design.md
+  ba6c69e601e5f575 1-280
+.vitepress/theme/components/CloudLayerResponsibilityDemo.vue
+  ba6c69e601e5f575 1-442
+.vitepress/theme/components/HttpPermissionGateDemo.vue
+  ba6c69e601e5f575 1-701
+docs/superpowers/plans/2026-04-14-lsp-edit-diagnostic-flow-implementation.md
+  ba6c69e601e5f575 1-158
+docs/superpowers/specs/2026-04-14-cloud-layer-responsibility-demo-design.md
+  ba6c69e601e5f575 1-310
+docs/superpowers/plans/2026-04-14-http-api-permission-gate-implementation.md
+  ba6c69e601e5f575 1-160
+.vitepress/theme/components/ExtensionCapabilitySelector.vue
+  ba6c69e601e5f575 1-532,534-536,543-549,554-556
+  63c751f988015bb3 533,537-542,550-553
+docs/superpowers/specs/2026-04-14-lsp-edit-diagnostic-flow-design.md
+  ba6c69e601e5f575 1-193
+docs/superpowers/plans/2026-04-14-cloud-layer-responsibility-demo-implementation.md
+  ba6c69e601e5f575 1-170
+docs/superpowers/plans/2026-04-14-testing-fixture-boundary-demo-implementation.md
+  ba6c69e601e5f575 1-172
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "97328842a16e6cd2f0c06edc17d4d7b2ff3a2629",
+  "prompts": {
+    "1c7b851c1b0c84e9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "2d2453d7-85ab-45e4-93b9-b8ccb71e23d6",
+        "model": "claude-sonnet-4.5"
+      },
+      "human_author": "张艳华",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 0,
+      "overriden_lines": 0
+    },
+    "63c751f988015bb3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e8462a0a-4a96-4d7c-b217-e6239ebcde23",
+        "model": "claude-sonnet-4.5"
+      },
+      "human_author": "张艳华",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 11,
+      "overriden_lines": 0
+    },
+    "ba6c69e601e5f575": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019d8bc4-3ce6-7b32-8a9c-7114008e1fc7",
+        "model": "gpt-5.1-codex-mini"
+      },
+      "human_author": "张艳华",
+      "messages": [],
+      "total_additions": 0,
+      "total_deletions": 0,
+      "accepted_lines": 3689,
+      "overriden_lines": 0
+    }
+  }
+}
