@@ -1,0 +1,23 @@
+.gitignore
+  0da5ea1a9f1f9eaa 12
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "07e68dbfce71910d2ecf564788cf29ab7b3ac2fc",
+  "prompts": {
+    "0da5ea1a9f1f9eaa": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "cae11245-e4ca-45c3-8ede-0bf55433ae0d",
+        "model": "claude-sonnet-4.5"
+      },
+      "human_author": "张艳华",
+      "messages": [],
+      "total_additions": 1,
+      "total_deletions": 0,
+      "accepted_lines": 1,
+      "overriden_lines": 0
+    }
+  }
+}
