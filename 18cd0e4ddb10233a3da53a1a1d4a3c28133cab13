@@ -1,0 +1,36 @@
+docs/interview/tools/index.md
+  74a0ab8d076163f8 46-52,60-66,74-80,88-94,102-108,118-124,132-138,146-152,160-166,174-180,188-194,202-208
+docs/interview/multi-agent/index.md
+  74a0ab8d076163f8 46-52,60-66,74-80,88-94,102-108,118-124,132-138,146-152,160-166,174-180,188-194,202-208
+docs/interview/planning/index.md
+  74a0ab8d076163f8 46-52,60-66,74-80,88-94,102-108,118-124,132-138,146-152,160-166,174-180,188-194,202-208
+docs/interview/rag/index.md
+  74a0ab8d076163f8 46-52,60-66,74-80,88-94,102-108,118-124,132-138,146-152,160-166,174-180,188-194,202-208
+docs/interview/fundamentals/index.md
+  74a0ab8d076163f8 46-52,60-66,74-80,88-94,102-108,118-124,132-138,146-152,160-166,174-180,188-194,202-208
+docs/interview/engineering/index.md
+  74a0ab8d076163f8 47-53,61-67,75-81,89-95,103-109,119-125,133-139,147-153,161-167,175-181,189-195,203-209
+docs/interview/memory/index.md
+  74a0ab8d076163f8 46-52,60-66,74-80,88-94,102-108,118-124,132-138,146-152,160-166,174-180,188-194,202-208
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "18cd0e4ddb10233a3da53a1a1d4a3c28133cab13",
+  "prompts": {
+    "74a0ab8d076163f8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019db31c-1827-7f11-a9fa-95ef8d84d33f",
+        "model": "gpt-5.4"
+      },
+      "human_author": "张艳华",
+      "messages": [],
+      "total_additions": 1447,
+      "total_deletions": 86,
+      "accepted_lines": 1447,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.tongbaninfo.com/cas/d8483b12c607a330e9b0f98aab58947fc3c30e95b5582828d92a3fba9330365e"
+    }
+  }
+}
