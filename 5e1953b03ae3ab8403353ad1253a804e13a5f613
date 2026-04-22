@@ -1,0 +1,24 @@
+docs/superpowers/plans/2026-04-22-interview-details-light-styling-implementation.md
+  74a0ab8d076163f8 1-176
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "5e1953b03ae3ab8403353ad1253a804e13a5f613",
+  "prompts": {
+    "74a0ab8d076163f8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019db31c-1827-7f11-a9fa-95ef8d84d33f",
+        "model": "gpt-5.4"
+      },
+      "human_author": "张艳华",
+      "messages": [],
+      "total_additions": 1035,
+      "total_deletions": 2,
+      "accepted_lines": 1035,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.tongbaninfo.com/cas/0fb6efad772b6f3097b35c4173c1aa757c10849e6c1b5cd933879ea74edcaedb"
+    }
+  }
+}
