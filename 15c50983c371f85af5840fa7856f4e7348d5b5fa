@@ -1,0 +1,38 @@
+docs/superpowers/specs/2026-04-22-interview-reading-simplification-design.md
+  74a0ab8d076163f8 1-184
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "15c50983c371f85af5840fa7856f4e7348d5b5fa",
+  "prompts": {
+    "67df26584fd08f84": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019daf82-2a87-7432-9b3b-70f56a9a8bab",
+        "model": "gpt-5.4"
+      },
+      "human_author": "张艳华",
+      "messages": [],
+      "total_additions": 859,
+      "total_deletions": 2,
+      "accepted_lines": 859,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.tongbaninfo.com/cas/9cc5402a17a33ce38c81c56d3a7611b195c4ebe12ecab6ec5e3e398a2dc061e7"
+    },
+    "74a0ab8d076163f8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019db31c-1827-7f11-a9fa-95ef8d84d33f",
+        "model": "gpt-5.4"
+      },
+      "human_author": "张艳华",
+      "messages": [],
+      "total_additions": 184,
+      "total_deletions": 0,
+      "accepted_lines": 184,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.tongbaninfo.com/cas/9846e7888582c1cbedd3ec85d6d5773e276ec46d9d1e692c86db1ea9ab296bf8"
+    }
+  }
+}
