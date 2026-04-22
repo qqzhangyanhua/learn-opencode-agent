@@ -12,18 +12,22 @@ const readingMapContent = readFileSync(path.join(rootDir, 'docs', 'reading-map.m
 
 const issues = []
 
-const requiredNavTexts = ['发现', '学习路径', '实践篇', '中级篇', '阅读地图']
+const requiredNavTexts = ['实践篇', '中级篇', '面试题专区', '专栏', '本书仓库']
 for (const text of requiredNavTexts) {
   if (!configContent.includes(`text: '${text}'`)) {
     issues.push(`顶层导航缺少「${text}」入口`)
   }
 }
 
-const rootSidebarLinks = ['/discover/', '/learning-paths/', '/practice/', '/intermediate/', '/reading-map']
+const rootSidebarLinks = ['/discover/', '/practice/', '/intermediate/', '/interview/']
 for (const link of rootSidebarLinks) {
   if (!configContent.includes(`link: '${link}'`)) {
     issues.push(`根侧边栏缺少 ${link} 入口`)
   }
+}
+
+if (!configContent.includes(`link: '/interview/fundamentals/'`)) {
+  issues.push('面试题专区侧边栏缺少基础概念入口')
 }
 
 if (!practiceContent.includes('/learning-paths/')) {

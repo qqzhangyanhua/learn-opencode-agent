@@ -203,6 +203,7 @@ export default withMermaid(defineConfig({
     nav: [
       { text: '实践篇', link: '/practice/', activeMatch: '/practice/' },
       { text: '中级篇', link: '/intermediate/', activeMatch: '/intermediate/' },
+      { text: '面试题专区', link: '/interview/', activeMatch: '/interview/' },
       {
         text: '专栏',
         items: [
@@ -516,10 +517,28 @@ export default withMermaid(defineConfig({
           ]
         },
       ],
+      '/interview/': [
+        { text: '← 返回首页', link: '/' },
+        { text: '专区总览', link: '/interview/' },
+        {
+          text: '能力分类',
+          collapsed: false,
+          items: [
+            { text: '基础概念', link: '/interview/fundamentals/' },
+            { text: '工具调用', link: '/interview/tools/' },
+            { text: '记忆', link: '/interview/memory/' },
+            { text: '规划', link: '/interview/planning/' },
+            { text: 'RAG', link: '/interview/rag/' },
+            { text: 'Multi-Agent', link: '/interview/multi-agent/' },
+            { text: '工程化', link: '/interview/engineering/' },
+          ]
+        },
+      ],
       '/': [
         { text: '发现中心', link: '/discover/' },
         { text: '实践篇总览', link: '/practice/' },
         { text: '中级篇导读', link: '/intermediate/' },
+        { text: '面试题专区', link: '/interview/' },
         { text: '术语表', link: '/glossary' },
         {
           text: '第一部分：AI Agent 基础',
