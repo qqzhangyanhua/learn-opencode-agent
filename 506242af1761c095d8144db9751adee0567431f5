@@ -1,0 +1,38 @@
+docs/interview/multi-agent/index.md
+  74a0ab8d076163f8 3
+docs/interview/rag/index.md
+  74a0ab8d076163f8 3
+docs/interview/memory/index.md
+  74a0ab8d076163f8 3
+docs/interview/fundamentals/index.md
+  74a0ab8d076163f8 3
+docs/interview/tools/index.md
+  74a0ab8d076163f8 3
+.vitepress/theme/custom.css
+  74a0ab8d076163f8 656-669
+docs/interview/engineering/index.md
+  74a0ab8d076163f8 3
+docs/interview/planning/index.md
+  74a0ab8d076163f8 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "506242af1761c095d8144db9751adee0567431f5",
+  "prompts": {
+    "74a0ab8d076163f8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019db31c-1827-7f11-a9fa-95ef8d84d33f",
+        "model": "gpt-5.4"
+      },
+      "human_author": "张艳华",
+      "messages": [],
+      "total_additions": 880,
+      "total_deletions": 2,
+      "accepted_lines": 880,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.tongbaninfo.com/cas/d0be63891a64b69212f815f08082962d644e5e62a8fcdf5db18845d03238d4e6"
+    }
+  }
+}
