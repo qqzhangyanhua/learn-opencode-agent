@@ -1,5 +1,6 @@
 ---
 title: Agent 面试题：工程化
+pageClass: interview-details-page
 description: 这一页整理 Agent 工程化高频题，帮助你回答评估、安全、监控、成本和生产可用性问题。
 contentType: support
 series: support

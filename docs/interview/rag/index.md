@@ -1,5 +1,6 @@
 ---
 title: Agent 面试题：RAG
+pageClass: interview-details-page
 description: 这一页整理 Agent 与 RAG 相关高频题，帮助你解释召回、生成、评估与失败模式。
 contentType: support
 series: support

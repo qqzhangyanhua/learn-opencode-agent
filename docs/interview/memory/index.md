@@ -1,5 +1,6 @@
 ---
 title: Agent 面试题：记忆
+pageClass: interview-details-page
 description: 这一页整理 Agent 记忆系统高频题，帮助你区分上下文、长期记忆和检索增强之间的边界。
 contentType: support
 series: support

@@ -1,5 +1,6 @@
 ---
 title: Agent 面试题：基础概念
+pageClass: interview-details-page
 description: 这一页整理 Agent 基础概念高频题，帮助你说清 Agent 的定义、边界与适用场景。
 contentType: support
 series: support

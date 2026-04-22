@@ -1,5 +1,6 @@
 ---
 title: Agent 面试题：规划
+pageClass: interview-details-page
 description: 这一页整理 Agent 规划机制高频题，帮助你解释为什么需要 Planning，以及它和 ReAct 的边界。
 contentType: support
 series: support

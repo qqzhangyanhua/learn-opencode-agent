@@ -1,5 +1,6 @@
 ---
 title: Agent 面试题：Multi-Agent
+pageClass: interview-details-page
 description: 这一页整理 Multi-Agent 相关高频题，帮助你回答分工设计、协作机制与系统复杂度问题。
 contentType: support
 series: support

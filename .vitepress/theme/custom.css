@@ -653,3 +653,17 @@ html {
   border-color: #f97316;
   color: #f97316;
 }
+
+.interview-details-page .vp-doc details {
+  margin-block: 0.25rem;
+}
+
+.interview-details-page .vp-doc summary {
+  font-weight: 600;
+  padding-block: 0.125rem;
+  cursor: pointer;
+}
+
+.interview-details-page .vp-doc details[open] > summary + * {
+  margin-top: 0.25rem;
+}

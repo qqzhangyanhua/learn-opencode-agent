@@ -1,5 +1,6 @@
 ---
 title: Agent 面试题：工具调用
+pageClass: interview-details-page
 description: 这一页整理 Agent 工具调用高频题，帮助你说清 Tool Use、权限边界和失败恢复机制。
 contentType: support
 series: support
