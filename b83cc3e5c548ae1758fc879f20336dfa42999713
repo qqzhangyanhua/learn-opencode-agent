@@ -1,0 +1,50 @@
+docs/interview/rag/index.md
+  55b77ba4523928a9 38,40,54-56,58,72-76,90,92-94,108-110,112,126-130,146,148-150,164-166,168,182-186,200,202-204,218-220,222,236-240,254-256,258
+docs/interview/tools/index.md
+  55b77ba4523928a9 38,40,54-56,58,72-76,90,92-94,108-110,112,126-130,146,148-150,164-166,168,182-186,200,202-204,218-220,222,236-240,254-256,258
+docs/interview/fundamentals/index.md
+  55b77ba4523928a9 38,40,54-56,58,72-76,90,92-94,108-110,112,126-130,146,148-150,164-166,168,182-186,200,202-204,218-220,222,236-240,254-256,258
+docs/interview/memory/index.md
+  55b77ba4523928a9 38,40,54-56,58,72-76,90,92-94,108-110,112,126-130,146,148-150,164-166,168,182-186,200,202-204,218-220,222,236-240,254-256,258
+docs/interview/planning/index.md
+  55b77ba4523928a9 38,40,54-56,58,72-76,90,92-94,108-110,112,126-130,146,148-150,164-166,168,182-186,200,202-204,218-220,222,236-240,254-256,258
+docs/interview/engineering/index.md
+  55b77ba4523928a9 39,41,55-57,59,73-77,91,93-95,109-111,113,127-131,147,149-151,165-167,169,183-187,201,203-205,219-221,223,237-241,255-257,259
+docs/interview/multi-agent/index.md
+  55b77ba4523928a9 38,40,54-56,58,72-76,90,92-94,108-110,112,126-130,146,148-150,164-166,168,182-186,200,202-204,218-220,222,236-240,254-256,258
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "b83cc3e5c548ae1758fc879f20336dfa42999713",
+  "prompts": {
+    "55b77ba4523928a9": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019db3a4-d6d8-7213-8a60-519e35588e30",
+        "model": "gpt-5.4"
+      },
+      "human_author": "张艳华",
+      "messages": [],
+      "total_additions": 441,
+      "total_deletions": 91,
+      "accepted_lines": 441,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.tongbaninfo.com/cas/2724e00d3f9371d9a354296e4f3e8afa2c2462c5113c3501ae626537c469fe0e"
+    },
+    "74a0ab8d076163f8": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019db31c-1827-7f11-a9fa-95ef8d84d33f",
+        "model": "gpt-5.4"
+      },
+      "human_author": "张艳华",
+      "messages": [],
+      "total_additions": 859,
+      "total_deletions": 2,
+      "accepted_lines": 859,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.tongbaninfo.com/cas/d0be63891a64b69212f815f08082962d644e5e62a8fcdf5db18845d03238d4e6"
+    }
+  }
+}
