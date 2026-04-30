@@ -17,7 +17,7 @@ VitePress 电子书站点。书名：**从零构建 AI Coding Agent — OpenCode
 - 基于 VitePress 1.5 + vitepress-plugin-mermaid 构建
 - 包管理器：bun（本地开发）/ pnpm（部署兼容）
 - 语言：TypeScript + Vue 3 SFC
-- 部署：静态构建 + Caddy 伺服（Railpack 平台）
+- 部署：静态构建 + Caddy 伺服
 - 仓库：`https://github.com/qqzhangyanhua/learn-opencode-agent`
 
 ---

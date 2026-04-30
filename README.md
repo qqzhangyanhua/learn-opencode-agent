@@ -238,7 +238,6 @@ bun run build:strict
 ├── practice/                   # 可运行 TypeScript 实践脚本（24 个）
 ├── scripts/                    # 内容质量校验脚本（11 个）
 ├── Caddyfile                   # 生产静态服务配置
-├── railpack.toml               # Railpack 部署配置
 └── package.json
 ```
 
@@ -259,8 +258,6 @@ bun run build:strict
 bun run build
 caddy run --config /Caddyfile --adapter caddyfile
 ```
-
-使用 Railpack 部署时，构建与启动命令已在 `railpack.toml` 中定义，无需额外配置。
 
 ## 维护约定
 

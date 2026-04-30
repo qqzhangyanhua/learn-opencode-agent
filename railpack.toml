@@ -1,8 +1,0 @@
-[build]
-cmd = "pnpm run build"
-
-[start]
-cmd = "caddy run --config /Caddyfile --adapter caddyfile"
-
-[static]
-dir = ".vitepress/dist"
