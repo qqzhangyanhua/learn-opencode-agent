@@ -91,18 +91,14 @@ RAG 通过 可检索的外部证据 提供「当下可查」的依据,让模型 
 
 ### 1.3 RAG vs 微调 vs 长上下文 的对比
 
-长上下文(Long
-维度          RAG           微调(Fine-tuning)
-Context)
-知识      更新索引即可,                                   仍需把新内容「放进上下需重新训练/LoRA,慢
-更新      快                                         文」或靠记忆机制
-私域/     文档可本地化部          数据需用于训练,合规要求             长上下文仍可能泄露敏感
-合规      署                高                        片段到日志检索+小上下文
-成本                       训练/数据标注成本高               长上下文推理贵、延迟高生成,通常更省
-事实问答、手           风格、格式、领域「说话方             单文档极长且需全局推理适用
-册、客服知识库          式」、小任务专用模型               时
-典型      检索失败则答案          难频繁追新事实;易过拟合             注意力分散、「中间遗
-短板      差                小数据                      忘」、费用原理简述
+| 维度 | RAG | 微调(Fine-tuning) | 长上下文(Long Context) |
+| --- | --- | --- | --- |
+| 知识更新 | 更新索引即可,快 | 需重新训练 / LoRA,较慢 | 仍需把新内容放进上下文,或依赖记忆机制 |
+| 私域 / 合规 | 文档可本地化部署 | 数据需用于训练,合规要求高 | 长上下文仍可能把敏感片段带入日志 |
+| 成本 | 检索 + 小上下文生成,通常更省 | 训练 / 数据标注成本高 | 长上下文推理贵、延迟高 |
+| 适用场景 | 事实问答、手册、客服知识库 | 风格、格式、领域“说话方式”、小任务专用模型 | 单文档极长且需要全局推理 |
+| 典型短板 | 检索失败则答案差 | 难频繁追新事实,易过拟合小数据 | 注意力分散、“中间遗忘”、费用高 |
+
 三者不是互斥:常见做法是 RAG 提供事实依据 + 轻量微调改善领域表达 + 长上下文处理单篇超长材料。
 
 面试 Q3:什么时候优先微调而不是 RAG?标准答案 A: 当目标主要是 行为与格式(如输出 JSON、口吻、工具调用习惯),或训练数据 稳定且可标注,而不仅是「塞事实」;事实类仍建议 RAG 或可检索记忆。
@@ -170,18 +166,14 @@ def naive_retrieve(query: str, chunks: List[str], top_k: int = 3) -> List[str]:
 概念解释
 解析是把 二进制或标记格式 变成 可切分的纯文本(并尽量保留标题层级、表格位置等结构信息)。
 常见工具
-类型                     工具                                  说明PyPDF2  /  pypdf ,
-PDF                                            纯文本 PDF 效果好;扫描版需 OCR pdfplumber (表格友好)
-统一分区(标题、列表、表格),适合
-多格式           Unstructured流水线
-服务端批量解析 Word/PDF 等,适合
-JVM 生态       Apache Tika
-Java 栈或与 Python 子进程配合
-Word          python-docx                      读  .docx  段落与表格
-BeautifulSoup4 、
-HTML                                           去导航栏等噪声,抽正文readability-lxml
-直接用文本读入 +  markdown  库
-Markdown                                       结构清晰,最适合 RAG转 AST(可选)
+| 类型 | 工具 | 说明 |
+| --- | --- | --- |
+| PDF | `PyPDF2` / `pypdf` / `pdfplumber` | 纯文本 PDF 效果较好;扫描版仍需 OCR，`pdfplumber` 对表格更友好 |
+| 多格式 | `Unstructured` | 统一分区标题、列表、表格，适合流水线处理 |
+| JVM 生态 | `Apache Tika` | 服务端批量解析 Word / PDF 等，适合 Java 栈或 Python 子进程配合 |
+| Word | `python-docx` | 读取 `.docx` 段落与表格 |
+| HTML | `BeautifulSoup4` / `readability-lxml` | 去导航栏等噪声，抽正文 |
+| Markdown | 直接读文本 + `markdown` 库转 AST(可选) | 结构清晰，最适合 RAG |
 原理详解
 PDF 本质是 排版指令,不是「自然段落」;同一页可能多栏、页眉页脚会混入。解析后要 按逻辑顺序 重组,否则分块会乱序。
 
@@ -223,34 +215,42 @@ OCR(光学字符识别)把 图像中的文字 变成可检索文本,用于扫描
 ### 2.4 数据清洗与标准化
 
 要点清单
-统一编码(UTF-8)、去除不可见字符合并多余空白与断行
-全角半角、数字与单位格式统一
-去重(MinHash/SimHash 或 embedding 聚类)
-PII 脱敏(电话、身份证)按合规要求代码示例:基础清洗
+- 统一编码(UTF-8)、去除不可见字符、合并多余空白与断行
+- 全角半角、数字与单位格式统一
+- 去重(MinHash / SimHash 或 embedding 聚类)
+- PII 脱敏(电话、身份证)按合规要求
 
-```
+代码示例:基础清洗
+
 ```python
 import re
 import unicodedata
+
 def normalize_text(s: str) -> str:
-s = unicodedata.normalize("NFKC", s)
-s = s.replace("\u200b", "")  # 零宽字符
-s = re.sub(r"\s+", " ", s).strip()
-return s
-代码示例:PyPDF / Unstructured(按需安装: pip install pypdf unstructured )
+    s = unicodedata.normalize("NFKC", s)
+    s = s.replace("\u200b", "")  # 零宽字符
+    s = re.sub(r"\s+", " ", s).strip()
+    return s
 ```
+
+代码示例:PyPDF / Unstructured(按需安装: `pip install pypdf unstructured`)
+
 ```python
 # ..- 方式 A:pypdf 读取纯文本 PDF ..-
 from pypdf import PdfReader
+
 def extract_pdf_pypdf(path: str) -> str:
-reader = PdfReader(path)
-parts = []
-for page in reader.pages:
-parts.append(page.extract_text() or "")return normalize_text("\n".join(parts))
+    reader = PdfReader(path)
+    parts = []
+    for page in reader.pages:
+        parts.append(page.extract_text() or "")
+    return normalize_text("\n".join(parts))
+
 # ..- 方式 B:Unstructured 分区(适合后续按类型路由)..-
 # from unstructured.partition.auto import partition
 # elements = partition(filename="手册.pdf")
 # texts = [el.text for el in elements if getattr(el, "text", None)]
+```
 
 追问应对
 问:Apache Tika 在 Python 里怎么用?
@@ -284,7 +284,7 @@ chunk_overlap  保留上下文衔接。
 ### 3.4 按文档结构分块(Markdown Header、HTML Section)
 
 概念解释
-利用  # 标题  或 HTML 的  <section>  / 标题标签,把 同一小节 作为块或父文档。
+利用 `#` 标题或 HTML 的 `<section>` / 标题标签,把同一小节作为块或父文档。
 原理
 保证块内主题一致;检索命中时可返回 完整小节。
 
@@ -318,53 +318,69 @@ chunk_overlap:通常为 size 的 10%–20%,避免切断关键句;overlap 越大,
 储路径。检索命中子块后,用 parent_id  取父块 拼进 Prompt。若父块过长,可对父块再 摘要后送入。
 代码示例:父子块数据结构(最小示意)
 
-```
 ```python
-from dataclasses import dataclass from typing import List
-@dataclass class ParentChunk:
-parent_id: str text: str
-children: List["ChildChunk"]
-@dataclass class ChildChunk:
-child_id: str
-parent_id: str
-```
-```text
-: str  # 小块,用于 embedding
+from dataclasses import dataclass
+from typing import List
+
+@dataclass
+class ParentChunk:
+    parent_id: str
+    text: str
+    children: List["ChildChunk"]
+
+@dataclass
+class ChildChunk:
+    child_id: str
+    parent_id: str
+    text: str  # 小块,用于 embedding
+
 # 索引阶段:只对 ChildChunk.text 做 embed,payload 带 parent_id
-# 检索阶段:命中 child_id .> 查 ParentChunk.text 作为生成上下文
+# 检索阶段:命中 child_id -> 查 ParentChunk.text 作为生成上下文
+```
 
 ### 3.8 代码示例:LangChain 各种 TextSplitter
 
 需安装:pip install langchain langchain-text-splitters
 
-```
 ```python
-from langchain_text_splitters import (CharacterTextSplitter,RecursiveCharacterTextSplitter,MarkdownHeaderTextSplitter,
+from langchain_text_splitters import (
+    CharacterTextSplitter,
+    RecursiveCharacterTextSplitter,
+    MarkdownHeaderTextSplitter,
 )
+
 text = "第一段。\n\n第二段更长一些,用于演示递归分割。\n\n第三段。\n"
+
 # 1) 固定字符分块
-fixed = CharacterTextSplitter(separator="\n\n", chunk_size=40,
-chunk_overlap=5)
+fixed = CharacterTextSplitter(separator="\n\n", chunk_size=40, chunk_overlap=5)
 print("Fixed:", fixed.split_text(text))
+
 # 2) 递归字符分割(推荐作为默认基线)
 recursive = RecursiveCharacterTextSplitter(
-chunk_size=60,
-chunk_overlap=10,
-separators=["\n\n", "\n", " ", ""],
+    chunk_size=60,
+    chunk_overlap=10,
+    separators=["\n\n", "\n", " ", ""],
 )
 print("Recursive:", recursive.split_text(text))
+
 # 3) Markdown 按标题分块
-md = "# 总则\n内容A\n\n.# 细则\n内容B\n"headers = [("#", "一级"), (".#", "二级")]md_splitter = MarkdownHeaderTextSplitter(headers_to_split_on=headers)md_docs = md_splitter.split_text(md)print("MD docs metadata:", [d.metadata for d in md_docs])
+md = "# 总则\n内容A\n\n## 细则\n内容B\n"
+headers = [("#", "一级"), ("##", "二级")]
+md_splitter = MarkdownHeaderTextSplitter(headers_to_split_on=headers)
+md_docs = md_splitter.split_text(md)
+print("MD docs metadata:", [d.metadata for d in md_docs])
+
 # 4) 语义分块(需 embedding 模型;此处仅展示 API 思路)
-```
 try:
-from langchain_experimental.text_splitter import SemanticChunker from langchain_openai import OpenAIEmbeddings
-# embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
-# semantic_splitter = SemanticChunker(embeddings,
-breakpoint_threshold_type="percentile")
-# semantic_chunks = semantic_splitter.create_documents([text])
+    from langchain_experimental.text_splitter import SemanticChunker
+    from langchain_openai import OpenAIEmbeddings
+
+    # embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
+    # semantic_splitter = SemanticChunker(embeddings, breakpoint_threshold_type="percentile")
+    # semantic_chunks = semantic_splitter.create_documents([text])
 except Exception:
-pass  # 实验包未安装时跳过
+    pass  # 实验包未安装时跳过
+```
 
 追问应对
 问:为什么生产常用 Recursive 而不是 Fixed?
