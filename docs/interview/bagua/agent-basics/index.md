@@ -102,13 +102,22 @@ A:
 
 ```python
 def run_agent(user_goal: str, tools: dict, llm, max_steps: int = 8):
-messages = [{"role": "system", "content": "你是可调用工具的 Agent。"},{"role": "user", "content": user_goal}]
-for _ in range(max_steps):
-plan = llm.chat(messages)  # 模型决定:结束 or 调用某工具
-action = parse_tool_call(plan)  # 从模型输出解析结构化动作
-if action.name == "finish":
-return action.args["answer"]obs = tools[action.name](**action.args)messages.append({"role": "assistant", "content": plan})messages.append({"role": "user", "content": f"工具结果:{obs}"})
-return "超过最大步数,未完成。"
+    messages = [
+        {"role": "system", "content": "你是可调用工具的 Agent。"},
+        {"role": "user", "content": user_goal},
+    ]
+    for _ in range(max_steps):
+        plan = llm.chat(messages)  # 模型决定:结束 or 调用某工具
+        action = parse_tool_call(plan)  # 从模型输出解析结构化动作
+        if action.name == 'finish':
+            return action.args['answer']
+
+        obs = tools[action.name](**action.args)
+        messages.append({"role": "assistant", "content": plan})
+        messages.append({"role": "user", "content": f"工具结果:{obs}"})
+
+    return "超过最大步数,未完成。"
+```
 
 ## 2. Agent vs LLM Chain vs ChatBot
 
@@ -122,17 +131,17 @@ Agent:像 项目经理——步骤不是完全写死的,模型根据当前观察
 
 ### 2.2 原理详解(技术细节)
 
-维度           ChatBot             LLM Chain                 Agent
-控制                            开发者定义的 DAG/序
-多为线性对话                                     模型驱动的分支与循环
-流                             列
-工具       可有可无                 可嵌入固定节点               动态选择与多轮调用
-状态       主要会话上下文              链各节点显式传递              记忆 + 环境观察
-问答、闲聊、简单引                                  开放问题、研究、自动化任
-适用                            ETL 式固定流程
-导                                          务本质区别一句话:
-Chain:控制流在代码里。
-Agent:控制流在模型决策 + 环境反馈里(仍可由代码设边界)。
+| 维度 | ChatBot | LLM Chain | Agent |
+| --- | --- | --- | --- |
+| 控制流 | 多为线性对话 | 开发者定义的 DAG 或固定步骤序列 | 模型驱动的分支与循环 |
+| 工具 | 可有可无 | 可嵌入固定节点 | 动态选择与多轮调用 |
+| 状态 | 主要会话上下文 | 链各节点显式传递 | 记忆 + 环境观察 |
+| 适用场景 | 问答、闲聊、简单引导 | ETL 式固定流程 | 开放问题、研究、自动化任务 |
+
+本质区别一句话:
+
+- Chain: 控制流在代码里。
+- Agent: 控制流在模型决策 + 环境反馈里(仍可由代码设边界)。
 
 ### 2.3 面试问题(Q)与标准答案(A)
 

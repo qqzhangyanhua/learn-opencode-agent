@@ -120,7 +120,11 @@ Context)
 → (可选) MMR 去冗余
 → 拼装 Prompt:系统指令 + 检索上下文 + 用户问题
 → LLM 生成答案
-→ (可选) 引用出处、拒答策略、日志与评估回流面试 Q4:离线与在线的职责分别是什么?标准答案 A: 离线负责 把非结构化知识变成可检索的索引(解析、分块、向量化、建索引、更新);在线负责 理解用户意图、检索、融合、约束生成,并保证延迟与成本可控。
+→ (可选) 引用出处、拒答策略、日志与评估回流
+
+面试 Q4:离线与在线的职责分别是什么?
+
+标准答案 A: 离线负责 把非结构化知识变成可检索的索引(解析、分块、向量化、建索引、更新);在线负责 理解用户意图、检索、融合、约束生成,并保证延迟与成本可控。
 
 ### 1.5 代码示例:最小 RAG 流水线(概念级)
 
@@ -128,21 +132,33 @@ Context)
 
 ```python
 # 最小概念示例:Embedding + 向量检索 + LLM(需安装 openai 等依赖)
-from typing import List def embed_texts(texts: List[str], model: str = "text-embedding-3-small") -
-> List[List[float]]:
-"""将文本列表转为向量;此处用 OpenAI 风格接口举例。"""
-import openai
-resp = openai.embeddings.create(model=model, input=texts)return [d.embedding for d in resp.data]
+from typing import List
+
+def embed_texts(texts: List[str], model: str = "text-embedding-3-small") -> List[List[float]]:
+    """将文本列表转为向量;此处用 OpenAI 风格接口举例。"""
+    import openai
+
+    resp = openai.embeddings.create(model=model, input=texts)
+    return [d.embedding for d in resp.data]
+
 def cosine_sim(a: List[float], b: List[float]) -> float:
-import math
-dot = sum(x * y for x, y in zip(a, b))na = math.sqrt(sum(x * x for x in a))nb = math.sqrt(sum(y * y for y in b))return dot / (na * nb + 1e-8)def naive_retrieve(query: str, chunks: List[str], top_k: int = 3) -> List[str]:
-q = embed_texts([query])[0]
-scores = [(cosine_sim(q, embed_texts([c])[0]), c) for c in chunks]  #
-生产应批量 embed
-scores.sort(key=lambda x: x[0], reverse=True)return [c for _, c in scores[:top_k]]
+    import math
+
+    dot = sum(x * y for x, y in zip(a, b))
+    na = math.sqrt(sum(x * x for x in a))
+    nb = math.sqrt(sum(y * y for y in b))
+    return dot / (na * nb + 1e-8)
+
+def naive_retrieve(query: str, chunks: List[str], top_k: int = 3) -> List[str]:
+    q = embed_texts([query])[0]
+    scores = [(cosine_sim(q, embed_texts([c])[0]), c) for c in chunks]  # 生产应批量 embed
+    scores.sort(key=lambda x: x[0], reverse=True)
+    return [c for _, c in scores[:top_k]]
+
 # chunks = ["公司年假规定...", "报销流程..."]
 # context = naive_retrieve("年假多少天?", chunks)
 # prompt = f"仅根据上下文回答:\n{context}\n\n问题:年假多少天?"
+```
 
 说明: 生产环境应对 chunks 批量嵌入并缓存;检索应用 ANN 索引(见第 5 节),不要暴
 力两两算相似度。

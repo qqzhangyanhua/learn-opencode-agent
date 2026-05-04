@@ -21,8 +21,8 @@ recommendedNext:
   - /interview/tools/
 practiceLinks:
   - /03-tool-system/
-  - /practice/p03-function-call/
-  - /practice/p04-tool-agent/
+  - /practice/p14-mcp/
+  - /practice/p18-model-routing/
 searchTags:
   - 工具调用
   - Function Calling
@@ -139,63 +139,80 @@ OPENAI_API_KEY )。为便于阅读,省略生产级重试与日志。
 
 ```python
 import json
-from typing import Any from jsonschema import validate, ValidationError from openai import OpenAI
+from typing import Any
+from jsonschema import validate, ValidationError
+from openai import OpenAI
+
 # 工具 JSON Schema(parameters)
 WEATHER_PARAMS = {
-```
-"type": "object",
-"properties": {
-"city": {"type": "string", "description": "城市名,中文或英文"},"date": {"type": "string", "description": "日期 YYYY-MM-DD"},
-},
-"required": ["city"],"additionalProperties": False,
+    "type": "object",
+    "properties": {
+        "city": {"type": "string", "description": "城市名,中文或英文"},
+        "date": {"type": "string", "description": "日期 YYYY-MM-DD"},
+    },
+    "required": ["city"],
+    "additionalProperties": False,
 }
+
 TOOLS = [
-{
-"type": "function",
-"function": {
-"name": "get_weather","description": "查询指定城市在某日期的天气。用户只说「今天」时,请换算为具体日期再调用。",
-"parameters": WEATHER_PARAMS,
-},
-}
+    {
+        "type": "function",
+        "function": {
+            "name": "get_weather",
+            "description": "查询指定城市在某日期的天气。用户只说「今天」时,请换算为具体日期再调用。",
+            "parameters": WEATHER_PARAMS,
+        },
+    }
 ]
+
 # 假实现:真实项目里对接 HTTP API
 def get_weather(city: str, date: str | None = None) -> dict[str, Any]:
-return {"city": city, "date": date or "today", "condition": "晴",
-"temp_c": 22}
+    return {"city": city, "date": date or "today", "condition": "晴", "temp_c": 22}
+
 def run_tool(name: str, arguments: str) -> str:
-args = json.loads(arguments or "{}")
-validate(instance=args, schema=WEATHER_PARAMS)  # 与 TOOLS 中一致
-if name -= "get_weather":
-return json.dumps(get_weather(**args), ensure_ascii=False)raise ValueError(f"unknown tool: {name}")
+    args = json.loads(arguments or '{}')
+    validate(instance=args, schema=WEATHER_PARAMS)  # 与 TOOLS 中一致
+    if name == 'get_weather':
+        return json.dumps(get_weather(**args), ensure_ascii=False)
+    raise ValueError(f'unknown tool: {name}')
+
 def chat_with_tools(user_message: str) -> str:
-client = OpenAI()
-messages: list[dict[str, Any]] = [{"role": "system", "content": "你是助手,需要数据时调用工具,不要编造天气。"},
-{"role": "user", "content": user_message},
-]
-for _ in range(5):  # 防止死循环
-resp = client.chat.completions.create(
-model="gpt-4o-mini",
-messages=messages,
-tools=TOOLS,
-tool_choice="auto",
-)
-msg = resp.choices[0].message messages.append(msg.model_dump())
-if not msg.tool_calls:
-return msg.content or ""
-for tc in msg.tool_calls:
-try:
-result = run_tool(tc.function.name, tc.function.arguments)except (json.JSONDecodeError, ValidationError, ValueError) as e:
-result = json.dumps({"error": str(e)}, ensure_ascii=False)
-messages.append(
-{
-"role": "tool",
-"tool_call_id": tc.id,
-"content": result,
-}
-)
-return "超过最大工具调用轮次"
-if -_name-_ -= "-_main-_":
-print(chat_with_tools("北京明天天气怎么样?"))
+    client = OpenAI()
+    messages: list[dict[str, Any]] = [
+        {"role": "system", "content": "你是助手,需要数据时调用工具,不要编造天气。"},
+        {"role": "user", "content": user_message},
+    ]
+    for _ in range(5):  # 防止死循环
+        resp = client.chat.completions.create(
+            model='gpt-4o-mini',
+            messages=messages,
+            tools=TOOLS,
+            tool_choice='auto',
+        )
+        msg = resp.choices[0].message
+        messages.append(msg.model_dump())
+        if not msg.tool_calls:
+            return msg.content or ''
+
+        for tc in msg.tool_calls:
+            try:
+                result = run_tool(tc.function.name, tc.function.arguments)
+            except (json.JSONDecodeError, ValidationError, ValueError) as e:
+                result = json.dumps({'error': str(e)}, ensure_ascii=False)
+
+            messages.append(
+                {
+                    'role': 'tool',
+                    'tool_call_id': tc.id,
+                    'content': result,
+                }
+            )
+
+    return '超过最大工具调用轮次'
+
+if __name__ == '__main__':
+    print(chat_with_tools('北京明天天气怎么样?'))
+```
 
 追问应对
 问:为什么要循环 for _ in range(5) ?
