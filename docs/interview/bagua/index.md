@@ -55,17 +55,17 @@ roleDescription: 作为面试专区里的系统化阅读入口，帮助读者按
 
 ## 模块目录
 
-下面九个模块会构成这条路径的完整目录。由于子页面还在后续任务中补齐，这里先保留构建安全的目录说明，不直接放未落地页面的跳转链接。
+下面九个模块会构成这条路径的完整目录。现在子页面已经补齐，可以直接按专题进入阅读。
 
-- 基础概念：`/interview/bagua/agent-basics/`
-- 核心框架：`/interview/bagua/core-frameworks/`
-- RAG 技术：`/interview/bagua/rag/`
-- 工具调用：`/interview/bagua/tool-calling/`
-- 记忆系统：`/interview/bagua/memory/`
-- 多智能体：`/interview/bagua/multi-agent/`
-- 大模型基础：`/interview/bagua/llm-fundamentals/`
-- 工程化实践：`/interview/bagua/engineering-practice/`
-- Prompt 工程：`/interview/bagua/prompt-engineering/`
+- [基础概念](/interview/bagua/agent-basics/)
+- [核心框架](/interview/bagua/core-frameworks/)
+- [RAG 技术](/interview/bagua/rag/)
+- [工具调用](/interview/bagua/tool-calling/)
+- [记忆系统](/interview/bagua/memory/)
+- [多智能体](/interview/bagua/multi-agent/)
+- [大模型基础](/interview/bagua/llm-fundamentals/)
+- [工程化实践](/interview/bagua/engineering-practice/)
+- [Prompt 工程](/interview/bagua/prompt-engineering/)
 
 ## 阅读建议
 
