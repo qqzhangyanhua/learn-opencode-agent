@@ -197,7 +197,13 @@ OCR(光学字符识别)把 图像中的文字 变成可检索文本,用于扫描
 原理简述
 典型流程:图像预处理(纠偏、二值化)→ 文字检测(框出文本行)→ 识别(CRNN/Transformer)→ 后处理(词典纠错)。
 常用方案
-云服务:Azure Document Intelligence、Google Document AI、阿里云 OCR开源:Tesseract 、 PaddleOCR (中文友好)、 EasyOCR面试 Q6:OCR 结果对 RAG 有什么影响?标准答案 A: OCR 会引入错字、断行、丢标点,导致 检索词不匹配 与 embedding 语义偏移。需要在清洗阶段做规范化,并考虑 关键词 + 向量混合检索 提高鲁棒性。
+
+- 云服务: Azure Document Intelligence、Google Document AI、阿里云 OCR
+- 开源方案: Tesseract、PaddleOCR (中文友好)、EasyOCR
+
+面试 Q6:OCR 结果对 RAG 有什么影响?
+
+标准答案 A: OCR 会引入错字、断行、丢标点,导致 检索词不匹配 与 embedding 语义偏移。需要在清洗阶段做规范化,并考虑 关键词 + 向量混合检索 提高鲁棒性。
 
 ### 2.3 表格和图片的处理策略
 

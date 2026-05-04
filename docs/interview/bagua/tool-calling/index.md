@@ -330,13 +330,13 @@ A:OpenAI 场景下你手写  run_tool ;MCP 下 Client 把远端/子进程 Server
 
 ### 3.3 MCP vs Function Calling 的区别
 
-维度               Function Calling                    MCP系统级协议:如何发现与调用工
-层级       多为「单次 API 能力」:模型输出调用指令
-具、资源实现位
-通常在应用进程内函数                          常在独立 Server,可远程置
-复用       每个应用复制粘贴集成                          标准 Server 多 Host 复用
-互补:Host 常把 MCP 工具转成 FC 的关系
-tools 定义给模型
+| 维度 | Function Calling | MCP |
+| --- | --- | --- |
+| 层级 | 多为“单次 API 能力”，模型输出调用指令 | 系统级协议，关注如何发现与调用工具、资源实现 |
+| 实现位置 | 通常在应用进程内函数 | 常在独立 Server，可远程部署 |
+| 复用 | 每个应用往往单独集成 | 标准 Server 可被多个 Host 复用 |
+
+互补关系: Host 常把 MCP 工具转成 FC 的 `tools` 定义交给模型。
 
 标准答案:Function Calling 解决「模型怎么表达调用」;MCP 解决「工具能力怎么暴露与连接」。二者常一起出现:模型侧用 FC,工具侧来自 MCP。
 
@@ -349,20 +349,26 @@ tools 定义给模型
 
 以下为示意代码:真实项目请使用官方 mcp Python 包( pip install mcp ),并以最新文档为准。下面用常见「FastMCP」风格说明结构。
 
-```
 ```python
 # 需要: pip install mcp
 # 以下为概念示例,包名与 API 请以官方文档为准
+
 try:
-from mcp.server.fastmcp import FastMCP
+    from mcp.server.fastmcp import FastMCP
 except ImportError:
-FastMCP = None  # 环境未安装时仅作结构说明if FastMCP:
-mcp = FastMCP("demo")
-@mcp.tool()
-def add(a: int, b: int) -> int:
-"""返回两个整数之和。"""
-return a + b
+    FastMCP = None  # 环境未安装时仅作结构说明
+
+if FastMCP:
+    mcp = FastMCP("demo")
+
+    @mcp.tool()
+    def add(a: int, b: int) -> int:
+        """返回两个整数之和。"""
+        return a + b
+
 # 通常以 `mcp.run(transport="stdio")` 由 Host 拉起子进程
+```
+
 若未使用 FastMCP,也可用手写 Server + stdio,核心是:声明工具列表、处理  tools/call
 类请求、返回结构化内容。面试中讲清「进程边界 + JSON-RPC 风格消息」即可得分。
 

@@ -255,11 +255,13 @@ if __name__ == "__main__":
 
 ### 1.7 与 Chain-of-Thought(CoT)的区别
 
-维度                  CoT                            ReAct
-是否有外部环境             通常无                 有(工具/Observation)
-输出内容                推理文字为主              Thought + Action + Observation 交替
-纠错方式                主要靠模型自省             主要靠 外部反馈
-典型目标                提升推理深度              推理 + 行动闭环
+| 维度 | CoT | ReAct |
+| --- | --- | --- |
+| 是否有外部环境 | 通常无 | 有(工具 / Observation) |
+| 输出内容 | 推理文字为主 | Thought + Action + Observation 交替 |
+| 纠错方式 | 主要靠模型自省 | 主要靠外部反馈 |
+| 典型目标 | 提升推理深度 | 推理 + 行动闭环 |
+
 一句话总结: CoT 让模型「更会想」;ReAct 让模型「在想的同时能动手,并用真实结果纠正自
 己」。
 
@@ -290,8 +292,8 @@ Plan-and-Execute 是 两阶段:先 制定计划(Planner),再 逐步执行(Execut
 
 ```text
 plan = LLM_planner(task, constraints)
-```
 validate_plan(plan)  # 可选:检查是否包含非法步骤/循环依赖
+```
 
 #### 2.2.3 Executor 组件设计(要点)
 
@@ -303,10 +305,10 @@ validate_plan(plan)  # 可选:检查是否包含非法步骤/循环依赖
 ```text
 state = {}
 for step in plan:
-out = execute_step(step, state, tools)
-state[step.id] = out
-if needs_replan(state):
-plan = replanner(task, plan, state)
+    out = execute_step(step, state, tools)
+    state[step.id] = out
+    if needs_replan(state):
+        plan = replanner(task, plan, state)
 ```
 
 #### 2.2.4 重规划(Re-planning)机制
