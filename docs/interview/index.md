@@ -108,6 +108,11 @@ roleDescription: 作为全站的面试准备入口，帮助读者按能力整理
 - 如果你已经做过项目：直接从 [RAG](/interview/rag/) 或 [Multi-Agent](/interview/multi-agent/) 开始
 - 如果你总在追问环节卡住：优先补 [记忆](/interview/memory/) 和 [规划](/interview/planning/)
 
+## AI Agent 面试八股文
+
+如果你想按专题快速背诵和复盘高频问法，可以走这条更偏“八股整理”的第二路径，集中补齐标准回答骨架。
+
+- [进入 AI Agent 面试八股文](/interview/bagua/)
 
 ## 回链入口
 

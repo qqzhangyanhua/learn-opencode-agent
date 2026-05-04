@@ -7,6 +7,7 @@ const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const configContent = readFileSync(path.join(rootDir, '.vitepress', 'config.mts'), 'utf8')
 const practiceContent = readFileSync(path.join(rootDir, 'docs', 'practice', 'index.md'), 'utf8')
 const intermediateContent = readFileSync(path.join(rootDir, 'docs', 'intermediate', 'index.md'), 'utf8')
+const interviewContent = readFileSync(path.join(rootDir, 'docs', 'interview', 'index.md'), 'utf8')
 const learningPathsContent = readFileSync(path.join(rootDir, 'docs', 'learning-paths', 'index.md'), 'utf8')
 const readingMapContent = readFileSync(path.join(rootDir, 'docs', 'reading-map.md'), 'utf8')
 
@@ -28,6 +29,10 @@ for (const link of rootSidebarLinks) {
 
 if (!configContent.includes(`link: '/interview/fundamentals/'`)) {
   issues.push('面试题专区侧边栏缺少基础概念入口')
+}
+
+if (!configContent.includes(`link: '/interview/bagua/'`)) {
+  issues.push('面试题专区侧边栏缺少八股文入口')
 }
 
 if (!practiceContent.includes('/learning-paths/')) {
@@ -52,6 +57,10 @@ if (!intermediateContent.includes('/discover/')) {
 
 if (!intermediateContent.includes('/practice/')) {
   issues.push('中级篇缺少返回实践篇的入口')
+}
+
+if (!interviewContent.includes('/interview/bagua/')) {
+  issues.push('面试题专区首页缺少八股文入口')
 }
 
 if (!learningPathsContent.includes('/discover/')) {

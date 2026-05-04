@@ -533,6 +533,22 @@ export default withMermaid(defineConfig({
             { text: '工程化', link: '/interview/engineering/' },
           ]
         },
+        {
+          text: '八股文',
+          collapsed: false,
+          items: [
+            { text: 'AI Agent 面试八股文', link: '/interview/bagua/' },
+            { text: '基础概念', link: '/interview/bagua/agent-basics/' },
+            { text: '核心框架', link: '/interview/bagua/core-frameworks/' },
+            { text: 'RAG 技术', link: '/interview/bagua/rag/' },
+            { text: '工具调用', link: '/interview/bagua/tool-calling/' },
+            { text: '记忆系统', link: '/interview/bagua/memory/' },
+            { text: '多智能体', link: '/interview/bagua/multi-agent/' },
+            { text: '大模型基础', link: '/interview/bagua/llm-fundamentals/' },
+            { text: '工程化实践', link: '/interview/bagua/engineering-practice/' },
+            { text: 'Prompt 工程', link: '/interview/bagua/prompt-engineering/' },
+          ]
+        },
       ],
       '/': [
         { text: '发现中心', link: '/discover/' },
