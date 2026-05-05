@@ -15,158 +15,95 @@ const routes = computed(() => {
 </script>
 
 <template>
-  <section class="discovery-goal-routes">
-    <article
+  <div class="goal-routes">
+    <section
       v-for="route in routes"
       :key="route.goalId"
-      class="goal-card"
+      class="goal"
     >
-      <div class="goal-card-top">
-        <span class="goal-kicker">按目标开始</span>
-        <span class="goal-route-label">{{ route.routeLabel }}</span>
-      </div>
+      <h3>{{ route.title }}</h3>
+      <p class="summary">{{ route.summary }}</p>
 
-      <h2>{{ route.title }}</h2>
-      <p class="goal-audience">{{ route.audience }}</p>
-      <p class="goal-summary">{{ route.summary }}</p>
+      <p class="line">
+        <span class="label">第一站</span>
+        <a :href="route.recommendedStart.href">{{ route.recommendedStart.title }}</a>
+      </p>
 
-      <div class="goal-start">
-        <div>
-          <p class="goal-label">推荐第一站</p>
-          <a :href="route.recommendedStart.href" class="goal-start-link">
-            {{ route.recommendedStart.title }}
+      <p class="line">
+        <span class="label">接着读</span>
+        <span class="next">
+          <a
+            v-for="(item, i) in route.continueWith"
+            :key="item.contentId"
+            :href="item.href"
+          >
+            {{ item.title }}<template v-if="i < route.continueWith.length - 1">、</template>
           </a>
-        </div>
-        <DiscoveryTypeBadge :label="route.recommendedStart.contentTypeLabel" />
-      </div>
-
-      <div class="goal-support">
-        <span>接下来你会经过：</span>
-        <a
-          v-for="item in route.continueWith"
-          :key="item.contentId"
-          :href="item.href"
-        >
-          {{ item.title }}
-        </a>
-      </div>
-
-      <a :href="route.recommendedStart.href" class="goal-cta">
-        从这里开始
-      </a>
-    </article>
-  </section>
+        </span>
+      </p>
+    </section>
+  </div>
 </template>
 
 <style scoped>
-.discovery-goal-routes {
+.goal-routes {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 8px;
-  margin: 12px 0 20px;
+  gap: 18px;
+  margin: 12px 0 24px;
 }
 
-.goal-card {
+.goal {
   display: grid;
-  gap: 8px;
-  padding: 12px 14px;
-  border-left: 3px solid var(--vp-c-brand-1);
-  border-radius: 0 6px 6px 0;
-  background: var(--vp-c-bg-alt);
+  gap: 4px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--vp-c-divider);
 }
 
-.goal-card-top,
-.goal-start,
-.goal-support {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
+.goal:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
 }
 
-.goal-card-top {
-  justify-content: space-between;
-}
-
-.goal-kicker,
-.goal-route-label {
-  font-size: 0.7rem;
-  font-weight: 600;
-}
-
-.goal-kicker {
-  color: var(--vp-c-brand-1);
-}
-
-.goal-route-label {
-  color: var(--vp-c-text-3);
-}
-
-.goal-card h2 {
+.goal h3 {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   font-weight: 600;
   color: var(--vp-c-text-1);
+  border: none;
+  padding: 0;
+  letter-spacing: 0;
 }
 
-.goal-audience {
-  display: none;
-}
-
-.goal-summary {
+.summary {
   margin: 0;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   color: var(--vp-c-text-2);
-  line-height: 1.55;
+  line-height: 1.6;
 }
 
-.goal-label {
+.line {
   margin: 0;
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: var(--vp-c-text-3);
+  font-size: 0.85rem;
+  line-height: 1.7;
 }
 
-.goal-start-link {
+.label {
+  display: inline-block;
+  width: 4em;
+  color: var(--vp-c-text-3);
+  font-size: 0.78rem;
+}
+
+.line a {
   color: var(--vp-c-brand-1);
-  font-size: 0.82rem;
-  font-weight: 500;
   text-decoration: none;
 }
 
-.goal-start-link:hover,
-.goal-support a:hover {
+.line a:hover {
   text-decoration: underline;
 }
 
-.goal-support {
-  justify-content: flex-start;
+.next {
   color: var(--vp-c-text-3);
-  font-size: 0.75rem;
-  gap: 4px;
-}
-
-.goal-support a {
-  color: var(--vp-c-brand-1);
-  font-weight: 500;
-  text-decoration: none;
-}
-
-.goal-cta {
-  display: inline-flex;
-  align-items: center;
-  width: fit-content;
-  padding: 4px 10px;
-  border: 1px solid var(--vp-c-brand-1);
-  border-radius: 4px;
-  color: var(--vp-c-brand-1);
-  background: transparent;
-  text-decoration: none;
-  font-size: 0.78rem;
-  font-weight: 500;
-}
-
-.goal-cta:hover {
-  background: var(--vp-c-brand-soft);
 }
 </style>

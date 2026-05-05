@@ -77,23 +77,23 @@ roleDescription: 帮助读者把多智能体从“多个机器人一起工作”
 
 ### 1.3 面试问题 Q1~Q3
 
-#### Q1: 单 Agent 和多 Agent 的本质区别是什么？什么时候该上多 Agent？
+#### Q1：单 Agent 和多 Agent 的本质区别是什么？什么时候该上多 Agent？
 
-**A：**本质区别不在「调几次模型」，而在是否显式建模角色、通信与治理。单 Agent 适合：任务边界清晰、工具少、强实时、成本极度敏感的场景。多 Agent 适合：任务可分解、需要不同专业视角、需要并行、需要权限隔离（例如代码执行与对外发布分离）、需要可观测分阶段产出的场景。
+**A：** 本质区别不在「调几次模型」，而在是否显式建模角色、通信与治理。单 Agent 适合：任务边界清晰、工具少、强实时、成本极度敏感的场景。多 Agent 适合：任务可分解、需要不同专业视角、需要并行、需要权限隔离（例如代码执行与对外发布分离）、需要可观测分阶段产出的场景。
 
-**追问应对：**若问「多 Agent 会不会更贵？」答：通常 Token 与调用次数会上升，但若通过小模型子任务 + 大模型仲裁、并行缩短时间、减少无效重试，总成本未必更高，需要按业务度量。
+若问「多 Agent 会不会更贵？」答：通常 Token 与调用次数会上升，但若通过小模型子任务 + 大模型仲裁、并行缩短时间、减少无效重试，总成本未必更高，需要按业务度量。
 
-#### Q2: 什么是「注意力漂移」？多 Agent 如何缓解？
+#### Q2：什么是「注意力漂移」？多 Agent 如何缓解？
 
-**A：**注意力漂移指模型在长上下文或多目标提示下，对关键约束的关注度下降，导致输出偏离要求。多 Agent 缓解方式包括：拆分子目标使每个子上下文更短；专职角色减少单提示中的目标数量；中间结果结构化（JSON / 状态机）减少自然语言堆砌。
+**A：** 注意力漂移指模型在长上下文或多目标提示下，对关键约束的关注度下降，导致输出偏离要求。多 Agent 缓解方式包括：拆分子目标使每个子上下文更短；专职角色减少单提示中的目标数量；中间结果结构化（JSON / 状态机）减少自然语言堆砌。
 
-**追问应对：**若问「不用多 Agent 怎么缓解？」答：摘要、检索注入关键句、约束前置、链式调用配合校验器等。
+若问「不用多 Agent 怎么缓解？」答：摘要、检索注入关键句、约束前置、链式调用配合校验器等。
 
-#### Q3: 多 Agent 的「容错」具体怎么体现？
+#### Q3：多 Agent 的「容错」具体怎么体现？
 
-**A：**体现为失败隔离 + 可替换性。例如审查 Agent 发现实现 Agent 的代码不合规，可打回重写而不污染主对话；执行 Agent 沙箱崩溃可只重启该步骤。工程上常配合重试、指数退避、断路器、降级模板。
+**A：** 体现为失败隔离 + 可替换性。例如审查 Agent 发现实现 Agent 的代码不合规，可打回重写而不污染主对话；执行 Agent 沙箱崩溃可只重启该步骤。工程上常配合重试、指数退避、断路器、降级模板。
 
-**追问应对：**若问「会不会互相甩锅？」答：会，所以需要明确终止条件、主席 / 仲裁机制、可观测日志（见第 5、9 节）。
+若问「会不会互相甩锅？」答：会，所以需要明确终止条件、主席 / 仲裁机制、可观测日志（见第 5、9 节）。
 
 ### 1.4 代码示例（Python）
 
@@ -102,7 +102,6 @@ roleDescription: 帮助读者把多智能体从“多个机器人一起工作”
 ```python
 from dataclasses import dataclass
 from typing import Callable
-
 
 @dataclass
 class SimpleAgent:
@@ -123,12 +122,10 @@ class SimpleAgent:
 ```python
 from typing import Dict
 
-
 def demo_single_long_chain(model: Callable[[str, str], str]) -> str:
     """单 Agent：把所有子任务说明塞进一次调用。"""
     mega_prompt = '你是全能助手。依次完成：需求分析、接口设计、写代码、写测试、审查。'
     return model('single', mega_prompt)
-
 
 def demo_multi_agents(model: Callable[[str, str], str]) -> Dict[str, str]:
     """多 Agent：每步短上下文，下一步只带必要摘要。"""
@@ -175,17 +172,17 @@ def demo_multi_agents(model: Callable[[str, str], str]) -> Dict[str, str]:
 
 ### 2.3 面试问题 Q4~Q5
 
-#### Q4: Boss-Worker 和 Pipeline 有什么本质差异？
+#### Q4：Boss-Worker 和 Pipeline 有什么本质差异？
 
-**A：**Pipeline 强调固定的阶段顺序与数据形态；Boss-Worker 强调动态任务图，Boss 可按需增删子任务、并行派发。Pipeline 更像工厂流水线；Boss-Worker 更像项目经理排期。
+**A：** Pipeline 强调固定的阶段顺序与数据形态；Boss-Worker 强调动态任务图，Boss 可按需增删子任务、并行派发。Pipeline 更像工厂流水线；Boss-Worker 更像项目经理排期。
 
-**追问应对：**若问「能混合吗？」答：非常常见，例如 Boss 定阶段，阶段内 Pipeline，阶段间讨论。
+若问「能混合吗？」答：非常常见，例如 Boss 定阶段，阶段内 Pipeline，阶段间讨论。
 
-#### Q5: 民主讨论模式如何避免永远开不完会？
+#### Q5：民主讨论模式如何避免永远开不完会？
 
-**A：**需要硬终止条件：最大轮数、Token 预算、无新信息阈值（连续两轮无实质变更则停）或主席裁决；并配合结构化发言（观点 + 证据 + 反对意见）减少废话。
+**A：** 需要硬终止条件：最大轮数、Token 预算、无新信息阈值（连续两轮无实质变更则停）或主席裁决；并配合结构化发言（观点 + 证据 + 反对意见）减少废话。
 
-**追问应对：**若问「讨论适合生产吗？」答：适合低风险创意类或人类在环；纯自动高风险决策通常要仲裁 + 规则引擎。
+若问「讨论适合生产吗？」答：适合低风险创意类或人类在环；纯自动高风险决策通常要仲裁 + 规则引擎。
 
 ### 2.4 代码示例（Python）
 
@@ -193,7 +190,6 @@ def demo_multi_agents(model: Callable[[str, str], str]) -> Dict[str, str]:
 
 ```python
 from typing import Callable, Dict, List
-
 
 class BossWorker:
     def __init__(
@@ -212,7 +208,6 @@ class BossWorker:
             results[name] = self.workers[name](st['prompt'])
         return results
 
-
 class Pipeline:
     def __init__(self, stages: List[Callable[[str], str]]) -> None:
         self.stages = stages
@@ -221,7 +216,6 @@ class Pipeline:
         for fn in self.stages:
             value = fn(value)
         return value
-
 
 class JointDiscussion:
     def __init__(
@@ -262,11 +256,11 @@ class JointDiscussion:
 
 ### 3.3 面试问题 Q6
 
-#### Q6: 黑板模式和消息队列有什么相似与不同？
+#### Q6：黑板模式和消息队列有什么相似与不同？
 
-**A：**相似点是都解耦发送方与接收方。不同点是黑板通常是共享状态容器（读最新快照），强调协作求解；队列是事件 / 任务的管道，强调可靠投递、顺序、削峰。黑板更像「会议室白板」；队列更像「工单系统」。
+**A：** 相似点是都解耦发送方与接收方。不同点是黑板通常是共享状态容器（读最新快照），强调协作求解；队列是事件 / 任务的管道，强调可靠投递、顺序、削峰。黑板更像「会议室白板」；队列更像「工单系统」。
 
-**追问应对：**若问「能结合吗？」答：可以，队列传事件，消费者更新黑板，兼顾可靠与共享状态。
+若问「能结合吗？」答：可以，队列传事件，消费者更新黑板，兼顾可靠与共享状态。
 
 ### 3.4 代码示例（Python）
 
@@ -276,7 +270,6 @@ class JointDiscussion:
 import threading
 from collections import defaultdict
 from typing import Any, Callable, DefaultDict, Dict, List
-
 
 class Blackboard:
     def __init__(self) -> None:
@@ -291,7 +284,6 @@ class Blackboard:
         with self._lock:
             return self._data.get(key)
 
-
 class PubSub:
     def __init__(self) -> None:
         self._subs: DefaultDict[str, List[Callable[[str, Any], None]]] = defaultdict(list)
@@ -302,7 +294,6 @@ class PubSub:
     def publish(self, topic: str, payload: Any) -> None:
         for handler in self._subs.get(topic, []):
             handler(topic, payload)
-
 
 bb = Blackboard()
 bb.write('plan', {'steps': ['analyze', 'code', 'test']})
@@ -316,7 +307,6 @@ bus.publish('task.done', {'agent': 'coder', 'ok': True})
 ```python
 from collections import deque
 from typing import Any, Deque, Optional
-
 
 class InMemoryQueue:
     def __init__(self) -> None:
@@ -347,11 +337,11 @@ class InMemoryQueue:
 
 ### 4.3 面试问题 Q7
 
-#### Q7: 动态任务分配和固定 Pipeline 各适合什么场景？
+#### Q7：动态任务分配和固定 Pipeline 各适合什么场景？
 
-**A：**固定 Pipeline 适合 SOP 稳定、输入输出契约清晰的场景，例如审核流水线。动态分配适合探索性任务（研究、故障排查），中间可能发现新子问题。工程上常混合：主干 Pipeline + 动态插入节点。
+**A：** 固定 Pipeline 适合 SOP 稳定、输入输出契约清晰的场景，例如审核流水线。动态分配适合探索性任务（研究、故障排查），中间可能发现新子问题。工程上常混合：主干 Pipeline + 动态插入节点。
 
-**追问应对：**若问「动态会不会不可控？」答：需要预算、最大深度、允许的工具白名单与人类在环。
+若问「动态会不会不可控？」答：需要预算、最大深度、允许的工具白名单与人类在环。
 
 ### 4.4 代码示例（Python）
 
@@ -361,7 +351,6 @@ class InMemoryQueue:
 from dataclasses import dataclass
 from typing import List, Set
 
-
 @dataclass
 class WorkerAgent:
     name: str
@@ -370,7 +359,6 @@ class WorkerAgent:
 
     def can_handle(self, required: Set[str]) -> bool:
         return required.issubset(self.skills)
-
 
 @dataclass
 class Scheduler:
@@ -384,7 +372,6 @@ class Scheduler:
         chosen = sorted(candidates, key=lambda worker: worker.load)[0]
         chosen.load += 1
         return chosen
-
 
 workers = [
     WorkerAgent('w1', {'python', 'test'}),
@@ -409,15 +396,17 @@ print(sched.assign({'python', 'test'}).name)
 | 主席 Agent | 指定角色做最终拍板 | 需要单一责任点 |
 | 基于证据的共识 | 必须引用日志、测试结果、CVE 编号等 | 技术决策、审计要求高 |
 
-注意：投票在模型相关性高（都想讨好用户）时可能出现集体偏误，需要多样化提示或引入反方角色（Red Team）。
+#### 注意
+
+投票在模型相关性高（都想讨好用户）时可能出现集体偏误，需要多样化提示或引入反方角色（Red Team）。
 
 ### 5.3 面试问题 Q8
 
-#### Q8: 为什么光有投票不够？
+#### Q8：为什么光有投票不够？
 
-**A：**因为 LLM Agent 的「独立意见」往往并不独立（相似训练分布、相似 `system` 提示），且缺少真实世界证据时，投票可能强化错误。更稳妥的是证据门槛 + 优先级规则 + 人类在环。
+**A：** 因为 LLM Agent 的「独立意见」往往并不独立（相似训练分布、相似 `system` 提示），且缺少真实世界证据时，投票可能强化错误。更稳妥的是证据门槛 + 优先级规则 + 人类在环。
 
-**追问应对：**若问「Red Team 怎么用？」答：专门 Agent 负责挑错、攻击假设、构造反例，输出必须回应的质疑清单。
+若问「Red Team 怎么用？」答：专门 Agent 负责挑错、攻击假设、构造反例，输出必须回应的质疑清单。
 
 ### 5.4 代码示例（Python）
 
@@ -427,13 +416,11 @@ print(sched.assign({'python', 'test'}).name)
 from enum import IntEnum
 from typing import Dict, List
 
-
 class Severity(IntEnum):
     LOW = 1
     MEDIUM = 2
     HIGH = 3
     CRITICAL = 4
-
 
 def weighted_vote(opinions: List[Dict[str, float | str]]) -> str:
     # opinions: [{'choice': 'block', 'weight': 2.0}, ...]
@@ -443,7 +430,6 @@ def weighted_vote(opinions: List[Dict[str, float | str]]) -> str:
         weight = float(opinion['weight'])
         score[choice] = score.get(choice, 0.0) + weight
     return max(score, key=score.get)
-
 
 def priority_arbitration(findings: List[Severity]) -> str:
     if any(f >= Severity.CRITICAL for f in findings):
@@ -469,11 +455,11 @@ def priority_arbitration(findings: List[Severity]) -> str:
 
 ### 6.3 面试问题 Q9
 
-#### Q9: 多 Agent 系统为什么推荐状态机而不是纯自然语言传递一切？
+#### Q9：多 Agent 系统为什么推荐状态机而不是纯自然语言传递一切？
 
-**A：**自然语言灵活但难校验、难回放、难测试。状态机提供可验证迁移、清晰终止、可观测指标（卡在何阶段多久）。自然语言可作为附件说明，不应是唯一真相来源。
+**A：** 自然语言灵活但难校验、难回放、难测试。状态机提供可验证迁移、清晰终止、可观测指标（卡在何阶段多久）。自然语言可作为附件说明，不应是唯一真相来源。
 
-**追问应对：**若问「状态存在哪？」答：进程内只适合 demo；生产用 Redis / DB 并加乐观锁。
+若问「状态存在哪？」答：进程内只适合 demo；生产用 Redis / DB 并加乐观锁。
 
 ### 6.4 代码示例（Python）
 
@@ -483,14 +469,12 @@ def priority_arbitration(findings: List[Severity]) -> str:
 from dataclasses import dataclass
 from enum import Enum, auto
 
-
 class Phase(Enum):
     INIT = auto()
     PLAN = auto()
     EXEC = auto()
     VERIFY = auto()
     DONE = auto()
-
 
 ALLOWED = {
     Phase.INIT: {Phase.PLAN},
@@ -499,7 +483,6 @@ ALLOWED = {
     Phase.VERIFY: {Phase.DONE, Phase.EXEC},  # 不通过可打回重做
     Phase.DONE: set(),
 }
-
 
 @dataclass
 class TaskState:
@@ -531,23 +514,23 @@ class TaskState:
 
 ### 7.3 面试问题 Q10~Q12
 
-#### Q10: AutoGen 和 LangGraph 多 Agent 有什么气质差异？
+#### Q10：AutoGen 和 LangGraph 多 Agent 有什么气质差异？
 
-**A：**AutoGen 偏对话与多角色交互的快速组合；LangGraph 偏显式图状态机与检查点 / 分支。若强调生产可恢复与审计，LangGraph 往往更易形式化；若强调探索式对话与人机混合，AutoGen 叙事更自然。
+**A：** AutoGen 偏对话与多角色交互的快速组合；LangGraph 偏显式图状态机与检查点 / 分支。若强调生产可恢复与审计，LangGraph 往往更易形式化；若强调探索式对话与人机混合，AutoGen 叙事更自然。
 
-**追问应对：**若问「能混用吗？」答：可以，例如 LangGraph 节点内嵌 AutoGen 会话，但要统一 `trace_id` 与成本核算。
+若问「能混用吗？」答：可以，例如 LangGraph 节点内嵌 AutoGen 会话，但要统一 `trace_id` 与成本核算。
 
-#### Q11: CrewAI 的「Crew」抽象解决什么问题？
+#### Q11：CrewAI 的「Crew」抽象解决什么问题？
 
-**A：**它把角色分工 + 任务依赖 + 执行顺序从 prompt 工程里抽成一等公民，降低「写一大坨 `system prompt`」的心智负担，让协作结构可见、可复用。
+**A：** 它把角色分工 + 任务依赖 + 执行顺序从 prompt 工程里抽成一等公民，降低「写一大坨 `system prompt`」的心智负担，让协作结构可见、可复用。
 
-**追问应对：**若问缺点？答：抽象与真实权限 / 数据边界仍需自己把控；复杂分支可能要下沉到代码。
+若问缺点？答：抽象与真实权限 / 数据边界仍需自己把控；复杂分支可能要下沉到代码。
 
-#### Q12: MetaGPT 适合直接上生产吗？
+#### Q12：MetaGPT 适合直接上生产吗？
 
-**A：**视场景而定：它擅长结构化软件过程与多角色产出的演示与研究；生产需补强测试、强权限、强监控、成本与延迟控制，框架本身不替你完成这些。
+**A：** 视场景而定：它擅长结构化软件过程与多角色产出的演示与研究；生产需补强测试、强权限、强监控、成本与延迟控制，框架本身不替你完成这些。
 
-**追问应对：**若问「和 CrewAI 选哪个？」答：先看团队熟悉度，以及是否需要强图编排 / 检查点（偏 LangGraph）或快速角色任务叙事（偏 CrewAI）。
+若问「和 CrewAI 选哪个？」答：先看团队熟悉度，以及是否需要强图编排 / 检查点（偏 LangGraph）或快速角色任务叙事（偏 CrewAI）。
 
 ### 7.4 代码示例（Python）
 
@@ -562,19 +545,16 @@ class TaskState:
 
 from dataclasses import dataclass
 
-
 @dataclass
 class Role:
     name: str
     goal: str
     backstory: str
 
-
 @dataclass
 class Task:
     description: str
     agent: str
-
 
 crew = (
     [Role('PM', '澄清需求', '...'), Role('Dev', '实现功能', '...')],
@@ -599,11 +579,11 @@ crew = (
 
 ### 8.3 面试问题 Q13
 
-#### Q13: 企业里多 Agent 与「传统工作流引擎（BPM）」关系是什么？
+#### Q13：企业里多 Agent 与「传统工作流引擎（BPM）」关系是什么？
 
-**A：**BPM 管确定性流程与人工节点；多 Agent 管需要语言推理与开放工具调用的步骤。常见架构是 BPM 编排确定性步骤 + LLM Agent 作为某一人工 / 自动活动；或 Agent 产出结构化决策，由 BPM 落账。
+**A：** BPM 管确定性流程与人工节点；多 Agent 管需要语言推理与开放工具调用的步骤。常见架构是 BPM 编排确定性步骤 + LLM Agent 作为某一人工 / 自动活动；或 Agent 产出结构化决策，由 BPM 落账。
 
-**追问应对：**若问「谁主谁辅？」答：强合规流程 BPM 主；强探索任务 Agent 主，但都要有护栏。
+若问「谁主谁辅？」答：强合规流程 BPM 主；强探索任务 Agent 主，但都要有护栏。
 
 ### 8.4 代码示例（Python）
 
@@ -614,10 +594,8 @@ def de_identify(table_rows):
     # 真实场景：哈希 / 泛化 / 抑制
     return [{'user': '***', 'amount': row['amount']} for row in table_rows]
 
-
 def analyst_agent(rows):
     return f"洞察：共 {len(rows)} 笔，总额 {sum(row['amount'] for row in rows)}"
-
 
 def pipeline(raw_rows):
     safe_rows = de_identify(raw_rows)
@@ -642,17 +620,17 @@ def pipeline(raw_rows):
 
 ### 9.3 面试问题 Q14~Q15
 
-#### Q14: 如何检测多 Agent 系统的「死循环」？
+#### Q14：如何检测多 Agent 系统的「死循环」？
 
-**A：**常用组合策略有：(1) 全局步数上限；(2) 状态哈希去重，若连续重复同一计划 / 同一工具入参则停；(3) 无进展检测，关键指标多轮不变时熔断；(4) 预算熔断（Token / 费用 / 时间）。
+**A：** 常用组合策略有：(1) 全局步数上限；(2) 状态哈希去重，若连续重复同一计划 / 同一工具入参则停；(3) 无进展检测，关键指标多轮不变时熔断；(4) 预算熔断（Token / 费用 / 时间）。
 
-**追问应对：**若问「误杀怎么办？」答：提高进展定义粒度，并允许人类确认继续。
+若问「误杀怎么办？」答：提高进展定义粒度，并允许人类确认继续。
 
-#### Q15: 错误隔离在多 Agent 里如何实现？
+#### Q15：错误隔离在多 Agent 里如何实现？
 
-**A：**常见做法有：(1) 沙箱执行与最小权限工具；(2) 校验 Agent 作为门禁；(3) 检查点，通过后持久化，失败从检查点重试；(4) 不把未经校验的自然语言直接当 API 参数。
+**A：** 常见做法有：(1) 沙箱执行与最小权限工具；(2) 校验 Agent 作为门禁；(3) 检查点，通过后持久化，失败从检查点重试；(4) 不把未经校验的自然语言直接当 API 参数。
 
-**追问应对：**若问「工具返回很大怎么办？」答：存对象存储，只把句柄或摘要放进上下文。
+若问「工具返回很大怎么办？」答：存对象存储，只把句柄或摘要放进上下文。
 
 ### 9.4 代码示例（Python）
 
@@ -660,7 +638,6 @@ def pipeline(raw_rows):
 
 ```python
 from typing import Callable, List, Set
-
 
 def run_with_guard(
     agent_step: Callable[[List[str]], str],
@@ -685,40 +662,39 @@ def run_with_guard(
 
 ## 附：更多高频面试题（Q16~Q20）
 
-#### Q16: 多 Agent 会不会降低「一致性」（同一产品前后端接口对不上）？
+#### Q16：多 Agent 会不会降低「一致性」（同一产品前后端接口对不上）？
 
-**A：**会，所以需要单一契约源（OpenAPI / JSON Schema）+ 契约测试 Agent 或静态检查 + 状态机门禁。
+**A：** 会，所以需要单一契约源（OpenAPI / JSON Schema）+ 契约测试 Agent 或静态检查 + 状态机门禁。
 
-#### Q17: 如何做跨 Agent 的权限隔离？
+#### Q17：如何做跨 Agent 的权限隔离？
 
-**A：**工具分账户 / 分密钥；Agent 最小权限；敏感操作走审批工作流；审计日志用不可篡改存储。
+**A：** 工具分账户 / 分密钥；Agent 最小权限；敏感操作走审批工作流；审计日志用不可篡改存储。
 
-#### Q18: 多 Agent 的评估怎么做？
+#### Q18：多 Agent 的评估怎么做？
 
-**A：**分层做：单元（单 Agent I/O）、集成（两两交互）、端到端（任务成功率）；若用 `LLM-as-judge`，最好配黄金集与人工抽检，避免裁判偏差。
+**A：** 分层做：单元（单 Agent I/O）、集成（两两交互）、端到端（任务成功率）；若用 `LLM-as-judge`，最好配黄金集与人工抽检，避免裁判偏差。
 
-#### Q19: 为什么需要「人机在环」？
+#### Q19：为什么需要「人机在环」？
 
-**A：**高风险决策、未知法规或模型置信度低时，人类是最后防线；同时也能收集真实反馈，继续迭代提示与工具。
+**A：** 高风险决策、未知法规或模型置信度低时，人类是最后防线；同时也能收集真实反馈，继续迭代提示与工具。
 
-#### Q20: 多 Agent 与「单 Agent + 多个工具」取舍？
+#### Q20：多 Agent 与「单 Agent + 多个工具」取舍？
 
-**A：**若只需统一策略调不同 API，单 Agent + 工具即可；若需要角色隔离、并行、对抗评审、组织流程，多 Agent 更合适。
+**A：** 若只需统一策略调不同 API，单 Agent + 工具即可；若需要角色隔离、并行、对抗评审、组织流程，多 Agent 更合适。
 
 ## 本篇小结（背调清单）
 
-为何多 Agent：拆上下文、专业化、并行、隔离失败；单 Agent 有注意力与能力边界问题。
+- 为何多 Agent：拆上下文、专业化、并行、隔离失败；单 Agent 有注意力与能力边界问题。
+- 三种协作：Boss-Worker、Pipeline、Joint Discussion，各有瓶颈（Boss 单点、Pipeline 难回溯、讨论易空转）。
+- 通信：直连、黑板、Pub-Sub、队列，解耦度与复杂度不同。
+- 分配：能力 / 负载 / 动态 / 竞拍，是匹配度与治理成本之间的权衡。
+- 冲突：投票、优先级、主席、证据，核心是防止“假独立”与集体偏误。
+- 状态：全局真相 + 状态机 + 事件驱动。
+- 框架：AutoGen、CrewAI、MetaGPT、ChatDev、LangGraph，重点理解抽象差异与工程补齐点。
+- 生产：钱、慢、死循环、错、看不清，都要有硬约束与可观测。
+## 继续阅读
 
-三种协作：Boss-Worker、Pipeline、Joint Discussion，各有瓶颈（Boss 单点、Pipeline 难回溯、讨论易空转）。
-
-通信：直连、黑板、Pub-Sub、队列，解耦度与复杂度不同。
-
-分配：能力 / 负载 / 动态 / 竞拍，是匹配度与治理成本之间的权衡。
-
-冲突：投票、优先级、主席、证据，核心是防止“假独立”与集体偏误。
-
-状态：全局真相 + 状态机 + 事件驱动。
-
-框架：AutoGen、CrewAI、MetaGPT、ChatDev、LangGraph，重点理解抽象差异与工程补齐点。
-
-生产：钱、慢、死循环、错、看不清，都要有硬约束与可观测。
+- 上一篇：[← 记忆系统](/interview/bagua/memory/)
+- 下一篇：[大模型基础 →](/interview/bagua/llm-fundamentals/)
+- 相关速查：[多智能体速查](/interview/multi-agent/)
+- 动手实践：[多 Agent 协作演示](/practice/p10-react-loop/)

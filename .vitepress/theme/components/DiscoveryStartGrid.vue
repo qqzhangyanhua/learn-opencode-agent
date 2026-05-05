@@ -15,135 +15,54 @@ const routes = computed(() => {
 </script>
 
 <template>
-  <section class="discovery-start-grid">
-    <article
-      v-for="route in routes"
-      :key="route.goalId"
-      class="start-card"
-    >
-      <div class="start-card-copy">
-        <p class="start-card-kicker">{{ route.title }}</p>
-        <h3>先读什么</h3>
-      </div>
-
-      <a :href="route.recommendedStart.href" class="start-primary-link">
-        {{ route.recommendedStart.title }}
-      </a>
-
-      <p class="start-summary">{{ route.recommendedStart.summary }}</p>
-
-      <div class="start-meta">
-        <DiscoveryTypeBadge :label="route.recommendedStart.contentTypeLabel" />
-        <span>{{ route.recommendedStart.estimatedTime }}</span>
-      </div>
-
-      <div class="continue-list">
-        <p>然后继续：</p>
-        <ul>
-          <li v-for="item in route.continueWith" :key="item.contentId">
-            <a :href="item.href">{{ item.title }}</a>
-            <DiscoveryTypeBadge :label="item.contentTypeLabel" />
-          </li>
-        </ul>
-      </div>
-    </article>
-  </section>
+  <ul class="start-list">
+    <li v-for="route in routes" :key="route.goalId">
+      <span class="goal">{{ route.title }}</span>
+      <span class="arrow">→</span>
+      <a :href="route.recommendedStart.href">{{ route.recommendedStart.title }}</a>
+      <span class="time">{{ route.recommendedStart.estimatedTime }}</span>
+    </li>
+  </ul>
 </template>
 
 <style scoped>
-.discovery-start-grid {
+.start-list {
+  list-style: none;
+  margin: 12px 0 24px;
+  padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 6px;
+}
+
+.start-list li {
+  display: flex;
+  align-items: baseline;
   gap: 8px;
-  margin: 12px 0 20px;
+  flex-wrap: wrap;
+  font-size: 0.88rem;
+  line-height: 1.6;
 }
 
-.start-card {
-  display: grid;
-  gap: 8px;
-  padding: 12px 14px;
-  border-left: 3px solid var(--vp-c-divider);
-  border-radius: 0 6px 6px 0;
-  background: var(--vp-c-bg-alt);
+.goal {
+  color: var(--vp-c-text-1);
+  min-width: 9em;
 }
 
-.start-card-copy h3,
-.start-card-copy p,
-.continue-list p {
-  margin: 0;
-}
-
-.start-card-kicker {
+.arrow {
   color: var(--vp-c-text-3);
-  font-size: 0.7rem;
-  font-weight: 600;
 }
 
-.start-card-copy h3 {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--vp-c-text-2);
-}
-
-.start-primary-link {
+.start-list a {
   color: var(--vp-c-brand-1);
-  font-size: 0.85rem;
-  font-weight: 500;
   text-decoration: none;
 }
 
-.start-primary-link:hover,
-.continue-list a:hover {
+.start-list a:hover {
   text-decoration: underline;
 }
 
-.start-summary {
-  margin: 0;
-  font-size: 0.78rem;
-  color: var(--vp-c-text-2);
-  line-height: 1.55;
-}
-
-.start-meta {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  align-items: center;
+.time {
   color: var(--vp-c-text-3);
-  font-size: 0.72rem;
-}
-
-.continue-list p {
-  font-size: 0.72rem;
-  color: var(--vp-c-text-3);
-}
-
-.continue-list ul {
-  margin: 4px 0 0;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  gap: 4px;
-}
-
-.continue-list li {
-  display: flex;
-  justify-content: space-between;
-  gap: 6px;
-  align-items: center;
-  padding: 5px 8px;
-  border-radius: 4px;
-  border: 1px solid var(--vp-c-divider);
-}
-
-.continue-list a {
-  color: var(--vp-c-text-2);
   font-size: 0.78rem;
-  font-weight: 400;
-  text-decoration: none;
-}
-
-.continue-list a:hover {
-  color: var(--vp-c-brand-1);
 }
 </style>

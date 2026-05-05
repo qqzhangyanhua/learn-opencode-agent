@@ -15,116 +15,89 @@ const topics = computed(() => {
 </script>
 
 <template>
-  <section class="discovery-topic-hub">
-    <article
+  <div class="topic-hub">
+    <section
       v-for="topic in topics"
       :key="topic.topicId"
-      class="topic-card"
+      class="topic"
     >
-      <div class="topic-copy">
-        <p class="topic-kicker">按主题继续逛</p>
-        <h3>{{ topic.title }}</h3>
-        <p>{{ topic.summary }}</p>
-      </div>
-
-      <div class="topic-item-list">
-        <a
-          v-for="item in topic.items"
-          :key="item.contentId"
-          :href="item.href"
-          class="topic-item"
-        >
-          <div class="topic-item-head">
-            <span class="topic-item-title">{{ item.title }}</span>
-            <DiscoveryTypeBadge :label="item.contentTypeLabel" />
-          </div>
-          <p>{{ item.summary }}</p>
-        </a>
-      </div>
-    </article>
-  </section>
+      <h3>{{ topic.title }}</h3>
+      <p class="summary">{{ topic.summary }}</p>
+      <ul>
+        <li v-for="item in topic.items" :key="item.contentId">
+          <a :href="item.href">{{ item.title }}</a>
+          <span>{{ item.summary }}</span>
+        </li>
+      </ul>
+    </section>
+  </div>
 </template>
 
 <style scoped>
-.discovery-topic-hub {
+.topic-hub {
   display: grid;
-  gap: 16px;
-  margin: 12px 0 20px;
+  gap: 18px;
+  margin: 12px 0 24px;
 }
 
-.topic-card {
+.topic {
   display: grid;
-  gap: 8px;
-}
-
-.topic-copy h3,
-.topic-copy p {
-  margin: 0;
-}
-
-.topic-copy {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  padding-bottom: 6px;
+  gap: 4px;
+  padding-bottom: 14px;
   border-bottom: 1px solid var(--vp-c-divider);
 }
 
-.topic-kicker {
-  display: none;
+.topic:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
 }
 
-.topic-copy h3 {
-  font-size: 0.88rem;
+.topic h3 {
+  margin: 0;
+  font-size: 0.95rem;
   font-weight: 600;
   color: var(--vp-c-text-1);
+  border: none;
+  padding: 0;
+  letter-spacing: 0;
 }
 
-.topic-copy > p {
-  font-size: 0.78rem;
-  color: var(--vp-c-text-3);
-}
-
-.topic-item-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 6px;
-}
-
-.topic-item {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 8px 10px;
-  border-radius: 6px;
-  border: 1px solid var(--vp-c-divider);
-  background: transparent;
-  text-decoration: none;
-  transition: background 0.15s;
-}
-
-.topic-item:hover {
-  background: var(--vp-c-bg-alt);
-  border-color: var(--vp-c-brand-1);
-}
-
-.topic-item-head {
-  display: flex;
-  justify-content: space-between;
-  gap: 6px;
-  align-items: center;
-}
-
-.topic-item-title {
-  color: var(--vp-c-text-1);
+.summary {
+  margin: 0 0 4px;
   font-size: 0.82rem;
-  font-weight: 500;
+  color: var(--vp-c-text-3);
+  line-height: 1.6;
 }
 
-.topic-item p {
+ul {
+  list-style: none;
   margin: 0;
-  font-size: 0.75rem;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+
+li {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+li a {
+  color: var(--vp-c-brand-1);
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+li a:hover {
+  text-decoration: underline;
+}
+
+li span {
   color: var(--vp-c-text-3);
-  line-height: 1.5;
+  font-size: 0.78rem;
 }
 </style>

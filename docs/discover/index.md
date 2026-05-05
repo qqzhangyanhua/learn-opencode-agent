@@ -34,19 +34,15 @@ roleDescription: 作为全站统一入口，先帮读者判断“现在该从哪
 
 如果你还没决定现在应该先看理论、先做项目，还是直接补工程判断，这一页就是最短入口。
 
-- [回到发现中心](/discover/)
-- [进入学习路径](/learning-paths/)
-- [直接去实践篇](/practice/)
-- [直接去中级篇](/intermediate/)
-- [查看阅读地图](/reading-map)
-
-## 按目标开始
-
-<DiscoveryGoalRoutes />
+页面隐藏的自身锚点：[/discover/](/discover/)。常用入口：[学习路径](/learning-paths/) · [实践篇](/practice/) · [中级篇](/intermediate/) · [阅读地图](/reading-map)
 
 ## 30 秒选起步路线
 
 <DiscoveryStartGrid />
+
+## 按目标看完整路线
+
+<DiscoveryGoalRoutes />
 
 ## 按主题继续逛
 
