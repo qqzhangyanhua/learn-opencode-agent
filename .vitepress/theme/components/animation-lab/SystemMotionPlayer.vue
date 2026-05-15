@@ -1,25 +1,40 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import TracePanel from './TracePanel.vue'
-import type { Experiment } from './type'
+import type { Experiment, ExperimentStep } from './type'
 
 const props = defineProps<{
   experiment: Experiment
 }>()
 
+defineSlots<{
+  default(props: {
+    step: ExperimentStep
+    stepIndex: number
+    totalSteps: number
+    traceCollapsed: boolean
+  }): unknown
+}>()
+
 const currentStepIndex = ref(0)
 const isTraceCollapsed = ref(false)
 
-const currentStep = computed(() => props.experiment.steps[currentStepIndex.value])
+const totalSteps = computed(() => props.experiment.steps.length)
+const currentStep = computed<ExperimentStep | undefined>(() => props.experiment.steps[currentStepIndex.value])
 const isFirstStep = computed(() => currentStepIndex.value === 0)
-const isLastStep = computed(() => currentStepIndex.value === props.experiment.steps.length - 1)
+const isLastStep = computed(() => totalSteps.value === 0 || currentStepIndex.value === totalSteps.value - 1)
 
 function previousStep() {
   currentStepIndex.value = Math.max(0, currentStepIndex.value - 1)
 }
 
 function nextStep() {
-  currentStepIndex.value = Math.min(props.experiment.steps.length - 1, currentStepIndex.value + 1)
+  if (totalSteps.value === 0) {
+    currentStepIndex.value = 0
+    return
+  }
+
+  currentStepIndex.value = Math.min(totalSteps.value - 1, currentStepIndex.value + 1)
 }
 
 function resetSteps() {
@@ -39,17 +54,17 @@ function toggleTrace() {
         <h2>{{ experiment.title }}</h2>
         <p>{{ experiment.summary }}</p>
       </div>
-      <div class="player-step-count" aria-live="polite">
-        {{ currentStepIndex + 1 }} / {{ experiment.steps.length }}
+      <div class="player-step-count" aria-label="当前步骤" aria-live="polite">
+        {{ currentStep ? currentStepIndex + 1 : 0 }} / {{ totalSteps }}
       </div>
     </header>
 
-    <div class="player-shell">
+    <div v-if="currentStep" class="player-shell">
       <div class="player-canvas">
         <slot
           :step="currentStep"
           :step-index="currentStepIndex"
-          :total-steps="experiment.steps.length"
+          :total-steps="totalSteps"
           :trace-collapsed="isTraceCollapsed"
         />
       </div>
@@ -57,13 +72,15 @@ function toggleTrace() {
       <TracePanel
         :step="currentStep"
         :step-index="currentStepIndex"
-        :total-steps="experiment.steps.length"
+        :total-steps="totalSteps"
         :collapsed="isTraceCollapsed"
         @toggle="toggleTrace"
       />
     </div>
 
-    <footer class="player-controls">
+    <p v-else class="player-empty">暂无可播放步骤。</p>
+
+    <footer v-if="currentStep" class="player-controls" aria-label="实验步骤控制">
       <button type="button" :disabled="isFirstStep" @click="previousStep">上一步</button>
       <button type="button" @click="resetSteps">重置</button>
       <button type="button" :disabled="isLastStep" @click="nextStep">下一步</button>
@@ -153,6 +170,18 @@ function toggleTrace() {
   background:
     radial-gradient(circle at top left, rgba(14, 165, 233, 0.14), transparent 32%),
     #0f172a;
+}
+
+.player-empty {
+  margin: 0;
+  padding: 28px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  border-radius: 8px;
+  background: #0f172a;
+  color: #b6c3d1;
+  font-size: 0.9rem;
+  line-height: 1.7;
+  text-align: center;
 }
 
 .player-controls {
