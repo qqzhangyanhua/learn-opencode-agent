@@ -14,17 +14,23 @@ const emit = defineEmits<{
 </script>
 
 <template>
-  <aside class="trace-panel" :class="{ collapsed }" aria-label="Trace panel">
-    <button class="trace-toggle" type="button" :aria-expanded="!collapsed" @click="emit('toggle')">
+  <aside class="trace-panel" :class="{ collapsed }" aria-label="运行轨迹面板">
+    <button
+      class="trace-toggle"
+      type="button"
+      aria-controls="trace-panel-content"
+      :aria-expanded="!collapsed"
+      @click="emit('toggle')"
+    >
       {{ collapsed ? '展开 Trace' : '收起 Trace' }}
     </button>
 
-    <div v-if="collapsed" class="trace-rail">
+    <div v-if="collapsed" id="trace-panel-content" class="trace-rail">
       <span>{{ stepIndex + 1 }}/{{ totalSteps }}</span>
       <strong>{{ step.title }}</strong>
     </div>
 
-    <div v-else class="trace-body">
+    <div v-else id="trace-panel-content" class="trace-body">
       <p class="trace-kicker">TRACE {{ stepIndex + 1 }} / {{ totalSteps }}</p>
       <h3>{{ step.title }}</h3>
       <p>{{ step.description }}</p>
@@ -248,12 +254,6 @@ const emit = defineEmits<{
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-  }
-}
-
-@media (max-width: 420px) {
-  .trace-panel.collapsed {
-    grid-template-columns: 1fr;
   }
 }
 </style>
