@@ -432,6 +432,19 @@ export default withMermaid(defineConfig({
             { text: 'E17：IMS Copilot 设计复盘', link: '/enterprise-agent/e17-ims-copilot-retrospective' },
           ]
         },
+        {
+          text: '落地工具包',
+          collapsed: false,
+          items: [
+            { text: '企业 Agent 实施模板', link: '/enterprise-agent/implementation-template' },
+            { text: '企业 Agent 风险矩阵', link: '/enterprise-agent/risk-matrix' },
+            { text: '企业 Agent 参考架构蓝图', link: '/enterprise-agent/architecture-blueprint' },
+            { text: 'Python 项目结构与技术选型', link: '/enterprise-agent/python-project-structure' },
+            { text: '企业 Agent 数据模型与 Schema', link: '/enterprise-agent/data-model-and-schema' },
+            { text: '企业 Agent 运行时状态机', link: '/enterprise-agent/runtime-state-machine' },
+            { text: '企业 Agent API 契约设计', link: '/enterprise-agent/api-contract' },
+          ]
+        },
       ],
       '/new-claude/': [
         { text: '← 返回首页', link: '/' },

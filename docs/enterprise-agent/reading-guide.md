@@ -68,7 +68,13 @@ roleDescription: 想快速判断该从哪一篇开始读的读者
 3. [E12：高风险工具调用的确认机制](/enterprise-agent/e12-high-risk-tool-confirmation)
 4. [E13：流程状态、回滚与补偿](/enterprise-agent/e13-workflow-state-rollback-compensation)
 5. [E16：从项目到平台](/enterprise-agent/e16-project-to-platform-evolution)
-6. [设计检查表](/enterprise-agent/design-checklist)
+6. [架构蓝图](/enterprise-agent/architecture-blueprint)
+7. [Python 项目结构](/enterprise-agent/python-project-structure)
+8. [数据模型与 Schema](/enterprise-agent/data-model-and-schema)
+9. [运行时状态机](/enterprise-agent/runtime-state-machine)
+10. [API 契约设计](/enterprise-agent/api-contract)
+11. [风险矩阵](/enterprise-agent/risk-matrix)
+12. [设计检查表](/enterprise-agent/design-checklist)
 
 这条路线关注“哪些能力应该沉淀成平台能力”。
 
@@ -86,3 +92,10 @@ roleDescription: 想快速判断该从哪一篇开始读的读者
 | 流程失败后怎么恢复 | [E13](/enterprise-agent/e13-workflow-state-rollback-compensation) |
 | 上线后怎么追问题 | [E14](/enterprise-agent/e14-observability-and-audit) |
 | 怎么控制成本和延迟 | [E15](/enterprise-agent/e15-cost-performance-model-routing) |
+| 项目方案怎么写 | [实施模板](/enterprise-agent/implementation-template) |
+| 上线风险怎么评估 | [风险矩阵](/enterprise-agent/risk-matrix) |
+| 整体架构怎么画 | [架构蓝图](/enterprise-agent/architecture-blueprint) |
+| Python 目录怎么设计 | [Python 项目结构](/enterprise-agent/python-project-structure) |
+| 核心对象怎么定义 | [数据模型与 Schema](/enterprise-agent/data-model-and-schema) |
+| 执行状态怎么流转 | [运行时状态机](/enterprise-agent/runtime-state-machine) |
+| API 接口怎么设计 | [API 契约设计](/enterprise-agent/api-contract) |
