@@ -7,7 +7,22 @@ const props = defineProps<{
   step: ExperimentStep
 }>()
 
-const packetClass = computed(() => props.step.packet ? `packet-${props.step.packet.from}-${props.step.packet.to}` : '')
+const packetRouteClasses: Record<string, string> = {
+  'user-planner': 'packet-user-planner',
+  'planner-llm': 'packet-planner-llm',
+  'llm-tool': 'packet-llm-tool',
+  'tool-observation': 'packet-tool-observation',
+  'memory-llm': 'packet-memory-llm',
+  'llm-final': 'packet-llm-final',
+}
+
+const packetClass = computed(() => {
+  if (!props.step.packet) {
+    return ''
+  }
+
+  return packetRouteClasses[`${props.step.packet.from}-${props.step.packet.to}`] ?? 'packet-unknown'
+})
 
 function isNodeActive(id: string) {
   return props.step.activeNodes.includes(id)
@@ -20,29 +35,31 @@ function isPathActive(id: string) {
 
 <template>
   <div class="agent-loop-canvas">
-    <div class="runtime-grid" aria-hidden="true"></div>
+    <div class="runtime-scene">
+      <div class="runtime-grid" aria-hidden="true"></div>
 
-    <svg class="runtime-paths" viewBox="0 0 1000 560" role="img" aria-label="Agent 运行闭环路径">
-      <path
-        v-for="path in agentLoopPaths"
-        :key="path.id"
-        :class="{ active: isPathActive(path.id) }"
-        :data-path="path.id"
-        :d="path.d"
-      />
-    </svg>
+      <svg class="runtime-paths" viewBox="0 0 1000 560" role="img" aria-label="Agent 运行闭环路径">
+        <path
+          v-for="path in agentLoopPaths"
+          :key="path.id"
+          :class="{ active: isPathActive(path.id) }"
+          :data-path="path.id"
+          :d="path.d"
+        />
+      </svg>
 
-    <div
-      v-for="node in agentLoopNodes"
-      :key="node.id"
-      :class="['runtime-node', `node-${node.id}`, { active: isNodeActive(node.id) }]"
-    >
-      <span>{{ node.role }}</span>
-      <strong>{{ node.label }}</strong>
-    </div>
+      <div
+        v-for="node in agentLoopNodes"
+        :key="node.id"
+        :class="['runtime-node', `node-${node.id}`, { active: isNodeActive(node.id) }]"
+      >
+        <span>{{ node.role }}</span>
+        <strong>{{ node.label }}</strong>
+      </div>
 
-    <div v-if="step.packet" :class="['motion-packet', packetClass]">
-      {{ step.packet.label }}
+      <div v-if="step.packet" :class="['motion-packet', packetClass]">
+        {{ step.packet.label }}
+      </div>
     </div>
 
     <div class="canvas-step-summary">
@@ -54,8 +71,11 @@ function isPathActive(id: string) {
 
 <style scoped>
 .agent-loop-canvas {
-  position: relative;
+  display: grid;
+  grid-template-rows: minmax(320px, 1fr) auto;
+  gap: 12px;
   min-height: 420px;
+  padding: 14px;
   overflow: hidden;
   border-radius: 8px;
   background:
@@ -64,6 +84,8 @@ function isPathActive(id: string) {
   color: #e5edf7;
   isolation: isolate;
 }
+
+.runtime-scene { position: relative; min-height: 320px; overflow: hidden; }
 
 .runtime-grid {
   position: absolute;
@@ -78,10 +100,10 @@ function isPathActive(id: string) {
 
 .runtime-paths {
   position: absolute;
-  inset: 7% 4% 12%;
+  inset: 7% 4% 3%;
   z-index: 1;
   width: 92%;
-  height: 81%;
+  height: 90%;
   overflow: visible;
 }
 
@@ -220,13 +242,16 @@ function isPathActive(id: string) {
 .packet-tool-observation { animation: packet-tool-observation 1.45s ease-in-out infinite; }
 .packet-memory-llm { animation: packet-memory-llm 1.45s ease-in-out infinite; }
 .packet-llm-final { animation: packet-llm-final 1.45s ease-in-out infinite; }
+.packet-unknown {
+  left: 50%;
+  top: 50%;
+  border-color: rgba(248, 113, 113, 0.86);
+  background: rgba(127, 29, 29, 0.94);
+  color: #fee2e2;
+  box-shadow: 0 0 0 2px rgba(248, 113, 113, 0.2), 0 0 18px rgba(248, 113, 113, 0.34);
+}
 
 .canvas-step-summary {
-  position: absolute;
-  right: 18px;
-  bottom: 16px;
-  left: 18px;
-  z-index: 4;
   display: grid;
   gap: 5px;
   max-width: 560px;
@@ -296,13 +321,17 @@ function isPathActive(id: string) {
 
 @media (max-width: 780px) {
   .agent-loop-canvas {
+    grid-template-rows: minmax(280px, 1fr) auto;
     min-height: 360px;
+    padding: 12px;
   }
 
+  .runtime-scene { min-height: 280px; }
+
   .runtime-paths {
-    inset: 8% 2% 21%;
+    inset: 8% 2% 4%;
     width: 96%;
-    height: 71%;
+    height: 88%;
   }
 
   .runtime-node {
@@ -362,22 +391,22 @@ function isPathActive(id: string) {
   }
 
   .canvas-step-summary {
-    right: 12px;
-    bottom: 12px;
-    left: 12px;
     padding: 10px 11px;
   }
 }
 
 @media (max-width: 520px) {
   .agent-loop-canvas {
+    grid-template-rows: minmax(310px, 1fr) auto;
     min-height: 430px;
   }
 
+  .runtime-scene { min-height: 310px; }
+
   .runtime-paths {
-    inset: 4% -16% 24%;
+    inset: 4% -16% 2%;
     width: 132%;
-    height: 72%;
+    height: 94%;
   }
 
   .runtime-node {
@@ -425,6 +454,12 @@ function isPathActive(id: string) {
   .runtime-paths path.active,
   .motion-packet {
     animation: none;
+  }
+
+  .runtime-paths path,
+  .runtime-node,
+  .motion-packet {
+    transition: none;
   }
 
   .packet-user-planner {
