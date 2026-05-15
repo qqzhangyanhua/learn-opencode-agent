@@ -100,6 +100,7 @@ const asyncGlobalComponents = [
   ['ExtensionBestPracticeChecklistDemo', asyncComponent(() => import('./components/ExtensionBestPracticeChecklistDemo.vue'))],
   ['ToolExecutionLifecycleDemo', asyncComponent(() => import('./components/ToolExecutionLifecycleDemo.vue'))],
   ['SessionLoopLifecycleDemo', asyncComponent(() => import('./components/SessionLoopLifecycleDemo.vue'))],
+  ['AnimationLabIndex', asyncComponent(() => import('./components/animation-lab/AnimationLabIndex.vue'))],
 ] as const
 
 const syncGlobalComponents = [
