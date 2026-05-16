@@ -2,6 +2,7 @@
 
 ## 变更记录 (Changelog)
 
+- **2026-05-16 11:24:43** - 全量增量扫描：发现 5 大新增内容专区（claude-code 22 页、new-claude 20 页、hermes-agent 43 页、enterprise-agent 28 页、interview 17 页）；新增 animation-lab 实验系统（17 组件 + 11 数据文件 + 实验目录）；新增约 35 个 Vue 演示组件（ReActLoopDemo、CodeReviewAgentSystemDemo、GenerateExecuteRepairLoopDemo 等）；新增 5 个 Scenario 测试文件；新增 superpowers/ 40 个规格/计划文档；校验脚本从 11 个增加到 12 个（含 check-animation-lab）；组件总数从约 60 增至约 95
 - **2026-03-25 13:07:08** - 全量增量扫描：补全中级篇（第25-32章）、补充实践篇（P24-P28）、发现中心组件系统、学习进度系统、内容元数据框架、11 个校验脚本、全量 Vue 组件清单（共约 60 个）
 - **2026-03-20 14:30:00** - 新增动画系统：5 个核心概念动画组件（2个 CSS + 3个 Lottie），包含滚动触发基础设施
 - **2026-03-20 10:00:00** - 补充实践篇完整结构：23 个实践章节（P1-P23）、7 个阶段、3 个实践篇专属组件
@@ -20,6 +21,8 @@ VitePress 电子书站点。书名：**从零构建 AI Coding Agent — OpenCode
 - 部署：静态构建 + Caddy 伺服
 - 仓库：`https://github.com/qqzhangyanhua/learn-opencode-agent`
 
+当前站点已扩展为多专区知识库，包含 8 个内容专区：理论篇、实践篇、中级篇、动画实验室、面试题专区、Claude Code 专栏、Hermes Agent 专栏、企业 Agent 专栏。
+
 ---
 
 ## 开发命令
@@ -32,7 +35,7 @@ bun build      # 构建静态站点到 .vitepress/dist
 bun preview    # 预览构建产物
 bun start      # Caddy 伺服（端口 3000，生产用）
 
-# 严格构建（运行所有 11 个校验脚本后再构建）
+# 严格构建（运行所有 12 个校验脚本后再构建）
 bun run build:strict
 
 # 单独运行校验
@@ -47,6 +50,7 @@ bun run check:chapter-experience   # 检查章节体验
 bun run check:practice-course-experience  # 检查实践课程体验
 bun run check:discovery-experience # 检查发现中心体验
 bun run check:learning-progress    # 检查学习进度
+bun run check:animation-lab        # 检查动画实验室数据与组件一致性
 
 # 类型检查
 bun run typecheck
@@ -63,10 +67,18 @@ docs/book/
 │   ├── tsconfig.json               # TypeScript 配置（覆盖 .vitepress/** 和 docs/**）
 │   ├── vue-shim.d.ts               # Vue SFC 类型声明
 │   ├── theme/
-│   │   ├── index.ts                # 主题入口，注册全部约 60 个 Vue 全局组件
+│   │   ├── index.ts                # 主题入口，注册全部约 95 个 Vue 全局组件
 │   │   ├── custom.css              # Cyber Teal 设计系统（品牌色、阅读体验变量）
 │   │   ├── components/             # Vue 全局组件目录（详见下方清单）
-│   │   │   ├── types.ts            # 所有组件 Props 类型集中定义（约 600 行）
+│   │   │   ├── types.ts            # 所有组件 Props 类型集中定义（约 800+ 行）
+│   │   │   ├── flowScenario.ts     # 流程演示通用场景编排
+│   │   │   ├── flowPlayback.ts     # 流程演示通用时间轴控制
+│   │   │   ├── flowPlayback.test.ts
+│   │   │   ├── extensionDecisionScenario.ts / .test.ts
+│   │   │   ├── taskExecutionScenario.ts / .test.ts
+│   │   │   ├── testingLayersScenario.ts / .test.ts
+│   │   │   ├── localCloudTopologyScenario.ts / .test.ts
+│   │   │   ├── hybridRetrievalData.ts
 │   │   │   ├── learning-progress/
 │   │   │   │   └── learningProgressStorage.ts  # 本地进度持久化（localStorage）
 │   │   │   ├── animations/
@@ -84,7 +96,24 @@ docs/book/
 │   │   │   │       ├── MemorySystem.vue
 │   │   │   │       ├── MultiAgentCollab.vue
 │   │   │   │       └── assets/               # Lottie JSON 动画数据（3 个 .json 文件）
-│   │   │   └── (其余约 50 个组件，见下方清单)
+│   │   │   └── animation-lab/              # 动画实验室组件（17 个 Vue + 2 CSS + 1 type.ts）
+│   │   │       ├── AnimationLabIndex.vue     # 实验室总览页面
+│   │   │       ├── SystemMotionPlayer.vue    # 系统运动播放器
+│   │   │       ├── TracePanel.vue           # Trace 事件面板
+│   │   │       ├── FlowExperimentCanvas.vue  # 流动实验画布
+│   │   │       ├── FlowExperimentCanvas.css / FlowExperimentCanvasMotion.css / FlowExperimentCanvasBase.css
+│   │   │       ├── AgentLoopExperiment.vue
+│   │   │       ├── ContextMemoryExperiment.vue
+│   │   │       ├── MultiAgentDispatchExperiment.vue
+│   │   │       ├── ToolPermissionGateExperiment.vue
+│   │   │       ├── ContextCompactionExperiment.vue
+│   │   │       ├── ErrorRecoveryLoopExperiment.vue
+│   │   │       ├── ProviderRoutingFallbackExperiment.vue
+│   │   │       ├── RagRetrievalFlowExperiment.vue
+│   │   │       ├── HumanApprovalGateExperiment.vue
+│   │   │       ├── StructuredOutputValidationExperiment.vue
+│   │   │       ├── StreamingInterruptControlExperiment.vue
+│   │   │       └── type.ts                 # animation-lab 类型定义
 │   │   ├── composables/
 │   │   │   ├── useDemoPlayer.ts            # 步骤式演示播放控制
 │   │   │   ├── useBudgetMeter.ts           # Token 预算仪表盘
@@ -96,7 +125,20 @@ docs/book/
 │   │       ├── learning-paths.data.ts      # 学习路径定义 data loader
 │   │       ├── practice-projects.ts        # 实践项目定义（28 个项目的完整元数据）
 │   │       ├── practice-source-files.ts    # 实践项目源文件映射
-│   │       └── discovery-content.ts        # 发现中心内容路由定义
+│   │       ├── discovery-content.ts        # 发现中心内容路由定义
+│   │       ├── animation-lab-experiments.ts # 动画实验室实验目录（11 个实验）
+│   │       └── animation-lab/             # 实验数据文件（11 个 .ts）
+│   │           ├── agent-loop.ts
+│   │           ├── context-memory-flow.ts
+│   │           ├── multi-agent-dispatch.ts
+│   │           ├── tool-permission-gate.ts
+│   │           ├── context-compaction.ts
+│   │           ├── error-recovery-loop.ts
+│   │           ├── provider-routing-fallback.ts
+│   │           ├── rag-retrieval-flow.ts
+│   │           ├── human-approval-gate.ts
+│   │           ├── structured-output-validation.ts
+│   │           └── streaming-interrupt-control.ts
 │   └── dist/                       # 构建输出（.gitignore 忽略）
 ├── docs/                           # srcDir 内容根目录
 │   ├── index.md                    # 首页（layout: home）
@@ -106,71 +148,64 @@ docs/book/
 │   ├── release-checklist.md        # 封版清单
 │   ├── oh-my-openagent-plan.md     # oh-my-openagent 规划文档
 │   ├── 00-what-is-ai-agent/        # 理论篇第1章
-│   ├── 01-agent-basics/            # 理论篇第2章
-│   ├── ...（02 到 20，及 oh-* 特殊章）
+│   ├── ...（01 到 20，及 oh-* 特殊章）
 │   ├── intermediate/               # 中级篇（第六部分，第25-32章）
-│   │   ├── index.md                # 中级篇导读
+│   │   ├── index.md
 │   │   ├── 25-rag-failure-patterns/
-│   │   ├── 26-multi-agent-collaboration/
-│   │   ├── 27-planning-mechanism/
-│   │   ├── 28-context-engineering/
-│   │   ├── 29-system-prompt-design/
-│   │   ├── 30-production-architecture/
-│   │   ├── 31-safety-boundaries/
-│   │   ├── 32-performance-cost/
-│   │   └── examples/               # Python 教学示例（对应各章）
-│   │       ├── 25-rag-failure-patterns/    # 5 个 .py 文件
-│   │       ├── 26-multi-agent-collaboration/
-│   │       ├── 27-planning-mechanism/
-│   │       └── 28-context-engineering/
-│   └── practice/                   # 实践篇（独立目录）
-│       ├── index.md                # 实践篇首页
-│       ├── setup.md                # 实践环境准备
-│       ├── p01-minimal-agent/      # Phase 1 — Agent 基础
-│       ├── p02-multi-turn/
-│       ├── p03-streaming/
-│       ├── p04-error-handling/
-│       ├── p24-prompt-engineering/ # Phase 1 补充
-│       ├── p25-long-context/       # Phase 1 补充
-│       ├── p26-structured-output/  # Phase 1 补充
-│       ├── p05-memory-arch/        # Phase 2 — 记忆与知识
-│       ├── p06-memory-retrieval/
-│       ├── p07-rag-basics/
-│       ├── p08-graphrag/
-│       ├── p09-hybrid-retrieval/
-│       ├── p10-react-loop/         # Phase 3 — 推理与规划
-│       ├── p11-planning/
-│       ├── p12-reflection/
-│       ├── p13-multimodal/         # Phase 4 — 感知扩展
-│       ├── p14-mcp/
-│       ├── p27-code-execution/     # Phase 4 补充
-│       ├── p15-multi-agent/        # Phase 5 — 多 Agent 协作
-│       ├── p16-subagent/
-│       ├── p17-agent-comm/
-│       ├── p28-human-in-loop/      # Phase 5 补充
-│       ├── p18-model-routing/      # Phase 6 — 生产化
-│       ├── p19-security/
-│       ├── p20-observability/
-│       ├── p21-evaluation/
-│       ├── p22-project/            # Phase 7 — 综合实战
-│       └── p23-production/
-├── practice/                       # 可运行 TypeScript 实践脚本（24 个文件）
-│   ├── p01-minimal-agent.ts
-│   ├── p02-multi-turn.ts
-│   ├── ... (p03 到 p22)
-│   └── p23-production.ts
-├── scripts/                        # 内容质量校验脚本（11 个 .mjs 文件）
-│   ├── check-content.mjs           # Markdown 文件完整性 + 禁止词检测
-│   ├── check-practice-entries.mjs  # 实践入口有效性
-│   ├── check-learning-metadata.mjs # frontmatter 学习元数据完整性
-│   ├── check-learning-paths.mjs    # 学习路径定义一致性
-│   ├── check-homepage-entry.mjs    # 首页入口检查
-│   ├── check-navigation-entry.mjs  # 导航入口检查
-│   ├── check-entry-context.mjs     # EntryContextBanner 使用检查
-│   ├── check-chapter-experience.mjs        # 章节体验完整性
-│   ├── check-practice-course-experience.mjs # 实践课程体验
-│   ├── check-discovery-experience.mjs      # 发现中心体验
-│   └── check-learning-progress.mjs         # 学习进度功能检查
+│   │   ├── ...（26 到 32）
+│   │   └── examples/               # Python 教学示例（25-32 章，13 个 .py + 8 个 README）
+│   ├── practice/                   # 实践篇（28 个章节，P1-P28）
+│   │   ├── index.md
+│   │   ├── setup.md
+│   │   ├── p01-minimal-agent/ 到 p28-human-in-loop/
+│   ├── animation-lab/              # 动画实验室（专区首页，使用 AnimationLabIndex 组件）
+│   │   └── index.md
+│   ├── interview/                  # Agent 面试题专区（按能力分类 + 八股文）
+│   │   ├── index.md
+│   │   ├── fundamentals/ tools/ memory/ planning/ rag/ multi-agent/ engineering/
+│   │   └── bagua/                 # 八股文子区（9 个分类页面）
+│   ├── claude-code/                # Claude Code 架构思维专栏（20 章 + 导读 + 首页）
+│   │   ├── index.md
+│   │   ├── reading-guide.md
+│   │   ├── chapter01.md 到 chapter20.md
+│   │   └── _archive/             # 旧版归档（chapter01-15）
+│   ├── new-claude/                 # Claude Code 源码业务流专栏（4 部分，20 页）
+│   │   ├── index.md
+│   │   ├── 00-阅读指南.md
+│   │   ├── 01-系统全景与学习路线.md
+│   │   ├── part-1-主业务流/（01-06）
+│   │   ├── part-2-扩展能力流/（07-10）
+│   │   ├── part-3-远程协同流/（11-14）
+│   │   └── part-4-附录/（90-92, 99）
+│   ├── hermes-agent/               # Hermes Agent 拆解专栏（12 章 + 31 附录 + 首页）
+│   │   ├── index.md
+│   │   ├── 00-先别急着看代码 到 11-自己做Agent/
+│   │   └── 附录A 到 附录AE（字母索引附录）
+│   ├── enterprise-agent/           # 企业 Agent 设计专栏（17 章 + 7 工具包 + 导读）
+│   │   ├── index.md
+│   │   ├── reading-guide.md
+│   │   ├── design-checklist.md
+│   │   ├── e00-enterprise-agent-constraints 到 e17-ims-copilot-retrospective/
+│   │   └── implementation-template/ risk-matrix/ architecture-blueprint/（工具包）
+│   └── superpowers/                # 设计规格与实施计划归档（40 个 .md）
+│       ├── specs/                  # 设计规格文档（20 个）
+│       └── plans/                  # 实施计划文档（20 个）
+├── practice/                       # 可运行 TypeScript 实践脚本（24 个文件 + README）
+│   ├── p01-minimal-agent.ts 到 p28-human-in-loop.ts
+│   └── p14-mcp-server.ts
+├── scripts/                        # 内容质量校验脚本（12 个 .mjs 文件）
+│   ├── check-content.mjs
+│   ├── check-practice-entries.mjs
+│   ├── check-learning-metadata.mjs
+│   ├── check-learning-paths.mjs
+│   ├── check-homepage-entry.mjs
+│   ├── check-navigation-entry.mjs
+│   ├── check-entry-context.mjs
+│   ├── check-chapter-experience.mjs
+│   ├── check-practice-course-experience.mjs
+│   ├── check-discovery-experience.mjs
+│   ├── check-learning-progress.mjs
+│   └── check-animation-lab.mjs     # 动画实验室数据/组件一致性校验
 ├── add-frontmatter.ts              # 工具脚本：为章节补写 frontmatter
 ├── remove-duplicate-titles.ts      # 工具脚本：移除重复 H1
 └── package.json
@@ -232,10 +267,10 @@ docs/book/
 | 第26章：多智能体协作实战 | `docs/intermediate/26-multi-agent-collaboration/` | 1 个 .py | 多 Agent 分工协同 |
 | 第27章：Planning 机制 | `docs/intermediate/27-planning-mechanism/` | 1 个 .py | 多阶段计划执行 |
 | 第28章：上下文工程实战 | `docs/intermediate/28-context-engineering/` | 1 个 .py | 上下文策略工程化 |
-| 第29章：System Prompt 设计 | `docs/intermediate/29-system-prompt-design/` | — | Prompt 三层结构 |
-| 第30章：生产架构 | `docs/intermediate/30-production-architecture/` | — | 架构边界与依赖 |
-| 第31章：安全与边界 | `docs/intermediate/31-safety-boundaries/` | — | 安全策略可审计 |
-| 第32章：性能与成本 | `docs/intermediate/32-performance-cost/` | — | 成本与性能全链路 |
+| 第29章：System Prompt 设计 | `docs/intermediate/29-system-prompt-design/` | 1 个 .py | Prompt 三层结构 |
+| 第30章：生产架构 | `docs/intermediate/30-production-architecture/` | 1 个 .py | 架构边界与依赖 |
+| 第31章：安全与边界 | `docs/intermediate/31-safety-boundaries/` | 1 个 .py | 安全策略可审计 |
+| 第32章：性能与成本 | `docs/intermediate/32-performance-cost/` | 1 个 .py | 成本与性能全链路 |
 
 ### 第七部分：实践篇（docs/practice/）
 
@@ -248,9 +283,9 @@ docs/book/
 | P2：多轮对话 | `docs/practice/p02-multi-turn/` | `practice/p02-multi-turn.ts` | 上下文管理 |
 | P3：流式输出 | `docs/practice/p03-streaming/` | `practice/p03-streaming.ts` | 实时反馈 |
 | P4：错误处理 | `docs/practice/p04-error-handling/` | `practice/p04-error-handling.ts` | 重试策略 |
-| P24：Prompt Engineering（补充） | `docs/practice/p24-prompt-engineering/` | — | System Prompt 三层结构 |
-| P25：长上下文管理（补充） | `docs/practice/p25-long-context/` | — | 长窗口处理 |
-| P26：结构化输出（补充） | `docs/practice/p26-structured-output/` | — | JSON schema 输出 |
+| P24：Prompt Engineering（补充） | `docs/practice/p24-prompt-engineering/` | `practice/p24-prompt-engineering.ts` | System Prompt 三层结构 |
+| P25：长上下文管理（补充） | `docs/practice/p25-long-context/` | `practice/p25-long-context.ts` | 长窗口处理 |
+| P26：结构化输出（补充） | `docs/practice/p26-structured-output/` | `practice/p26-structured-output.ts` | JSON schema 输出 |
 
 #### Phase 2 — 记忆与知识系统
 | 章节 | 路径 | 对应脚本 | 说明 |
@@ -272,8 +307,8 @@ docs/book/
 | 章节 | 路径 | 对应脚本 | 说明 |
 |------|------|---------|------|
 | P13：多模态 | `docs/practice/p13-multimodal/` | `practice/p13-multimodal.ts` | 多模态智能体 |
-| P14：MCP 协议 | `docs/practice/p14-mcp/` | `practice/p14-mcp.ts` | MCP 协议接入 |
-| P27：代码执行 Agent（补充） | `docs/practice/p27-code-execution/` | — | 代码沙箱执行 |
+| P14：MCP 协议 | `docs/practice/p14-mcp/` | `practice/p14-mcp.ts` + `practice/p14-mcp-server.ts` | MCP 协议接入 |
+| P27：代码执行 Agent（补充） | `docs/practice/p27-code-execution/` | `practice/p27-code-execution.ts` | 代码沙箱执行 |
 
 #### Phase 5 — 多 Agent 协作
 | 章节 | 路径 | 对应脚本 | 说明 |
@@ -281,7 +316,7 @@ docs/book/
 | P15：多 Agent 编排 | `docs/practice/p15-multi-agent/` | `practice/p15-multi-agent.ts` | 编排模式 |
 | P16：子 Agent | `docs/practice/p16-subagent/` | `practice/p16-subagent.ts` | 任务分解 |
 | P17：Agent 通信 | `docs/practice/p17-agent-comm/` | `practice/p17-agent-comm.ts` | 状态共享 |
-| P28：Human-in-the-Loop（补充） | `docs/practice/p28-human-in-loop/` | — | 高风险操作人工介入 |
+| P28：Human-in-the-Loop（补充） | `docs/practice/p28-human-in-loop/` | `practice/p28-human-in-loop.ts` | 高风险操作人工介入 |
 
 #### Phase 6 — 生产化
 | 章节 | 路径 | 对应脚本 | 说明 |
@@ -297,6 +332,80 @@ docs/book/
 | P22：完整项目 | `docs/practice/p22-project/` | `practice/p22-project.ts` | Code Review Agent |
 | P23：生产部署 | `docs/practice/p23-production/` | `practice/p23-production.ts` | 部署清单 |
 
+### 第八部分：Claude Code 架构思维专栏（claude-code/）
+
+从架构师思维角度拆解 Agent 系统的设计原理，共 5 部分 20 章。
+
+| 区块 | 路径 | 章节数 |
+|------|------|--------|
+| 第一部分：先把 Agent 这件事想明白 | `docs/claude-code/chapter01` - `chapter03` | 3 章 |
+| 第二部分：把运行时主链路拆开 | `docs/claude-code/chapter04` - `chapter09` | 6 章 |
+| 第三部分：从单 Agent 走向更复杂系统 | `docs/claude-code/chapter10` - `chapter15` | 6 章 |
+| 第四部分：从应用走向平台 | `docs/claude-code/chapter16` - `chapter18` | 3 章 |
+| 第五部分：工程化闭环与全书收束 | `docs/claude-code/chapter19` - `chapter20` | 2 章 |
+| 辅助页面 | `docs/claude-code/index.md`、`reading-guide.md` | — |
+
+`_archive/` 目录保存旧版 1-15 章草稿。
+
+### 第九部分：Claude Code 源码业务流专栏（new-claude/）
+
+从代码执行路径角度拆解 Claude Code 的实现，共 4 部分 20 页。
+
+| 区块 | 路径 | 说明 |
+|------|------|------|
+| Part 1：主业务流 | `docs/new-claude/part-1-主业务流/` | CLI 启动、初始化、会话、主循环、工具编排、输出渲染（6 章） |
+| Part 2：扩展能力流 | `docs/new-claude/part-2-扩展能力流/` | MCP、Skills、Plugins/Hooks、权限策略（4 章） |
+| Part 3：远程协同流 | `docs/new-claude/part-3-远程协同流/` | Bridge、Remote Session、后台会话、多代理（4 章） |
+| Part 4：附录 | `docs/new-claude/part-4-附录/` | 源码地图、核心文件索引、关键类型、练习题（4 章） |
+| 辅助页面 | `docs/new-claude/` | 阅读指南(00)、系统全景(01)、首页(index) |
+
+### 第十部分：Hermes Agent 拆解专栏（hermes-agent/）
+
+对 Anthropic 官方 Hermes Agent 参考实现的逐层拆解，共 12 章 + 31 附录（按字母索引）。
+
+| 区块 | 章节 | 附录 |
+|------|------|------|
+| 概念准备 | 第1-2章 | — |
+| 核心机制 | 第3-6章（run_agent 闭环、工具系统、记忆系统、SessionDB） | — |
+| 系统扩展 | 第7-10章（CLI/Gateway、Skills、子Agent、Cron） | — |
+| 工程落地 | 第11-12章（安全约束、如何复刻） | — |
+| 附录：Prompt 与上下文 | — | 附录 A/B/L/V/W/X/Y（7 篇） |
+| 附录：工具与能力层 | — | 附录 E/F/I/K/AD/AE（6 篇） |
+| 附录：记忆与会话 | — | 附录 J/N/O/P/Q/S/T（7 篇） |
+| 附录：运行时与执行 | — | 附录 C/D/M/R/AA/AB（6 篇） |
+| 附录：扩展与接入 | — | 附录 G/H/U/AC/Z（5 篇） |
+
+### 第十一部分：企业 Agent 设计专栏（enterprise-agent/）
+
+从零设计企业级 AI Agent 的完整方法论，共 5 模块 + 17 章 + 7 工具包。
+
+| 模块 | 章节 | 说明 |
+|------|------|------|
+| 模块 0：企业 Agent 约束 | E00-E01 | 四个本质约束、Chatbot 到企业 Agent |
+| 模块 1：意图识别与混合查询 | E02-E04 | 意图分层、混合查询拆解、澄清问题 |
+| 模块 2：Policy QA 与企业知识库 | E05-E07 | 企业 RAG、权限过滤、Text-to-SQL 管控 |
+| 模块 3：个人数据与操作引导 | E08-E10 | 上下文设计、操作引导、意图到步骤 |
+| 模块 4：流程自动化与人机协同 | E11-E13 | Human-in-the-Loop、高风险确认、回滚补偿 |
+| 模块 5：生产化收口 | E14-E17 | 观测审计、成本路由、平台演化、IMS 复盘 |
+| 落地工具包 | 7 个页面 | 实施模板、风险矩阵、架构蓝图、Python 结构、数据模型、状态机、API 契约 |
+
+### 第十二部分：面试题专区（interview/）
+
+按能力分类的 Agent 面试准备专区。
+
+| 分类 | 路径 | 说明 |
+|------|------|------|
+| 专区总览 | `docs/interview/index.md` | 题目分类入口 |
+| 基础概念 | `docs/interview/fundamentals/` | Agent 基本概念面试题 |
+| 工具调用 | `docs/interview/tools/` | Tool Use 高频题 |
+| 记忆 | `docs/interview/memory/` | 记忆系统面试题 |
+| 规划 | `docs/interview/planning/` | Planning 面试题 |
+| RAG | `docs/interview/rag/` | RAG 技术面试题 |
+| Multi-Agent | `docs/interview/multi-agent/` | 多 Agent 面试题 |
+| 工程化 | `docs/interview/engineering/` | 工程实践面试题 |
+| 八股文总览 | `docs/interview/bagua/index.md` | Agent 八股文 |
+| 八股文子类 | `docs/interview/bagua/` | agent-basics / core-frameworks / rag / tool-calling / memory / multi-agent / llm-fundamentals / engineering-practice / prompt-engineering（9 个分类） |
+
 ### 辅助页面
 | 页面 | 路径 | 说明 |
 |------|------|------|
@@ -304,6 +413,7 @@ docs/book/
 | 实践篇首页 | `docs/practice/index.md` | 含 PracticeTerminalHero、PracticePhaseGrid、PracticeTagCloud、PracticeRouteExplorer |
 | 中级篇导读 | `docs/intermediate/index.md` | 含 EntryContextBanner，三条阅读路线入口 |
 | 实践环境准备 | `docs/practice/setup.md` | 环境配置与依赖安装 |
+| 动画实验室 | `docs/animation-lab/index.md` | 含 AnimationLabIndex 组件，11 个交互实验 |
 | 阅读地图 | `docs/reading-map.md` | 多阶段课程分级与路线 |
 | 术语表 | `docs/glossary.md` | 高频概念统一口径 |
 | 版本说明 | `docs/version-notes.md` | 源码快照语义、写作边界 |
@@ -314,7 +424,7 @@ docs/book/
 
 ## Vue 全局组件清单
 
-所有组件在 `.vitepress/theme/index.ts` 注册，可直接在任意 Markdown 文件中使用。当前注册组件约 60 个（含异步加载 1 个）。
+所有组件在 `.vitepress/theme/index.ts` 注册，可直接在任意 Markdown 文件中使用。当前注册组件约 95 个（含异步加载）。
 
 ### 核心展示组件（首页 / 导航页）
 | 组件名 | 文件 | 用途 |
@@ -326,6 +436,7 @@ docs/book/
 | `StarCTA` | `components/StarCTA.vue` | 各章末尾 Star 召唤行动按钮 |
 | `HomeStartPanel` | `components/HomeStartPanel.vue` | 首页起始引导面板 |
 | `HomeExploreLinks` | `components/HomeExploreLinks.vue` | 首页探索链接 |
+| `HomeSeriesStrip` | `components/HomeSeriesStrip.vue` | 首页专栏系列条 |
 | `SectionRoleGrid` | `components/SectionRoleGrid.vue` | 各篇章角色定位网格 |
 
 ### 章节体验组件
@@ -368,6 +479,7 @@ docs/book/
 | `MessageAccumulator` | `components/MessageAccumulator.vue` | 第4章（消息累积） |
 | `PermissionFlow` | `components/PermissionFlow.vue` | 第4章（权限流程） |
 | `McpHandshake` | `components/McpHandshake.vue` | 第7章（MCP 握手） |
+| `HttpPermissionGateDemo` | `components/HttpPermissionGateDemo.vue` | 第9章（HTTP 权限门控） |
 | `SseBroadcast` | `components/SseBroadcast.vue` | 第9章（SSE 广播） |
 | `ContextCompaction` | `components/ContextCompaction.vue` | 第5章（上下文压缩） |
 | `ProviderFallback` | `components/ProviderFallback.vue` | 第6章（Provider 故障转移） |
@@ -389,8 +501,10 @@ docs/book/
 |--------|------|----------|
 | `RagAccuracyDemo` | `components/RagAccuracyDemo.vue` | 第25章（RAG 检索准确性） |
 | `MultiAgentWorkflowDetailed` | `components/MultiAgentWorkflowDetailed.vue` | 第26章（多智能体协作详细） |
+| `MultiAgentModeSimulator` | `components/MultiAgentModeSimulator.vue` | 第26章（多 Agent 模式模拟器） |
 | `PlanningTreeDemo` | `components/PlanningTreeDemo.vue` | 第27章（Planning 树） |
 | `PlanningTreeNodeItem` | `components/PlanningTreeNodeItem.vue` | 第27章（Planning 树节点子组件） |
+| `PlanningFlowSimulator` | `components/PlanningFlowSimulator.vue` | 第27章（Planning 流程模拟器） |
 | `ContextEngineeringExtended` | `components/ContextEngineeringExtended.vue` | 第28章（上下文工程） |
 | `PromptDesignStudio` | `components/PromptDesignStudio.vue` | 第29章（Prompt 设计工作台） |
 | `PromptLintPanel` | `components/PromptLintPanel.vue` | 第29章（Prompt 静态检查面板） |
@@ -398,6 +512,35 @@ docs/book/
 | `TopologyNodeLabel` | `components/TopologyNodeLabel.vue` | 第30章（拓扑节点标签子组件） |
 | `SecurityBoundaryDemo` | `components/SecurityBoundaryDemo.vue` | 第31章（安全边界演示） |
 | `CostOptimizationDashboard` | `components/CostOptimizationDashboard.vue` | 第32章（成本优化仪表盘） |
+
+### 新增中级篇/扩展演示组件
+| 组件名 | 文件 | 对应章节/用途 |
+|--------|------|-------------|
+| `ReActLoopDemo` | `components/ReActLoopDemo.vue` | 第10章（ReAct 循环演示） |
+| `PlanningExecuteDemo` | `components/PlanningExecuteDemo.vue` | 第27章（规划执行演示） |
+| `ReflectionCycleDemo` | `components/ReflectionCycleDemo.vue` | 第5章（反思循环演示） |
+| `AgentCommunicationModesDemo` | `components/AgentCommunicationModesDemo.vue` | 第26章（Agent 通信模式） |
+| `TraceSpanTimelineDemo` | `components/TraceSpanTimelineDemo.vue` | 第20章（Trace Span 时间线） |
+| `EvaluationPipelineDemo` | `components/EvaluationPipelineDemo.vue` | 第21章（评估流水线） |
+| `CodeReviewAgentSystemDemo` | `components/CodeReviewAgentSystemDemo.vue` | P22（Code Review 系统） |
+| `ContextBudgetCompressionDemo` | `components/ContextBudgetCompressionDemo.vue` | 第5章（上下文预算压缩） |
+| `GenerateExecuteRepairLoopDemo` | `components/GenerateExecuteRepairLoopDemo.vue` | 第27章（生成-执行-修复循环） |
+| `ApprovalInterruptResumeDemo` | `components/ApprovalInterruptResumeDemo.vue` | 第11章/P28（审批-中断-恢复） |
+| `MultimodalMessageFlowDemo` | `components/MultimodalMessageFlowDemo.vue` | P13（多模态消息流） |
+| `PromptLayerComposerDemo` | `components/PromptLayerComposerDemo.vue` | 第29章（Prompt 层合成器） |
+| `SchemaConstrainedOutputDemo` | `components/SchemaConstrainedOutputDemo.vue` | P26（Schema 约束输出） |
+| `TransactionEffectQueueDemo` | `components/TransactionEffectQueueDemo.vue` | 第30章（事务效果队列） |
+| `ExtensionDecisionFlowDemo` | `components/ExtensionDecisionFlowDemo.vue` | 第13章（扩展决策流程） |
+| `ExtensionCapabilitySelector` | `components/ExtensionCapabilitySelector.vue` | 第13章（扩展能力选择器） |
+| `CloudLayerResponsibilityDemo` | `components/CloudLayerResponsibilityDemo.vue` | 第14章（云层责任划分） |
+| `TaskExecutionPathDemo` | `components/TaskExecutionPathDemo.vue` | 第27章（任务执行路径） |
+| `TestingLayersDemo` | `components/TestingLayersDemo.vue` | 第15章（测试分层） |
+| `LocalCloudTopologyDemo` | `components/LocalCloudTopologyDemo.vue` | 第14章（本地云拓扑） |
+| `TuiProviderFlowDemo` | `components/TuiProviderFlowDemo.vue` | 第8章（TUI Provider 流程） |
+| `PluginLifecycleDemo` | `components/PluginLifecycleDemo.vue` | 第13章（插件生命周期） |
+| `ExtensionBestPracticeChecklistDemo` | `components/ExtensionBestPracticeChecklistDemo.vue` | 第13章（扩展最佳实践） |
+| `ToolExecutionLifecycleDemo` | `components/ToolExecutionLifecycleDemo.vue` | 第4章（工具执行生命周期） |
+| `SessionLoopLifecycleDemo` | `components/SessionLoopLifecycleDemo.vue` | 第5章（会话循环生命周期） |
 
 ### 实践篇演示组件（P1-P9 专属）
 | 组件名 | 文件 | 对应章节 |
@@ -423,6 +566,27 @@ docs/book/
 | `MultiAgentCollab` | `components/animations/lottie/MultiAgentCollab.vue` | 第16章（多 Agent 协作） |
 | `MemorySystem` | `components/animations/lottie/MemorySystem.vue` | 第5章（记忆系统 Lottie 动画） |
 
+### 动画实验室组件（animation-lab/）
+| 组件名 | 文件 | 用途 |
+|--------|------|------|
+| `AnimationLabIndex` | `components/animation-lab/AnimationLabIndex.vue` | 实验室总览页面，渲染 11 个实验入口 |
+| `SystemMotionPlayer` | `components/animation-lab/SystemMotionPlayer.vue` | 系统运动演示播放器 |
+| `TracePanel` | `components/animation-lab/TracePanel.vue` | Trace 事件追踪面板 |
+| `FlowExperimentCanvas` | `components/animation-lab/FlowExperimentCanvas.vue` | 通用流动实验画布（节点 + 路径 + 动画） |
+| `AgentLoopExperiment` | `components/animation-lab/AgentLoopExperiment.vue` | Agent 运行闭环实验 |
+| `ContextMemoryExperiment` | `components/animation-lab/ContextMemoryExperiment.vue` | 上下文与记忆流实验 |
+| `MultiAgentDispatchExperiment` | `components/animation-lab/MultiAgentDispatchExperiment.vue` | 多 Agent 调度实验 |
+| `ToolPermissionGateExperiment` | `components/animation-lab/ToolPermissionGateExperiment.vue` | 工具调用与权限门实验 |
+| `ContextCompactionExperiment` | `components/animation-lab/ContextCompactionExperiment.vue` | 上下文压缩实验 |
+| `ErrorRecoveryLoopExperiment` | `components/animation-lab/ErrorRecoveryLoopExperiment.vue` | 错误恢复与自修复循环实验 |
+| `ProviderRoutingFallbackExperiment` | `components/animation-lab/ProviderRoutingFallbackExperiment.vue` | Provider 路由与降级实验 |
+| `RagRetrievalFlowExperiment` | `components/animation-lab/RagRetrievalFlowExperiment.vue` | RAG 检索增强流程实验 |
+| `HumanApprovalGateExperiment` | `components/animation-lab/HumanApprovalGateExperiment.vue` | 人工确认与高风险操作实验 |
+| `StructuredOutputValidationExperiment` | `components/animation-lab/StructuredOutputValidationExperiment.vue` | 结构化输出与校验修复实验 |
+| `StreamingInterruptControlExperiment` | `components/animation-lab/StreamingInterruptControlExperiment.vue` | 流式输出与中断控制实验 |
+
+动画实验室支持 11 种实验类型：`agent-loop`、`context-memory-flow`、`multi-agent-dispatch`、`tool-permission-gate`、`context-compaction`、`error-recovery-loop`、`provider-routing-fallback`、`rag-retrieval-flow`、`human-approval-gate`、`structured-output-validation`、`streaming-interrupt-control`。
+
 ---
 
 ## 数据层（theme/data/）
@@ -437,6 +601,8 @@ docs/book/
 | `practice-projects.ts` | 28 个实践项目完整元数据定义 | `practiceProjectsById`、`PracticeProjectDefinition` |
 | `practice-source-files.ts` | 实践项目源文件路径映射 | 每个 projectId 对应的可运行脚本路径 |
 | `discovery-content.ts` | 发现中心内容路由（按目标分组） | `DiscoveryGoalRoute`、`DiscoveryTopicCollection` |
+| `animation-lab-experiments.ts` | 动画实验室实验目录定义（11 个实验） | `animationLabExperiments`（`ExperimentCatalogItem[]`）、各实验 canvas/data 的 re-export |
+| `animation-lab/*.ts` | 各实验的数据定义（11 个文件） | 每个文件导出 canvas（nodes/paths）和 experiment（steps/traceEvents） |
 
 ### Frontmatter 元数据规范
 
@@ -488,18 +654,24 @@ roleDescription: 适合哪类读者
 - 从 `content-meta` 导出：`ContentType`、`LearningDifficulty`、`EntryMode` 等核心枚举
 - 从 `discovery-content` 导出：`DiscoveryGoalRoute`、`DiscoveryTopicCollection`
 - 从 `practice-projects` 导出：`PracticeProjectDefinition`、`PracticeCourseRoute`
-- 原生定义：`SourceSnapshotCardProps`、`RuntimeLifecycleDiagramProps`、中级篇各章 Demo Props（Ch25-Ch32）、学习进度类型（`LearningProgressStatus`、`LearningProgressRecord`）、动画系统类型（`AnimationContainerProps`、`LottiePlayerProps`、`AnimationStage`）
+- 原生定义：`SourceSnapshotCardProps`、`RuntimeLifecycleDiagramProps`、中级篇各章 Demo Props（Ch25-Ch32）、学习进度类型（`LearningProgressStatus`、`LearningProgressRecord`）、动画系统类型（`AnimationContainerProps`、`LottiePlayerProps`、`AnimationStage`）、动画实验室类型（`Experiment`、`ExperimentStep`、`TraceEvent`、`MotionPacket`、`FlowCanvasConfig`、`FlowCanvasMotion` 等）
 
 ---
 
 ## VitePress 配置要点
 
 - **srcDir**：`docs` — 所有内容路径相对于 `docs/`
-- **侧边栏**：`config.mts` 中手动定义三组侧边栏：
-  - 理论篇（`/`）：六个部分（第一至第六部分，含中级篇索引）
+- **侧边栏**：`config.mts` 中手动定义多组侧边栏（按专区划分）：
+  - 理论篇（`/`）：六个部分（第一至第六部分，含中级篇索引），顶部含发现中心、动画实验室、实践篇、中级篇、面试题专区入口
   - 实践篇（`/practice/`）：七个阶段 + 5 个补充章节（P24-P28）
   - 中级篇（`/intermediate/`）：8 个专题 + 推荐入口
-- **导航栏**：首页 / 实践篇 / 中级篇 / 阅读地图 / 本书仓库
+  - 动画实验室（`/animation-lab/`）：实验室首页 + 11 个实验锚点链接
+  - 面试题专区（`/interview/`）：7 个能力分类 + 9 个八股文子类
+  - Claude Code（`/claude-code/`）：5 部分 20 章侧边栏
+  - Hermes Agent（`/hermes-agent/`）：4 区块 12 章 + 5 组附录侧边栏
+  - 企业 Agent（`/enterprise-agent/`）：6 模块 17 章 + 7 工具包侧边栏
+  - Claude Code 业务流（`/new-claude/`）：4 部分 20 页侧边栏
+- **导航栏**：实践篇 / 中级篇 / 动画实验室 / 面试题专区 / 专栏（下拉：Claude Code 架构思维、Claude Code 源码业务流、Hermes Agent 拆解、从零设计企业 Agent）/ 本书仓库
 - **搜索增强**：`_render` 钩子调用 `buildSearchPrelude()` 为每个页面注入结构化学习元数据，提升本地搜索质量
 - **Mermaid**：`vitepress-plugin-mermaid` + `withMermaid()` 包装启用
 - **OG Meta**：`transformPageData` 钩子自动注入每页 og:title / og:description / twitter:card
@@ -511,7 +683,7 @@ roleDescription: 适合哪类读者
 
 ## 内容质量校验体系（scripts/）
 
-项目建立了 11 个校验脚本，全部通过后方可执行 `build:strict`：
+项目建立了 12 个校验脚本，全部通过后方可执行 `build:strict`：
 
 | 脚本 | 检查内容 |
 |------|---------|
@@ -526,6 +698,7 @@ roleDescription: 适合哪类读者
 | `check-practice-course-experience.mjs` | 实践章节页面体验组件使用规范 |
 | `check-discovery-experience.mjs` | 发现中心组件在对应页面正确使用 |
 | `check-learning-progress.mjs` | LearningProgressToggle 在需要的页面中使用 |
+| `check-animation-lab.mjs` | 动画实验室数据文件与实际导入一致性、组件注册完整性、布局签名校验 |
 
 ---
 
@@ -535,13 +708,19 @@ roleDescription: 适合哪类读者
 - **不重复 H1**：VitePress 从 frontmatter 渲染标题，正文不加同名 H1
 - **章节命名**：
   - 理论篇：`docs/NN-slug/index.md`（00-20），特殊页 `docs/oh-*/index.md`
-  - 中级篇：`docs/intermediate/NN-slug/index.md`（25-32）
+  - 中级篇：`docs/intermediate/NN-slug/index.md`（25-32，含 Python 示例 README）
   - 实践篇：`docs/practice/pNN-slug/index.md`（p01-p28）
+  - 专栏（claude-code）：`docs/claude-code/chapterNN.md`（直接 .md，无子目录）
+  - 专栏（new-claude）：`docs/new-claude/part-N-名称/`（按部分分目录）
+  - 专栏（hermes-agent）：`docs/hermes-agent/`（章节和附录均为单层 .md 文件）
+  - 专栏（enterprise-agent）：`docs/enterprise-agent/eNN-slug.md`（模块章节 + 工具包）
+  - 面试题：`docs/interview/category/index.md`（按分类子目录）
 - **辅助页面**：直接放 `docs/` 根下（不带子目录）
 - **源码快照卡**：每章顶部应包含 `<SourceSnapshotCard>` 锚定版本
 - **章末 CTA**：各章末尾可嵌入 `<StarCTA>` 引导 Star
 - **中级篇**：每章开头应有 `<EntryContextBanner>` 提供定位说明
 - **实践篇**：每章开头应有 `<PracticeProjectGuide project-id="..." />` 提供项目元数据
+- **动画实验室**：页面使用 `<AnimationLabIndex />` 自包含组件，无需额外组件
 
 ---
 
@@ -614,18 +793,33 @@ roleDescription: 适合哪类读者
 - 不创建独立的 `practice/*.ts` 脚本，只有文档页面
 - 挂在对应 Phase 的补充位置（侧边栏标注"补充："前缀）
 
+**新增专栏章节**：
+1. 在 `docs/column-name/` 下创建 .md 文件（按专栏约定命名）
+2. 在 `config.mts` 中新增专属 sidebar 分组：`'/column-name/'`
+3. 如果专栏需要导航栏入口：添加到 `themeConfig.nav` 或"专栏"下拉菜单
+
 ### 新增 Vue 组件
 
 1. 在 `.vitepress/theme/components/` 创建 `.vue` 文件
-2. Props 类型定义**必须**写入 `types.ts`（按章节分区，加注释）
-3. 在 `theme/index.ts` 的 `globalComponents` 数组中注册（注意数组末尾追加）
+2. Props 类型定义**必须**写入 `types.ts`（按章节分区，加注释）；animation-lab 子组件类型写入 `components/animation-lab/type.ts`
+3. 在 `theme/index.ts` 的 `asyncGlobalComponents` 数组中注册（异步组件）或 `syncGlobalComponents`（同步组件）
 4. 单文件不超过 500 行，超出则拆分子组件
+5. 如果组件有配套数据文件，放 `theme/data/` 对应目录
+
+### 新增动画实验室实验
+
+1. 在 `theme/data/animation-lab/` 创建实验数据文件（导出 `Experiment` 和 `FlowCanvasConfig`）
+2. 在 `theme/components/animation-lab/` 创建对应的实验组件
+3. 在 `animation-lab-experiments.ts` 中注册实验到 `animationLabExperiments` 数组
+4. 在 `scripts/check-animation-lab.mjs` 的 `animationDataFiles` 中添加映射
+5. 在 `config.mts` 的 `sidebar['/animation-lab/']` 中添加实验锚点链接
 
 ### 数据层变更
 
 - 修改 `practice-projects.ts` 后，相关校验脚本会自动检查一致性
 - 修改 `content-meta.ts` 类型后，需同步更新 `types.ts` 的重新导出声明
 - `content-index.data.ts` 是 VitePress data loader，自动扫描全站 frontmatter，不需要手动维护
+- 修改 `animation-lab-experiments.ts` 后，`check-animation-lab.mjs` 会验证数据一致性
 
 ### 调试构建问题
 
@@ -633,15 +827,21 @@ roleDescription: 适合哪类读者
 - 类型错误：检查 `.vitepress/tsconfig.json`（target ES2022 / moduleResolution Bundler）
 - 校验失败：`bun run build:strict` 会在第一个失败的脚本处停止，单独运行对应 `check:*` 命令快速定位
 - 内容路径问题：所有链接相对于 `srcDir: docs`，不是项目根目录
+- 动画实验室布局异常：检查 `FlowExperimentCanvasBase.css` / `FlowExperimentCanvasMotion.css` 中的 CSS 变量定义
 
 ### 常见任务
 
-- **查看全书导航结构**：读取 `.vitepress/config.mts` 的 `sidebar` 配置（三组：`/`、`/practice/`、`/intermediate/`）
-- **查看组件注册情况**：读取 `.vitepress/theme/index.ts`（约 60 个组件）
-- **查看 Props 类型**：读取 `.vitepress/theme/components/types.ts`（约 600 行，按章节分区注释）
+- **查看全书导航结构**：读取 `.vitepress/config.mts` 的 `sidebar` 配置（多组：`/`、`/practice/`、`/intermediate/`、`/animation-lab/`、`/interview/`、`/claude-code/`、`/hermes-agent/`、`/enterprise-agent/`、`/new-claude/`）
+- **查看导航栏**：读取 `.vitepress/config.mts` 的 `themeConfig.nav`（首页 / 实践篇 / 中级篇 / 动画实验室 / 面试题专区 / 专栏下拉 / 本书仓库）
+- **查看组件注册情况**：读取 `.vitepress/theme/index.ts`（约 95 个组件，含 26 个同步 + 67 个异步 + 2 个单独异步）
+- **查看 Props 类型**：读取 `.vitepress/theme/components/types.ts`（约 800+ 行，按章节分区注释）
+- **查看动画实验室类型**：读取 `.vitepress/theme/components/animation-lab/type.ts`
 - **查看实践项目元数据**：读取 `.vitepress/theme/data/practice-projects.ts`
 - **查看学习路径定义**：读取 `.vitepress/theme/data/learning-paths.data.ts`
 - **查看内容元数据规范**：读取 `.vitepress/theme/data/content-meta.ts`
+- **查看动画实验定义**：读取 `.vitepress/theme/data/animation-lab-experiments.ts` 及各 `animation-lab/*.ts`
 - **更新源码快照版本**：修改 `config.mts` 的 `sourceCommit` 常量，并同步 `docs/version-notes.md`
 - **实践篇环境配置**：查看 `docs/practice/setup.md`
 - **中级篇入口回链**：查看 `docs/intermediate/index.md` 中的回链表格
+- **动画实验室入口**：查看 `docs/animation-lab/index.md`（使用 `<AnimationLabIndex />` 组件）
+- **设计规格与计划**：查看 `docs/superpowers/specs/` 和 `docs/superpowers/plans/`

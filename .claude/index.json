@@ -1,13 +1,14 @@
 {
-  "timestamp": "2026-03-25T13:07:08.000Z",
-  "scanVersion": "3.0.0",
+  "timestamp": "2026-05-16T11:24:43+08:00",
+  "scanVersion": "4.0.0",
   "project": {
     "name": "learn-opencode-agent-book",
-    "type": "VitePress 电子书站点",
+    "type": "VitePress 电子书站点（多专区知识库）",
     "description": "从零构建 AI Coding Agent — OpenCode 源码剖析与实战",
     "rootPath": "/Users/zhangyanhua/AI/opencode/docs/book",
     "runtime": "bun (本地) / pnpm (部署兼容)",
     "framework": "VitePress 1.5 + Vue 3 + Mermaid",
+    "contentZones": 8,
     "repositories": {
       "book": "https://github.com/qqzhangyanhua/learn-opencode-agent",
       "opencode": "https://github.com/anomalyco/opencode/tree/dev",
@@ -27,12 +28,12 @@
         ".vitepress/vue-shim.d.ts"
       ],
       "responsibilities": [
-        "站点元数据、导航、侧边栏配置（三组：理论篇 / 实践篇 / 中级篇）",
+        "站点元数据、导航栏、侧边栏配置（9 组：/、/practice/、/intermediate/、/animation-lab/、/interview/、/claude-code/、/hermes-agent/、/enterprise-agent/、/new-claude/）",
         "Mermaid 插件集成（withMermaid + vitepress-plugin-mermaid）",
         "OG meta 自动注入（transformPageData 钩子）",
         "搜索配置与学习元数据搜索预处理（buildSearchPrelude）",
         "内联 frontmatter 解析器（parseFrontmatter）",
-        "content-meta 类型导入（getContentTypeLabel、getEntryModeLabel）"
+        "专栏导航下拉菜单（4 个专栏入口）"
       ],
       "coverage": "100%"
     },
@@ -45,22 +46,26 @@
       "keyFiles": [
         ".vitepress/theme/index.ts",
         ".vitepress/theme/custom.css",
-        ".vitepress/theme/components/types.ts"
+        ".vitepress/theme/components/types.ts",
+        ".vitepress/theme/components/animation-lab/type.ts"
       ],
       "components": {
-        "total": 60,
-        "registeredSync": 59,
-        "registeredAsync": 1,
+        "total": 95,
+        "registeredSync": 26,
+        "registeredAsync": 67,
+        "registeredExtra": 2,
         "categories": {
-          "核心展示组件": ["HomeStartPanel", "RuntimeLifecycleDiagram", "HomeExploreLinks", "LearningPath", "TechStackGrid", "SourceSnapshotCard", "StarCTA", "SectionRoleGrid"],
+          "核心展示组件（首页/导航页）": ["LearningPath", "RuntimeLifecycleDiagram", "TechStackGrid", "SourceSnapshotCard", "StarCTA", "HomeStartPanel", "HomeExploreLinks", "HomeSeriesStrip", "SectionRoleGrid"],
           "章节体验组件": ["EntryContextBanner", "ChapterLearningGuide", "ChapterActionPanel", "LearningProgressToggle"],
-          "交互演示组件（理论篇）": ["ReActLoop", "StreamingDemo", "MessageAccumulator", "PermissionFlow", "McpHandshake", "SseBroadcast", "ContextCompaction", "ProviderFallback", "WorkflowVsAgent", "LspHover", "ConnectionGate"],
+          "交互演示组件（理论篇）": ["ReActLoop", "StreamingDemo", "MessageAccumulator", "PermissionFlow", "McpHandshake", "HttpPermissionGateDemo", "SseBroadcast", "ContextCompaction", "ProviderFallback", "WorkflowVsAgent", "LspHover", "ConnectionGate"],
           "第五部分专属组件": ["AgentDispatchDemo", "BackgroundTaskDemo", "RuntimeFallbackDemo", "HashlineEditDemo", "TaskDelegationDemo"],
-          "中级篇专属演示组件": ["RagAccuracyDemo", "MultiAgentWorkflowDetailed", "PlanningTreeDemo", "PlanningTreeNodeItem", "ContextEngineeringExtended", "PromptDesignStudio", "PromptLintPanel", "ProductionArchitectureDiagram", "TopologyNodeLabel", "SecurityBoundaryDemo", "CostOptimizationDashboard"],
+          "中级篇专属演示组件": ["RagAccuracyDemo", "MultiAgentWorkflowDetailed", "MultiAgentModeSimulator", "PlanningTreeDemo", "PlanningTreeNodeItem", "PlanningFlowSimulator", "ContextEngineeringExtended", "PromptDesignStudio", "PromptLintPanel", "ProductionArchitectureDiagram", "TopologyNodeLabel", "SecurityBoundaryDemo", "CostOptimizationDashboard"],
+          "新增中级篇/扩展演示组件": ["ReActLoopDemo", "PlanningExecuteDemo", "ReflectionCycleDemo", "AgentCommunicationModesDemo", "TraceSpanTimelineDemo", "EvaluationPipelineDemo", "CodeReviewAgentSystemDemo", "ContextBudgetCompressionDemo", "GenerateExecuteRepairLoopDemo", "ApprovalInterruptResumeDemo", "MultimodalMessageFlowDemo", "PromptLayerComposerDemo", "SchemaConstrainedOutputDemo", "TransactionEffectQueueDemo", "ExtensionDecisionFlowDemo", "ExtensionCapabilitySelector", "CloudLayerResponsibilityDemo", "TaskExecutionPathDemo", "TestingLayersDemo", "LocalCloudTopologyDemo", "TuiProviderFlowDemo", "PluginLifecycleDemo", "ExtensionBestPracticeChecklistDemo", "ToolExecutionLifecycleDemo", "SessionLoopLifecycleDemo"],
           "实践篇专属组件": ["PracticeTerminalHero", "PracticePhaseGrid", "PracticeTagCloud", "PracticeRouteExplorer", "PracticeProjectSyllabus", "PracticeProjectGuide", "PracticeProjectActionPanel", "PracticeProjectSourceFiles(async)", "RelatedPracticeProjects", "ProjectCard", "RunCommand", "PracticePreview"],
           "发现中心组件": ["DiscoveryTypeBadge", "DiscoveryGoalRoutes", "DiscoveryStartGrid", "DiscoveryTopicHub"],
           "实践篇演示组件（P1-P9）": ["ToolCallingLifecycle", "StreamingOutputDemo", "ContextWindowDemo", "ErrorRetryDemo", "MemoryLayersDemo", "MemoryBankDemo", "RagPipelineDemo", "GraphRagDemo", "HybridRetrievalDemo"],
-          "动画演示组件": ["WhatIsAgent", "MultiTurnDialog", "FunctionCallingCss", "MemorySystemCss", "FunctionCalling", "MultiAgentCollab", "MemorySystem"]
+          "动画演示组件": ["WhatIsAgent", "MultiTurnDialog", "FunctionCallingCss", "MemorySystemCss", "FunctionCalling", "MultiAgentCollab", "MemorySystem"],
+          "动画实验室组件": ["AnimationLabIndex", "SystemMotionPlayer", "TracePanel", "FlowExperimentCanvas", "AgentLoopExperiment", "ContextMemoryExperiment", "MultiAgentDispatchExperiment", "ToolPermissionGateExperiment", "ContextCompactionExperiment", "ErrorRecoveryLoopExperiment", "ProviderRoutingFallbackExperiment", "RagRetrievalFlowExperiment", "HumanApprovalGateExperiment", "StructuredOutputValidationExperiment", "StreamingInterruptControlExperiment"]
         }
       },
       "composables": [
@@ -70,6 +75,21 @@
         "composables/useDependencyGraph.ts",
         "components/animations/core/useIntersectionObserver.ts",
         "components/learning-progress/learningProgressStorage.ts"
+      ],
+      "testFiles": [
+        "components/flowPlayback.test.ts",
+        "components/extensionDecisionScenario.test.ts",
+        "components/taskExecutionScenario.test.ts",
+        "components/testingLayersScenario.test.ts",
+        "components/localCloudTopologyScenario.test.ts"
+      ],
+      "scenarioFiles": [
+        "components/flowScenario.ts",
+        "components/flowPlayback.ts",
+        "components/extensionDecisionScenario.ts",
+        "components/taskExecutionScenario.ts",
+        "components/testingLayersScenario.ts",
+        "components/localCloudTopologyScenario.ts"
       ],
       "coverage": "100%"
     },
@@ -84,15 +104,23 @@
         ".vitepress/theme/data/learning-paths.data.ts",
         ".vitepress/theme/data/practice-projects.ts",
         ".vitepress/theme/data/practice-source-files.ts",
-        ".vitepress/theme/data/discovery-content.ts"
+        ".vitepress/theme/data/discovery-content.ts",
+        ".vitepress/theme/data/animation-lab-experiments.ts"
       ],
+      "subDirs": {
+        "animation-lab": {
+          "files": 11,
+          "experiments": ["agent-loop", "context-memory-flow", "multi-agent-dispatch", "tool-permission-gate", "context-compaction", "error-recovery-loop", "provider-routing-fallback", "rag-retrieval-flow", "human-approval-gate", "structured-output-validation", "streaming-interrupt-control"]
+        }
+      },
       "responsibilities": [
-        "内容类型枚举与元数据规范化（content-meta.ts，normalizeLearningFrontmatter）",
-        "全站页面元数据聚合（content-index.data.ts，VitePress data loader）",
-        "学习路径定义（learning-paths.data.ts，三条路径：theory-first / practice-first / engineering-depth）",
-        "28 个实践项目完整元数据（practice-projects.ts，含 PracticeProjectDefinition 和三条课程路线）",
+        "内容类型枚举与元数据规范化（content-meta.ts）",
+        "全站页面元数据聚合（content-index.data.ts）",
+        "学习路径定义（learning-paths.data.ts）",
+        "28 个实践项目完整元数据（practice-projects.ts）",
         "实践项目源文件路径映射（practice-source-files.ts）",
-        "发现中心内容路由（discovery-content.ts，三个 DiscoveryGoalId：system-learn / engineering-upgrade / build-by-project）"
+        "发现中心内容路由（discovery-content.ts）",
+        "动画实验室实验目录与数据重导出（animation-lab-experiments.ts）"
       ],
       "coverage": "100%"
     },
@@ -122,14 +150,14 @@
         { "id": "26-multi-agent-collaboration", "title": "多智能体协作实战", "pythonExamples": 1 },
         { "id": "27-planning-mechanism", "title": "Planning 机制", "pythonExamples": 1 },
         { "id": "28-context-engineering", "title": "上下文工程实战", "pythonExamples": 1 },
-        { "id": "29-system-prompt-design", "title": "System Prompt 设计", "pythonExamples": 0 },
-        { "id": "30-production-architecture", "title": "生产架构", "pythonExamples": 0 },
-        { "id": "31-safety-boundaries", "title": "安全与边界", "pythonExamples": 0 },
-        { "id": "32-performance-cost", "title": "性能与成本", "pythonExamples": 0 }
+        { "id": "29-system-prompt-design", "title": "System Prompt 设计", "pythonExamples": 1 },
+        { "id": "30-production-architecture", "title": "生产架构", "pythonExamples": 1 },
+        { "id": "31-safety-boundaries", "title": "安全与边界", "pythonExamples": 1 },
+        { "id": "32-performance-cost", "title": "性能与成本", "pythonExamples": 1 }
       ],
       "totalChapters": 8,
       "examplesDirectory": "docs/intermediate/examples",
-      "totalPythonExamples": 8,
+      "totalPythonExamples": 13,
       "coverage": "100%"
     },
     {
@@ -152,25 +180,113 @@
       "coverage": "100%"
     },
     {
+      "name": "Claude Code 架构思维专栏",
+      "path": "docs/claude-code",
+      "type": "content",
+      "language": "Markdown",
+      "totalChapters": 22,
+      "structure": {
+        "第一部分": { "chapters": 3, "paths": ["chapter01", "chapter02", "chapter03"] },
+        "第二部分": { "chapters": 6, "paths": ["chapter04"..."chapter09"] },
+        "第三部分": { "chapters": 6, "paths": ["chapter10"..."chapter15"] },
+        "第四部分": { "chapters": 3, "paths": ["chapter16", "chapter17", "chapter18"] },
+        "第五部分": { "chapters": 2, "paths": ["chapter19", "chapter20"] },
+        "辅助页面": ["index.md", "reading-guide.md"],
+        "归档": ["_archive/chapter01"..."chapter15"]
+      },
+      "coverage": "cataloged (paths + structure only)"
+    },
+    {
+      "name": "Claude Code 源码业务流专栏",
+      "path": "docs/new-claude",
+      "type": "content",
+      "language": "Markdown",
+      "totalPages": 20,
+      "structure": {
+        "Part 1 主业务流": { "chapters": 6 },
+        "Part 2 扩展能力流": { "chapters": 4 },
+        "Part 3 远程协同流": { "chapters": 4 },
+        "Part 4 附录": { "chapters": 4 },
+        "辅助页面": ["index.md", "00-阅读指南.md", "01-系统全景与学习路线.md"]
+      },
+      "coverage": "cataloged (paths + structure only)"
+    },
+    {
+      "name": "Hermes Agent 拆解专栏",
+      "path": "docs/hermes-agent",
+      "type": "content",
+      "language": "Markdown",
+      "totalPages": 43,
+      "structure": {
+        "主章节": 12,
+        "附录 (Prompt/上下文)": 7,
+        "附录 (工具/能力层)": 6,
+        "附录 (记忆/会话)": 7,
+        "附录 (运行时/执行)": 6,
+        "附录 (扩展/接入)": 5,
+        "首页": "index.md"
+      },
+      "coverage": "cataloged (paths + structure only)"
+    },
+    {
+      "name": "企业 Agent 设计专栏",
+      "path": "docs/enterprise-agent",
+      "type": "content",
+      "language": "Markdown",
+      "totalPages": 28,
+      "structure": {
+        "模块 0：企业 Agent 约束": 2,
+        "模块 1：意图识别与混合查询": 3,
+        "模块 2：Policy QA 与企业知识库": 3,
+        "模块 3：个人数据与操作引导": 3,
+        "模块 4：流程自动化与人机协同": 3,
+        "模块 5：生产化收口": 4,
+        "落地工具包": 7,
+        "辅助页面": ["index.md", "reading-guide.md", "design-checklist.md"]
+      },
+      "coverage": "cataloged (paths + structure only)"
+    },
+    {
+      "name": "面试题专区",
+      "path": "docs/interview",
+      "type": "content",
+      "language": "Markdown",
+      "totalPages": 17,
+      "structure": {
+        "能力分类": ["fundamentals", "tools", "memory", "planning", "rag", "multi-agent", "engineering"],
+        "八股文": ["index", "agent-basics", "core-frameworks", "rag", "tool-calling", "memory", "multi-agent", "llm-fundamentals", "engineering-practice", "prompt-engineering"]
+      },
+      "coverage": "cataloged (paths + structure only)"
+    },
+    {
+      "name": "动画实验室内容",
+      "path": "docs/animation-lab",
+      "type": "content",
+      "language": "Markdown",
+      "totalPages": 1,
+      "note": "单页应用，使用 AnimationLabIndex 组件渲染 11 个实验",
+      "coverage": "100%"
+    },
+    {
+      "name": "设计规格与计划归档",
+      "path": "docs/superpowers",
+      "type": "documentation",
+      "language": "Markdown",
+      "totalPages": 40,
+      "structure": {
+        "specs": 20,
+        "plans": 20,
+        "dateRange": "2026-03-26 到 2026-05-15"
+      },
+      "coverage": "cataloged (paths + count only)"
+    },
+    {
       "name": "实践脚本",
       "path": "practice",
       "type": "executable",
       "language": "TypeScript",
       "totalScripts": 24,
-      "note": "P24-P28 补充实践章节无独立可运行脚本，仅有文档页面",
-      "keyScripts": [
-        "p01-minimal-agent.ts",
-        "p10-react-loop.ts",
-        "p14-mcp.ts",
-        "p14-mcp-server.ts",
-        "p22-project.ts",
-        "p23-production.ts"
-      ],
-      "runtimeDependencies": [
-        "openai ^6.32.0",
-        "@modelcontextprotocol/sdk ^1.27.1"
-      ],
-      "envRequired": ["OPENAI_API_KEY", "OPENAI_BASE_URL (optional)", "OPENAI_MODEL (optional)"],
+      "note": "P24-P28 补充实践章节有对应的 .ts 脚本",
       "coverage": "100%"
     },
     {
@@ -178,9 +294,9 @@
       "path": "scripts",
       "type": "validation",
       "language": "JavaScript (ESM)",
-      "totalScripts": 11,
+      "totalScripts": 12,
       "scripts": [
-        { "file": "check-content.mjs", "checks": "Markdown 文件存在性、禁止词（TODO/FIXME/TBD/待补/需要补充）" },
+        { "file": "check-content.mjs", "checks": "Markdown 文件存在性、禁止词" },
         { "file": "check-practice-entries.mjs", "checks": "practice/*.ts 入口与 docs/practice/ 一一对应" },
         { "file": "check-learning-metadata.mjs", "checks": "章节 frontmatter 的 15 个学习元数据字段完整性" },
         { "file": "check-learning-paths.mjs", "checks": "learning-paths.data.ts 中 step.contentId 全站可解析" },
@@ -190,10 +306,9 @@
         { "file": "check-chapter-experience.mjs", "checks": "ChapterLearningGuide / ChapterActionPanel 使用规范" },
         { "file": "check-practice-course-experience.mjs", "checks": "实践章节页面体验组件使用规范" },
         { "file": "check-discovery-experience.mjs", "checks": "发现中心组件在对应页面正确使用" },
-        { "file": "check-learning-progress.mjs", "checks": "LearningProgressToggle 在需要的页面中使用" }
+        { "file": "check-learning-progress.mjs", "checks": "LearningProgressToggle 在需要的页面中使用" },
+        { "file": "check-animation-lab.mjs", "checks": "动画实验室数据文件与实际导入一致性、组件注册完整性、布局签名" }
       ],
-      "blockedPatterns": ["TODO", "FIXME", "TBD", "待补", "需要补充"],
-      "allowListPatterns": ["创建一个 TODO 应用", "搜索 `TODO`、`待补`"],
       "coverage": "100%"
     },
     {
@@ -201,10 +316,10 @@
       "path": ".",
       "type": "infrastructure",
       "keyFiles": [
-        "Caddyfile (生产静态服务，从 /app/.vitepress/dist 伺服)",
-        "railpack.toml (Railpack 部署，构建命令 pnpm run build)",
-        "package.json (bun 本地开发入口)",
-        "tsconfig.json (根目录 TypeScript 配置)"
+        "Caddyfile",
+        "railpack.toml",
+        "package.json",
+        "tsconfig.json"
       ],
       "buildCommand": "pnpm run build",
       "startCommand": "caddy run --config /Caddyfile --adapter caddyfile",
@@ -213,50 +328,54 @@
     }
   ],
   "statistics": {
-    "scannedAt": "2026-03-25T13:07:08.000Z",
-    "estimatedTotalSourceFiles": 200,
-    "scannedFiles": 195,
-    "coveragePercentage": 97,
+    "scannedAt": "2026-05-16T11:24:43+08:00",
+    "estimatedTotalSourceFiles": 380,
+    "scannedFiles": 300,
+    "coveragePercentage": 79,
     "filesByType": {
-      "md": 82,
-      "vue": 60,
-      "ts": 42,
-      "mjs": 11,
+      "md": 185,
+      "vue": 95,
+      "ts": 65,
+      "mjs": 12,
       "mts": 1,
-      "css": 1,
-      "json": 3,
-      "py": 8,
-      "other": 10
+      "css": 3,
+      "json": 5,
+      "py": 13,
+      "toml": 1,
+      "other": 5
     },
     "truncated": false,
-    "ignoredPaths": ["node_modules/", ".vitepress/cache/", ".vitepress/dist/", ".worktrees/"]
+    "ignoredPaths": ["node_modules/", ".vitepress/cache/", ".vitepress/dist/", "dist/", ".worktrees/"]
   },
   "gaps": [
     {
-      "area": "补充实践章节（P24-P28）",
-      "gap": "5 个补充实践章节有文档页面但没有对应的 practice/*.ts 可运行脚本",
-      "impact": "low",
-      "note": "按设计如此，P24-P28 为纯文档补充章节"
-    },
-    {
-      "area": "add-frontmatter.ts 工具脚本",
-      "gap": "脚本硬编码章节列表不包含中级篇（第25-32章）和补充实践章节（P24-P28）",
-      "impact": "low",
-      "recommendation": "如需批量补写这些章节的 frontmatter，需手动更新 add-frontmatter.ts 的章节列表"
-    },
-    {
-      "area": "中级篇 Python 示例",
-      "gap": "第29-32章目前只有 README.md 没有 Python 代码示例",
+      "area": "专栏内容深度",
+      "gap": "claude-code、new-claude、hermes-agent、enterprise-agent、interview 五个专栏共约 130 个 Markdown 文件仅记录了路径和结构，未深度读取内容",
       "impact": "medium",
-      "recommendation": "如需补充这四章的教学代码，在 docs/intermediate/examples/29-32 目录下创建 .py 文件"
+      "recommendation": "如需精确了解各专栏章节的内部结构（如组件引用、图表定义），需逐区执行深度扫描"
+    },
+    {
+      "area": "superpowers 归档",
+      "gap": "40 个规格/计划文档仅记录数量和日期范围，未读取内容",
+      "impact": "low",
+      "note": "这些是设计历史归档，非核心知识库内容"
+    },
+    {
+      "area": "claude-code _archive",
+      "gap": "旧版 15 个章节目录归档未读取",
+      "impact": "low",
+      "note": "归档内容，不应在生产侧边栏中引用"
     }
   ],
   "recommendations": [
-    "定期运行 `bun run build:strict` 确保 11 个校验脚本全部通过",
-    "新增章节时需同步更新 config.mts 侧边栏（三组都需检查）、practice-projects.ts（如涉及实践）、frontmatter 元数据",
-    "新增 Vue 组件时 Props 类型必须写入 types.ts 对应章节分区，并在 theme/index.ts 的 globalComponents 数组末尾追加",
-    "中级篇新增章节需在 sidebar['/intermediate/'] 和 sidebar['/'] 两处都添加条目",
+    "定期运行 `bun run build:strict` 确保 12 个校验脚本全部通过",
+    "新增章节时需同步更新 config.mts 的对应专区侧边栏",
+    "新增 Vue 组件时 Props 类型写入 types.ts（通用组件）或 animation-lab/type.ts（动画实验室组件）",
+    "新增动画实验室实验需同时更新 animation-lab-experiments.ts、对应 data 文件、组件文件、check-animation-lab.mjs 和 sidebar",
     "shiki ^1.22.2 是新增依赖（旧文档未记录），升级 VitePress 时注意版本兼容"
   ],
-  "nextSteps": []
+  "nextSteps": [
+    "如需专栏内容深度索引，建议优先扫描 docs/claude-code/（架构思维类，与 OpenCode 主线最相关）",
+    "hermes-agent 专栏附录可后补（附录数量多、内容独立性强）"
+  ]
 }
