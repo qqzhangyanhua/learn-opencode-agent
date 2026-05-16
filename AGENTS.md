@@ -30,3 +30,13 @@ Recent history follows Conventional Commits with scopes, such as `feat(practice)
 ## Release & Content Notes
 
 Before merging content-heavy changes, review `docs/release-checklist.md`. Prefer small, traceable edits that keep homepage, reading map, practice entries, and chapter metadata in sync.
+
+## .context Project Context
+
+> This project uses `.context/` to manage development decision context.
+
+- Coding style: `.context/prefs/coding-style.md`
+- Workflow rules: `.context/prefs/workflow.md`
+- Decision history: `.context/history/commits.md`
+
+**Rule**: Read prefs/ before modifying code. Log decisions per workflow.md rules.
