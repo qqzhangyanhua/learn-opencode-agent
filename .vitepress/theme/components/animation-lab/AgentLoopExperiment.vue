@@ -293,9 +293,26 @@ function isPathActive(id: string) {
 }
 
 @keyframes packet-travel {
-  0%,
-  100% { left: var(--packet-start-x); top: var(--packet-start-y); }
-  50% { left: var(--packet-end-x); top: var(--packet-end-y); }
+  0% {
+    left: var(--packet-start-x);
+    top: var(--packet-start-y);
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.7);
+  }
+  18% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  82% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    left: var(--packet-end-x);
+    top: var(--packet-end-y);
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.7);
+  }
 }
 
 @media (max-width: 780px) {

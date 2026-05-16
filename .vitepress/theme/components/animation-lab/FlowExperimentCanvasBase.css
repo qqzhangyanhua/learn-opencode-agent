@@ -25,6 +25,12 @@
   --accent-soft: rgba(20, 184, 166, 0.14);
 }
 
+.accent-sky {
+  --accent-line: #38bdf8;
+  --accent-node: #7dd3fc;
+  --accent-soft: rgba(14, 165, 233, 0.16);
+}
+
 .accent-amber {
   --accent-line: #fbbf24;
   --accent-node: #facc15;
@@ -32,6 +38,18 @@
   --packet-border: rgba(56, 189, 248, 0.7);
   --packet-bg: rgba(8, 47, 73, 0.94);
   --packet-text: #dff7ff;
+}
+
+.accent-indigo {
+  --accent-line: #818cf8;
+  --accent-node: #a5b4fc;
+  --accent-soft: rgba(99, 102, 241, 0.14);
+}
+
+.accent-rose {
+  --accent-line: #fb7185;
+  --accent-node: #fda4af;
+  --accent-soft: rgba(244, 63, 94, 0.14);
 }
 
 .flow-scene {
@@ -232,7 +250,7 @@
 .motion-dispatch .flow-packet {
   min-width: 42px;
   border-radius: 6px;
-  animation: dispatch-packet 1.1s steps(3, end) infinite;
+  animation: dispatch-packet 1.4s ease-in-out infinite;
 }
 
 .motion-gate .flow-packet {
@@ -253,7 +271,7 @@
 .motion-route .flow-packet {
   min-width: 48px;
   border-radius: 6px;
-  animation: route-packet 1.15s steps(4, end) infinite;
+  animation: route-packet 1.4s ease-in-out infinite;
 }
 
 .flow-step-summary {

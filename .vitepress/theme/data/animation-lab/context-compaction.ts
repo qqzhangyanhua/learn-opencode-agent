@@ -5,18 +5,18 @@ export const contextCompactionCanvas: FlowCanvasConfig = {
   accent: 'teal',
   motion: 'compact',
   nodes: [
-    { id: 'window', label: 'Context Window', role: '上下文窗口', x: 15, y: 45, mobileX: 22, mobileY: 18 },
-    { id: 'meter', label: 'Token Meter', role: '容量检测', x: 38, y: 22, mobileX: 58, mobileY: 22 },
-    { id: 'pruner', label: 'Pruner', role: '裁剪', x: 64, y: 30, mobileX: 82, mobileY: 42 },
-    { id: 'summarizer', label: 'Summarizer', role: '摘要器', x: 66, y: 70, mobileX: 58, mobileY: 66 },
-    { id: 'prompt', label: 'Next Prompt', role: '重建输入', x: 28, y: 76, mobileX: 28, mobileY: 84 },
+    { id: 'window', label: 'Context Window', role: '上下文窗口', x: 15, y: 15, mobileX: 22, mobileY: 18 },
+    { id: 'meter', label: 'Token Meter', role: '容量检测', x: 85, y: 15, mobileX: 58, mobileY: 22 },
+    { id: 'pruner', label: 'Pruner', role: '裁剪', x: 85, y: 85, mobileX: 82, mobileY: 42 },
+    { id: 'summarizer', label: 'Summarizer', role: '摘要器', x: 15, y: 85, mobileX: 58, mobileY: 66 },
+    { id: 'prompt', label: 'Next Prompt', role: '重建输入', x: 50, y: 50, mobileX: 28, mobileY: 84 },
   ],
   paths: [
-    { id: 'window-meter', from: 'window', to: 'meter', d: 'M150 252 C225 150 300 105 380 125' },
-    { id: 'meter-pruner', from: 'meter', to: 'pruner', d: 'M390 125 C480 95 575 115 640 168' },
-    { id: 'pruner-summarizer', from: 'pruner', to: 'summarizer', d: 'M650 180 C705 270 710 345 660 392' },
-    { id: 'summarizer-prompt', from: 'summarizer', to: 'prompt', d: 'M650 402 C520 455 390 455 280 425' },
-    { id: 'prompt-window', from: 'prompt', to: 'window', d: 'M275 415 C170 375 125 315 150 260' },
+    { id: 'window-meter', from: 'window', to: 'meter', d: 'M150 84 L850 84' },
+    { id: 'meter-pruner', from: 'meter', to: 'pruner', d: 'M850 84 L850 476' },
+    { id: 'pruner-summarizer', from: 'pruner', to: 'summarizer', d: 'M850 476 L150 476' },
+    { id: 'summarizer-prompt', from: 'summarizer', to: 'prompt', d: 'M150 476 C150 476 150 280 500 280' },
+    { id: 'prompt-window', from: 'prompt', to: 'window', d: 'M500 280 C500 280 150 280 150 84' },
   ],
 }
 

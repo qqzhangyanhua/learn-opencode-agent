@@ -41,6 +41,22 @@ const requiredExperimentIds = [
   'streaming-interrupt-control',
 ]
 
+function getLayoutSignature(content) {
+  const nodes = [...content.matchAll(/x: (\d+), y: (\d+), mobileX: (\d+), mobileY: (\d+)/g)]
+    .map(([, x, y, mobileX, mobileY]) => `${x},${y},${mobileX},${mobileY}`)
+    .join('|')
+
+  const paths = [...content.matchAll(/\bd: '([^']+)'/g)]
+    .map(([, d]) => d)
+    .join('|')
+
+  if (!nodes || !paths) {
+    return ''
+  }
+
+  return `${nodes}::${paths}`
+}
+
 requiredExperimentIds.forEach((id, index) => {
   if (!animationFileContents[index]?.includes(`id: '${id}'`)) {
     issues.push(`动画实验缺少 catalog id: ${id}`)
@@ -106,6 +122,23 @@ for (const motion of ['memory', 'dispatch', 'gate', 'compact', 'recover', 'route
     issues.push(`缺少场景化动效配置: ${motion}`)
   }
 }
+
+const layoutOwners = new Map()
+animationDataFiles.forEach(([fileName], index) => {
+  const signature = getLayoutSignature(animationFileContents[index] ?? '')
+
+  if (!signature) {
+    return
+  }
+
+  const owner = layoutOwners.get(signature)
+  if (owner) {
+    issues.push(`动画实验复用了相同画布模板: ${owner} / ${fileName}`)
+    return
+  }
+
+  layoutOwners.set(signature, fileName)
+})
 
 if (indexContent.includes('lab-sidebar') || indexContent.includes('lab-nav-item')) {
   issues.push('动画实验室内容区不应包含实验菜单')

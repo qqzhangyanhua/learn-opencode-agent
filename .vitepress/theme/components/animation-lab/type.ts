@@ -87,7 +87,7 @@ export interface FlowCanvasConfig {
   ariaLabel: string
   nodes: FlowCanvasNode[]
   paths: CanvasPath[]
-  accent: 'sky' | 'teal' | 'amber'
+  accent: 'sky' | 'teal' | 'amber' | 'indigo' | 'rose'
   motion: FlowCanvasMotion
 }
 
