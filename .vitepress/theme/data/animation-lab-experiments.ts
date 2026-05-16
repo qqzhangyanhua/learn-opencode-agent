@@ -11,7 +11,7 @@ import { humanApprovalGateExperiment } from './animation-lab/human-approval-gate
 import { structuredOutputValidationExperiment } from './animation-lab/structured-output-validation'
 import { streamingInterruptControlExperiment } from './animation-lab/streaming-interrupt-control'
 
-export { agentLoopNodes, agentLoopPaths, agentLoopExperiment } from './animation-lab/agent-loop'
+export { agentLoopCanvas, agentLoopExperiment } from './animation-lab/agent-loop'
 export { contextMemoryCanvas, contextMemoryExperiment } from './animation-lab/context-memory-flow'
 export { multiAgentDispatchCanvas, multiAgentDispatchExperiment } from './animation-lab/multi-agent-dispatch'
 export { toolPermissionGateCanvas, toolPermissionGateExperiment } from './animation-lab/tool-permission-gate'

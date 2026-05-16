@@ -1,24 +1,28 @@
-import type { CanvasNode, CanvasPath, Experiment } from '../../components/animation-lab/type'
+import type { FlowCanvasConfig, Experiment } from '../../components/animation-lab/type'
 
-export const agentLoopNodes: CanvasNode[] = [
-  { id: 'user', label: 'User', role: '输入' },
-  { id: 'planner', label: 'Planner', role: '计划' },
-  { id: 'llm', label: 'LLM', role: '推理' },
-  { id: 'tool', label: 'Tool', role: '行动' },
-  { id: 'observation', label: 'Observation', role: '观察' },
-  { id: 'memory', label: 'Memory', role: '上下文' },
-  { id: 'final', label: 'Final Answer', role: '输出' },
-]
-
-export const agentLoopPaths: CanvasPath[] = [
-  { id: 'user-planner', from: 'user', to: 'planner', d: 'M120 260 C190 220 240 190 315 190' },
-  { id: 'planner-llm', from: 'planner', to: 'llm', d: 'M350 190 C430 130 520 130 610 190' },
-  { id: 'llm-tool', from: 'llm', to: 'tool', d: 'M640 210 C730 225 790 260 840 330' },
-  { id: 'tool-observation', from: 'tool', to: 'observation', d: 'M820 360 C720 415 625 425 530 380' },
-  { id: 'observation-memory', from: 'observation', to: 'memory', d: 'M500 395 C430 470 320 470 250 390' },
-  { id: 'memory-llm', from: 'memory', to: 'llm', d: 'M265 365 C365 300 500 255 605 220' },
-  { id: 'llm-final', from: 'llm', to: 'final', d: 'M640 180 C735 120 830 120 900 185' },
-]
+export const agentLoopCanvas: FlowCanvasConfig = {
+  ariaLabel: 'Agent 运行闭环路径',
+  accent: 'teal',
+  motion: 'memory',
+  nodes: [
+    { id: 'user', label: 'User', role: '输入', x: 16, y: 48, mobileX: 22, mobileY: 36 },
+    { id: 'planner', label: 'Planner', role: '计划', x: 38, y: 26, mobileX: 50, mobileY: 18 },
+    { id: 'llm', label: 'LLM', role: '推理', x: 64, y: 34, mobileX: 78, mobileY: 39 },
+    { id: 'tool', label: 'Tool', role: '行动', x: 78, y: 58, mobileX: 78, mobileY: 59 },
+    { id: 'observation', label: 'Observation', role: '观察', x: 54, y: 70, mobileX: 50, mobileY: 80 },
+    { id: 'memory', label: 'Memory', role: '上下文', x: 28, y: 70, mobileX: 22, mobileY: 59 },
+    { id: 'final', label: 'Final Answer', role: '输出', x: 88, y: 15, mobileX: 86, mobileY: 10 },
+  ],
+  paths: [
+    { id: 'user-planner', from: 'user', to: 'planner', d: 'M120 260 C190 220 240 190 315 190' },
+    { id: 'planner-llm', from: 'planner', to: 'llm', d: 'M350 190 C430 130 520 130 610 190' },
+    { id: 'llm-tool', from: 'llm', to: 'tool', d: 'M640 210 C730 225 790 260 840 330' },
+    { id: 'tool-observation', from: 'tool', to: 'observation', d: 'M820 360 C720 415 625 425 530 380' },
+    { id: 'observation-memory', from: 'observation', to: 'memory', d: 'M500 395 C430 470 320 470 250 390' },
+    { id: 'memory-llm', from: 'memory', to: 'llm', d: 'M265 365 C365 300 500 255 605 220' },
+    { id: 'llm-final', from: 'llm', to: 'final', d: 'M640 180 C735 120 830 120 900 185' },
+  ],
+}
 
 export const agentLoopExperiment: Experiment = {
   id: 'agent-loop',
@@ -34,7 +38,7 @@ export const agentLoopExperiment: Experiment = {
       activePaths: ['user-planner'],
       packet: { from: 'user', to: 'planner', label: 'goal' },
       traceEvents: [
-        { id: 'input-received', type: 'input', title: '接收目标', detail: '系统记录用户目标、约束和可用上下文，作为后续计划的输入。', status: 'active' },
+        { id: 'input-received', type: 'input', title: '接收目标', detail: '接收用户目标、约束和可用上下文，确立本轮 Agent 运行的起点。', status: 'active' },
       ],
     },
     {
@@ -45,7 +49,7 @@ export const agentLoopExperiment: Experiment = {
       activePaths: ['planner-llm'],
       packet: { from: 'planner', to: 'llm', label: 'plan' },
       traceEvents: [
-        { id: 'plan-created', type: 'thinking', title: '生成计划', detail: '系统记录当前假设、下一步动作和触发工具调用的理由。', status: 'active' },
+        { id: 'plan-created', type: 'thinking', title: '生成计划', detail: '推断当前假设，锁定下一步动作，明确触发工具调用的理由。', status: 'active' },
       ],
     },
     {
@@ -56,7 +60,7 @@ export const agentLoopExperiment: Experiment = {
       activePaths: ['llm-tool'],
       packet: { from: 'llm', to: 'tool', label: 'call' },
       traceEvents: [
-        { id: 'tool-dispatched', type: 'tool-call', title: '调用工具', detail: '系统记录工具名、参数、调用目标和等待中的执行状态。', status: 'active' },
+        { id: 'tool-dispatched', type: 'tool-call', title: '调用工具', detail: '携带工具名、结构化参数和调用目标，等待外部执行层响应。', status: 'active' },
       ],
     },
     {
@@ -67,7 +71,7 @@ export const agentLoopExperiment: Experiment = {
       activePaths: ['tool-observation'],
       packet: { from: 'tool', to: 'observation', label: 'result' },
       traceEvents: [
-        { id: 'observation-returned', type: 'observation', title: '观察结果', detail: '系统记录 stdout、结构化结果或错误信号，等待模型判断可信度。', status: 'active' },
+        { id: 'observation-returned', type: 'observation', title: '观察结果', detail: '工具返回 stdout、结构化结果或错误信号，注入上下文等待模型评估可信度。', status: 'active' },
       ],
     },
     {
@@ -78,7 +82,7 @@ export const agentLoopExperiment: Experiment = {
       activePaths: ['observation-memory', 'memory-llm'],
       packet: { from: 'memory', to: 'llm', label: 'context' },
       traceEvents: [
-        { id: 'context-refined', type: 'repair', title: '修正上下文', detail: '系统记录新证据、被推翻的假设和下一步调整方向。', status: 'active' },
+        { id: 'context-refined', type: 'repair', title: '修正上下文', detail: '检测到旧假设与新证据的偏差，更新上下文并明确下一步调整方向。', status: 'active' },
       ],
     },
     {
@@ -89,7 +93,7 @@ export const agentLoopExperiment: Experiment = {
       activePaths: ['llm-final'],
       packet: { from: 'llm', to: 'final', label: 'answer' },
       traceEvents: [
-        { id: 'answer-ready', type: 'output', title: '生成输出', detail: '系统记录最终响应、关键依据和任务结束状态。', status: 'active' },
+        { id: 'answer-ready', type: 'output', title: '生成输出', detail: '收敛输出最终响应，附带关键推理依据和任务结束状态。', status: 'active' },
       ],
     },
   ],

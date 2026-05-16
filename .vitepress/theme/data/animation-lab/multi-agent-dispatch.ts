@@ -25,7 +25,7 @@ export const multiAgentDispatchCanvas: FlowCanvasConfig = {
 export const multiAgentDispatchExperiment: Experiment = {
   id: 'multi-agent-dispatch',
   title: '多 Agent 调度',
-  summary: '拆解复杂任务何时值得分发给多个 Agent，以及并行协作、审查与结果汇总的运行轨迹。',
+  summary: '展示任务如何分发给多个 Agent，观察并行协作、审查与结果汇总的完整运行轨迹。',
   kind: 'multi-agent-dispatch',
   steps: [
     {
@@ -36,7 +36,7 @@ export const multiAgentDispatchExperiment: Experiment = {
       activePaths: ['coordinator-planner'],
       packet: { from: 'coordinator', to: 'planner', label: 'brief' },
       traceEvents: [
-        { id: 'brief-sent', type: 'input', title: '下发任务摘要', detail: '系统记录任务目标、约束、共享上下文和可并行部分。', status: 'active' },
+        { id: 'brief-sent', type: 'input', title: '下发任务摘要', detail: '接收任务目标和约束，识别可并行的工作单元，下发给计划 Agent 确认分工边界。', status: 'active' },
       ],
     },
     {
@@ -47,7 +47,7 @@ export const multiAgentDispatchExperiment: Experiment = {
       activePaths: ['planner-coder', 'planner-reviewer'],
       packet: { from: 'planner', to: 'coder', label: 'task' },
       traceEvents: [
-        { id: 'work-split', type: 'thinking', title: '拆分并行任务', detail: '系统记录子任务边界、依赖关系和每个 Agent 的责任范围。', status: 'active' },
+        { id: 'work-split', type: 'thinking', title: '拆分并行任务', detail: '划定子任务边界和依赖关系，分配各 Agent 的责任范围，释放互不阻塞的并行路径。', status: 'active' },
       ],
     },
     {
@@ -58,7 +58,7 @@ export const multiAgentDispatchExperiment: Experiment = {
       activePaths: ['coder-reviewer'],
       packet: { from: 'coder', to: 'reviewer', label: 'diff' },
       traceEvents: [
-        { id: 'review-started', type: 'tool-call', title: '提交审查', detail: '系统记录变更摘要、风险点和需要核对的接口契约。', status: 'active' },
+        { id: 'review-started', type: 'tool-call', title: '提交审查', detail: '提交变更摘要和风险点，要求审查 Agent 核对接口契约和边界条件。', status: 'active' },
       ],
     },
     {
@@ -69,18 +69,18 @@ export const multiAgentDispatchExperiment: Experiment = {
       activePaths: ['reviewer-merge'],
       packet: { from: 'reviewer', to: 'merge', label: 'notes' },
       traceEvents: [
-        { id: 'findings-merged', type: 'repair', title: '汇总反馈', detail: '系统记录采纳的反馈、丢弃的重复项和仍需说明的风险。', status: 'active' },
+        { id: 'findings-merged', type: 'repair', title: '汇总反馈', detail: '合并审查反馈，去重冲突结论，标注仍需说明的残余风险。', status: 'active' },
       ],
     },
     {
       id: 'deliver-answer',
       title: 'Deliver Answer',
-      description: '调度器输出最终结果，把多条工作流折叠成用户可理解、可执行的收敛答案。',
+      description: '调度器输出最终结果，把多条工作流汇总为用户可理解、可执行的收敛答案。',
       activeNodes: ['merge', 'answer'],
       activePaths: ['merge-answer'],
       packet: { from: 'merge', to: 'answer', label: 'final' },
       traceEvents: [
-        { id: 'answer-delivered', type: 'output', title: '交付结果', detail: '系统记录最终答案、贡献来源和被隐藏的协作过程。', status: 'active' },
+        { id: 'answer-delivered', type: 'output', title: '交付结果', detail: '汇总多 Agent 贡献，输出最终答案，将协作过程收敛为用户可理解的交付结果。', status: 'active' },
       ],
     },
   ],

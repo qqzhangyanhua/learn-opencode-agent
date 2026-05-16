@@ -35,7 +35,7 @@ export const ragRetrievalFlowExperiment: Experiment = {
       activePaths: ['question-rewrite'],
       packet: { from: 'question', to: 'rewrite', label: 'ask' },
       traceEvents: [
-        { id: 'question-captured', type: 'input', title: '接收问题', detail: '系统记录原始问题、目标实体和缺失证据类型。', status: 'active' },
+        { id: 'question-captured', type: 'input', title: '接收问题', detail: '接收原始问题，提取目标实体，定位需要从知识库补齐的证据缺口。', status: 'active' },
       ],
     },
     {
@@ -46,7 +46,7 @@ export const ragRetrievalFlowExperiment: Experiment = {
       activePaths: ['rewrite-retriever'],
       packet: { from: 'rewrite', to: 'retriever', label: 'query' },
       traceEvents: [
-        { id: 'query-rewritten', type: 'thinking', title: '改写查询', detail: '系统记录关键词、过滤条件和检索范围。', status: 'active' },
+        { id: 'query-rewritten', type: 'thinking', title: '改写查询', detail: '推断检索意图，提取关键词和过滤条件，生成比原始问题更适合向量检索的查询表达。', status: 'active' },
       ],
     },
     {
@@ -57,7 +57,7 @@ export const ragRetrievalFlowExperiment: Experiment = {
       activePaths: ['retriever-reranker'],
       packet: { from: 'retriever', to: 'reranker', label: 'docs' },
       traceEvents: [
-        { id: 'candidates-returned', type: 'observation', title: '召回候选', detail: '系统记录命中文档、片段数量和初始相关度。', status: 'active' },
+        { id: 'candidates-returned', type: 'observation', title: '召回候选', detail: '检索器返回命中文档和片段，附带初始相关度评分，移交重排层进一步筛选。', status: 'active' },
       ],
     },
     {
@@ -68,7 +68,7 @@ export const ragRetrievalFlowExperiment: Experiment = {
       activePaths: ['reranker-evidence'],
       packet: { from: 'reranker', to: 'evidence', label: 'top' },
       traceEvents: [
-        { id: 'evidence-ranked', type: 'repair', title: '筛选证据', detail: '系统记录保留片段、排序依据和被丢弃的低质命中。', status: 'active' },
+        { id: 'evidence-ranked', type: 'repair', title: '筛选证据', detail: '按相关度和可信度重排证据，保留高质量片段，过滤低质命中，缩短注入长度。', status: 'active' },
       ],
     },
     {
@@ -79,7 +79,7 @@ export const ragRetrievalFlowExperiment: Experiment = {
       activePaths: ['evidence-answer'],
       packet: { from: 'evidence', to: 'answer', label: 'cite' },
       traceEvents: [
-        { id: 'answer-cited', type: 'output', title: '带引用生成', detail: '系统记录答案、引用来源和未被证据覆盖的边界。', status: 'active' },
+        { id: 'answer-cited', type: 'output', title: '带引用生成', detail: '基于证据生成答案，标注引用来源，明确未被知识库覆盖的回答边界。', status: 'active' },
       ],
     },
   ],

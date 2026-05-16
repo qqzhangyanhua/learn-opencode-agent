@@ -36,7 +36,7 @@ export const providerRoutingFallbackExperiment: Experiment = {
       activePaths: ['request-router'],
       packet: { from: 'request', to: 'router', label: 'req' },
       traceEvents: [
-        { id: 'request-normalized', type: 'input', title: '标准化请求', detail: '系统记录任务类型、上下文长度、质量目标和候选能力标签。', status: 'active' },
+        { id: 'request-normalized', type: 'input', title: '标准化请求', detail: '接收请求携带的任务类型、上下文长度和质量目标，提取候选 Provider 能力标签。', status: 'active' },
       ],
     },
     {
@@ -47,7 +47,7 @@ export const providerRoutingFallbackExperiment: Experiment = {
       activePaths: ['router-budget'],
       packet: { from: 'router', to: 'budget', label: 'policy' },
       traceEvents: [
-        { id: 'budget-evaluated', type: 'thinking', title: '评估策略', detail: '系统记录预算上限、延迟目标和本次路由策略。', status: 'active' },
+        { id: 'budget-evaluated', type: 'thinking', title: '评估策略', detail: '评估预算上限和延迟目标，推断本次路由策略，避免简单任务命中昂贵 Provider。', status: 'active' },
       ],
     },
     {
@@ -58,7 +58,7 @@ export const providerRoutingFallbackExperiment: Experiment = {
       activePaths: ['router-primary'],
       packet: { from: 'router', to: 'primary', label: 'call' },
       traceEvents: [
-        { id: 'primary-selected', type: 'tool-call', title: '选择主 Provider', detail: '系统记录首选 Provider、模型能力和调用开始时间。', status: 'active' },
+        { id: 'primary-selected', type: 'tool-call', title: '选择主 Provider', detail: '发起首选 Provider 调用，记录模型能力匹配情况和调用开始时间。', status: 'active' },
       ],
     },
     {
@@ -69,7 +69,7 @@ export const providerRoutingFallbackExperiment: Experiment = {
       activePaths: ['primary-fallback', 'budget-fallback'],
       packet: { from: 'primary', to: 'fallback', label: 'failover' },
       traceEvents: [
-        { id: 'fallback-selected', type: 'repair', title: '触发降级', detail: '系统记录失败原因、降级条件和备用 Provider 的选择依据。', status: 'active' },
+        { id: 'fallback-selected', type: 'repair', title: '触发降级', detail: '检测到主 Provider 失败，按策略触发降级，记录失败原因和备用 Provider 的选择依据。', status: 'active' },
       ],
     },
     {
@@ -80,7 +80,7 @@ export const providerRoutingFallbackExperiment: Experiment = {
       activePaths: ['fallback-response'],
       packet: { from: 'fallback', to: 'response', label: 'resp' },
       traceEvents: [
-        { id: 'response-ready', type: 'output', title: '返回响应', detail: '系统记录最终 Provider、响应状态和可复盘的路由路径。', status: 'active' },
+        { id: 'response-ready', type: 'output', title: '返回响应', detail: '备用 Provider 返回响应，输出实际来源、响应质量和完整路由路径供复盘。', status: 'active' },
       ],
     },
   ],

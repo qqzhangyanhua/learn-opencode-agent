@@ -35,7 +35,7 @@ export const humanApprovalGateExperiment: Experiment = {
       activePaths: ['model-risk'],
       packet: { from: 'model', to: 'risk', label: 'intent' },
       traceEvents: [
-        { id: 'intent-captured', type: 'input', title: '捕获意图', detail: '系统记录动作类型、参数和可能的副作用范围。', status: 'active' },
+        { id: 'intent-captured', type: 'input', title: '捕获意图', detail: '接收高风险动作意图，提取动作类型、参数和可能的副作用范围，暂缓执行。', status: 'active' },
       ],
     },
     {
@@ -46,7 +46,7 @@ export const humanApprovalGateExperiment: Experiment = {
       activePaths: ['risk-gate'],
       packet: { from: 'risk', to: 'gate', label: 'risk' },
       traceEvents: [
-        { id: 'risk-labelled', type: 'thinking', title: '风险定级', detail: '系统记录命中规则、风险等级和触发确认门的原因。', status: 'active' },
+        { id: 'risk-labelled', type: 'thinking', title: '风险定级', detail: '扫描规则库，推断命中风险等级，明确触发确认门的理由，等待人类介入。', status: 'active' },
       ],
     },
     {
@@ -57,7 +57,7 @@ export const humanApprovalGateExperiment: Experiment = {
       activePaths: ['gate-user'],
       packet: { from: 'gate', to: 'user', label: 'ask' },
       traceEvents: [
-        { id: 'confirm-pending', type: 'observation', title: '等待确认', detail: '系统记录展示给用户的动作摘要、影响说明和默认选项。', status: 'active' },
+        { id: 'confirm-pending', type: 'observation', title: '等待确认', detail: '向用户展示动作摘要和影响说明，等待 approve/reject 响应，保持执行暂停状态。', status: 'active' },
       ],
     },
     {
@@ -68,7 +68,7 @@ export const humanApprovalGateExperiment: Experiment = {
       activePaths: ['user-executor'],
       packet: { from: 'user', to: 'executor', label: 'go' },
       traceEvents: [
-        { id: 'action-dispatched', type: 'tool-call', title: '放行执行', detail: '系统记录确认人、确认时间和最终下发的执行参数。', status: 'active' },
+        { id: 'action-dispatched', type: 'tool-call', title: '放行执行', detail: '用户确认后释放执行，携带确认人身份、确认时间和最终参数发起外部动作。', status: 'active' },
       ],
     },
     {
@@ -79,7 +79,7 @@ export const humanApprovalGateExperiment: Experiment = {
       activePaths: ['executor-result'],
       packet: { from: 'executor', to: 'result', label: 'done' },
       traceEvents: [
-        { id: 'result-logged', type: 'output', title: '回填结果', detail: '系统记录执行状态、副作用和后续可观察的影响。', status: 'active' },
+        { id: 'result-logged', type: 'output', title: '回填结果', detail: '执行结果回填上下文，无论成功或失败均记录副作用，作为后续决策的可观察证据。', status: 'active' },
       ],
     },
   ],

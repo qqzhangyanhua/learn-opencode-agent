@@ -35,7 +35,7 @@ export const streamingInterruptControlExperiment: Experiment = {
       activePaths: ['request-stream'],
       packet: { from: 'request', to: 'stream', label: 'req' },
       traceEvents: [
-        { id: 'stream-opened', type: 'input', title: '打开流', detail: '系统记录请求参数、流连接和首包等待状态。', status: 'active' },
+        { id: 'stream-opened', type: 'input', title: '打开流', detail: '发起流式请求，建立流连接，等待模型推送首批 Token。', status: 'active' },
       ],
     },
     {
@@ -46,7 +46,7 @@ export const streamingInterruptControlExperiment: Experiment = {
       activePaths: ['stream-buffer'],
       packet: { from: 'stream', to: 'buffer', label: 'tok' },
       traceEvents: [
-        { id: 'tokens-buffered', type: 'observation', title: '缓冲 Token', detail: '系统记录 token 批次、缓冲长度和推送节奏。', status: 'active' },
+        { id: 'tokens-buffered', type: 'observation', title: '缓冲 Token', detail: 'Token 持续写入缓冲区，记录批次长度和推送节奏，平滑向 UI 层输出。', status: 'active' },
       ],
     },
     {
@@ -57,7 +57,7 @@ export const streamingInterruptControlExperiment: Experiment = {
       activePaths: ['buffer-ui'],
       packet: { from: 'buffer', to: 'ui', label: 'paint' },
       traceEvents: [
-        { id: 'ui-updated', type: 'tool-call', title: '增量渲染', detail: '系统记录已渲染文本、光标位置和当前流状态。', status: 'active' },
+        { id: 'ui-updated', type: 'tool-call', title: '增量渲染', detail: '增量更新 UI，追踪已渲染文本和光标位置，保持生成状态对用户可见。', status: 'active' },
       ],
     },
     {
@@ -68,7 +68,7 @@ export const streamingInterruptControlExperiment: Experiment = {
       activePaths: ['ui-interrupt'],
       packet: { from: 'ui', to: 'interrupt', label: 'stop' },
       traceEvents: [
-        { id: 'stream-cancelled', type: 'repair', title: '取消生成', detail: '系统记录取消来源、停止位置和是否还有未消费片段。', status: 'active' },
+        { id: 'stream-cancelled', type: 'repair', title: '取消生成', detail: '接收中断信号，发送取消请求，记录停止位置和未消费片段，清理流连接。', status: 'active' },
       ],
     },
     {
@@ -79,7 +79,7 @@ export const streamingInterruptControlExperiment: Experiment = {
       activePaths: ['interrupt-state'],
       packet: { from: 'interrupt', to: 'state', label: 'save' },
       traceEvents: [
-        { id: 'partial-saved', type: 'output', title: '保存状态', detail: '系统记录已生成内容、上下文快照和下一次恢复入口。', status: 'active' },
+        { id: 'partial-saved', type: 'output', title: '保存状态', detail: '保存已生成内容和上下文快照，输出恢复入口，支持后续重写或重新发起请求。', status: 'active' },
       ],
     },
   ],

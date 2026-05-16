@@ -34,7 +34,7 @@ export const contextCompactionExperiment: Experiment = {
       activePaths: ['window-meter'],
       packet: { from: 'window', to: 'meter', label: 'usage' },
       traceEvents: [
-        { id: 'usage-counted', type: 'input', title: '统计窗口容量', detail: '系统记录消息、工具结果、约束和摘要各自占用的 Token。', status: 'active' },
+        { id: 'usage-counted', type: 'input', title: '统计窗口容量', detail: '统计消息、工具结果和约束各自的 Token 占用，评估当前窗口压力。', status: 'active' },
       ],
     },
     {
@@ -45,7 +45,7 @@ export const contextCompactionExperiment: Experiment = {
       activePaths: ['meter-pruner'],
       packet: { from: 'meter', to: 'pruner', label: 'limit' },
       traceEvents: [
-        { id: 'overflow-detected', type: 'thinking', title: '触发压缩', detail: '系统记录触发阈值、风险来源和需要优先处理的内容块。', status: 'active' },
+        { id: 'overflow-detected', type: 'thinking', title: '触发压缩', detail: '推断触发压缩的阈值条件，定位高风险来源，标记需要优先裁剪的内容块。', status: 'active' },
       ],
     },
     {
@@ -56,7 +56,7 @@ export const contextCompactionExperiment: Experiment = {
       activePaths: ['pruner-summarizer'],
       packet: { from: 'pruner', to: 'summarizer', label: 'facts' },
       traceEvents: [
-        { id: 'tool-output-pruned', type: 'repair', title: '裁剪工具输出', detail: '系统记录裁剪规则、保留片段和被替换的大段输出。', status: 'active' },
+        { id: 'tool-output-pruned', type: 'repair', title: '裁剪工具输出', detail: '按裁剪规则折叠冗余工具输出，保留错误、路径和结论片段，替换大段无效内容。', status: 'active' },
       ],
     },
     {
@@ -67,7 +67,7 @@ export const contextCompactionExperiment: Experiment = {
       activePaths: ['summarizer-prompt'],
       packet: { from: 'summarizer', to: 'prompt', label: 'summary' },
       traceEvents: [
-        { id: 'summary-created', type: 'observation', title: '生成摘要', detail: '系统记录目标、决策、风险、证据和下一步的摘要版本。', status: 'active' },
+        { id: 'summary-created', type: 'observation', title: '生成摘要', detail: '压缩后的状态快照包含目标、决策、风险和证据，作为下一轮推理的记忆替代。', status: 'active' },
       ],
     },
     {
@@ -78,7 +78,7 @@ export const contextCompactionExperiment: Experiment = {
       activePaths: ['prompt-window'],
       packet: { from: 'prompt', to: 'window', label: 'ctx' },
       traceEvents: [
-        { id: 'context-restored', type: 'output', title: '重建上下文', detail: '系统记录释放的窗口空间、注入的摘要和新的上下文入口。', status: 'active' },
+        { id: 'context-restored', type: 'output', title: '重建上下文', detail: '摘要替换冗长历史后窗口空间释放，输出新的上下文入口供下一次模型调用使用。', status: 'active' },
       ],
     },
   ],

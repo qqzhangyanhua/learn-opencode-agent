@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import type { ExperimentStep } from './type'
+import { computed } from 'vue'
+import type { ExperimentStep, TraceEventStatus } from './type'
 
-defineProps<{
-  step: ExperimentStep
+const props = defineProps<{
+  steps: ExperimentStep[]
   stepIndex: number
   totalSteps: number
   collapsed: boolean
@@ -11,6 +12,17 @@ defineProps<{
 const emit = defineEmits<{
   toggle: []
 }>()
+
+const currentStep = computed(() => props.steps[props.stepIndex])
+
+const accumulatedEvents = computed(() => {
+  return props.steps.slice(0, props.stepIndex + 1).flatMap((step, i) =>
+    step.traceEvents.map((event) => ({
+      ...event,
+      status: (i < props.stepIndex ? 'done' : event.status) as TraceEventStatus,
+    }))
+  )
+})
 </script>
 
 <template>
@@ -30,20 +42,20 @@ const emit = defineEmits<{
       id="trace-panel-content"
       class="trace-rail"
       type="button"
-      :aria-label="`展开 Trace：${step.title}`"
+      :aria-label="`展开 Trace：${currentStep?.title}`"
       @click="emit('toggle')"
     >
       <span>{{ stepIndex + 1 }}/{{ totalSteps }}</span>
-      <strong>{{ step.title }}</strong>
+      <strong>{{ currentStep?.title }}</strong>
     </button>
 
     <div v-else id="trace-panel-content" class="trace-body">
       <p class="trace-kicker">TRACE {{ stepIndex + 1 }} / {{ totalSteps }}</p>
-      <h3>{{ step.title }}</h3>
-      <p>{{ step.description }}</p>
+      <h3>{{ currentStep?.title }}</h3>
+      <p>{{ currentStep?.description }}</p>
       <ol class="trace-events">
         <li
-          v-for="event in step.traceEvents"
+          v-for="event in accumulatedEvents"
           :key="event.id"
           :class="['trace-event', event.type, event.status]"
         >

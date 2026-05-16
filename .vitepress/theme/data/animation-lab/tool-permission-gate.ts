@@ -36,7 +36,7 @@ export const toolPermissionGateExperiment: Experiment = {
       activePaths: ['model-request'],
       packet: { from: 'model', to: 'request', label: 'intent' },
       traceEvents: [
-        { id: 'intent-created', type: 'thinking', title: '形成调用意图', detail: '系统记录工具目标、候选参数和风险信号，等待结构化与权限检查。', status: 'active' },
+        { id: 'intent-created', type: 'thinking', title: '形成调用意图', detail: '推断工具调用目标，提取候选参数，标记潜在风险信号，等待权限层接管。', status: 'active' },
       ],
     },
     {
@@ -47,7 +47,7 @@ export const toolPermissionGateExperiment: Experiment = {
       activePaths: ['request-gate'],
       packet: { from: 'request', to: 'gate', label: 'check' },
       traceEvents: [
-        { id: 'gate-checking', type: 'tool-call', title: '检查权限', detail: '系统记录权限结果、阻断原因或需要用户确认的高风险动作。', status: 'active' },
+        { id: 'gate-checking', type: 'tool-call', title: '检查权限', detail: '执行权限检查，记录通过或阻断结果，对高风险动作标记需要用户确认的标志位。', status: 'active' },
       ],
     },
     {
@@ -58,7 +58,7 @@ export const toolPermissionGateExperiment: Experiment = {
       activePaths: ['gate-execute'],
       packet: { from: 'gate', to: 'execute', label: 'allow' },
       traceEvents: [
-        { id: 'tool-executed', type: 'tool-call', title: '执行工具', detail: '系统记录实际执行参数、运行环境和工具调用状态。', status: 'active' },
+        { id: 'tool-executed', type: 'tool-call', title: '执行工具', detail: '以授权后的结构化参数发起调用，在隔离边界内执行，跟踪工具运行状态。', status: 'active' },
       ],
     },
     {
@@ -69,7 +69,7 @@ export const toolPermissionGateExperiment: Experiment = {
       activePaths: ['execute-result'],
       packet: { from: 'execute', to: 'result', label: 'result' },
       traceEvents: [
-        { id: 'result-returned', type: 'observation', title: '返回结果', detail: '系统记录 stdout、错误、结构化输出和执行是否成功。', status: 'active' },
+        { id: 'result-returned', type: 'observation', title: '返回结果', detail: '工具返回 stdout、错误信息和结构化输出，注入上下文等待模型评估。', status: 'active' },
       ],
     },
     {
@@ -80,7 +80,7 @@ export const toolPermissionGateExperiment: Experiment = {
       activePaths: ['result-model-update', 'model-update-model'],
       packet: { from: 'result', to: 'model-update', label: 'obs' },
       traceEvents: [
-        { id: 'observation-applied', type: 'output', title: '回填观察', detail: '系统记录工具事实如何影响计划、上下文和响应状态。', status: 'active' },
+        { id: 'observation-applied', type: 'output', title: '回填观察', detail: '工具事实回填进上下文，更新计划状态，触发模型决策下一步行动或生成响应。', status: 'active' },
       ],
     },
   ],

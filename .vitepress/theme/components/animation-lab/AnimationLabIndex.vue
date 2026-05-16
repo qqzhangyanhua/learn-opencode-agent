@@ -45,7 +45,7 @@ onUnmounted(() => {
     <header class="lab-hero">
       <p class="lab-eyebrow">Animation Lab</p>
       <h1>动画实验室</h1>
-      <p>用系统运动展示 Agent 运行闭环、工具边界、上下文管理、RAG、结构化输出、流式控制和模型路由，把抽象机制拆成可观察、可暂停、可复盘的轨迹。</p>
+      <p>用系统运动展示 Agent 运行闭环、工具边界、上下文管理、RAG、结构化输出、流式控制、模型路由与多 Agent 协作，把抽象机制拆成可观察、可暂停、可复盘的轨迹。</p>
     </header>
 
     <section class="lab-workspace" aria-label="动画实验库">

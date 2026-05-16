@@ -35,7 +35,7 @@ export const structuredOutputValidationExperiment: Experiment = {
       activePaths: ['prompt-draft'],
       packet: { from: 'prompt', to: 'draft', label: 'rules' },
       traceEvents: [
-        { id: 'schema-injected', type: 'input', title: '注入结构约束', detail: '系统记录必填字段、类型要求和非法值边界。', status: 'active' },
+        { id: 'schema-injected', type: 'input', title: '注入结构约束', detail: '将必填字段、类型要求和非法值边界注入 Prompt，让模型在生成前感知结构约束。', status: 'active' },
       ],
     },
     {
@@ -46,7 +46,7 @@ export const structuredOutputValidationExperiment: Experiment = {
       activePaths: ['draft-schema'],
       packet: { from: 'draft', to: 'schema', label: 'json' },
       traceEvents: [
-        { id: 'draft-created', type: 'thinking', title: '生成初稿', detail: '系统记录模型返回的字段、缺失项和原始 JSON 文本。', status: 'active' },
+        { id: 'draft-created', type: 'thinking', title: '生成初稿', detail: '推断结构化输出的字段排布，生成初版 JSON，标记可能不合规的字段等待程序校验。', status: 'active' },
       ],
     },
     {
@@ -57,7 +57,7 @@ export const structuredOutputValidationExperiment: Experiment = {
       activePaths: ['schema-validator'],
       packet: { from: 'schema', to: 'validator', label: 'check' },
       traceEvents: [
-        { id: 'schema-invalid', type: 'observation', title: '校验失败', detail: '系统记录错误路径、期望类型和实际输出值。', status: 'active' },
+        { id: 'schema-invalid', type: 'observation', title: '校验失败', detail: '校验器返回错误路径、期望类型与实际值的偏差，定位不合规字段，等待修复。', status: 'active' },
       ],
     },
     {
@@ -68,7 +68,7 @@ export const structuredOutputValidationExperiment: Experiment = {
       activePaths: ['validator-repair'],
       packet: { from: 'validator', to: 'repair', label: 'fix' },
       traceEvents: [
-        { id: 'fields-repaired', type: 'repair', title: '局部修复', detail: '系统记录待修字段、修复提示和保留不变的字段。', status: 'active' },
+        { id: 'fields-repaired', type: 'repair', title: '局部修复', detail: '将错误字段和修复提示反馈给模型，只重新生成问题字段，保留已合规部分不变。', status: 'active' },
       ],
     },
     {
@@ -79,7 +79,7 @@ export const structuredOutputValidationExperiment: Experiment = {
       activePaths: ['repair-typed'],
       packet: { from: 'repair', to: 'typed', label: 'ok' },
       traceEvents: [
-        { id: 'typed-ready', type: 'output', title: '输出可用数据', detail: '系统记录最终结构、校验通过状态和下游消费入口。', status: 'active' },
+        { id: 'typed-ready', type: 'output', title: '输出可用数据', detail: '全字段校验通过，输出可被程序安全消费的 Typed Result，开放下游调用入口。', status: 'active' },
       ],
     },
   ],

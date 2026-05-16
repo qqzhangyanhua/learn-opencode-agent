@@ -77,7 +77,7 @@ watch(
       </div>
 
       <TracePanel
-        :step="currentStep"
+        :steps="experiment.steps"
         :step-index="currentStepIndex"
         :total-steps="totalSteps"
         :collapsed="isTraceCollapsed"

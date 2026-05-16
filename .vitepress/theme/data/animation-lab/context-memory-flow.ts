@@ -36,7 +36,7 @@ export const contextMemoryExperiment: Experiment = {
       activePaths: ['turn-window'],
       packet: { from: 'turn', to: 'window', label: 'turn' },
       traceEvents: [
-        { id: 'turn-captured', type: 'input', title: '捕获当前轮次', detail: '系统记录用户目标、最近消息和仍然有效的任务约束。', status: 'active' },
+        { id: 'turn-captured', type: 'input', title: '捕获当前轮次', detail: '接收用户目标和最近消息，识别仍然有效的任务约束，作为本轮推理起点。', status: 'active' },
       ],
     },
     {
@@ -47,18 +47,18 @@ export const contextMemoryExperiment: Experiment = {
       activePaths: ['window-retriever'],
       packet: { from: 'window', to: 'retriever', label: 'query' },
       traceEvents: [
-        { id: 'query-built', type: 'thinking', title: '生成检索查询', detail: '系统记录检索意图、查询词和需要补齐的信息缺口。', status: 'active' },
+        { id: 'query-built', type: 'thinking', title: '生成检索查询', detail: '推断检索意图，生成查询词，定位需要从长期记忆中补齐的信息缺口。', status: 'active' },
       ],
     },
     {
       id: 'memory-hit',
       title: 'Memory Hit',
-      description: '检索器命中长期记忆，只把与当前问题有关的事实片段带回当前运行。',
+      description: '检索器命中长期记忆，只把与当前问题有关的事实片段带回当前上下文。',
       activeNodes: ['retriever', 'memory'],
       activePaths: ['retriever-memory'],
       packet: { from: 'retriever', to: 'memory', label: 'hit' },
       traceEvents: [
-        { id: 'memory-returned', type: 'observation', title: '召回长期记忆', detail: '系统记录命中来源、相关度和可引用的证据片段。', status: 'active' },
+        { id: 'memory-returned', type: 'observation', title: '召回长期记忆', detail: '长期记忆返回命中来源和相关度评分，提取可引用的证据片段注入当前上下文。', status: 'active' },
       ],
     },
     {
@@ -69,7 +69,7 @@ export const contextMemoryExperiment: Experiment = {
       activePaths: ['memory-compact'],
       packet: { from: 'memory', to: 'compact', label: 'facts' },
       traceEvents: [
-        { id: 'context-compacted', type: 'repair', title: '压缩上下文', detail: '系统记录被保留的事实、被丢弃的噪声和压缩后的状态。', status: 'active' },
+        { id: 'context-compacted', type: 'repair', title: '压缩上下文', detail: '过滤低价值历史噪声，保留关键事实，生成压缩后的上下文快照。', status: 'active' },
       ],
     },
     {
@@ -80,7 +80,7 @@ export const contextMemoryExperiment: Experiment = {
       activePaths: ['compact-prompt', 'window-prompt'],
       packet: { from: 'compact', to: 'prompt', label: 'ctx' },
       traceEvents: [
-        { id: 'prompt-ready', type: 'output', title: '组装 Prompt', detail: '系统记录最终上下文包、证据来源和下一次调用入口。', status: 'active' },
+        { id: 'prompt-ready', type: 'output', title: '组装 Prompt', detail: '组装最终上下文包，标注证据来源，输出下一次模型调用所需的最小有效输入。', status: 'active' },
       ],
     },
   ],

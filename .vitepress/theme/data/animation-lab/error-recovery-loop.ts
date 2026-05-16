@@ -36,7 +36,7 @@ export const errorRecoveryLoopExperiment: Experiment = {
       activePaths: ['model-tool'],
       packet: { from: 'model', to: 'tool', label: 'call' },
       traceEvents: [
-        { id: 'tool-called', type: 'tool-call', title: '执行工具', detail: '系统记录工具名、参数、调用上下文和本次执行编号。', status: 'active' },
+        { id: 'tool-called', type: 'tool-call', title: '执行工具', detail: '携带工具名、结构化参数和调用上下文，发起本次执行并记录执行编号。', status: 'active' },
       ],
     },
     {
@@ -47,7 +47,7 @@ export const errorRecoveryLoopExperiment: Experiment = {
       activePaths: ['tool-error'],
       packet: { from: 'tool', to: 'error', label: 'err' },
       traceEvents: [
-        { id: 'error-captured', type: 'observation', title: '捕获错误', detail: '系统记录 stderr、退出码、错误类型和失败发生的位置。', status: 'active' },
+        { id: 'error-captured', type: 'observation', title: '捕获错误', detail: '工具返回 stderr、退出码和错误类型，失败位置注入 Trace，等待分类处理。', status: 'active' },
       ],
     },
     {
@@ -58,7 +58,7 @@ export const errorRecoveryLoopExperiment: Experiment = {
       activePaths: ['error-analyzer'],
       packet: { from: 'error', to: 'analyzer', label: 'signal' },
       traceEvents: [
-        { id: 'error-classified', type: 'thinking', title: '分类失败原因', detail: '系统记录错误类别、可恢复性和允许重试的条件。', status: 'active' },
+        { id: 'error-classified', type: 'thinking', title: '分类失败原因', detail: '分析错误类别和可恢复性，推断允许重试的条件，决策是否进入修复循环。', status: 'active' },
       ],
     },
     {
@@ -69,7 +69,7 @@ export const errorRecoveryLoopExperiment: Experiment = {
       activePaths: ['analyzer-repair'],
       packet: { from: 'analyzer', to: 'repair', label: 'fix' },
       traceEvents: [
-        { id: 'params-repaired', type: 'repair', title: '修正调用', detail: '系统记录被修改的参数、修复依据和重试边界。', status: 'active' },
+        { id: 'params-repaired', type: 'repair', title: '修正调用', detail: '根据错误信号修改参数，明确修复依据和重试边界，避免重复同一次失败。', status: 'active' },
       ],
     },
     {
@@ -80,7 +80,7 @@ export const errorRecoveryLoopExperiment: Experiment = {
       activePaths: ['repair-tool', 'tool-final'],
       packet: { from: 'tool', to: 'final', label: 'ok' },
       traceEvents: [
-        { id: 'retry-succeeded', type: 'output', title: '重试成功', detail: '系统记录成功结果、采用的修复路径和最终可交付状态。', status: 'active' },
+        { id: 'retry-succeeded', type: 'output', title: '重试成功', detail: '重试成功，输出可交付结果，保留失败到修复的完整路径供复盘。', status: 'active' },
       ],
     },
   ],
