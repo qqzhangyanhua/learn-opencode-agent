@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { agentLoopNodes, agentLoopPaths } from '../../data/animation-lab-experiments'
+import { agentLoopNodes, agentLoopPaths } from '../../data/animation-lab/agent-loop'
 import type { ExperimentStep } from './type'
 
 const props = defineProps<{

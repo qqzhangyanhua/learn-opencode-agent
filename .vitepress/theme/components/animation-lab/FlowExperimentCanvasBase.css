@@ -1,0 +1,377 @@
+.flow-experiment-canvas {
+  display: grid;
+  grid-template-rows: minmax(320px, 1fr) auto;
+  gap: 12px;
+  min-height: 420px;
+  padding: 14px;
+  overflow: hidden;
+  border-radius: 8px;
+  background:
+    linear-gradient(135deg, rgba(15, 23, 42, 0.94), rgba(3, 7, 18, 0.98)),
+    #020617;
+  color: #e5edf7;
+  isolation: isolate;
+  --accent-line: #38bdf8;
+  --accent-node: #2dd4bf;
+  --accent-soft: rgba(14, 165, 233, 0.16);
+  --packet-border: rgba(251, 191, 36, 0.72);
+  --packet-bg: rgba(120, 53, 15, 0.92);
+  --packet-text: #fef3c7;
+}
+
+.accent-teal {
+  --accent-line: #2dd4bf;
+  --accent-node: #5eead4;
+  --accent-soft: rgba(20, 184, 166, 0.14);
+}
+
+.accent-amber {
+  --accent-line: #fbbf24;
+  --accent-node: #facc15;
+  --accent-soft: rgba(251, 191, 36, 0.13);
+  --packet-border: rgba(56, 189, 248, 0.7);
+  --packet-bg: rgba(8, 47, 73, 0.94);
+  --packet-text: #dff7ff;
+}
+
+.flow-scene {
+  position: relative;
+  min-height: 320px;
+  overflow: hidden;
+}
+
+.flow-grid {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.78), rgba(0, 0, 0, 0.2));
+}
+
+.scene-effect {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.scene-effect span {
+  position: absolute;
+  display: block;
+}
+
+.flow-paths {
+  position: absolute;
+  inset: 7% 4% 3%;
+  z-index: 1;
+  width: 92%;
+  height: 90%;
+  overflow: visible;
+}
+
+.flow-paths path {
+  fill: none;
+  stroke: rgba(100, 116, 139, 0.48);
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-dasharray: 12 18;
+  transition:
+    stroke 0.18s ease,
+    stroke-width 0.18s ease,
+    opacity 0.18s ease;
+}
+
+.flow-paths path.active {
+  stroke: var(--accent-line);
+  stroke-width: 6;
+  animation: flow-path 1.2s linear infinite;
+  filter: drop-shadow(0 0 8px var(--accent-soft));
+}
+
+.motion-dispatch .flow-paths path.active {
+  stroke-dasharray: 2 18;
+  animation: dispatch-path 0.8s linear infinite;
+}
+
+.motion-gate .flow-paths path.active {
+  stroke-dasharray: 28 12;
+  animation: gate-path 1.1s ease-in-out infinite;
+}
+
+.motion-compact .flow-paths path.active {
+  stroke-dasharray: 18 10;
+  animation: compact-path 1.35s ease-in-out infinite;
+}
+
+.motion-recover .flow-paths path.active {
+  stroke-dasharray: 8 14;
+  animation: recover-path 0.95s linear infinite;
+}
+
+.motion-route .flow-paths path.active {
+  stroke-dasharray: 3 16;
+  animation: route-path 0.85s linear infinite;
+}
+
+.flow-node {
+  position: absolute;
+  left: var(--node-x);
+  top: var(--node-y);
+  z-index: 2;
+  display: grid;
+  gap: 4px;
+  place-items: center;
+  width: clamp(86px, 13vw, 132px);
+  min-height: 66px;
+  padding: 11px 12px;
+  border: 1px solid rgba(148, 163, 184, 0.36);
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.9);
+  box-shadow: 0 14px 32px rgba(2, 6, 23, 0.34);
+  color: #dbeafe;
+  text-align: center;
+  transform: translate(-50%, -50%);
+  transition:
+    border-color 0.18s ease,
+    background-color 0.18s ease,
+    box-shadow 0.18s ease,
+    color 0.18s ease;
+}
+
+.flow-node span {
+  color: #8fb2c9;
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.flow-node strong {
+  color: inherit;
+  font-size: clamp(0.76rem, 1vw, 0.92rem);
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.flow-node.active {
+  border-color: color-mix(in srgb, var(--accent-node) 78%, transparent);
+  background: rgba(15, 44, 52, 0.94);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--accent-node) 16%, transparent),
+    0 0 26px color-mix(in srgb, var(--accent-node) 24%, transparent),
+    0 16px 34px rgba(2, 6, 23, 0.42);
+  color: #f8fafc;
+}
+
+.motion-memory .flow-node.active {
+  animation: memory-node 1.8s ease-in-out infinite;
+}
+
+.motion-dispatch .flow-node.active {
+  animation: dispatch-node 1.1s ease-in-out infinite;
+}
+
+.motion-gate .flow-node.active {
+  animation: gate-node 1.4s ease-in-out infinite;
+}
+
+.motion-compact .flow-node.active {
+  animation: compact-node 1.6s ease-in-out infinite;
+}
+
+.motion-recover .flow-node.active {
+  animation: recover-node 1.25s ease-in-out infinite;
+}
+
+.motion-route .flow-node.active {
+  animation: route-node 1.2s ease-in-out infinite;
+}
+
+.flow-node.active span {
+  color: #d9f99d;
+}
+
+.accent-sky .flow-node.active span {
+  color: #99f6e4;
+}
+
+.flow-packet {
+  position: absolute;
+  left: var(--packet-start-x);
+  top: var(--packet-start-y);
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  min-width: 54px;
+  min-height: 30px;
+  padding: 6px 10px;
+  border: 1px solid var(--packet-border);
+  border-radius: 999px;
+  background: var(--packet-bg);
+  box-shadow:
+    0 0 18px color-mix(in srgb, var(--packet-border) 36%, transparent),
+    0 10px 22px rgba(2, 6, 23, 0.38);
+  color: var(--packet-text);
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1;
+  text-transform: uppercase;
+  transform: translate(-50%, -50%);
+  animation: flow-packet 1.45s ease-in-out infinite;
+}
+
+.motion-memory .flow-packet {
+  border-radius: 8px 999px 999px 8px;
+  animation: memory-packet 1.7s ease-in-out infinite;
+}
+
+.motion-dispatch .flow-packet {
+  min-width: 42px;
+  border-radius: 6px;
+  animation: dispatch-packet 1.1s steps(3, end) infinite;
+}
+
+.motion-gate .flow-packet {
+  border-radius: 999px 999px 8px 8px;
+  animation: gate-packet 1.65s ease-in-out infinite;
+}
+
+.motion-compact .flow-packet {
+  border-radius: 8px;
+  animation: compact-packet 1.65s ease-in-out infinite;
+}
+
+.motion-recover .flow-packet {
+  border-radius: 999px 8px 999px 8px;
+  animation: recover-packet 1.35s ease-in-out infinite;
+}
+
+.motion-route .flow-packet {
+  min-width: 48px;
+  border-radius: 6px;
+  animation: route-packet 1.15s steps(4, end) infinite;
+}
+
+.flow-step-summary {
+  display: grid;
+  gap: 5px;
+  max-width: 560px;
+  padding: 12px 14px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  border-radius: 8px;
+  background: rgba(2, 6, 23, 0.78);
+  backdrop-filter: blur(10px);
+}
+
+.flow-step-summary span {
+  color: #bae6fd;
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.76rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.flow-step-summary p {
+  margin: 0;
+  color: #d6e3ef;
+  font-size: 0.84rem;
+  line-height: 1.55;
+}
+
+@media (max-width: 780px) {
+  .flow-experiment-canvas {
+    grid-template-rows: minmax(280px, 1fr) auto;
+    min-height: 360px;
+    padding: 12px;
+  }
+
+  .flow-scene {
+    min-height: 280px;
+  }
+
+  .flow-paths {
+    inset: 8% 2% 4%;
+    width: 96%;
+    height: 88%;
+  }
+
+  .flow-node {
+    width: clamp(74px, 19vw, 104px);
+    min-height: 56px;
+    padding: 9px 8px;
+  }
+
+  .flow-node span {
+    font-size: 0.62rem;
+  }
+
+  .flow-node strong {
+    font-size: 0.72rem;
+  }
+
+  .flow-packet {
+    min-width: 46px;
+    min-height: 26px;
+    padding: 5px 8px;
+    font-size: 0.64rem;
+  }
+
+  .flow-step-summary {
+    padding: 10px 11px;
+  }
+}
+
+@media (max-width: 520px) {
+  .flow-experiment-canvas {
+    grid-template-rows: minmax(360px, 1fr) auto;
+    min-height: 480px;
+  }
+
+  .flow-scene {
+    min-height: 360px;
+  }
+
+  .flow-paths {
+    inset: 4% -16% 2%;
+    width: 132%;
+    height: 94%;
+  }
+
+  .flow-node {
+    left: var(--node-mobile-x);
+    top: var(--node-mobile-y);
+    width: 96px;
+    min-height: 54px;
+  }
+
+  .flow-packet {
+    --packet-start-x: var(--packet-mobile-start-x);
+    --packet-start-y: var(--packet-mobile-start-y);
+    --packet-end-x: var(--packet-mobile-end-x);
+    --packet-end-y: var(--packet-mobile-end-y);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flow-paths path.active,
+  .flow-packet,
+  .scene-effect span,
+  .flow-node.active {
+    animation: none;
+  }
+
+  .flow-paths path,
+  .flow-node,
+  .flow-packet {
+    transition: none;
+  }
+
+  .flow-packet {
+    left: var(--packet-end-x);
+    top: var(--packet-end-y);
+  }
+}

@@ -705,6 +705,19 @@ export default withMermaid(defineConfig({
       '/animation-lab/': [
         { text: '← 返回首页', link: '/' },
         { text: '实验室首页', link: '/animation-lab/' },
+        {
+          text: '实验列表',
+          collapsed: false,
+          items: [
+            { text: 'Agent 运行闭环', link: '/animation-lab/#agent-loop' },
+            { text: '上下文与记忆流', link: '/animation-lab/#context-memory-flow' },
+            { text: '多 Agent 调度', link: '/animation-lab/#multi-agent-dispatch' },
+            { text: '工具调用与权限门', link: '/animation-lab/#tool-permission-gate' },
+            { text: '上下文压缩与摘要生成', link: '/animation-lab/#context-compaction' },
+            { text: '错误恢复与自修复循环', link: '/animation-lab/#error-recovery-loop' },
+            { text: 'Provider 路由与降级', link: '/animation-lab/#provider-routing-fallback' },
+          ]
+        },
         { text: '回到实践篇', link: '/practice/' },
         { text: '进入中级篇', link: '/intermediate/' },
       ],

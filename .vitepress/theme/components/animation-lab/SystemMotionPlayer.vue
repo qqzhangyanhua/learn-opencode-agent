@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import TracePanel from './TracePanel.vue'
 import type { Experiment, ExperimentStep } from './type'
 
@@ -44,6 +44,13 @@ function resetSteps() {
 function toggleTrace() {
   isTraceCollapsed.value = !isTraceCollapsed.value
 }
+
+watch(
+  () => props.experiment.id,
+  () => {
+    currentStepIndex.value = 0
+  }
+)
 </script>
 
 <template>

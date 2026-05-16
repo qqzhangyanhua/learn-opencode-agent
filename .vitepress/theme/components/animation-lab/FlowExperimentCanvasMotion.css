@@ -1,0 +1,469 @@
+.motion-memory .scene-effect {
+  background:
+    radial-gradient(circle at 35% 30%, rgba(45, 212, 191, 0.18), transparent 18%),
+    radial-gradient(circle at 82% 58%, rgba(20, 184, 166, 0.14), transparent 22%),
+    linear-gradient(120deg, transparent 0 44%, rgba(45, 212, 191, 0.08) 45% 55%, transparent 56%);
+}
+
+.motion-memory .scene-effect span {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(153, 246, 228, 0.8);
+  box-shadow: 0 0 18px rgba(45, 212, 191, 0.45);
+  animation: memory-particle 2.4s ease-in-out infinite;
+}
+
+.motion-memory .scene-effect span:nth-child(1) {
+  left: 20%;
+  top: 62%;
+}
+
+.motion-memory .scene-effect span:nth-child(2) {
+  left: 53%;
+  top: 22%;
+  animation-delay: 0.32s;
+}
+
+.motion-memory .scene-effect span:nth-child(3) {
+  left: 78%;
+  top: 70%;
+  animation-delay: 0.64s;
+}
+
+.motion-dispatch .scene-effect {
+  background:
+    linear-gradient(90deg, transparent 0 12%, rgba(56, 189, 248, 0.08) 13% 30%, transparent 31%),
+    linear-gradient(90deg, transparent 0 38%, rgba(125, 211, 252, 0.1) 39% 72%, transparent 73%),
+    linear-gradient(90deg, transparent 0 76%, rgba(56, 189, 248, 0.08) 77% 92%, transparent 93%);
+}
+
+.motion-dispatch .scene-effect span {
+  left: 14%;
+  right: 12%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(125, 211, 252, 0.76), transparent);
+  animation: dispatch-lane 1.8s ease-in-out infinite;
+}
+
+.motion-dispatch .scene-effect span:nth-child(1) {
+  top: 26%;
+}
+
+.motion-dispatch .scene-effect span:nth-child(2) {
+  top: 52%;
+  animation-delay: 0.24s;
+}
+
+.motion-dispatch .scene-effect span:nth-child(3) {
+  top: 76%;
+  animation-delay: 0.48s;
+}
+
+.motion-gate .scene-effect {
+  background:
+    linear-gradient(90deg, transparent 0 54%, rgba(251, 191, 36, 0.16) 55% 61%, transparent 62%),
+    radial-gradient(circle at 58% 30%, rgba(251, 191, 36, 0.16), transparent 16%);
+}
+
+.motion-gate .scene-effect span:nth-child(1) {
+  left: 56%;
+  top: 14%;
+  width: 5px;
+  height: 72%;
+  border-radius: 999px;
+  background: rgba(251, 191, 36, 0.72);
+  box-shadow: 0 0 26px rgba(251, 191, 36, 0.32);
+  animation: gate-scan 1.7s ease-in-out infinite;
+}
+
+.motion-gate .scene-effect span:nth-child(2),
+.motion-gate .scene-effect span:nth-child(3) {
+  left: 50%;
+  width: 16%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.82), transparent);
+}
+
+.motion-gate .scene-effect span:nth-child(2) {
+  top: 28%;
+}
+
+.motion-gate .scene-effect span:nth-child(3) {
+  top: 58%;
+}
+
+.motion-compact .scene-effect {
+  background:
+    linear-gradient(90deg, transparent 0 22%, rgba(45, 212, 191, 0.12) 23% 40%, transparent 41%),
+    radial-gradient(circle at 64% 70%, rgba(45, 212, 191, 0.14), transparent 18%);
+}
+
+.motion-compact .scene-effect span {
+  left: 18%;
+  right: 18%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(94, 234, 212, 0.72), transparent);
+  animation: compact-line 1.8s ease-in-out infinite;
+}
+
+.motion-compact .scene-effect span:nth-child(1) {
+  top: 28%;
+}
+
+.motion-compact .scene-effect span:nth-child(2) {
+  top: 48%;
+  animation-delay: 0.24s;
+}
+
+.motion-compact .scene-effect span:nth-child(3) {
+  top: 68%;
+  animation-delay: 0.48s;
+}
+
+.motion-recover .scene-effect {
+  background:
+    radial-gradient(circle at 60% 26%, rgba(251, 191, 36, 0.18), transparent 16%),
+    linear-gradient(135deg, transparent 0 46%, rgba(251, 191, 36, 0.1) 47% 53%, transparent 54%);
+}
+
+.motion-recover .scene-effect span {
+  width: 10px;
+  height: 10px;
+  border: 1px solid rgba(251, 191, 36, 0.76);
+  border-radius: 50%;
+  animation: recover-pulse 1.5s ease-in-out infinite;
+}
+
+.motion-recover .scene-effect span:nth-child(1) {
+  left: 58%;
+  top: 24%;
+}
+
+.motion-recover .scene-effect span:nth-child(2) {
+  left: 75%;
+  top: 58%;
+  animation-delay: 0.22s;
+}
+
+.motion-recover .scene-effect span:nth-child(3) {
+  left: 48%;
+  top: 74%;
+  animation-delay: 0.44s;
+}
+
+.motion-route .scene-effect {
+  background:
+    linear-gradient(90deg, transparent 0 30%, rgba(56, 189, 248, 0.1) 31% 38%, transparent 39%),
+    linear-gradient(90deg, transparent 0 62%, rgba(56, 189, 248, 0.1) 63% 70%, transparent 71%);
+}
+
+.motion-route .scene-effect span {
+  top: 18%;
+  bottom: 18%;
+  width: 1px;
+  background: linear-gradient(180deg, transparent, rgba(125, 211, 252, 0.72), transparent);
+  animation: route-scan 1.7s ease-in-out infinite;
+}
+
+.motion-route .scene-effect span:nth-child(1) {
+  left: 36%;
+}
+
+.motion-route .scene-effect span:nth-child(2) {
+  left: 64%;
+  animation-delay: 0.28s;
+}
+
+.motion-route .scene-effect span:nth-child(3) {
+  left: 88%;
+  animation-delay: 0.56s;
+}
+
+@keyframes flow-path {
+  to {
+    stroke-dashoffset: -30;
+  }
+}
+
+@keyframes flow-packet {
+  0%,
+  100% {
+    left: var(--packet-start-x);
+    top: var(--packet-start-y);
+  }
+
+  50% {
+    left: var(--packet-end-x);
+    top: var(--packet-end-y);
+  }
+}
+
+@keyframes memory-particle {
+  0%,
+  100% {
+    opacity: 0.22;
+    transform: translate(0, 0) scale(0.75);
+  }
+
+  48% {
+    opacity: 0.9;
+    transform: translate(18px, -24px) scale(1.15);
+  }
+
+  76% {
+    opacity: 0.45;
+    transform: translate(110px, 28px) scale(0.55);
+  }
+}
+
+@keyframes memory-node {
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(94, 234, 212, 0.18),
+      0 0 34px rgba(45, 212, 191, 0.34),
+      0 16px 34px rgba(2, 6, 23, 0.42);
+  }
+}
+
+@keyframes memory-packet {
+  0%,
+  100% {
+    left: var(--packet-start-x);
+    top: var(--packet-start-y);
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+
+  55% {
+    left: var(--packet-end-x);
+    top: var(--packet-end-y);
+    transform: translate(-50%, -50%) scale(0.72);
+  }
+}
+
+@keyframes dispatch-lane {
+  0%,
+  100% {
+    opacity: 0.16;
+    transform: scaleX(0.35);
+  }
+
+  50% {
+    opacity: 0.8;
+    transform: scaleX(1);
+  }
+}
+
+@keyframes dispatch-path {
+  to {
+    stroke-dashoffset: -40;
+  }
+}
+
+@keyframes dispatch-node {
+  50% {
+    transform: translate(-50%, -50%) translateY(-3px);
+  }
+}
+
+@keyframes dispatch-packet {
+  0% {
+    left: var(--packet-start-x);
+    top: var(--packet-start-y);
+  }
+
+  33% {
+    left: 52%;
+    top: 42%;
+  }
+
+  66%,
+  100% {
+    left: var(--packet-end-x);
+    top: var(--packet-end-y);
+  }
+}
+
+@keyframes gate-scan {
+  0%,
+  100% {
+    opacity: 0.38;
+    transform: translateX(-8px) scaleY(0.82);
+  }
+
+  50% {
+    opacity: 1;
+    transform: translateX(8px) scaleY(1);
+  }
+}
+
+@keyframes gate-path {
+  0%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+
+  50% {
+    stroke-dashoffset: -24;
+  }
+}
+
+@keyframes gate-node {
+  50% {
+    border-color: rgba(251, 191, 36, 0.92);
+  }
+}
+
+@keyframes gate-packet {
+  0%,
+  40% {
+    left: var(--packet-start-x);
+    top: var(--packet-start-y);
+    filter: saturate(0.8);
+  }
+
+  55% {
+    left: 58%;
+    top: 30%;
+    filter: saturate(1.6);
+  }
+
+  100% {
+    left: var(--packet-end-x);
+    top: var(--packet-end-y);
+    filter: saturate(1);
+  }
+}
+
+@keyframes compact-line {
+  0%,
+  100% {
+    opacity: 0.18;
+    transform: scaleX(1);
+  }
+
+  50% {
+    opacity: 0.78;
+    transform: scaleX(0.38);
+  }
+}
+
+@keyframes compact-path {
+  0%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+
+  50% {
+    stroke-dashoffset: -18;
+  }
+}
+
+@keyframes compact-node {
+  50% {
+    transform: translate(-50%, -50%) scale(0.97);
+  }
+}
+
+@keyframes compact-packet {
+  0%,
+  100% {
+    left: var(--packet-start-x);
+    top: var(--packet-start-y);
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  55% {
+    left: var(--packet-end-x);
+    top: var(--packet-end-y);
+    transform: translate(-50%, -50%) scale(0.72);
+  }
+}
+
+@keyframes recover-pulse {
+  0%,
+  100% {
+    opacity: 0.18;
+    transform: scale(0.6);
+  }
+
+  50% {
+    opacity: 0.92;
+    transform: scale(1.35);
+  }
+}
+
+@keyframes recover-path {
+  to {
+    stroke-dashoffset: -36;
+  }
+}
+
+@keyframes recover-node {
+  50% {
+    border-color: rgba(251, 191, 36, 0.92);
+    transform: translate(-50%, -50%) translateY(-2px);
+  }
+}
+
+@keyframes recover-packet {
+  0%,
+  35% {
+    left: var(--packet-start-x);
+    top: var(--packet-start-y);
+  }
+
+  52% {
+    filter: saturate(1.7);
+  }
+
+  100% {
+    left: var(--packet-end-x);
+    top: var(--packet-end-y);
+  }
+}
+
+@keyframes route-scan {
+  0%,
+  100% {
+    opacity: 0.14;
+    transform: scaleY(0.46);
+  }
+
+  50% {
+    opacity: 0.82;
+    transform: scaleY(1);
+  }
+}
+
+@keyframes route-path {
+  to {
+    stroke-dashoffset: -38;
+  }
+}
+
+@keyframes route-node {
+  50% {
+    box-shadow:
+      0 0 0 1px rgba(125, 211, 252, 0.2),
+      0 0 30px rgba(56, 189, 248, 0.32),
+      0 16px 34px rgba(2, 6, 23, 0.42);
+  }
+}
+
+@keyframes route-packet {
+  0% {
+    left: var(--packet-start-x);
+    top: var(--packet-start-y);
+  }
+
+  50% {
+    left: 58%;
+    top: 42%;
+  }
+
+  100% {
+    left: var(--packet-end-x);
+    top: var(--packet-end-y);
+  }
+}

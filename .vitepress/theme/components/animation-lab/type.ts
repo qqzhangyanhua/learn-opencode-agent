@@ -36,7 +36,27 @@ export interface Experiment {
   id: string
   title: string
   summary: string
+  kind: ExperimentKind
   steps: ExperimentStep[]
+}
+
+export type ExperimentKind =
+  | 'agent-loop'
+  | 'context-memory-flow'
+  | 'multi-agent-dispatch'
+  | 'tool-permission-gate'
+  | 'context-compaction'
+  | 'error-recovery-loop'
+  | 'provider-routing-fallback'
+
+export type ExperimentStatus = 'available' | 'coming-soon'
+
+export interface ExperimentCatalogItem {
+  id: string
+  title: string
+  summary: string
+  status: ExperimentStatus
+  experiment?: Experiment
 }
 
 export interface CanvasNode {
@@ -51,3 +71,20 @@ export interface CanvasPath {
   to: string
   d: string
 }
+
+export interface FlowCanvasNode extends CanvasNode {
+  x: number
+  y: number
+  mobileX?: number
+  mobileY?: number
+}
+
+export interface FlowCanvasConfig {
+  ariaLabel: string
+  nodes: FlowCanvasNode[]
+  paths: CanvasPath[]
+  accent: 'sky' | 'teal' | 'amber'
+  motion: FlowCanvasMotion
+}
+
+export type FlowCanvasMotion = 'memory' | 'dispatch' | 'gate' | 'compact' | 'recover' | 'route'
