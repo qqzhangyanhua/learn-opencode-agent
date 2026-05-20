@@ -774,6 +774,156 @@ const projectSeeds: ProjectSeed[] = [
     ],
     relatedTheory: [THEORY_LINKS.sessionManagement, THEORY_LINKS.planningMechanism],
     nextProjectIds: []
+  },
+  {
+    projectId: 'practice-p24-prompt-engineering',
+    order: 24,
+    shortLabel: 'P24',
+    title: 'Prompt Engineering 基础',
+    path: '/practice/p24-prompt-engineering/',
+    projectTitle: '一个可迭代的 Prompt 设计工作台',
+    summary: '把 system prompt、few-shot 和推理引导拆成可调试结构，让 Agent 输出更稳定。',
+    difficulty: 'beginner',
+    estimatedTime: '35 min',
+    tags: ['Prompt Engineering', 'System Prompt', 'Few-Shot', 'TypeScript', 'OpenAI SDK'],
+    learningGoals: [
+      '掌握 system prompt 的角色、约束、输出格式三层结构',
+      '理解 few-shot 示例如何固定输出格式和风格',
+      '学会把 prompt 问题拆成可定位、可迭代的工程问题'
+    ],
+    prerequisites: ['建议先完成 P1'],
+    prerequisiteProjectIds: ['practice-p01-minimal-agent'],
+    runCommand: 'bun run p24-prompt-engineering.ts',
+    sourceFiles: ['practice/p24-prompt-engineering.ts'],
+    runModeLabel: '在线/本地均可',
+    runModeHint: '适合一边改 prompt 一边观察输出差异，在线试跑和本地调试都可以。',
+    completionSignals: [
+      '同一任务在不同 prompt 配置下能产生可观察的输出差异',
+      '你能指出角色、约束、格式分别解决什么问题',
+      '你能把一次输出跑偏定位到具体 prompt 层级'
+    ],
+    relatedTheory: [THEORY_LINKS.agentBasics, THEORY_LINKS.toolSystem],
+    nextProjectIds: ['practice-p25-long-context', 'practice-p26-structured-output']
+  },
+  {
+    projectId: 'practice-p25-long-context',
+    order: 25,
+    shortLabel: 'P25',
+    title: '长上下文管理',
+    path: '/practice/p25-long-context/',
+    projectTitle: '一个带滑动窗口和渐进式摘要的长对话 Agent',
+    summary: '在上下文溢出之前主动裁剪和压缩，让长任务保留关键状态而不崩溃。',
+    difficulty: 'intermediate',
+    estimatedTime: '45 min',
+    tags: ['Long Context', 'Context Management', 'Summarization', 'TypeScript', 'OpenAI SDK'],
+    learningGoals: [
+      '理解滑动窗口和渐进式摘要的取舍',
+      '学会用 token 预算触发主动压缩',
+      '把多轮对话从短会话扩展到更接近真实工作的长任务'
+    ],
+    prerequisites: ['建议先完成 P2'],
+    prerequisiteProjectIds: ['practice-p02-multi-turn'],
+    runCommand: 'bun run p25-long-context.ts',
+    sourceFiles: ['practice/p25-long-context.ts'],
+    runModeLabel: '推荐本地运行',
+    runModeHint: '长上下文压缩需要观察多轮日志和摘要内容，本地运行更容易调试。',
+    completionSignals: [
+      '历史过长时能触发滑动窗口或摘要压缩',
+      '早期关键事实被摘要保留，而不是直接丢失',
+      '你能说明哪些上下文必须保留，哪些可以压缩'
+    ],
+    relatedTheory: [THEORY_LINKS.sessionManagement],
+    nextProjectIds: ['practice-p05-memory-arch', 'practice-p26-structured-output']
+  },
+  {
+    projectId: 'practice-p26-structured-output',
+    order: 26,
+    shortLabel: 'P26',
+    title: '结构化输出',
+    path: '/practice/p26-structured-output/',
+    projectTitle: '一个用 Schema 约束输出的强类型 Agent',
+    summary: '用 JSON Mode 和 Zod Schema 约束模型输出，让结果能被程序可靠解析。',
+    difficulty: 'intermediate',
+    estimatedTime: '40 min',
+    tags: ['Structured Output', 'JSON Mode', 'Zod', 'TypeScript', 'OpenAI SDK'],
+    learningGoals: [
+      '理解自由文本和结构化输出在工程可靠性上的差异',
+      '掌握 JSON Mode 与 Zod Schema 的边界',
+      '学会处理 refusal、解析失败和调用失败'
+    ],
+    prerequisites: ['建议先完成 P1、P24'],
+    prerequisiteProjectIds: ['practice-p01-minimal-agent', 'practice-p24-prompt-engineering'],
+    runCommand: 'bun run p26-structured-output.ts',
+    sourceFiles: ['practice/p26-structured-output.ts'],
+    runModeLabel: '在线/本地均可',
+    runModeHint: '适合反复调整 Schema 和输入案例，观察 parsed 结果是否稳定。',
+    completionSignals: [
+      '模型输出能被 Schema 解析成强类型对象',
+      '不符合格式的输出不会悄悄进入业务逻辑',
+      '你能说明 JSON 合法和字段可信不是同一件事'
+    ],
+    relatedTheory: [THEORY_LINKS.toolSystem, THEORY_LINKS.planningMechanism],
+    nextProjectIds: ['practice-p11-planning', 'practice-p22-project']
+  },
+  {
+    projectId: 'practice-p27-code-execution',
+    order: 27,
+    shortLabel: 'P27',
+    title: '代码执行 Agent',
+    path: '/practice/p27-code-execution/',
+    projectTitle: '一个带子进程沙箱和修正循环的代码执行 Agent',
+    summary: '把 Agent 的行动从预定义工具扩展到生成、执行、观察错误并自动修正代码。',
+    difficulty: 'advanced',
+    estimatedTime: '60 min',
+    tags: ['Code Execution', 'Sandbox', 'Tool Calling', 'TypeScript', 'OpenAI SDK'],
+    learningGoals: [
+      '理解为什么代码执行要放进隔离子进程',
+      '掌握超时、输出限制和临时文件清理这些安全边界',
+      '学会把 stderr 反馈给模型形成生成-执行-修正循环'
+    ],
+    prerequisites: ['建议先完成 P10、P19'],
+    prerequisiteProjectIds: ['practice-p10-react-loop', 'practice-p19-security'],
+    runCommand: 'bun run p27-code-execution.ts',
+    sourceFiles: ['practice/p27-code-execution.ts'],
+    runModeLabel: '推荐本地运行',
+    runModeHint: '代码执行涉及子进程、临时文件和错误输出，本地观察最清楚。',
+    completionSignals: [
+      '生成的代码能在隔离进程中执行并返回 stdout/stderr',
+      '代码报错后模型能根据错误信息生成修正版',
+      '你能说出 eval 和 child_process 在风险边界上的区别'
+    ],
+    relatedTheory: [THEORY_LINKS.toolSystem, THEORY_LINKS.planningMechanism],
+    nextProjectIds: ['practice-p19-security', 'practice-p28-human-in-loop']
+  },
+  {
+    projectId: 'practice-p28-human-in-loop',
+    order: 28,
+    shortLabel: 'P28',
+    title: 'Human-in-the-Loop',
+    path: '/practice/p28-human-in-loop/',
+    projectTitle: '一个会在高风险工具前暂停确认的 Agent',
+    summary: '把工具调用按风险分级，在不可逆操作前引入人类审批和恢复机制。',
+    difficulty: 'advanced',
+    estimatedTime: '50 min',
+    tags: ['Human-in-the-Loop', 'Approval', 'Safety', 'Interrupt', 'TypeScript', 'OpenAI SDK'],
+    learningGoals: [
+      '掌握 safe、review、critical 三类工具风险分级',
+      '理解同步确认和 Interrupt/Resume 的适用场景',
+      '学会给高风险 Agent 操作设计可审计的人类决策点'
+    ],
+    prerequisites: ['建议先完成 P14、P19'],
+    prerequisiteProjectIds: ['practice-p14-mcp', 'practice-p19-security'],
+    runCommand: 'bun run p28-human-in-loop.ts',
+    sourceFiles: ['practice/p28-human-in-loop.ts'],
+    runModeLabel: '推荐本地运行',
+    runModeHint: '审批流程需要终端交互，建议本地完整体验暂停、确认和恢复。',
+    completionSignals: [
+      'safe 工具能直接执行，critical 工具会等待确认',
+      '拒绝审批时危险操作不会继续执行',
+      '你能说明什么时候应该中断 Agent，而不是让它自动完成'
+    ],
+    relatedTheory: [THEORY_LINKS.toolSystem, THEORY_LINKS.planningMechanism],
+    nextProjectIds: ['practice-p23-production']
   }
 ]
 

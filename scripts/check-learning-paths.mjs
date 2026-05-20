@@ -116,7 +116,8 @@ function walkIndexMarkdownFiles(dir) {
 }
 
 function toPageUrl(relativePath) {
-  const withoutDocsPrefix = relativePath.replace(/^docs\//, '')
+  const normalizedPath = relativePath.split(path.sep).join('/')
+  const withoutDocsPrefix = normalizedPath.replace(/^docs\//, '')
   if (withoutDocsPrefix === 'index.md') {
     return '/'
   }

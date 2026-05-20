@@ -77,12 +77,15 @@ export const practicePhases: PracticePhaseSummary[] = [
     title: 'Agent 基础',
     subtitle: '工具调用 / 多轮对话 / 流式输出 / 错误处理',
     summary: '先把最小 Agent 跑起来，建立对工具调用和基本对话循环的直觉。',
-    projectCount: 4,
+    projectCount: 7,
     projectIds: [
       'practice-p01-minimal-agent',
       'practice-p02-multi-turn',
       'practice-p03-streaming',
-      'practice-p04-error-handling'
+      'practice-p04-error-handling',
+      'practice-p24-prompt-engineering',
+      'practice-p25-long-context',
+      'practice-p26-structured-output'
     ],
     recommendedStart: '/practice/p01-minimal-agent/',
     themeTags: ['Tool Calling', 'Multi-turn', 'Streaming', 'Error Handling']
@@ -125,10 +128,11 @@ export const practicePhases: PracticePhaseSummary[] = [
     title: '感知扩展',
     subtitle: '多模态智能体 / MCP 协议接入',
     summary: '让 Agent 从文本世界走向多模态输入和外部能力接入。',
-    projectCount: 2,
+    projectCount: 3,
     projectIds: [
       'practice-p13-multimodal',
-      'practice-p14-mcp'
+      'practice-p14-mcp',
+      'practice-p27-code-execution'
     ],
     recommendedStart: '/practice/p13-multimodal/',
     themeTags: ['Multimodal', 'MCP']
@@ -139,11 +143,12 @@ export const practicePhases: PracticePhaseSummary[] = [
     title: '多 Agent 协作',
     subtitle: '编排模式 / 子 Agent / 通信协议',
     summary: '从单 Agent 迈向多角色协作、任务拆解和状态共享。',
-    projectCount: 3,
+    projectCount: 4,
     projectIds: [
       'practice-p15-multi-agent',
       'practice-p16-subagent',
-      'practice-p17-agent-comm'
+      'practice-p17-agent-comm',
+      'practice-p28-human-in-loop'
     ],
     recommendedStart: '/practice/p15-multi-agent/',
     themeTags: ['Multi-Agent', 'Sub-Agent', 'Communication']
