@@ -22,7 +22,6 @@ import HomeStartPanel from './components/HomeStartPanel.vue'
 import EntryContextBanner from './components/EntryContextBanner.vue'
 import ChapterLearningGuide from './components/ChapterLearningGuide.vue'
 import ChapterActionPanel from './components/ChapterActionPanel.vue'
-import PracticePreview from './components/PracticePreview.vue'
 
 import './custom.css'
 
@@ -31,12 +30,10 @@ const asyncComponent = (loader: Parameters<typeof defineAsyncComponent>[0]) =>
 
 const asyncGlobalComponents = [
   ['ReActLoop', asyncComponent(() => import('./components/ReActLoop.vue'))],
-  ['StreamingDemo', asyncComponent(() => import('./components/StreamingDemo.vue'))],
   ['MessageAccumulator', asyncComponent(() => import('./components/MessageAccumulator.vue'))],
   ['PermissionFlow', asyncComponent(() => import('./components/PermissionFlow.vue'))],
   ['McpHandshake', asyncComponent(() => import('./components/McpHandshake.vue'))],
   ['HttpPermissionGateDemo', asyncComponent(() => import('./components/HttpPermissionGateDemo.vue'))],
-  ['SseBroadcast', asyncComponent(() => import('./components/SseBroadcast.vue'))],
   ['ContextCompaction', asyncComponent(() => import('./components/ContextCompaction.vue'))],
   ['ProviderFallback', asyncComponent(() => import('./components/ProviderFallback.vue'))],
   ['WorkflowVsAgent', asyncComponent(() => import('./components/WorkflowVsAgent.vue'))],
@@ -48,16 +45,12 @@ const asyncGlobalComponents = [
   ['HashlineEditDemo', asyncComponent(() => import('./components/HashlineEditDemo.vue'))],
   ['TaskDelegationDemo', asyncComponent(() => import('./components/TaskDelegationDemo.vue'))],
   ['WhatIsAgent', asyncComponent(() => import('./components/animations/css/WhatIsAgent.vue'))],
-  ['MultiTurnDialog', asyncComponent(() => import('./components/animations/css/MultiTurnDialog.vue'))],
   ['FunctionCalling', asyncComponent(() => import('./components/animations/lottie/FunctionCalling.vue'))],
-  ['FunctionCallingCss', asyncComponent(() => import('./components/animations/css/FunctionCallingCss.vue'))],
   ['MultiAgentCollab', asyncComponent(() => import('./components/animations/lottie/MultiAgentCollab.vue'))],
   ['MemorySystem', asyncComponent(() => import('./components/animations/lottie/MemorySystem.vue'))],
-  ['MemorySystemCss', asyncComponent(() => import('./components/animations/css/MemorySystemCss.vue'))],
   ['RagAccuracyDemo', asyncComponent(() => import('./components/RagAccuracyDemo.vue'))],
   ['MultiAgentWorkflowDetailed', asyncComponent(() => import('./components/MultiAgentWorkflowDetailed.vue'))],
   ['MultiAgentModeSimulator', asyncComponent(() => import('./components/MultiAgentModeSimulator.vue'))],
-  ['PlanningTreeDemo', asyncComponent(() => import('./components/PlanningTreeDemo.vue'))],
   ['ContextEngineeringExtended', asyncComponent(() => import('./components/ContextEngineeringExtended.vue'))],
   ['PromptDesignStudio', asyncComponent(() => import('./components/PromptDesignStudio.vue'))],
   ['ProductionArchitectureDiagram', asyncComponent(() => import('./components/ProductionArchitectureDiagram.vue'))],
@@ -123,7 +116,6 @@ const syncGlobalComponents = [
   ['EntryContextBanner', EntryContextBanner],
   ['ChapterLearningGuide', ChapterLearningGuide],
   ['ChapterActionPanel', ChapterActionPanel],
-  ['PracticePreview', PracticePreview],
 ] as const
 
 const AsyncPracticeProjectSourceFiles = asyncComponent(() =>

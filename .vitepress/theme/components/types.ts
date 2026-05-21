@@ -3,8 +3,7 @@ import type {
   DiscoveryGoalId,
   LearningDifficulty,
   LearningPathDefinition,
-  PracticePhaseSummary,
-  SectionRoleSummary
+  PracticePhaseSummary
 } from '../data/content-meta'
 import type {
   DiscoveryTopicCollection
@@ -71,17 +70,6 @@ export interface RuntimeLifecycleDiagramProps {
   highlightKeys?: string[]
 }
 
-export interface TechItem {
-  name: string
-  category: string
-  description: string
-}
-
-export interface TechGroup {
-  label: string
-  items: TechItem[]
-}
-
 export interface LearningPathChapter {
   name: string
   link: string
@@ -98,10 +86,6 @@ export interface LearningPhase {
   goal: string
   outcome: string
   chapters: LearningPathChapter[]
-}
-
-export interface SectionRoleGridProps {
-  sections?: SectionRoleSummary[]
 }
 
 export interface PracticePhaseGridProps {
@@ -129,12 +113,6 @@ export interface RunCommandProps {
 export interface TrackHighlight {
   icon: string
   text: string
-}
-
-export interface PracticePreviewProps {
-  theoryChapters?: number
-  practiceProjects?: number
-  practicePhases?: number
 }
 
 export interface PracticeRouteExplorerProps {
@@ -323,16 +301,6 @@ export interface UseIntersectionObserverOptions {
 // ===== 中级篇通用工具类型 =====
 
 export type DemoTone = 'positive' | 'negative' | 'neutral' | 'info' | 'success' | 'warning' | 'danger'
-export type DemoPlaybackStatus = 'idle' | 'playing' | 'paused' | 'completed'
-export type DemoStepStatus = 'pending' | 'active' | 'done' | 'blocked'
-
-export interface DemoBudget {
-  used: number
-  total: number
-  reserved?: number
-  warningAt?: number
-  dangerAt?: number
-}
 
 export interface DemoScenarioMeta {
   id: string
@@ -427,25 +395,6 @@ export interface MultiAgentModeScenario {
 
 export interface MultiAgentModeSimulatorProps {
   initialModeId?: MultiAgentModeKey
-}
-
-// ===== Ch27: Planning 机制 =====
-
-export interface PlanTaskNode {
-  id: string
-  title: string
-  description: string
-  status: DemoStepStatus
-  priority: 'p0' | 'p1' | 'p2'
-  estimatedTokens: number
-  dependsOn: string[]
-  children?: PlanTaskNode[]
-}
-
-export interface PlanningTreeDemoProps {
-  tasks: PlanTaskNode[]
-  autoPlay?: boolean
-  playSpeed?: number
 }
 
 // ===== Ch28: 上下文工程 =====
