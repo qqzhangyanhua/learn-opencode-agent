@@ -10,3 +10,4 @@ dist/
 .claude/worktrees/
 .env
 .playwright-cli/
+.qoder/
