@@ -1,0 +1,64 @@
+docs/hermes-agent/index.md
+  18998ddda592860f 23-24
+package.json
+  18998ddda592860f 9,22
+scripts/check-practice-motion.mjs
+  18998ddda592860f 1-167
+.vitepress/theme/components/ChapterLearningGuide.vue
+  18998ddda592860f 35-40
+.vitepress/theme/components/PracticeProjectGuide.vue
+  18998ddda592860f 30-36
+docs/11-code-intelligence/index.md
+  18998ddda592860f 63-64
+.vitepress/theme/components/TestingFixtureBoundaryDemo.vue
+  18998ddda592860f 1-136
+scripts/check-content.mjs
+  18998ddda592860f 27-29,32-36,42-46
+docs/08-http-api-server/index.md
+  18998ddda592860f 63-64
+.vitepress/theme/data/content-meta.ts
+  18998ddda592860f 2,10-17
+docs/12-plugins-extensions/index.md
+  18998ddda592860f 90-91
+docs/claude-code/reading-guide.md
+  18998ddda592860f 14-15,18-19
+.vitepress/theme/data/practice-motion/type.ts
+  18998ddda592860f 1-14
+.context/history/commits.jsonl
+  18998ddda592860f 12
+.vitepress/theme/data/practice-motion/index.ts
+  18998ddda592860f 1-200
+docs/claude-code/index.md
+  18998ddda592860f 23-24
+docs/intermediate/27-planning-mechanism/index.md
+  18998ddda592860f 277-280
+scripts/check-learning-metadata.mjs
+  18998ddda592860f 139-142
+.context/history/commits.md
+  18998ddda592860f 19
+.vitepress/theme/components/LspEditDiagnosticFlowDemo.vue
+  18998ddda592860f 1-270
+.vitepress/theme/index.ts
+  18998ddda592860f 37,91
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "01636323606614ccbb0c5773ccf42e86540f911c",
+  "prompts": {
+    "18998ddda592860f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e4e6a-3de7-74a1-870a-79eb8c60e349",
+        "model": "gpt-5.5"
+      },
+      "human_author": "张艳华",
+      "messages": [],
+      "total_additions": 850,
+      "total_deletions": 8,
+      "accepted_lines": 850,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.tongbaninfo.com/cas/da7fa0bfae44e49e462b02a70f456194cba8aac86c23b1c0945efb44f4285ff0"
+    }
+  }
+}
