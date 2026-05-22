@@ -1,0 +1,56 @@
+.vitepress/theme/components/ReActLoopDemo.vue
+  139dc4b813b39fe4 86,89
+.vitepress/theme/components/ErrorRetryDemo.vue
+  139dc4b813b39fe4 91,94
+.vitepress/theme/components/MemoryBankDemo.vue
+  139dc4b813b39fe4 114,117,235-239,282-283,350-351,368-382
+.vitepress/theme/components/StreamingOutputDemo.css
+  139dc4b813b39fe4 119-125,346-357,359
+.context/history/commits.md
+  139dc4b813b39fe4 18
+.vitepress/theme/components/StreamingOutputDemo.vue
+  139dc4b813b39fe4 131,134
+.vitepress/theme/components/FlowScenarioDemo.vue
+  139dc4b813b39fe4 67-69,465-469,486-490
+.vitepress/theme/components/HybridRetrievalDemo.vue
+  139dc4b813b39fe4 75,78,240-244,330,483,541-555
+.vitepress/theme/components/graphRagVisitTimer.test.ts
+  139dc4b813b39fe4 1-19
+.vitepress/theme/components/graphRagVisitTimer.ts
+  139dc4b813b39fe4 1-23
+.vitepress/theme/components/ReActLoopDemo.css
+  139dc4b813b39fe4 120-126,208,415-419,421-431
+.vitepress/theme/components/ToolCallingLifecycle.vue
+  139dc4b813b39fe4 86,89
+.vitepress/theme/components/ErrorRetryDemo.css
+  139dc4b813b39fe4 120-126,209,377,434-438,440-450
+.vitepress/theme/components/GraphRagDemo.vue
+  139dc4b813b39fe4 3,56,124,145,153,188,191,367-372,460,593-603
+.vitepress/theme/components/MemoryLayersDemo.vue
+  139dc4b813b39fe4 139,142,300-305,387,551,597-610
+.context/history/commits.jsonl
+  139dc4b813b39fe4 11
+.vitepress/theme/components/ToolCallingLifecycle.css
+  139dc4b813b39fe4 120-126,208,398,446-459
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "e8d3c349f0d361ade0a3dd6d21a20ccfe04cdd0e",
+  "prompts": {
+    "139dc4b813b39fe4": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e4e18-5eec-7681-9ef9-5463775cb73a",
+        "model": "gpt-5.5"
+      },
+      "human_author": "张艳华",
+      "messages": [],
+      "total_additions": 269,
+      "total_deletions": 35,
+      "accepted_lines": 269,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.tongbaninfo.com/cas/d218a25cc23717c0783e3b268c9e27966d450c68aad7dcd1218c01696fc47c65"
+    }
+  }
+}
