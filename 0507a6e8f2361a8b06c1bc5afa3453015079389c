@@ -1,0 +1,78 @@
+.vitepress/theme/components/ReActLoopDemo.css
+  006607ebec39d31c 1-408
+.vitepress/theme/components/ErrorRetryDemo.vue
+  006607ebec39d31c 4-9,19,25-28,37,39,53,71-74,98-108,111-112,122,168,186
+.vitepress/theme/components/securityBoundaryScenario.ts
+  006607ebec39d31c 1-57
+.vitepress/theme/components/ErrorRetryDemo.css
+  006607ebec39d31c 1-427
+.vitepress/theme/components/SessionLoopLifecycleDemo.vue
+  006607ebec39d31c 2-21,25-26,28-31,33-68
+.vitepress/theme/components/ToolCallingLifecycle.css
+  006607ebec39d31c 1-438
+.vitepress/theme/components/errorRetryScenario.test.ts
+  006607ebec39d31c 1-30
+.vitepress/theme/components/StreamingOutputDemo.css
+  006607ebec39d31c 1-339
+.vitepress/theme/components/securityBoundaryMatcher.test.ts
+  006607ebec39d31c 1-13
+.vitepress/theme/components/sessionLoopLifecycleModes.test.ts
+  006607ebec39d31c 1-31
+.context/history/commits.md
+  006607ebec39d31c 16
+.vitepress/theme/components/streamingOutputScenario.ts
+  006607ebec39d31c 1-84
+.vitepress/theme/components/errorRetryScenario.ts
+  006607ebec39d31c 1-91
+.vitepress/theme/components/toolCallingLifecycleScenario.test.ts
+  006607ebec39d31c 1-37
+.vitepress/theme/components/toolCallingLifecycleScenario.ts
+  006607ebec39d31c 1-230
+.vitepress/theme/components/streamingOutputScenario.test.ts
+  006607ebec39d31c 1-31
+.vitepress/theme/components/StreamingOutputDemo.vue
+  006607ebec39d31c 4,14,16,24-27,35,37,40,43-44,47-48,51-54,58,62-69,83,88-94,99,106,116,131-132,138-148,150-151,156,176,185-189,205-206,209-210,219
+docs/practice/p19-security/index.md
+  006607ebec39d31c 9,11-12
+.vitepress/theme/components/reActLoopScenario.ts
+  006607ebec39d31c 1-195
+.vitepress/theme/components/SecurityBoundaryDemo.css
+  006607ebec39d31c 1-444
+.vitepress/theme/components/SecurityBoundaryDemo.vue
+  006607ebec39d31c 4,115,325
+.vitepress/theme/components/securityBoundaryScenario.test.ts
+  006607ebec39d31c 1-23
+.vitepress/theme/components/securityBoundaryMatcher.ts
+  006607ebec39d31c 1-14
+.vitepress/theme/components/sessionLoopLifecycleModes.ts
+  006607ebec39d31c 1-183
+.vitepress/theme/components/ReActLoopDemo.vue
+  006607ebec39d31c 4,14,20-23,32,34,48,66-71,93-103,106-107,117,185-187,204
+.context/history/commits.jsonl
+  006607ebec39d31c 9
+.vitepress/theme/components/reActLoopScenario.test.ts
+  006607ebec39d31c 1-29
+.vitepress/theme/components/ToolCallingLifecycle.vue
+  006607ebec39d31c 4,14,20-23,32,34,48,66-69,93-103,105-106,117,121-122,131,140,164,178
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "0507a6e8f2361a8b06c1bc5afa3453015079389c",
+  "prompts": {
+    "006607ebec39d31c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e4e08-176d-7211-9514-f5d7b47e3d01",
+        "model": "gpt-5.5"
+      },
+      "human_author": "张艳华",
+      "messages": [],
+      "total_additions": 3352,
+      "total_deletions": 2202,
+      "accepted_lines": 3352,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.tongbaninfo.com/cas/da6c346a8cde9113207c288e6c7d4efe648740a0313e1dea21b3cce7311ce631"
+    }
+  }
+}
