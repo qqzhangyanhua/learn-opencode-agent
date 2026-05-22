@@ -1,0 +1,34 @@
+scripts/check-animation-lab.mjs
+  faff49c6f1934e0f 10,173-187,236-237
+.context/history/commits.jsonl
+  faff49c6f1934e0f 10
+.vitepress/theme/components/animation-lab/type.ts
+  faff49c6f1934e0f 90,95-97
+.vitepress/theme/data/animation-lab-experiments.ts
+  faff49c6f1934e0f 1,43-114,121
+.vitepress/theme/components/animation-lab/AnimationLabIndex.vue
+  faff49c6f1934e0f 43-51,53-70,131-132,166-184,187-226,232-238
+.context/history/commits.md
+  faff49c6f1934e0f 17
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.2.8",
+  "base_commit_sha": "2c5e51852b949ea69752caff204670222717ca44",
+  "prompts": {
+    "faff49c6f1934e0f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019e4e0d-4ae3-7912-a497-8056e0244839",
+        "model": "gpt-5.5"
+      },
+      "human_author": "张艳华",
+      "messages": [],
+      "total_additions": 201,
+      "total_deletions": 10,
+      "accepted_lines": 201,
+      "overriden_lines": 0,
+      "messages_url": "https://gitai.tongbaninfo.com/cas/a6efb4e0cd26ed896ea8389f67b57a4bee15dac3af9a3edf00e43f8d3aed0b6b"
+    }
+  }
+}
