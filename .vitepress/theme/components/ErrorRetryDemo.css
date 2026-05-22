@@ -117,6 +117,13 @@
   opacity: 0.9;
 }
 
+.erd-btn-primary:focus-visible,
+.erd-btn-ghost:focus-visible,
+.erd-mode-btn:focus-visible {
+  outline: 2px solid var(--vp-c-brand-1);
+  outline-offset: 2px;
+}
+
 .erd-btn-primary.active {
   background: #0f766e;
 }
@@ -199,7 +206,7 @@
   color: var(--vp-c-text-3);
   position: relative;
   z-index: 1;
-  transition: all 0.3s;
+  transition: background 0.3s, border-color 0.3s, color 0.3s, transform 0.3s;
 }
 
 .erd-step-dot.active.call      { background: #3b82f6; border-color: #3b82f6; color: #fff; transform: scale(1.15); }
@@ -367,7 +374,7 @@
   padding: 0.5rem;
   border-radius: 4px;
   background: var(--vp-c-bg-soft);
-  transition: all 0.2s;
+  transition: background 0.2s, border-left-color 0.2s;
 }
 
 .erd-guard-item.active {
@@ -423,5 +430,21 @@
     width: 28px;
     height: 28px;
     font-size: 0.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .erd-indicator.running {
+    animation: none;
+  }
+
+  .erd-progress-fill,
+  .erd-step-dot,
+  .erd-guard-item {
+    transition: none;
+  }
+
+  .erd-step-dot.active {
+    transform: none;
   }
 }

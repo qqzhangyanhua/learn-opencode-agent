@@ -117,6 +117,13 @@
   opacity: 0.9;
 }
 
+.rld-btn-primary:focus-visible,
+.rld-btn-ghost:focus-visible,
+.rld-mode-btn:focus-visible {
+  outline: 2px solid var(--vp-c-brand-1);
+  outline-offset: 2px;
+}
+
 .rld-btn-primary.active {
   background: #0f766e;
 }
@@ -198,7 +205,7 @@
   color: var(--vp-c-text-3);
   position: relative;
   z-index: 1;
-  transition: all 0.3s;
+  transition: background 0.3s, border-color 0.3s, color 0.3s, transform 0.3s;
 }
 
 .rld-step-dot.active.thought { background: #8b5cf6; border-color: #8b5cf6; color: #fff; transform: scale(1.15); }
@@ -404,5 +411,21 @@
     width: 28px;
     height: 28px;
     font-size: 0.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rld-indicator.running {
+    animation: none;
+  }
+
+  .rld-progress-fill,
+  .rld-step-dot,
+  .rld-step-title {
+    transition: none;
+  }
+
+  .rld-step-dot.active {
+    transform: none;
   }
 }

@@ -128,10 +128,10 @@ const phaseColor = computed(() => {
         <span class="sod-badge">P3 · Streaming</span>
       </div>
       <div class="sod-actions">
-        <button class="sod-btn-primary" @click="runMode()" :disabled="isRunning">
+        <button type="button" class="sod-btn-primary" @click="runMode()" :disabled="isRunning">
           {{ isRunning ? '播放中' : '开始演示' }}
         </button>
-        <button class="sod-btn-ghost" @click="resetDemo">重置</button>
+        <button type="button" class="sod-btn-ghost" @click="resetDemo">重置</button>
       </div>
     </div>
 

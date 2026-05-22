@@ -88,10 +88,10 @@ if (props.autoPlay) startDemo()
         <span class="erd-badge">P4 · Error Handling</span>
       </div>
       <div class="erd-actions">
-        <button class="erd-btn-primary" :class="{ active: isRunning }" @click="isRunning ? stopDemo() : startDemo()">
+        <button type="button" class="erd-btn-primary" :class="{ active: isRunning }" @click="isRunning ? stopDemo() : startDemo()">
           {{ isRunning ? '暂停' : '开始演示' }}
         </button>
-        <button class="erd-btn-ghost" @click="resetDemo">重置</button>
+        <button type="button" class="erd-btn-ghost" @click="resetDemo">重置</button>
       </div>
     </div>
 

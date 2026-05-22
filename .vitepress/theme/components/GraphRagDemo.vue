@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onUnmounted } from 'vue'
+import { createGraphRagVisitTimer } from './graphRagVisitTimer'
 
 type GraphNodeType = 'person' | 'project' | 'department' | 'tech'
 
@@ -52,6 +53,7 @@ const toVisitQueue = ref<string[]>([props.startNodeId])
 const isRunning = ref(false)
 const executionLog = ref<{ time: string; msg: string; type: 'info' | 'success' | 'hop' }[]>([])
 let timer: ReturnType<typeof setInterval> | null = null
+const visitTimer = createGraphRagVisitTimer()
 
 const currentNodeId = computed(() => {
   const current = nodeStates.value.find(n => n.status === 'current')
@@ -119,7 +121,7 @@ function nextStep() {
   })
 
   // 标记为已访问
-  setTimeout(() => {
+  visitTimer.schedule(() => {
     if (node.status === 'current') {
       node.status = 'visited'
       visitedQueue.value.push(nodeId)
@@ -140,6 +142,7 @@ function startDemo() {
 
 function stopDemo() {
   isRunning.value = false
+  visitTimer.clear()
   if (timer !== null) {
     clearInterval(timer)
     timer = null
@@ -147,6 +150,7 @@ function stopDemo() {
 }
 
 function resetState() {
+  visitTimer.clear()
   nodeStates.value = props.nodes.map(node => ({
     ...node,
     status: node.id === props.startNodeId ? 'unvisited' : 'unvisited'
@@ -181,10 +185,10 @@ const viewBoxHeight = 400
         <span class="grd-badge">P8 · GraphRAG</span>
       </div>
       <div class="grd-actions">
-        <button class="grd-btn-primary" :class="{ active: isRunning }" @click="isRunning ? stopDemo() : startDemo()">
+        <button type="button" class="grd-btn-primary" :class="{ active: isRunning }" @click="isRunning ? stopDemo() : startDemo()">
           {{ isRunning ? '暂停' : '开始遍历' }}
         </button>
-        <button class="grd-btn-ghost" @click="resetDemo">重置</button>
+        <button type="button" class="grd-btn-ghost" @click="resetDemo">重置</button>
       </div>
     </div>
 
@@ -360,6 +364,12 @@ const viewBoxHeight = 400
   opacity: 0.9;
 }
 
+.grd-btn-primary:focus-visible,
+.grd-btn-ghost:focus-visible {
+  outline: 2px solid var(--vp-c-brand-1);
+  outline-offset: 2px;
+}
+
 .grd-btn-primary.active {
   background: #0f766e;
 }
@@ -447,7 +457,7 @@ const viewBoxHeight = 400
   fill: var(--vp-c-bg-soft);
   stroke: var(--vp-c-divider);
   stroke-width: 2;
-  transition: all 0.3s;
+  transition: fill 0.3s, stroke 0.3s, stroke-width 0.3s;
 }
 
 .grd-node.unvisited {
@@ -578,6 +588,19 @@ const viewBoxHeight = 400
 
   .grd-graph {
     min-height: 350px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .grd-indicator.running {
+    animation: none;
+  }
+
+  .grd-node,
+  .grd-edge,
+  .grd-edge-label,
+  .grd-node-label {
+    transition: none;
   }
 }
 </style>

@@ -83,10 +83,10 @@ if (props.autoPlay) startDemo()
         <span class="rld-badge">P10 · ReAct Loop</span>
       </div>
       <div class="rld-actions">
-        <button class="rld-btn-primary" :class="{ active: isRunning }" @click="isRunning ? stopDemo() : startDemo()">
+        <button type="button" class="rld-btn-primary" :class="{ active: isRunning }" @click="isRunning ? stopDemo() : startDemo()">
           {{ isRunning ? '暂停' : '开始演示' }}
         </button>
-        <button class="rld-btn-ghost" @click="resetDemo">重置</button>
+        <button type="button" class="rld-btn-ghost" @click="resetDemo">重置</button>
       </div>
     </div>
 

@@ -72,10 +72,10 @@ if (props.autoPlay) startDemo()
         <span class="hrd-badge">P9 · Hybrid Retrieval</span>
       </div>
       <div class="hrd-actions">
-        <button class="hrd-btn-primary" :class="{ active: isRunning }" @click="isRunning ? stopDemo() : startDemo()">
+        <button type="button" class="hrd-btn-primary" :class="{ active: isRunning }" @click="isRunning ? stopDemo() : startDemo()">
           {{ isRunning ? '暂停' : '开始演示' }}
         </button>
-        <button class="hrd-btn-ghost" @click="resetDemo">重置</button>
+        <button type="button" class="hrd-btn-ghost" @click="resetDemo">重置</button>
       </div>
     </div>
 
@@ -237,6 +237,11 @@ if (props.autoPlay) startDemo()
 }
 
 .hrd-btn-primary:hover { opacity: 0.9; }
+.hrd-btn-primary:focus-visible,
+.hrd-btn-ghost:focus-visible {
+  outline: 2px solid var(--vp-c-brand-1);
+  outline-offset: 2px;
+}
 .hrd-btn-primary.active { background: #0f766e; }
 
 .hrd-btn-ghost {
@@ -322,7 +327,7 @@ if (props.autoPlay) startDemo()
   color: var(--vp-c-text-3);
   position: relative;
   z-index: 1;
-  transition: all 0.3s;
+  transition: background 0.3s, border-color 0.3s, color 0.3s, transform 0.3s;
 }
 
 .hrd-step-dot.active {
@@ -475,7 +480,7 @@ if (props.autoPlay) startDemo()
   padding: 0.5rem;
   border-radius: 4px;
   background: var(--vp-c-bg-soft);
-  transition: all 0.2s;
+  transition: background 0.2s, border-left-color 0.2s;
 }
 
 .hrd-method-item.active {
@@ -532,5 +537,21 @@ if (props.autoPlay) startDemo()
   }
   .hrd-root { padding: 1rem; }
   .hrd-main { padding: 1rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hrd-indicator.running {
+    animation: none;
+  }
+
+  .hrd-progress-fill,
+  .hrd-step-dot,
+  .hrd-method-item {
+    transition: none;
+  }
+
+  .hrd-step-dot.active {
+    transform: none;
+  }
 }
 </style>

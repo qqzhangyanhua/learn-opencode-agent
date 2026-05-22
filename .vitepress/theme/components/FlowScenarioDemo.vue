@@ -64,9 +64,9 @@
     </div>
 
     <div class="flow-footer">
-      <button class="btn" @click="restart">重新播放</button>
-      <button class="btn" @click="prev" :disabled="isAtStart">上一步</button>
-      <button class="btn" @click="next" :disabled="isAtEnd">下一步</button>
+      <button type="button" class="btn" @click="restart">重新播放</button>
+      <button type="button" class="btn" @click="prev" :disabled="isAtStart">上一步</button>
+      <button type="button" class="btn" @click="next" :disabled="isAtEnd">下一步</button>
       <span class="flow-status">{{ progress.current }} / {{ progress.total }}</span>
     </div>
   </div>
@@ -462,6 +462,11 @@ onUnmounted(() => {
   background: var(--vp-c-brand-soft);
 }
 
+.btn:focus-visible {
+  outline: 2px solid var(--vp-c-brand-1);
+  outline-offset: 2px;
+}
+
 .btn:disabled {
   cursor: not-allowed;
   opacity: 0.55;
@@ -476,6 +481,13 @@ onUnmounted(() => {
 @media (max-width: 960px) {
   .flow-body {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .flow-step,
+  .btn {
+    transition: none;
   }
 }
 </style>

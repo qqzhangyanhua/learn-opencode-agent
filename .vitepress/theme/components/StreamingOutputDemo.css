@@ -116,6 +116,13 @@
   opacity: 0.9;
 }
 
+.sod-btn-primary:focus-visible,
+.sod-btn-ghost:focus-visible,
+.sod-mode-btn:focus-visible {
+  outline: 2px solid var(--vp-c-brand-1);
+  outline-offset: 2px;
+}
+
 .sod-btn-primary:disabled {
   opacity: 0.5;
   cursor: not-allowed;
@@ -335,5 +342,18 @@
   .sod-btn-primary,
   .sod-btn-ghost {
     flex: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sod-indicator.running,
+  .sod-cursor {
+    animation: none;
+  }
+
+  .sod-indicator,
+  .sod-mode-btn,
+  .sod-btn-primary {
+    transition: none;
   }
 }

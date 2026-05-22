@@ -136,10 +136,10 @@ if (props.autoPlay) startDemo()
         <span class="mld-badge">P5 · Memory Architecture</span>
       </div>
       <div class="mld-actions">
-        <button class="mld-btn-primary" :class="{ active: isRunning }" @click="isRunning ? stopDemo() : startDemo()">
+        <button type="button" class="mld-btn-primary" :class="{ active: isRunning }" @click="isRunning ? stopDemo() : startDemo()">
           {{ isRunning ? '暂停' : '开始演示' }}
         </button>
-        <button class="mld-btn-ghost" @click="resetDemo">重置</button>
+        <button type="button" class="mld-btn-ghost" @click="resetDemo">重置</button>
       </div>
     </div>
 
@@ -297,6 +297,12 @@ if (props.autoPlay) startDemo()
   opacity: 0.9;
 }
 
+.mld-btn-primary:focus-visible,
+.mld-btn-ghost:focus-visible {
+  outline: 2px solid var(--vp-c-brand-1);
+  outline-offset: 2px;
+}
+
 .mld-btn-primary.active {
   background: #0f766e;
 }
@@ -378,7 +384,7 @@ if (props.autoPlay) startDemo()
   color: var(--vp-c-text-3);
   position: relative;
   z-index: 1;
-  transition: all 0.3s;
+  transition: background 0.3s, border-color 0.3s, color 0.3s, transform 0.3s;
 }
 
 .mld-step-dot.active {
@@ -542,7 +548,7 @@ if (props.autoPlay) startDemo()
   padding: 0.5rem;
   border-radius: 4px;
   background: var(--vp-c-bg-soft);
-  transition: all 0.2s;
+  transition: background 0.2s, border-left-color 0.2s;
 }
 
 .mld-phase-item.active {
@@ -586,6 +592,22 @@ if (props.autoPlay) startDemo()
     width: 28px;
     height: 28px;
     font-size: 0.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mld-indicator.running {
+    animation: none;
+  }
+
+  .mld-progress-fill,
+  .mld-step-dot,
+  .mld-phase-item {
+    transition: none;
+  }
+
+  .mld-step-dot.active {
+    transform: none;
   }
 }
 </style>

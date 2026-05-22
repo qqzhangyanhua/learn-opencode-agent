@@ -83,10 +83,10 @@ if (props.autoPlay) startDemo()
         <span class="tcl-badge">P1 · Tool Calling</span>
       </div>
       <div class="tcl-actions">
-        <button class="tcl-btn-primary" :class="{ active: isRunning }" @click="isRunning ? stopDemo() : startDemo()">
+        <button type="button" class="tcl-btn-primary" :class="{ active: isRunning }" @click="isRunning ? stopDemo() : startDemo()">
           {{ isRunning ? '暂停' : '开始演示' }}
         </button>
-        <button class="tcl-btn-ghost" @click="resetDemo">重置</button>
+        <button type="button" class="tcl-btn-ghost" @click="resetDemo">重置</button>
       </div>
     </div>
 

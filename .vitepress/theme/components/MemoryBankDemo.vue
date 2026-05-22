@@ -111,10 +111,10 @@ if (props.autoPlay) startDemo()
         <span class="mbd-badge">P6 · Memory Retrieval</span>
       </div>
       <div class="mbd-actions">
-        <button class="mbd-btn-primary" :class="{ active: isRunning }" @click="isRunning ? stopDemo() : startDemo()">
+        <button type="button" class="mbd-btn-primary" :class="{ active: isRunning }" @click="isRunning ? stopDemo() : startDemo()">
           {{ isRunning ? '暂停' : '开始演示' }}
         </button>
-        <button class="mbd-btn-ghost" @click="resetDemo">重置</button>
+        <button type="button" class="mbd-btn-ghost" @click="resetDemo">重置</button>
       </div>
     </div>
 
@@ -232,6 +232,11 @@ if (props.autoPlay) startDemo()
   font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: opacity 0.2s;
 }
 .mbd-btn-primary:hover { opacity: 0.9; }
+.mbd-btn-primary:focus-visible,
+.mbd-btn-ghost:focus-visible {
+  outline: 2px solid var(--vp-c-brand-1);
+  outline-offset: 2px;
+}
 .mbd-btn-primary.active { background: #0f766e; }
 .mbd-btn-ghost {
   background: transparent; border: 1px solid var(--vp-c-divider);
@@ -274,7 +279,8 @@ if (props.autoPlay) startDemo()
   background: var(--vp-c-bg-soft); border: 2px solid var(--vp-c-divider);
   display: flex; align-items: center; justify-content: center;
   font-size: 0.875rem; font-weight: 600; color: var(--vp-c-text-3);
-  position: relative; z-index: 1; transition: all 0.3s;
+  position: relative; z-index: 1;
+  transition: background 0.3s, border-color 0.3s, color 0.3s, transform 0.3s;
 }
 .mbd-step-dot.active { background: var(--vp-c-brand-1); border-color: var(--vp-c-brand-1); color: #fff; transform: scale(1.15); }
 .mbd-step-dot.done { background: #10b981; border-color: #10b981; color: #fff; }
@@ -341,7 +347,8 @@ if (props.autoPlay) startDemo()
 .mbd-flow-item {
   display: flex; align-items: center; gap: 0.5rem;
   padding: 0.5rem; border-radius: 4px;
-  background: var(--vp-c-bg-soft); transition: all 0.2s;
+  background: var(--vp-c-bg-soft);
+  transition: background 0.2s, border-left-color 0.2s;
 }
 .mbd-flow-item.active { background: rgba(13, 148, 136, 0.1); border-left: 3px solid var(--vp-c-brand-1); }
 .mbd-flow-num { font-size: 0.6875rem; font-weight: 700; color: var(--vp-c-text-3); width: 14px; text-align: center; flex-shrink: 0; }
@@ -357,5 +364,21 @@ if (props.autoPlay) startDemo()
   .mbd-step-indicator { padding: 0 0.5rem; }
   .mbd-step-indicator::before { left: 0.5rem; right: 0.5rem; }
   .mbd-step-dot { width: 28px; height: 28px; font-size: 0.75rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mbd-indicator.running {
+    animation: none;
+  }
+
+  .mbd-progress-fill,
+  .mbd-step-dot,
+  .mbd-flow-item {
+    transition: none;
+  }
+
+  .mbd-step-dot.active {
+    transform: none;
+  }
 }
 </style>
