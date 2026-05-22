@@ -27,6 +27,13 @@ function difficultyLabel(value: string) {
         :hint="project.runModeHint"
       />
     </div>
+
+    <LearningProgressToggle
+      :content-id="project.projectId"
+      content-type="practice"
+      title="实践进度"
+      description="标记这个实践项目的完成状态，方便回到实践路线时继续推进。"
+    />
   </section>
 </template>
 

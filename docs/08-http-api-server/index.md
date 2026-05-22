@@ -60,6 +60,8 @@ import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshot
 
 ### 先抓一条主链路
 
+<HttpPermissionGateDemo />
+
 ```text
 客户端发出 POST /session/:id/message
   -> onError 注册（兜底）

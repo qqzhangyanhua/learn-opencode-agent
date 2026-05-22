@@ -20,7 +20,8 @@ prerequisites:
 recommendedNext:
   - /new-claude/
   - /intermediate/
-practiceLinks: []
+practiceLinks:
+  - /practice/
 searchTags:
   - claude-code
   - agent架构

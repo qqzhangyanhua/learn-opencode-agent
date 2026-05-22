@@ -32,6 +32,12 @@ const sectionSummary = computed(() => {
     <p class="hero-description">
       {{ currentNode?.roleDescription ?? sectionSummary?.roleDescription ?? '帮助你快速判断本章定位、前置要求与学习目标。' }}
     </p>
+
+    <LearningProgressToggle
+      v-if="currentNode"
+      :content-id="currentNode.contentId"
+      :content-type="currentNode.contentType"
+    />
   </section>
 </template>
 

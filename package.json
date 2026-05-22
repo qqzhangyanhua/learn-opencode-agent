@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vitepress dev",
     "build": "vitepress build",
-    "build:strict": "bun run check:content && bun run check:practice && bun run check:learning-metadata && bun run check:learning-paths && bun run check:homepage-entry && bun run check:navigation-entry && bun run check:entry-context && bun run check:chapter-experience && bun run check:practice-course-experience && bun run check:discovery-experience && bun run check:learning-progress && bun run check:animation-lab && bun run build",
+    "build:strict": "bun run check:content && bun run check:practice && bun run check:learning-metadata && bun run check:learning-paths && bun run check:homepage-entry && bun run check:navigation-entry && bun run check:entry-context && bun run check:chapter-experience && bun run check:practice-course-experience && bun run check:discovery-experience && bun run check:learning-progress && bun run check:animation-lab && bun run check:practice-motion && bun run build",
     "typecheck": "tsc --noEmit -p .vitepress/tsconfig.json",
     "check:content": "node scripts/check-content.mjs",
     "check:learning-metadata": "node scripts/check-learning-metadata.mjs",
@@ -19,6 +19,7 @@
     "check:discovery-experience": "node scripts/check-discovery-experience.mjs",
     "check:learning-progress": "node scripts/check-learning-progress.mjs",
     "check:animation-lab": "node scripts/check-animation-lab.mjs",
+    "check:practice-motion": "node scripts/check-practice-motion.mjs",
     "check:practice": "node scripts/check-practice-entries.mjs",
     "preview": "vitepress preview",
     "start": "caddy run --config /Caddyfile --adapter caddyfile"

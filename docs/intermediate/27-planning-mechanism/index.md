@@ -274,6 +274,10 @@ class SmartAgent:
 
 ## 延伸阅读与回链
 
+<RelatedPracticeProjects
+  theory-path="/intermediate/27-planning-mechanism/"
+/>
+
 - 如果你还在理解”边想边做”的工作方式，先回看 [P10：ReAct Loop](/practice/p10-react-loop/)。
 - 如果你想动手实现完整的 Plan-and-Execute 主链，直接阅读 [P11：Planning 机制](/practice/p11-planning/)。
 - 如果你想把 Planning 和 OpenCode 的角色/权限/会话循环结合起来理解，建议串读 [第3章：OpenCode 项目介绍](/02-agent-core/) 与 [第5章：会话管理](/04-session-management/)。

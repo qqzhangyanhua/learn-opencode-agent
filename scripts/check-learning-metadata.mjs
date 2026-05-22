@@ -136,6 +136,10 @@ async function walkMarkdownFiles(dir) {
   const files = await Promise.all(entries.map(async (entry) => {
     const fullPath = path.join(dir, entry.name)
     if (entry.isDirectory()) {
+      if (entry.name === '_archive') {
+        return []
+      }
+
       return walkMarkdownFiles(fullPath)
     }
 

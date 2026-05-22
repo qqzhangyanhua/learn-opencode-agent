@@ -24,14 +24,26 @@ const blockedPatterns = [
 const allowLinePatterns = [
   /创建一个 TODO 应用/,
   /搜索 `TODO`、`待补`、`需要补充`、`TBD`/,
+  /TODO state/,
+  /TODO snapshot/,
+  /临时 TODO/,
 ]
+
+const ignoredMarkdownPathSegments = new Set([
+  '_archive',
+  'superpowers',
+])
 
 async function walkMarkdownFiles(dir) {
   const entries = await readdir(dir, { withFileTypes: true })
   const files = await Promise.all(entries.map(async (entry) => {
     const fullPath = path.join(dir, entry.name)
     if (entry.isDirectory()) {
-      if (entry.name === 'node_modules' || entry.name.startsWith('.worktrees')) {
+      if (
+        entry.name === 'node_modules' ||
+        entry.name.startsWith('.worktrees') ||
+        ignoredMarkdownPathSegments.has(entry.name)
+      ) {
         return []
       }
       return walkMarkdownFiles(fullPath)

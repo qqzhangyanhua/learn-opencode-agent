@@ -20,7 +20,8 @@ prerequisites:
 recommendedNext:
   - /claude-code/
   - /new-claude/
-practiceLinks: []
+practiceLinks:
+  - /practice/
 searchTags:
   - hermes-agent
   - agent-runtime

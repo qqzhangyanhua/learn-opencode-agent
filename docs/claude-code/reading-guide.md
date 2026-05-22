@@ -11,10 +11,12 @@ estimatedTime: 10 分钟
 learningGoals:
   - 了解本书适合哪类读者
   - 选择适合自己的学习路线
-prerequisites: []
+prerequisites:
+  - 无，适合作为 Claude Code 课程入口
 recommendedNext:
   - /claude-code/chapter01
-practiceLinks: []
+practiceLinks:
+  - /practice/
 searchTags:
   - claude-code
   - 阅读指南

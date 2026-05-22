@@ -1,5 +1,5 @@
 export type ContentType = 'theory' | 'practice' | 'intermediate' | 'support'
-export type ContentSeries = 'book' | 'practice' | 'intermediate' | 'support'
+export type ContentSeries = 'book' | 'practice' | 'intermediate' | 'support' | 'claude-code' | 'hermes-agent'
 export type LearningDifficulty = 'beginner' | 'intermediate' | 'advanced'
 export type EntryMode = 'read-first' | 'build-first' | 'bridge'
 export type SectionId = 'theory' | 'practice' | 'intermediate'
@@ -7,7 +7,14 @@ export type LearningPathId = 'theory-first' | 'practice-first' | 'engineering-de
 export type DiscoveryContentTypeLabel = '章节' | '实践项目' | '进阶专题' | '辅助页面'
 export type DiscoveryGoalId = 'system-learn' | 'engineering-upgrade' | 'build-by-project'
 export const CONTENT_TYPES = ['theory', 'practice', 'intermediate', 'support'] as const satisfies readonly ContentType[]
-export const CONTENT_SERIES = ['book', 'practice', 'intermediate', 'support'] as const satisfies readonly ContentSeries[]
+export const CONTENT_SERIES = [
+  'book',
+  'practice',
+  'intermediate',
+  'support',
+  'claude-code',
+  'hermes-agent'
+] as const satisfies readonly ContentSeries[]
 export const LEARNING_DIFFICULTIES = ['beginner', 'intermediate', 'advanced'] as const satisfies readonly LearningDifficulty[]
 export const ENTRY_MODES = ['read-first', 'build-first', 'bridge'] as const satisfies readonly EntryMode[]
 export const SECTION_IDS = ['theory', 'practice', 'intermediate'] as const satisfies readonly SectionId[]

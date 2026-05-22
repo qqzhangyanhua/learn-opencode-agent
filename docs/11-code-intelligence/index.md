@@ -60,6 +60,8 @@ import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshot
 
 ### 先抓一条主链路
 
+<LspEditDiagnosticFlowDemo />
+
 ```text
 AI 调用 edit 工具修改 foo.ts
   -> 文件写入磁盘

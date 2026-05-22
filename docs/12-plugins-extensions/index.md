@@ -87,6 +87,8 @@ sdks/vscode/src/extension.ts -> 把编辑器上下文送进 opencode TUI
 
 ### 扩展方式选择指南
 
+<ExtensionCapabilitySelector />
+
 先不要急着看技术实现，先按”我要扩展什么能力”来选最合适的扩展方式：
 
 | 你的目标 | 最合适的方式 | 原因 |
