@@ -203,6 +203,7 @@ export default withMermaid(defineConfig({
     nav: [
       { text: '实践篇', link: '/practice/', activeMatch: '/practice/' },
       { text: '中级篇', link: '/intermediate/', activeMatch: '/intermediate/' },
+      { text: '智能体选型', link: '/agent-selection/', activeMatch: '/agent-selection/' },
       { text: '动画实验室', link: '/animation-lab/', activeMatch: '/animation-lab/' },
       { text: '面试题专区', link: '/interview/', activeMatch: '/interview/' },
       {
@@ -572,6 +573,32 @@ export default withMermaid(defineConfig({
           ]
         },
       ],
+      '/agent-selection/': [
+        { text: '← 返回首页', link: '/' },
+        { text: '专区总览', link: '/agent-selection/' },
+        {
+          text: '智能体选型',
+          collapsed: false,
+          items: [
+            { text: '01：Agent 框架怎么选', link: '/agent-selection/01-agent-frameworks' },
+            { text: '02：LangGraph 适合什么场景', link: '/agent-selection/02-langgraph' },
+            { text: '03：RAG 知识与检索选型', link: '/agent-selection/03-rag-knowledge-selection' },
+            { text: '04：搜索工具选型', link: '/agent-selection/04-search-tools' },
+            { text: '05：组合方案', link: '/agent-selection/05-composition-patterns' },
+            { text: '06：选型检查表', link: '/agent-selection/06-selection-checklist' },
+          ]
+        },
+        {
+          text: '相关实践',
+          collapsed: false,
+          items: [
+            { text: 'P7：RAG 基础', link: '/practice/p07-rag-basics/' },
+            { text: 'P9：混合检索策略', link: '/practice/p09-hybrid-retrieval/' },
+            { text: 'P14：MCP 协议接入', link: '/practice/p14-mcp/' },
+            { text: 'P18：模型路由与成本控制', link: '/practice/p18-model-routing/' },
+          ]
+        },
+      ],
       '/intermediate/': [
         { text: '← 返回首页', link: '/' },
         { text: '回到实践篇', link: '/practice/' },
@@ -630,6 +657,7 @@ export default withMermaid(defineConfig({
         { text: '动画实验室', link: '/animation-lab/' },
         { text: '实践篇总览', link: '/practice/' },
         { text: '中级篇导读', link: '/intermediate/' },
+        { text: '智能体选型', link: '/agent-selection/' },
         { text: '面试题专区', link: '/interview/' },
         { text: '术语表', link: '/glossary' },
         {

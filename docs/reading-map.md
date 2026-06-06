@@ -14,7 +14,8 @@ description: 这本电子书的推荐阅读顺序与章节关系图
   ]"
   :support-links="[
     { label: '直接去实践篇', href: '/practice/', hint: '如果你已经决定先做项目，直接进入项目总览。' },
-    { label: '直接去中级篇', href: '/intermediate/', hint: '如果你已经做过基础闭环，直接进入工程专题。' }
+    { label: '直接去中级篇', href: '/intermediate/', hint: '如果你已经做过基础闭环，直接进入工程专题。' },
+    { label: '进入智能体选型', href: '/agent-selection/', hint: '如果你正在判断 Agent 框架、RAG、搜索工具和组合方案的取舍，直接进入选型专区。' }
   ]"
 />
 
@@ -29,6 +30,7 @@ description: 这本电子书的推荐阅读顺序与章节关系图
 - [查看学习路径](/learning-paths/) - 用三条路线卡片决定理论 / 实践 / 工程专题的推进顺序
 - [直接进入实践篇](/practice/) - 如果你更想先跑项目
 - [进入中级篇](/intermediate/) - 当你已经做过基础闭环并开始关心工程问题
+- [智能体选型](/agent-selection/) - 如果你正在判断 Agent 框架、LangGraph、RAG、搜索工具和组合方案
 - [企业 Agent 落地线](/enterprise-agent/) - 如果你想把 Agent 从 Demo 推到企业内部真实系统
 
 ## 核心概念快速定位
@@ -87,6 +89,20 @@ Agent 的核心执行流程：
 | [第 6-9 章：模型、协议、服务与持久化](/05-provider-system/) | [P14、P18、P20：MCP、模型路由、可观测性](/practice/p14-mcp/) | [第 30 章：生产架构](/intermediate/30-production-architecture/) | 把运行时能力延伸到服务化和生产环境。 |
 | [第 15-16 章：高级主题与最佳实践](/14-testing-quality/) | [P15-P17：多 Agent 协作](/practice/p15-multi-agent/) | [第 26 章：多智能体协作](/intermediate/26-multi-agent-collaboration/) | 理论、实践和专题都围绕协作边界与分工展开。 |
 | [第 6、9、14 章：模型、数据与质量](/05-provider-system/) | [P18-P21：路由、安全、可观测、评估](/practice/p18-model-routing/) | [第 25、32 章：RAG 稳定性与性能成本](/intermediate/25-rag-failure-patterns/) | 把“能跑”推进到“可测、可控、可优化”。 |
+
+## 独立专区：智能体选型
+
+如果你的问题不是“继续读哪一章”，而是“我的项目到底该用 Agent Framework、LangGraph、RAG、Search Tools 还是组合方案”，进入 [智能体选型](/agent-selection/)。
+
+推荐路径：
+
+1. [专区总览](/agent-selection/)
+2. [Agent 框架怎么选](/agent-selection/01-agent-frameworks)
+3. [LangGraph 适合什么场景](/agent-selection/02-langgraph)
+4. [RAG 知识与检索选型](/agent-selection/03-rag-knowledge-selection)
+5. [搜索工具选型](/agent-selection/04-search-tools)
+6. [组合方案](/agent-selection/05-composition-patterns)
+7. [选型检查表](/agent-selection/06-selection-checklist)
 
 ## 四阶段课程分级
 

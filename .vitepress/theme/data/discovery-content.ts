@@ -107,6 +107,18 @@ const curatedContentById: Record<string, DiscoveryContentLink> = {
     estimatedTime: '25 min',
     difficulty: 'intermediate',
     searchTags: ['RAG', '检索', '失败模式']
+  },
+  'agent-selection-index': {
+    contentId: 'agent-selection-index',
+    href: '/agent-selection/',
+    title: '智能体选型',
+    contentType: 'support',
+    contentTypeLabel: getDiscoveryContentTypeLabel('support'),
+    summary: '从 Agent 框架、LangGraph、RAG、搜索工具和组合方案之间建立工程选型判断。',
+    roleDescription: '适合正在判断技术栈边界、避免过度 Agent 化或过度 RAG 化的开发者。',
+    estimatedTime: '45 min',
+    difficulty: 'intermediate',
+    searchTags: ['智能体选型', 'Agent Framework', 'LangGraph', 'RAG', '搜索工具']
   }
 }
 
@@ -163,7 +175,8 @@ export const discoveryGoalRoutes: DiscoveryGoalRoute[] = [
     continueWith: [
       resolveContentLink('book-03-tool-system'),
       resolveContentLink('intermediate-27-planning-mechanism'),
-      resolveContentLink('practice-p18-model-routing')
+      resolveContentLink('practice-p18-model-routing'),
+      resolveContentLink('agent-selection-index')
     ]
   },
   {
@@ -212,6 +225,17 @@ export const discoveryTopicCollections: DiscoveryTopicCollection[] = [
       resolveContentLink('practice-p11-planning'),
       resolveContentLink('practice-p12-reflection'),
       resolveContentLink('practice-p15-multi-agent')
+    ]
+  },
+  {
+    topicId: 'agent-stack-selection',
+    title: 'Agent 技术栈选型',
+    summary: '把框架、RAG、搜索和模型路由放到同一套工程判断里。',
+    items: [
+      resolveContentLink('agent-selection-index'),
+      resolveContentLink('intermediate-25-rag-failure-patterns'),
+      resolveContentLink('practice-p09-hybrid-retrieval'),
+      resolveContentLink('practice-p18-model-routing')
     ]
   }
 ]
