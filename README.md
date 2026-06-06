@@ -58,7 +58,7 @@ bun run typecheck  # 检查 .vitepress 主题层 TypeScript
 bun run build:strict
 ```
 
-`build:strict` 会依次运行内容、实践、学习路径、首页入口、导航入口、章节体验、发现中心、学习进度、动画实验室等 12 个校验脚本，最后执行站点构建。
+`build:strict` 会依次运行内容、实践、学习路径、首页入口、导航入口、章节体验、发现中心、学习进度、动画实验室、实践动画治理等 13 个校验脚本，最后执行站点构建。
 
 ## 常用检查
 
@@ -72,6 +72,7 @@ bun run build:strict
 | `bun run check:chapter-experience` | 校验章节体验组件和结构 |
 | `bun run check:discovery-experience` | 校验发现中心体验 |
 | `bun run check:animation-lab` | 校验动画实验室数据与入口 |
+| `bun run check:practice-motion` | 校验实践演示与动画实验映射 |
 
 ## 项目结构
 
