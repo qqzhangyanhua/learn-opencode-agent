@@ -96,13 +96,11 @@ Agent 的核心执行流程：
 
 推荐路径：
 
-1. [专区总览](/agent-selection/)
-2. [Agent 框架怎么选](/agent-selection/01-agent-frameworks)
-3. [LangGraph 适合什么场景](/agent-selection/02-langgraph)
-4. [RAG 知识与检索选型](/agent-selection/03-rag-knowledge-selection)
-5. [搜索工具选型](/agent-selection/04-search-tools)
-6. [组合方案](/agent-selection/05-composition-patterns)
-7. [选型检查表](/agent-selection/06-selection-checklist)
+1. 先读 [专区总览](/agent-selection/) 和 [选型检查表](/agent-selection/06-selection-checklist)。
+2. 如果在做业务方案，读 [场景选型手册](/agent-selection/07-scenario-playbook)。
+3. 如果准备立项或上线，读 [POC 与评估标准](/agent-selection/08-poc-evaluation) 和 [Agent 选型评审模板](/agent-selection/14-selection-review-template)。
+4. 如果在选平台，读 [自研、框架还是托管平台](/agent-selection/09-build-vs-buy) 和 [供应商锁定怎么评估](/agent-selection/15-vendor-lock-in)。
+5. 如果已经确定技术方向，再进入对应的 RAG、工具、模型和生产工程细分文章。
 
 ## 四阶段课程分级
 

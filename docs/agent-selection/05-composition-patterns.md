@@ -7,7 +7,7 @@ contentId: agent-selection-composition-patterns
 shortTitle: 组合方案
 summary: 真实系统通常不是三选一，而是按控制流、知识来源、实时性和运维约束进行分层组合。
 difficulty: advanced
-estimatedTime: 25 分钟
+estimatedTime: 30 分钟
 learningGoals:
   - 掌握 Agent Framework、RAG、Search Tools 的常见组合模式
   - 判断不同业务场景应该使用轻量方案还是完整 Agent 技术栈
@@ -55,6 +55,18 @@ roleDescription: 适合把框架、RAG、搜索、工具和审计组合成完整
 
 从轻到重演进，而不是一步到位。
 
+## 先分清三条线
+
+组合方案要先分清三条线：
+
+| 线 | 解决什么 | 常见误区 |
+| --- | --- | --- |
+| 知识线 | 模型看什么资料 | 把 Search 和 RAG 混成一个来源 |
+| 控制线 | 谁决定下一步 | 把所有分支塞进 Prompt |
+| 执行线 | 谁调用工具 | 让模型绕过权限和审计 |
+
+RAG 和 Search 是上下文来源，Agent Framework 是控制流，Tools 是执行能力。三者不是同一层，不能互相替代。
+
 ## LLM only
 
 适合：
@@ -101,6 +113,21 @@ roleDescription: 适合把框架、RAG、搜索、工具和审计组合成完整
 ```
 
 风险：chunk 错、metadata 缺失、权限过滤后置、索引漂移。
+
+## 什么时候该升级组合
+
+升级组合要基于明确失败：
+
+| 当前方案 | 失败现象 | 升级 |
+| --- | --- | --- |
+| LLM only | 缺内部资料 | RAG |
+| LLM only | 缺最新外部信息 | Search |
+| RAG-only | 需要执行动作 | Agent + Tools |
+| Search-only | 需要内部权限知识 | RAG + Search |
+| Agent + Tools | 动作需要知识依据 | Agent + RAG |
+| 轻量 loop | 需要暂停恢复 | Workflow / LangGraph |
+
+不要因为“以后可能需要”提前组合所有能力。先让当前失败样本证明下一层确实必要。
 
 ## Agent + Tools
 
@@ -174,6 +201,19 @@ roleDescription: 适合把框架、RAG、搜索、工具和审计组合成完整
 
 这是重方案。只有当业务真的需要，才值得上。
 
+## 重方案的失败路径
+
+`Agent + RAG + Search + Tools` 最常见的问题不是单点能力不够，而是边界混乱：
+
+- 内部资料和外部网页冲突时没有优先级；
+- 工具执行没有绑定引用依据；
+- 搜索失败后仍然输出确定结论；
+- RAG 权限和工具权限分开设计，导致越权；
+- trace 只记录最终答案，看不到哪一层错了；
+- 成本和延迟来自多层串行调用，却没有预算。
+
+重方案上线前必须先定义每一层失败时怎么降级，否则系统会在异常场景里不可控。
+
 ## 企业级组合
 
 企业 Agent 通常需要：
@@ -209,3 +249,19 @@ Intent Router
 - RAG 和 Search 要分层，不要混成一个来源。
 - 工具执行要有权限和审计。
 - 每一层都要能单独测试和降级。
+
+## 组合评审表
+
+评审时逐层写清：
+
+| 层 | 是否需要 | 不用会怎样 | 失败怎么处理 |
+| --- | --- | --- | --- |
+| RAG | 是/否 | 缺内部知识 | 拒答或转人工 |
+| Search | 是/否 | 无法确认实时信息 | 使用缓存并标注时间 |
+| Tools | 是/否 | 无法执行动作 | 提供人工操作指引 |
+| Workflow | 是/否 | 无法恢复长流程 | 降级为单轮确认 |
+| Human Approval | 是/否 | 高风险动作不可控 | 阻断执行 |
+
+如果某一层写不出“不用会怎样”，它大概率不是第一版必需能力。
+
+方案定下来之前，最后用 [选型检查表](/agent-selection/06-selection-checklist) 逐项确认任务类型、知识来源、权限、引用、成本和可观测性。
