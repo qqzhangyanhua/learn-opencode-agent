@@ -1,5 +1,34 @@
 # Repository Guidelines
 
+## Read First
+
+- `docs/project-map.md`
+- `docs/testing.md`
+- `docs/dangerous-areas.md`
+- `docs/debugging.md`
+- `.context/prefs/coding-style.md`
+- `.context/prefs/workflow.md`
+
+## Default Agent Workflow
+
+1. Understand the task and check current workspace state.
+2. Search for relevant files before editing.
+3. Make the smallest safe change.
+4. Add or update tests/checks when behavior changes.
+5. Run `./scripts/check.sh` or the narrower verified command listed in `docs/testing.md`.
+6. Report changed files, validation results, and remaining risks.
+
+## Do Not
+
+- Edit generated files directly.
+- Modify secrets or local environment files.
+- Change deployment, infrastructure, permissions, public API examples, navigation contracts, or generated/cache artifacts without calling out the risk.
+- Hide failing or skipped checks.
+
+## Large or High-Risk Changes
+
+Use `docs/agent-plan-template.md` before editing. Stop after the plan for high-risk areas and ask for human review.
+
 ## Project Structure & Module Organization
 
 This repository is a VitePress-based book site. Main content lives in `docs/`, with chapter folders such as `docs/01-agent-basics/`, practice lessons in `docs/practice/`, and intermediate chapters in `docs/intermediate/`. Interactive source examples live in `practice/` as runnable TypeScript entry files like `p01-minimal-agent.ts`. Theme code and UI components live under `.vitepress/`, especially `.vitepress/theme/components/` and `.vitepress/theme/data/`. Validation and release checks are script-driven from `scripts/check-*.mjs`.

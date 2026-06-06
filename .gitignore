@@ -11,3 +11,4 @@ dist/
 .env
 .playwright-cli/
 .qoder/
+.agent/
