@@ -136,6 +136,29 @@ Agent Framework 决定任务怎么推进。
 
 这棵树的目的，是把问题拆成稳定的数据结构。先确定知识、工具、状态和风险，再选框架和供应商。
 
+## 反例索引
+
+选型失败通常不是因为少知道一个框架，而是把不同层的问题混在一起。下面这些是最常见的坏味道：
+
+| 反例 | 真正问题 | 应该先看 |
+| --- | --- | --- |
+| 为了一个工具调用就上 Agent Framework | 只是需要一次受控 tool call，不需要状态机 | [Agent 框架与 Runtime 怎么选](/agent-selection/01-agent-frameworks) |
+| 用 Search 替代企业知识库 | 内部知识需要权限、版本和引用，不是开放网页搜索问题 | [RAG 链路设计原则](/agent-selection/03-rag-knowledge-selection) |
+| 先检索全量知识，再让模型不要泄露 | 未授权内容已经进入上下文、日志或 trace | [企业知识库权限过滤怎么设计](/agent-selection/18-enterprise-knowledge-permission) |
+| 把 MCP 当成 Agent Runtime | MCP 只解决工具协议，不管理 loop、状态和审批 | [MCP 工具怎么选](/agent-selection/19-mcp-tool-selection) |
+| 用长上下文替代检索 | 长上下文解决容量，不解决噪声、权限和证据选择 | [检索组件怎么选](/agent-selection/16-retrieval-patterns) |
+| 把多 Agent 写成角色聊天 | 角色名不能替代输入、输出、状态和责任边界 | [场景选型手册](/agent-selection/06-scenario-playbook) |
+| 让模型自己决定高风险动作是否执行 | 删除、支付、发布、发消息必须有程序化权限和人工确认 | [Agent 安全边界与权限模型怎么选](/agent-selection/22-security-permission-selection) |
+| 没有预算就上线研究型 Agent | 搜索、读取、重试和长上下文会让成本与延迟失控 | [成本与延迟预算检查](/agent-selection/23-cost-latency-selection) |
+| 只看最终答案，不记录中间过程 | 失败后无法判断是检索、工具、模型还是路由出错 | [Agent 可观测性与评估怎么选](/agent-selection/21-observability-trace-replay-eval) |
+| fallback 只写“换个模型重试” | 不同失败类型需要不同降级路径，盲目重试会放大故障 | [Agent 降级策略怎么设计](/agent-selection/24-fallback-strategy) |
+
+判断一个方案是不是过度设计，可以用一句话检查：
+
+```text
+如果去掉某个框架、Agent、长上下文或工具协议，核心业务样本仍然能跑通，那它现在就不是必需品。
+```
+
 ## 怎么使用这个专区
 
 不要从框架品牌开始选。先按问题类型收束：
