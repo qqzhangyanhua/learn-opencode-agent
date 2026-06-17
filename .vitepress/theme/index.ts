@@ -22,6 +22,7 @@ import HomeStartPanel from './components/HomeStartPanel.vue'
 import EntryContextBanner from './components/EntryContextBanner.vue'
 import ChapterLearningGuide from './components/ChapterLearningGuide.vue'
 import ChapterActionPanel from './components/ChapterActionPanel.vue'
+import MermaidFixed from './components/MermaidFixed.vue'
 import { installAgentSelectionRedirects } from './agent-selection-redirects'
 
 import './custom.css'
@@ -143,5 +144,8 @@ export default {
 
     app.component('PracticeProjectSourceFiles', AsyncPracticeProjectSourceFiles)
     app.component('PlanningFlowSimulator', AsyncPlanningFlowSimulator)
+    // Override vitepress-plugin-mermaid's Mermaid component with a fixed version
+    // that guards against reactive writes after component unmount during SPA navigation.
+    app.component('Mermaid', MermaidFixed)
   }
 } satisfies Theme
