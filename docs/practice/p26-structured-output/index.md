@@ -1,6 +1,6 @@
 ---
-title: 补充：结构化输出
-description: JSON Mode 与 Zod Schema——让 Agent 输出你能可靠解析的数据，彻底告别正则提取
+title: "补充：结构化输出"
+description: "正则抠 JSON 太脆：用 JSON Mode 与 Schema 约束输出可解析结构，告别脆弱拼接，本练习提供可运行 TypeScript 示例。"
 ---
 
 <PracticeProjectGuide project-id="practice-p26-structured-output" />

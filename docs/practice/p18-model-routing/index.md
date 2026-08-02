@@ -1,6 +1,6 @@
 ---
-title: P18：多模型路由与成本控制
-description: 按任务复杂度智能路由到不同模型，实现 Token 预算追踪与故障降级链
+title: "P18：多模型路由与成本控制"
+description: "模型成本与能力难兼顾：按任务复杂度路由，并加上 Token 预算与故障降级链，本练习提供可运行 TypeScript 示例。"
 ---
 
 <PracticeProjectGuide project-id="practice-p18-model-routing" />

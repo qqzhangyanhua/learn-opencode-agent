@@ -1,6 +1,6 @@
 ---
-title: 补充：Human-in-the-Loop
-description: 工具风险分级与中断恢复——在高风险操作前让人类参与决策，而不是全程自动执行
+title: "补充：Human-in-the-Loop"
+description: "高风险不能全自动：做工具风险分级与中断恢复，在危险动作前引入人类确认，本练习提供可运行 TypeScript 示例。"
 ---
 
 <PracticeProjectGuide project-id="practice-p28-human-in-loop" />

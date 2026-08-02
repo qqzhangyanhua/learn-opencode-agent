@@ -1,6 +1,6 @@
 ---
-title: P20：可观测性与调试
-description: 结构化日志、Span 追踪、指标收集——用装饰器模式为 Agent 添加生产级可观测性
+title: "P20：可观测性与调试"
+description: "出问题无从查：用装饰器挂日志、Span 与指标，给 Agent 加生产级可观测性骨架，本练习提供可运行 TypeScript 示例。"
 ---
 
 <PracticeProjectGuide project-id="practice-p20-observability" />

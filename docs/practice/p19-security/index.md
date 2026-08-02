@@ -1,6 +1,6 @@
 ---
-title: P19：Agent 安全与防注入
-description: Prompt Injection 防御、输入清洗、工具权限沙箱、输出验证——四层纵深防御体系
+title: "P19：Agent 安全与防注入"
+description: "注入与越权是真风险：搭输入清洗、工具沙箱与输出验证，练四层纵深安全底线，本练习提供可运行 TypeScript 示例。"
 ---
 
 <PracticeProjectGuide project-id="practice-p19-security" />

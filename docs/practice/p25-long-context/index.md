@@ -1,6 +1,6 @@
 ---
-title: 补充：长上下文管理
-description: 滑动窗口与渐进式摘要——在上下文溢出之前主动裁剪，让长对话不崩溃
+title: "补充：长上下文管理"
+description: "长对话易爆窗：实现滑动窗口与渐进摘要，在溢出前裁剪，让会话稳定继续，本练习提供可运行 TypeScript 示例。"
 ---
 
 <PracticeProjectGuide project-id="practice-p25-long-context" />

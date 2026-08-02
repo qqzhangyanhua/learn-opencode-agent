@@ -1,6 +1,6 @@
 ---
-title: P21：评估与基准测试
-description: 构建系统化的 Agent 评估框架——测试用例设计、LLM-as-Judge、确定性校验、A/B 对比测试
+title: "P21：评估与基准测试"
+description: "凭感觉说变好了不够：搭用例、LLM-as-Judge 与确定性校验，建立可重复评估，本练习提供可运行 TypeScript 示例。"
 ---
 
 <PracticeProjectGuide project-id="practice-p21-evaluation" />

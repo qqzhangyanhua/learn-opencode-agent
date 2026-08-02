@@ -1,6 +1,6 @@
 ---
-title: P13：多模态智能体
-description: 图像理解与分析 — 让 Agent 看懂截图、图表与文档图片
+title: "P13：多模态智能体"
+description: "只会读文字不够：让 Agent 解析截图与图表，完成看图回答的最小多模态闭环，本练习提供可运行 TypeScript 示例。"
 ---
 
 <PracticeProjectGuide project-id="practice-p13-multimodal" />

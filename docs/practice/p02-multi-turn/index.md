@@ -1,6 +1,6 @@
 ---
-title: P2：多轮对话与上下文管理
-description: 构建有记忆的对话助手，掌握 messages 历史管理与 Token 预算控制两项核心技能
+title: "P2：多轮对话与上下文管理"
+description: "对话一多就丢上下文？亲手管理 messages 历史与 Token 预算，做出跨轮记住要点的对话助手，本练习提供可运行 TypeScript 示例。"
 ---
 
 <PracticeProjectGuide project-id="practice-p02-multi-turn" />

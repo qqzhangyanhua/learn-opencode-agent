@@ -1,6 +1,6 @@
 ---
-title: P6：记忆增强检索（MemoryBank）
-description: 设计带标签与重要性评分的 MemoryBank，让 Agent 在每次回答前精准检索相关历史记忆
+title: "P6：记忆增强检索（MemoryBank）"
+description: "历史一多就检不准：设计带标签与重要性的 MemoryBank，让回答前检索到真正相关记忆，本练习提供可运行 TypeScript 示例。"
 ---
 
 <PracticeProjectGuide project-id="practice-p06-memory-retrieval" />

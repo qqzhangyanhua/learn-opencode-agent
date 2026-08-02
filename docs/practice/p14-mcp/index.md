@@ -1,6 +1,6 @@
 ---
-title: P14：MCP 协议接入
-description: 连接标准化工具服务器，让 Agent 接入外部能力生态
+title: "P14：MCP 协议接入"
+description: "外部工具如何标准化接入？连接 MCP 服务器，完成发现、调用与结果回填练习，本练习提供可运行 TypeScript 示例。"
 ---
 
 <PracticeProjectGuide project-id="practice-p14-mcp" />

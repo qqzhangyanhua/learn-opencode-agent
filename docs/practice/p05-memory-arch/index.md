@@ -1,6 +1,6 @@
 ---
-title: P5：记忆系统架构
-description: 短期/工作/长期记忆三层模型设计，从零实现 Agent 的记忆系统
+title: "P5：记忆系统架构"
+description: "从零搭短期/工作/长期三层记忆：分清存什么、何时读写，做出可扩展的 Agent 记忆骨架，本练习提供可运行 TypeScript 示例。"
 ---
 
 <PracticeProjectGuide project-id="practice-p05-memory-arch" />
