@@ -1,3 +1,8 @@
+---
+title: "附录 P｜Resume、Branch、Compression 的 Session Lineage 专章：Hermes 怎么把一段对话长成一棵会话树"
+description: "Resume、Branch、Compression 的 Session Lineage 专章：Hermes 怎么把一段对话长成一棵会话树。基于 Hermes Agent 拆解专栏，结合源码讲清设计动机与边界。"
+---
+
 # 附录 P｜Resume、Branch、Compression 的 Session Lineage 专章：Hermes 怎么把一段对话长成一棵会话树
 
 ## 先把会话谱系看成一棵树

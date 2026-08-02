@@ -1,6 +1,6 @@
 ---
-title: P22：完整项目实战 — Code Review Agent
-description: 综合多 Agent 编排、安全检测、结构化输出等技术，从零构建一个生产级 Code Review Agent
+title: "P22：完整项目实战 — Code Review Agent"
+description: "综合多 Agent、安全与结构化输出：从零做一个可演示的 Code Review Agent 实战，本练习提供可运行 TypeScript 示例。"
 ---
 
 <PracticeProjectGuide project-id="practice-p22-project" />

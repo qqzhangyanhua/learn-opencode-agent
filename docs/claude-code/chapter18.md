@@ -1,3 +1,8 @@
+---
+title: "第 18 章：多 Agent 一旦落地，真正难的是编排而不是数量"
+description: "讲清多 Agent 系统一旦真的上线，难点不在“有几个 Agent”，而在“主 Agent、子 Agent、Hook、工具扩展和外部能力之间到底怎么串起来”。Claude Code 架构思维专栏。"
+---
+
 # 第 18 章：多 Agent 一旦落地，真正难的是编排而不是数量
 
 > 本章目标：讲清多 Agent 系统一旦真的上线，难点不在“有几个 Agent”，而在“主 Agent、子 Agent、Hook、工具扩展和外部能力之间到底怎么串起来”。  

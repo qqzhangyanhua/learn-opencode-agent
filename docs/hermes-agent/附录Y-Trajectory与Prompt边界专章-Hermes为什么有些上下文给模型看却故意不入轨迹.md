@@ -1,3 +1,8 @@
+---
+title: "附录 Y｜Trajectory 与 Prompt 边界专章：Hermes 为什么有些上下文给模型看，却故意不入轨迹"
+description: "Hermes 为什么有些上下文给模型看，却故意不入轨迹。基于 Hermes Agent 拆解专栏，源码拆解「Trajectory 与 Prompt 边界专章」。"
+---
+
 # 附录 Y｜Trajectory 与 Prompt 边界专章：Hermes 为什么有些上下文给模型看，却故意不入轨迹
 
 ## 先把“看见”和“落盘”分开

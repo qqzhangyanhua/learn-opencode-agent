@@ -1,6 +1,6 @@
 ---
-title: P12：Reflection 模式
-description: 让 Agent 生成初稿后用评审者角色评估质量，根据反馈迭代修改，直到满足标准
+title: "P12：Reflection 模式"
+description: "初稿质量不稳？让 Agent 自审打分并迭代修改，练出可见的反思与修正循环，本练习提供可运行 TypeScript 示例。"
 ---
 
 <PracticeProjectGuide project-id="practice-p12-reflection" />

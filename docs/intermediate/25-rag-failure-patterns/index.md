@@ -1,6 +1,6 @@
 ---
 title: 第25章：RAG 为什么总是答不准？
-description: 从五个高频翻车场景切入，理解 RAG 系统为何会答偏、漏答、编造，以及如何用工程手段逐个修复。
+description: "RAG 为什么总答不准？从分块、向量、检索、Prompt 与权限五类高频翻车场景出发，给出可落地的排查与修复路径。"
 contentType: intermediate
 series: book
 contentId: intermediate-25-rag-failure-patterns
@@ -17,11 +17,13 @@ learningGoals:
 prerequisites:
   - 建议按当前章节顺序继续阅读
 recommendedNext:
+  - /practice/p07-rag-basics/
+  - /practice/p09-hybrid-retrieval/
   - /intermediate/26-multi-agent-collaboration/
-  - /practice/
 practiceLinks:
-  - /practice/
-  - /intermediate/
+  - /practice/p07-rag-basics/
+  - /practice/p08-graphrag/
+  - /practice/p09-hybrid-retrieval/
 searchTags:
   - RAG 为什么总是答不准？
   - OpenCode
@@ -30,6 +32,7 @@ navigationLabel: RAG 为什么总是答不准？
 entryMode: bridge
 roleDescription: 理解 RAG 系统常见故障模式，掌握排查与修复方法。
 ---
+
 <ChapterLearningGuide />
 
 
@@ -41,6 +44,10 @@ roleDescription: 理解 RAG 系统常见故障模式，掌握排查与修复方�
 - 找到了相关文档，但答案还是答偏
 - 一问数字、版本、日期，输出就开始不稳定
 - 多份文档互相矛盾时，模型会把新旧规则混在一起
+
+**这篇不覆盖**：从零搭第一个向量库（请先做 [P7 RAG 基础](/practice/p07-rag-basics/)），也不展开 GraphRAG 关系推理实现细节（见 [P8](/practice/p08-graphrag/)）。这里专治「已经跑通却总答不准」的工程排障。
+
+**跨线入口**：混合召回练手 [P9](/practice/p09-hybrid-retrieval/)；企业权限与引用场景可对照 [企业 Agent 专栏](/enterprise-agent/)。
 
 这类问题如果只用一句“检索效果不好”来概括，通常修不动。因为它们其实来自五条完全不同的故障链：
 

@@ -1,6 +1,6 @@
 ---
 title: 阅读地图
-description: 这本电子书的推荐阅读顺序与章节关系图
+description: "全书阅读地图：推荐顺序、章节关系与三条主线对照，帮你决定先读理论、先做实践，还是先攻中级专题。"
 ---
 
 <EntryContextBanner

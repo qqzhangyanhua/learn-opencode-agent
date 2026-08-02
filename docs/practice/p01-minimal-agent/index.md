@@ -1,6 +1,6 @@
 ---
 title: P1：最小 Agent — 工具调用核心机制
-description: 用 80 行 TypeScript 构建你的第一个可运行 Agent，理解工具调用的完整生命周期
+description: "用约 80 行 TypeScript 实现最小可运行 Agent，亲手走通工具定义、模型决策、调用与结果回填的完整生命周期。"
 contentType: practice
 series: practice
 contentId: practice-p01-minimal-agent
@@ -35,6 +35,10 @@ roleDescription: 用一个最短可运行项目先把工具调用和 Agent 循�
 <PracticeProjectGuide project-id="practice-p01-minimal-agent" />
 
 ## 背景与目标
+
+**本练习解决什么**：用最少代码跑通「声明工具 → 模型决策 → 执行 → 回填 → 最终回复」。
+
+**不覆盖**：ReAct 显式推理链、MCP 外部服务器、生产级权限与观测。需要可见推理链请做 [P10 ReAct](/practice/p10-react-loop/)；概念回看 [什么是 AI Agent](/00-what-is-ai-agent/)。
 
 大多数人第一次用 LLM API，都是这样写的：
 

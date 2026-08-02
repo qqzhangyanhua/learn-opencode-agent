@@ -1,5 +1,17 @@
 :3000 {
-  root * /app/.vitepress/dist
-  file_server
-  try_files {path} /index.html
+	root * /app/.vitepress/dist
+	encode zstd gzip
+
+	# Static VitePress output (cleanUrls: false):
+	# - directories: /path/ -> /path/index.html
+	# - pages: /page -> /page.html
+	# Do not fall back to /index.html (that creates soft-404 SEO damage).
+	try_files {path} {path}.html {path}/index.html
+
+	file_server
+
+	handle_errors {
+		rewrite * /404.html
+		file_server
+	}
 }

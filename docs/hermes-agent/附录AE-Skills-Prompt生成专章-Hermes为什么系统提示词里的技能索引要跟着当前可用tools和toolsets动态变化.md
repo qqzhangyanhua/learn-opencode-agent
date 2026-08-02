@@ -1,3 +1,8 @@
+---
+title: "附录 AE｜Skills Prompt 生成专章：Hermes 为什么系统提示词里的技能索引要跟着当前可用 tools 和 toolsets 动态变化"
+description: "Hermes 为什么系统提示词里的技能索引要跟着当前可用 tools 和 toolsets 动态变化。基于 Hermes Agent 拆解专栏，源码拆解「Skills Prompt 生成专章」。"
+---
+
 # 附录 AE｜Skills Prompt 生成专章：Hermes 为什么系统提示词里的技能索引要跟着当前可用 tools 和 toolsets 动态变化
 
 ## 先盯住真正会漂移的地方

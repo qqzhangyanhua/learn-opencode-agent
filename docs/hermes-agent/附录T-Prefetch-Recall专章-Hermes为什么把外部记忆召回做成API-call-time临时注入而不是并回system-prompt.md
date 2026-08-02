@@ -1,3 +1,8 @@
+---
+title: "附录 T｜Prefetch Recall 专章：Hermes 为什么把外部记忆召回做成 API-call-time 临时注入，而不是并回 system prompt"
+description: "Hermes 为什么把外部记忆召回做成 API-call-time 临时注入，而不是并回 system prompt。基于 Hermes Agent 拆解专栏，源码拆解「Prefetch Recall 专章」。"
+---
+
 # 附录 T｜Prefetch Recall 专章：Hermes 为什么把外部记忆召回做成 API-call-time 临时注入，而不是并回 system prompt
 
 ## 先把 recall 的位置摆正

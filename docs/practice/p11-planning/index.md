@@ -1,6 +1,6 @@
 ---
-title: P11：Planning 机制 — Plan-and-Execute
-description: 实现两阶段 Agent：先用 LLM 将目标分解为有序步骤列表，再逐步执行，支持步骤失败时重新规划
+title: "P11：Planning 机制 — Plan-and-Execute"
+description: "一步做完易翻车：实现 Plan-and-Execute 两阶段 Agent，支持失败重规划与分步推进，本练习提供可运行 TypeScript 示例。"
 ---
 
 <PracticeProjectGuide project-id="practice-p11-planning" />

@@ -1,6 +1,6 @@
 ---
 title: 第2章：AI Agent 的核心组件
-description: 深入理解 LLM、Tools、Memory、Planning、Execution Loop 五个核心模块的工作原理与实现
+description: "AI Agent 五大核心组件：LLM、Tools、Memory、Planning、Execution Loop。用可运行结构理解 Agent 如何决策、调用工具并闭环。"
 contentType: theory
 series: book
 contentId: book-01-agent-basics
@@ -37,11 +37,25 @@ import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshot
 
 <ChapterLearningGuide />
 
+<RelatedPracticeProjects
+  :project-ids="['practice-p01-minimal-agent']"
+  description="概念骨架搭好后，最适合立刻做 P1：用最少代码验证 Function Calling 与执行循环不是纸上谈兵。"
+/>
+
 ## 本章导读
 
 ### 这一章解决什么问题
 
 第1章告诉你 Agent 是什么，第2章告诉你每个组件怎么工作。Function Calling 是 LLM 调用工具的底层机制、上下文窗口限制决定了记忆系统的设计、执行循环是整个系统的心脏。
+
+### 这一章不解决什么
+
+不深入 OpenCode 工具注册表与权限门控（见 [工具系统](/03-tool-system/)），也不讲生产级 RAG 翻车排障（见 [中级篇 RAG](/intermediate/25-rag-failure-patterns/)）。
+
+### 跨线入口
+
+- 动手：[P1 最小 Agent](/practice/p01-minimal-agent/)
+- 源码加深：[工具系统](/03-tool-system/) → [MCP 协议集成](/06-mcp-integration/)
 
 ### 必看入口
 

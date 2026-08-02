@@ -1,5 +1,7 @@
 ---
 layout: home
+title: 从零理解如何构建 AI Agent
+description: "OpenCode 源码剖析与 AI Agent 实战电子书。覆盖工具调用、MCP、多 Agent、RAG、生产架构与企业 Agent，边学边做建立工程直觉。"
 
 hero:
   name: 从零理解如何构建 AI Agent

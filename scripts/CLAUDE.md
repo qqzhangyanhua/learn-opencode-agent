@@ -20,6 +20,8 @@
 | 脚本 | 校验内容 | npm 别名 |
 | --- | --- | --- |
 | `check-content.mjs` | 必需 Markdown 文件存在性、禁止词（TODO/FIXME/TBD/待补/需要补充）、代码围栏语言标签合法性 | `check:content` |
+| `check-seo-copy.mjs` | 公开页 `title`/`description` 必填、描述长度带、禁止 SERP 模板腔；历史债务见 `seo-copy-debt.txt` | `check:seo-copy` |
+| `lib/seo-copy-quality.mjs` | SEO 文案规则纯函数（单测：`bun run test:seo-copy`） | `test:seo-copy` |
 | `check-practice-entries.mjs` | `practice/*.ts` 与 `docs/practice/` 一一对应 | `check:practice` |
 | `check-learning-metadata.mjs` | 章节 frontmatter 学习元数据字段完整性 | `check:learning-metadata` |
 | `check-learning-paths.mjs` | `learning-paths.data.ts` 中 `step.contentId` 全站可解析 | `check:learning-paths` |

@@ -1,3 +1,8 @@
+---
+title: "附录 Z｜Gateway Agent Cache 专章：Hermes 为什么在消息平台里宁可缓存整颗 AIAgent，也不愿每条消息重建一次运行时"
+description: "Hermes 为什么在消息平台里宁可缓存整颗 AIAgent，也不愿每条消息重建一次运行时。基于 Hermes Agent 拆解专栏，源码拆解「Gateway Agent Cache 专章」。"
+---
+
 # 附录 Z｜Gateway Agent Cache 专章：Hermes 为什么在消息平台里宁可缓存整颗 AIAgent，也不愿每条消息重建一次运行时
 
 ## 先把缓存整颗 Agent 的原因说透

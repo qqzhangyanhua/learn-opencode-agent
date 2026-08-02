@@ -1,6 +1,6 @@
 ---
 title: 从零拆解 Hermes Agent
-description: 以 Hermes Agent 源码为案例，从 Agent 概念校准到运行时全链路拆解，建立 Agent Runtime 工程直觉
+description: "从零拆解 Hermes Agent：核心循环、工具系统、记忆会话、CLI/Gateway、Skills 与安全约束，建立 Agent Runtime 工程直觉。"
 contentType: theory
 series: hermes-agent
 contentId: hermes-agent-index
@@ -37,6 +37,18 @@ roleDescription: 想通过真实 Agent 源码建立运行时工程直觉的开�
 # 从零拆解 Hermes Agent
 
 > 以 Hermes Agent 当前源码为分析基点，12 章主干 + 26 篇深度附录，把一个真实 Agent Runtime 从概念到工程全部拆开讲透。
+
+## 适合谁 / 不适合谁
+
+- **适合**：想读一个真实 Agent Runtime（循环、工具、记忆会话、多入口、Skills、安全），建立可迁移的工程分层。
+- **不适合**：只想用 TypeScript 跟练最小闭环——请先 [实践篇](/practice/)；OpenCode 主书概念入口见 [什么是 AI Agent](/00-what-is-ai-agent/)。
+
+## 跨线入口
+
+- 概念校准对照：[什么是 AI Agent](/00-what-is-ai-agent/)
+- 工具协议对照：[OpenCode 工具系统](/03-tool-system/)
+- 动手：[P1](/practice/p01-minimal-agent/) / [P10 ReAct](/practice/p10-react-loop/)
+- 判断力专栏：[Claude Code 架构思维](/claude-code/)
 
 ## 本书特点
 

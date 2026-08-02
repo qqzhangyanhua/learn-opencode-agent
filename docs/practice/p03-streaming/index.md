@@ -1,6 +1,6 @@
 ---
-title: P3：流式输出与实时反馈
-description: 用 stream() API 实现逐 token 打印，让 Agent 回复不再让用户干等
+title: "P3：流式输出与实时反馈"
+description: "不想干等完整回复？用 stream API 实现逐 token 打印，给 Agent 接上实时反馈，改善交互等待体验。"
 ---
 
 <PracticeProjectGuide project-id="practice-p03-streaming" />

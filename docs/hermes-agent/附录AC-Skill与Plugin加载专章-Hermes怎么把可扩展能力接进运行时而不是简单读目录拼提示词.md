@@ -1,3 +1,8 @@
+---
+title: "附录 AC｜Skill 与 Plugin 加载专章：Hermes 怎么把可扩展能力接进运行时，而不是简单读目录拼提示词"
+description: "Hermes 怎么把可扩展能力接进运行时，而不是简单读目录拼提示词。基于 Hermes Agent 拆解专栏，源码拆解「Skill 与 Plugin 加载专章」。"
+---
+
 # 附录 AC｜Skill 与 Plugin 加载专章：Hermes 怎么把可扩展能力接进运行时，而不是简单读目录拼提示词
 
 ## 先把扩展边界摆清楚

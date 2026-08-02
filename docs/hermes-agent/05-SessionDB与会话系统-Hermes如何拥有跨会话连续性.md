@@ -1,3 +1,8 @@
+---
+title: "Hermes SessionDB：跨会话连续性如何落盘与续接"
+description: "用 SessionDB 与会话账本理解跨平台、跨压缩后的连续性：历史存在哪、如何恢复，以及为何不能只靠当前 transcript。"
+---
+
 # 05｜SessionDB 与会话系统：Hermes 如何拥有跨会话连续性
 
 ## 先把连续性这件事说透

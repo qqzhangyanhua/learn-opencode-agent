@@ -1,3 +1,8 @@
+---
+title: "Claude Code Remote Session：会话接管与连接如何管理"
+description: "Remote Session 如何接管与维持连接：会话身份、连接生命周期与失败恢复，避免把远程当成无状态转发。"
+---
+
 # 12 Remote Session：会话接管与连接管理
 
 第 11 章讲的是：

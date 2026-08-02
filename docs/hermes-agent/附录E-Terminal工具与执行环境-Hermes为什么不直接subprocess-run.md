@@ -1,3 +1,8 @@
+---
+title: "附录 E｜Terminal 工具与执行环境：Hermes 为什么不直接 `subprocess.run`"
+description: "Hermes 为什么不直接 subprocess.run。基于 Hermes Agent 拆解专栏，源码拆解「Terminal 工具与执行环境」。"
+---
+
 # 附录 E｜Terminal 工具与执行环境：Hermes 为什么不直接 `subprocess.run`
 
 ## 先把 terminal 当成运行时而不是 subprocess

@@ -1,3 +1,8 @@
+---
+title: "附录 AA｜Interrupt 与 Queue 专章：Hermes 为什么消息平台里的新消息不能直接塞进正在运行的 Agent 回合"
+description: "Hermes 为什么消息平台里的新消息不能直接塞进正在运行的 Agent 回合。基于 Hermes Agent 拆解专栏，源码拆解「Interrupt 与 Queue 专章」。"
+---
+
 # 附录 AA｜Interrupt 与 Queue 专章：Hermes 为什么消息平台里的新消息不能直接塞进正在运行的 Agent 回合
 
 ## 先把 interrupt 和 queue 分开

@@ -1,3 +1,8 @@
+---
+title: "附录 R｜Auxiliary Model 专章：Hermes 为什么不让主模型包办摘要、压缩、视觉和副任务"
+description: "Hermes 为什么不让主模型包办摘要、压缩、视觉和副任务。基于 Hermes Agent 拆解专栏，源码拆解「Auxiliary Model 专章」。"
+---
+
 # 附录 R｜Auxiliary Model 专章：Hermes 为什么不让主模型包办摘要、压缩、视觉和副任务
 
 ## 先把辅助模型的职责切开

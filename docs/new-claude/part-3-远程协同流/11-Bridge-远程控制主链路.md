@@ -1,3 +1,8 @@
+---
+title: "Claude Code Bridge：远程控制主链路如何接通本地循环"
+description: "bridge 不是装饰目录：理解远程控制如何接入本地 query 与工具主链路，以及远程指令和本地执行之间的边界。"
+---
+
 # 11 Bridge：远程控制主链路
 
 Part 1 讲清了“本地一次请求怎么跑完”，Part 2 讲清了“能力怎么扩进来”。

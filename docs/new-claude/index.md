@@ -1,9 +1,21 @@
 ---
 title: Claude Code 源码业务流
-description: 以业务流程+源码映射+复刻抽象的方式，拆解 Claude Code 从入口到工具编排再到远程协同的闭环
+description: "Claude Code 源码业务流：按入口启动、query 主循环、工具编排、MCP/Skills、权限与远程协同，做业务流程到源码的映射。"
 ---
 
 # Claude Code 源码业务流电子书
+
+## 适合谁 / 不适合谁
+
+- **适合**：要按「入口 → query 主循环 → 工具 → 扩展 → 远程」追 Claude Code 源码业务流，并映射到自己的复刻设计。
+- **不适合**：只要架构判断框架、不追文件——请读 [Claude Code 架构思维](/claude-code/)；只要可运行 TS 练习——请去 [实践篇](/practice/)。
+
+## 跨线入口
+
+- 主书概念：[什么是 AI Agent](/00-what-is-ai-agent/)
+- OpenCode MCP 主着陆：[MCP 协议集成](/06-mcp-integration/)
+- 动手：[P1](/practice/p01-minimal-agent/) · [P14 MCP](/practice/p14-mcp/)
+- 判断力并行：[Claude Code 架构思维](/claude-code/)
 
 ## 这套书解决什么问题
 

@@ -1,6 +1,6 @@
 ---
-title: P16：子 Agent 与任务分解
-description: 将 Worker 升级为拥有独立工具和多轮循环的子 Agent，让编排器调度真正有"手脚"的执行者
+title: "P16：子 Agent 与任务分解"
+description: "空壳 Worker 不够用：把子任务做成有工具与多轮循环的子 Agent，练真可调度分解，本练习提供可运行 TypeScript 示例。"
 ---
 
 <PracticeProjectGuide project-id="practice-p16-subagent" />

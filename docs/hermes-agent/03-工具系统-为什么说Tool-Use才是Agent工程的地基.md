@@ -1,3 +1,8 @@
+---
+title: "Hermes 工具系统：Tool Use 如何变成可控运行时能力"
+description: "拆 model_tools 看工具如何对模型可见、对会话过滤、对副作用分层。搞清「接了 API」和「做好工具系统」的差别。"
+---
+
 # 03｜工具系统才是 Agent 工程的地基：拆开 model_tools.py 看 Hermes 怎么把能力变成可控运行时
 
 ## 先把地基看清楚

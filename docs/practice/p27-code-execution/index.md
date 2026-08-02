@@ -1,6 +1,6 @@
 ---
-title: 补充：代码执行 Agent
-description: 子进程沙箱 + 生成-执行-修正循环——让 Agent 真正"动手"运行代码而不只是说代码
+title: "补充：代码执行 Agent"
+description: "只会说代码不够：沙箱里跑生成-执行-修正循环，让 Agent 真正跑代码并自修，本练习提供可运行 TypeScript 示例。"
 ---
 
 <PracticeProjectGuide project-id="practice-p27-code-execution" />

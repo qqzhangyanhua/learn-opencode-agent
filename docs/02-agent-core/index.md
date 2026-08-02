@@ -1,6 +1,6 @@
 ---
 title: 第3章：OpenCode 项目介绍
-description: 建立 OpenCode 源码地图——从项目定位到代码路径，理解一个真实 AI Coding Agent 的工程结构
+description: "OpenCode 项目全景与源码地图：从定位、目录到主链路，快速建立真实 AI Coding Agent 的工程坐标系。"
 contentType: theory
 series: book
 contentId: book-02-agent-core
@@ -27,6 +27,7 @@ navigationLabel: OpenCode 项目介绍
 entryMode: read-first
 roleDescription: 建立 OpenCode 源码地图，把抽象概念对应到真实代码路径。
 ---
+
 <ChapterLearningGuide />
 
 <script setup>

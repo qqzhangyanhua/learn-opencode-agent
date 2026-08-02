@@ -1,6 +1,6 @@
 ---
-title: P9：混合检索策略
-description: 融合关键词检索、向量检索三路结果，用 RRF 算法合并排名，兼顾精确匹配与语义理解
+title: "P9：混合检索策略"
+description: "关键词与向量各有短板：融合多路检索并用 RRF 合并排名，练可调的混合召回策略，本练习提供可运行 TypeScript 示例。"
 ---
 
 <PracticeProjectGuide project-id="practice-p09-hybrid-retrieval" />

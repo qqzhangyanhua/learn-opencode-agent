@@ -1,6 +1,6 @@
 ---
 title: 第7章：MCP 协议集成
-description: 深入 MCP 客户端实现——local/remote 两种连接方式、工具发现与转换、OAuth 认证、资源与提示词管理
+description: "MCP 协议在 OpenCode 中的集成：local/remote 连接、工具发现与转换、OAuth、资源与提示词，把外部能力安全接进 Agent。"
 contentType: theory
 series: book
 contentId: book-06-mcp-integration
@@ -15,11 +15,12 @@ learningGoals:
 prerequisites:
   - 第6章"多模型支持"
 recommendedNext:
+  - /practice/p14-mcp/
   - /07-tui-interface/
-  - /practice/
+  - /new-claude/part-2-扩展能力流/07-MCP-如何把外部能力接进来
 practiceLinks:
-  - /practice/
-  - /reading-map
+  - /practice/p14-mcp/
+  - /03-tool-system/
 searchTags:
   - MCP 协议集成
   - OpenCode
@@ -28,11 +29,17 @@ navigationLabel: MCP 协议集成
 entryMode: read-first
 roleDescription: 深入 MCP 协议集成机制，理解工具扩展的标准化方案。
 ---
-<ChapterLearningGuide />
 
 <script setup>
 import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshotCard.vue'
 </script>
+
+<ChapterLearningGuide />
+
+<RelatedPracticeProjects
+  :project-ids="['practice-p14-mcp']"
+  description="读完 OpenCode 作为 MCP Client 的主链路后，立刻用 P14 亲手连一个工具服务器，把发现与调用跑通。"
+/>
 
 > **学习目标**：理解 MCP 协议的设计思想，掌握 OpenCode 作为 MCP Client 的完整实现，学会配置和调试 MCP Server
 > **前置知识**：第6章"多模型支持"
@@ -46,6 +53,16 @@ import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshot
 ### 这一章解决什么问题
 
 内置工具有限，用户需求无限。MCP 是解决方案——定义了一个标准协议，让第三方工具服务器接入 OpenCode，不需要修改 OpenCode 核心代码。
+
+### 这一章不解决什么
+
+不写一个完整 MCP Server 产品，也不讲企业权限体系全貌。动手接入请去 [P14 MCP](/practice/p14-mcp/)；Claude Code 业务流视角见 [MCP 如何把外部能力接进来](/new-claude/part-2-扩展能力流/07-MCP-如何把外部能力接进来)。
+
+### 跨线入口
+
+- 先懂内置工具：[工具系统](/03-tool-system/)
+- 动手：[P14 MCP 协议接入](/practice/p14-mcp/)
+- 对照业务流：[New-Claude MCP 章](/new-claude/part-2-扩展能力流/07-MCP-如何把外部能力接进来)
 
 ### 必看入口
 

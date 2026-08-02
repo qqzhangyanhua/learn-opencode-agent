@@ -1,3 +1,8 @@
+---
+title: "Claude Code CLI 启动：入口如何分流到主业务流"
+description: "从 CLI 入口看请求如何被分流：启动参数、模式选择与进入主链路前的分叉点，帮你建立读 Claude Code 源码的第一张地图。"
+---
+
 # 01 CLI 启动与入口分流
 
 本章是 Part 1「主业务流」的第一章：我们从真正的 CLI 入口 `restored-src/src/entrypoints/cli.tsx` 出发，回答一个很现实的问题：

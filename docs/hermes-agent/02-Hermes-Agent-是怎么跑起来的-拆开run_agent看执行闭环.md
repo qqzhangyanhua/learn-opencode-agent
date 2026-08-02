@@ -1,3 +1,8 @@
+---
+title: "Hermes 执行闭环：拆开 run_agent 看一轮任务如何推进"
+description: "沿 run_agent 追踪用户输入到工具回填的完整回合：模型决策、工具调用、状态更新如何串成可恢复的执行闭环。"
+---
+
 # 02｜Hermes Agent 是怎么跑起来的：拆开 run_agent.py 看执行闭环
 
 ## 先盯住真正的执行闭环

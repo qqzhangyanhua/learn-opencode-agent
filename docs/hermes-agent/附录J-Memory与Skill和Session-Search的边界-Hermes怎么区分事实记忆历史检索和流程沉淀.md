@@ -1,3 +1,8 @@
+---
+title: "附录 J｜Memory 与 Skill 和 Session Search 的边界：Hermes 怎么区分事实记忆、历史检索和流程沉淀"
+description: "Memory 与 Skill 和 Session Search 的边界：Hermes 怎么区分事实记忆、历史检索和流程沉淀。基于 Hermes Agent 拆解专栏，结合源码讲清设计动机与边界。"
+---
+
 # 附录 J｜Memory 与 Skill 和 Session Search 的边界：Hermes 怎么区分事实记忆、历史检索和流程沉淀
 
 ## 先把记忆、检索、技能分账

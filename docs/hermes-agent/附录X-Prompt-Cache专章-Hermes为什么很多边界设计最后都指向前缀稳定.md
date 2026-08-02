@@ -1,3 +1,8 @@
+---
+title: "附录 X｜Prompt Cache 专章：Hermes 为什么很多边界设计，最后都指向“前缀稳定”"
+description: "Hermes 为什么很多边界设计，最后都指向“前缀稳定”。基于 Hermes Agent 拆解专栏，源码拆解「Prompt Cache 专章」。"
+---
+
 # 附录 X｜Prompt Cache 专章：Hermes 为什么很多边界设计，最后都指向“前缀稳定”
 
 ## 先看总约束，而不是单点技巧

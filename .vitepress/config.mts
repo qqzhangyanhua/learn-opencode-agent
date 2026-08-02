@@ -6,9 +6,15 @@ import {
   getEntryModeLabel,
   normalizeLearningFrontmatter
 } from './theme/data/content-meta'
+import {
+  buildPageSeoHead,
+  globalSeoHead,
+  shouldIncludeInSitemap,
+  siteDescription,
+  siteTitle,
+  siteUrl
+} from './seo'
 
-const siteTitle = '从零理解如何构建 AI Agent'
-const siteDescription = 'OpenCode 源码剖析与实战'
 const bookRepository = 'https://github.com/qqzhangyanhua/learn-opencode-agent'
 const sourceCommit = 'f8475649da1cd7a6d49f8f30ee2fad374c2f4fcc'
 const sourceRepository = `https://github.com/anomalyco/opencode/tree/${sourceCommit}`
@@ -156,7 +162,21 @@ export default withMermaid(defineConfig({
   description: siteDescription,
   lang: 'zh-CN',
   lastUpdated: true,
-  head: googleAnalyticsHead,
+  // Keep draft / agent-workflow material out of the published site and sitemap.
+  srcExclude: [
+    '**/claude-code/_archive/**',
+    '**/superpowers/**'
+  ],
+  head: [
+    ...globalSeoHead,
+    ...googleAnalyticsHead
+  ],
+  sitemap: {
+    hostname: siteUrl,
+    transformItems(items) {
+      return items.filter((item) => shouldIncludeInSitemap(item.url))
+    }
+  },
   ignoreDeadLinks: [
     /\/docs\//,
     /\/plugins\//,
@@ -165,9 +185,15 @@ export default withMermaid(defineConfig({
     /\/\.devcontainer\//,
     /^\/CLAUDE$/,
     /restored-src/,
+    /\/superpowers\//,
+    /\/claude-code\/_archive\//,
   ],
   transformPageData(pageData) {
-    const pageTitle = pageData.frontmatter.layout === 'home'
+    const isHome = pageData.frontmatter.layout === 'home'
+    const pageName = isHome
+      ? siteTitle
+      : pageData.title || siteTitle
+    const pageTitle = isHome
       ? siteTitle
       : pageData.title
         ? `${pageData.title} | ${siteTitle}`
@@ -178,13 +204,14 @@ export default withMermaid(defineConfig({
 
     pageData.frontmatter.head ??= []
     pageData.frontmatter.head.push(
-      ['meta', { property: 'og:title', content: pageTitle }],
-      ['meta', { property: 'og:description', content: pageDescription }],
-      ['meta', { property: 'og:type', content: 'website' }],
-      ['meta', { property: 'og:locale', content: 'zh_CN' }],
-      ['meta', { name: 'twitter:card', content: 'summary' }],
-      ['meta', { name: 'twitter:title', content: pageTitle }],
-      ['meta', { name: 'twitter:description', content: pageDescription }]
+      ...buildPageSeoHead({
+        pageTitle,
+        pageName,
+        pageDescription,
+        relativePath: pageData.relativePath,
+        isHome,
+        lastUpdated: pageData.lastUpdated
+      })
     )
   },
 

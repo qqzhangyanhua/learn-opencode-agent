@@ -1,6 +1,6 @@
 ---
-title: P4：错误处理与重试策略
-description: 指数退避、工具调用失败降级、让 Agent 在不稳定环境中可靠运行
+title: "P4：错误处理与重试策略"
+description: "工具与网络常失败：实现指数退避、失败降级与可恢复路径，让 Agent 在不稳定环境仍能跑完，本练习提供可运行 TypeScript 示例。"
 ---
 
 <PracticeProjectGuide project-id="practice-p04-error-handling" />

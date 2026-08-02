@@ -1,6 +1,6 @@
 ---
-title: P17：Agent 间通信与状态共享
-description: 共享黑板、消息传递、Handoff 三种 Agent 协作通信模式——让多个 Agent 不再各自为战
+title: "P17：Agent 间通信与状态共享"
+description: "多 Agent 各自为战？实现黑板、消息传递与 Handoff，练状态共享与任务交接，本练习提供可运行 TypeScript 示例。"
 ---
 
 <PracticeProjectGuide project-id="practice-p17-agent-comm" />

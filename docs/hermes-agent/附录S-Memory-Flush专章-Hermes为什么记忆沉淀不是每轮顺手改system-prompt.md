@@ -1,3 +1,8 @@
+---
+title: "附录 S｜Memory Flush 专章：Hermes 为什么记忆沉淀不是每轮顺手改 system prompt"
+description: "Hermes 为什么记忆沉淀不是每轮顺手改 system prompt。基于 Hermes Agent 拆解专栏，源码拆解「Memory Flush 专章」。"
+---
+
 # 附录 S｜Memory Flush 专章：Hermes 为什么记忆沉淀不是每轮顺手改 system prompt
 
 ## 先问记忆沉淀为什么不能顺手改 prompt

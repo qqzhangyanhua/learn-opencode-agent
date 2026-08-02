@@ -1,7 +1,7 @@
 ---
 layout: home
 title: AI Agent 实战手册
-description: 23 个主线项目加 5 个补充实践，按章节拆解 TypeScript Agent 实现，从工具调用到生产部署全覆盖
+description: "AI Agent 实战手册：28 个 TypeScript 项目，从最小工具调用、ReAct、RAG、MCP 到多 Agent、安全与生产部署，边做边学。"
 pageClass: practice-page
 ---
 
@@ -35,7 +35,7 @@ const bannerSupportLinks = [
   <a href="/practice/setup" class="btn-secondary">实践环境准备</a>
 </div>
 
-> 这里不是项目目录，而是整套 AI Agent 跟练课程的入口。第一次进入实践篇，推荐先在下面选一条路线；如果你还没准备好环境，再先看 [实践环境准备](/practice/setup)。
+> 这里不是项目目录，而是整套 AI Agent 跟练课程的入口。第一次进入实践篇，推荐先在下面选一条路线；如果你还没准备好环境，再先看 [实践环境准备](/practice/setup)。概念不清可先回 [什么是 AI Agent](/00-what-is-ai-agent/)；基础跑通后可去 [中级篇](/intermediate/) 补工程判断。
 
 </div>
 

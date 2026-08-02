@@ -1,6 +1,6 @@
 ---
 title: 智能体选型
-description: 面向智能体开发工程师，系统比较 Agent 框架、RAG、搜索、模型、工具、平台和生产组件的技术选型。
+description: "智能体选型手册：比较 Agent 框架、RAG、向量库、模型路由、MCP 工具与生产组件，用场景与约束做技术取舍。"
 contentType: support
 series: support
 contentId: agent-selection-index

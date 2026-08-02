@@ -1,3 +1,8 @@
+---
+title: "附录 D｜模型切换与 Provider Fallback：Hermes 怎么把模型差异变成运行时策略"
+description: "模型切换与 Provider Fallback：Hermes 怎么把模型差异变成运行时策略。基于 Hermes Agent 拆解专栏，结合源码讲清设计动机与边界。"
+---
+
 # 附录 D｜模型切换与 Provider Fallback：Hermes 怎么把模型差异变成运行时策略
 
 ## 先把模型差异当成运行时问题

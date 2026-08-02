@@ -1,3 +1,8 @@
+---
+title: "Claude Code Skills：方法论如何可发现、可调用地注入"
+description: "Skills 如何把流程模板与操作约束接进主链路：可发现、可隔离执行，避免退化成固定 prompt 或裸工具堆砌。"
+---
+
 # 08 Skills：如何把方法论接进主流程
 
 如果说 MCP 解决的是“把外部能力接进来”，那 Skills 解决的就是另一个问题：

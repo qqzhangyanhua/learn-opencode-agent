@@ -1,3 +1,8 @@
+---
+title: "附录 K｜Agent Loop 接管工具专章：Hermes 为什么有些工具不能走普通 Registry Dispatch"
+description: "Hermes 为什么有些工具不能走普通 Registry Dispatch。基于 Hermes Agent 拆解专栏，源码拆解「Agent Loop 接管工具专章」。"
+---
+
 # 附录 K｜Agent Loop 接管工具专章：Hermes 为什么有些工具不能走普通 Registry Dispatch
 
 ## 先看哪些工具必须由 Agent Loop 接管

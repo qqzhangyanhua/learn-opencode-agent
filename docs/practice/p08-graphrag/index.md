@@ -1,6 +1,6 @@
 ---
-title: P8：GraphRAG — 知识图谱增强检索
-description: 构建基于知识图谱的 RAG 系统，处理实体关系推理，回答需要多跳推断的复杂问题
+title: "P8：GraphRAG — 知识图谱增强检索"
+description: "多跳问答向量检索不够：构建图谱增强 RAG，练习关系推理而不只是单段相似搜索，本练习提供可运行 TypeScript 示例。"
 ---
 
 <PracticeProjectGuide project-id="practice-p08-graphrag" />

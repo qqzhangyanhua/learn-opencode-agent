@@ -1,3 +1,8 @@
+---
+title: "附录 L｜Context Compression 后状态恢复专章：Hermes 为什么压缩上下文不等于删历史"
+description: "Hermes 为什么压缩上下文不等于删历史。基于 Hermes Agent 拆解专栏，源码拆解「Context Compression 后状态恢复专章」。"
+---
+
 # 附录 L｜Context Compression 后状态恢复专章：Hermes 为什么压缩上下文不等于删历史
 
 ## 先把压缩后的恢复边界说清楚

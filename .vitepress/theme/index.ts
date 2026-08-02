@@ -3,6 +3,7 @@ import DefaultTheme from 'vitepress/theme'
 import type { Theme } from 'vitepress'
 import { defineAsyncComponent } from 'vue'
 
+import Layout from './Layout.vue'
 import StarCTA from './components/StarCTA.vue'
 import PracticeTerminalHero from './components/PracticeTerminalHero.vue'
 import PracticePhaseGrid from './components/PracticePhaseGrid.vue'
@@ -131,6 +132,7 @@ const AsyncPlanningFlowSimulator = asyncComponent(() =>
 
 export default {
   extends: DefaultTheme,
+  Layout,
   enhanceApp({ app, router }) {
     installAgentSelectionRedirects(router)
 

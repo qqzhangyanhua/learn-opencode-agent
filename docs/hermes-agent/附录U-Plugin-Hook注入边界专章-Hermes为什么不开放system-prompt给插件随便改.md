@@ -1,3 +1,8 @@
+---
+title: "附录 U｜Plugin Hook 注入边界专章：Hermes 为什么不开放 system prompt 给插件随便改"
+description: "Hermes 为什么不开放 system prompt 给插件随便改。基于 Hermes Agent 拆解专栏，源码拆解「Plugin Hook 注入边界专章」。"
+---
+
 # 附录 U｜Plugin Hook 注入边界专章：Hermes 为什么不开放 system prompt 给插件随便改
 
 ## 先把插件权限边界讲明白

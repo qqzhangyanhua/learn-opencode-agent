@@ -1,3 +1,8 @@
+---
+title: "Claude Code 请求收尾：渲染、Stop Hooks 与任务摘要"
+description: "模型停下来之后系统还要做什么：输出渲染、stop hooks、任务摘要与收尾钩子如何决定一轮请求真正完整结束。"
+---
+
 # 06 输出渲染、Stop Hooks、任务摘要、请求收尾
 
 写到这里，Part 1 其实已经完成了主链路里最硬核的两段：

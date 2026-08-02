@@ -1,6 +1,6 @@
 ---
 title: Agent 面试题专区
-description: 一个按能力分类整理的 Agent 面试准备专区，帮助你把概念、执行链路和工程判断整理成可口述的回答框架。
+description: "Agent 面试题专区：按基础、工具、记忆、规划、RAG、Multi-Agent 与工程化分类整理，把概念练成可口述的回答框架。"
 contentType: support
 series: support
 contentId: support-agent-interview-zone

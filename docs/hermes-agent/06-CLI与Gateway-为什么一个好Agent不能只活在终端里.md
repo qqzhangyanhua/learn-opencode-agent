@@ -1,3 +1,8 @@
+---
+title: "Hermes CLI 与 Gateway：同一内核如何服务多入口"
+description: "对比终端与消息平台入口：为何好 Agent 不能只活在 CLI，以及 Gateway 如何把渠道差异收敛到同一运行时内核。"
+---
+
 # 06｜CLI 与 Gateway：为什么一个好 Agent 不能只活在终端里
 
 ## 先把入口和运行面分开

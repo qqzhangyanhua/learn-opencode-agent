@@ -1,6 +1,6 @@
 ---
-title: P7：RAG 基础
-description: 向量化、分块策略、语义检索，构建让 Agent 能读文档的知识库
+title: "P7：RAG 基础"
+description: "文档塞不进窗口？亲手做分块、向量化与语义检索，搭 Agent 可读本地库的最小 RAG，本练习提供可运行 TypeScript 示例。"
 ---
 
 <PracticeProjectGuide project-id="practice-p07-rag-basics" />

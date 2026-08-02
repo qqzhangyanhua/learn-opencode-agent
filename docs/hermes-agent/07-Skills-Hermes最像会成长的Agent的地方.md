@@ -1,3 +1,8 @@
+---
+title: "Hermes Skills：可成长能力如何按需装进主流程"
+description: "Skills 不是塞进 system prompt 的长文：看索引、按需加载与信任边界，理解 Hermes 如何让方法论可复用且可治理。"
+---
+
 # 07｜Skills：Hermes 最像会成长的 Agent 的地方
 
 ## 先看 Skills 到底解决什么

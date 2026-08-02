@@ -1,3 +1,8 @@
+---
+title: "附录 M｜多入口同一 Runtime 专章：Hermes 为什么 CLI、Gateway、ACP 和 API Server 共用一颗 Agent 内核"
+description: "Hermes 为什么 CLI、Gateway、ACP 和 API Server 共用一颗 Agent 内核。基于 Hermes Agent 拆解专栏，源码拆解「多入口同一 Runtime 专章」。"
+---
+
 # 附录 M｜多入口同一 Runtime 专章：Hermes 为什么 CLI、Gateway、ACP 和 API Server 共用一颗 Agent 内核
 
 ## 先把多入口共内核这件事看清

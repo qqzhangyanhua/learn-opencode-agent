@@ -1,3 +1,8 @@
+---
+title: "附录 V｜Ephemeral System Prompt 专章：Hermes 为什么自己保留临时 system 通道，却不把它当长期前缀"
+description: "Hermes 为什么自己保留临时 system 通道，却不把它当长期前缀。基于 Hermes Agent 拆解专栏，源码拆解「Ephemeral System Prompt 专章」。"
+---
+
 # 附录 V｜Ephemeral System Prompt 专章：Hermes 为什么自己保留临时 system 通道，却不把它当长期前缀
 
 ## 先把这条白名单通道说透
