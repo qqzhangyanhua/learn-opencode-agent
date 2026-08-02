@@ -1,6 +1,6 @@
 ---
 title: 第25章：RAG 为什么总是答不准？
-description: 从五个高频翻车场景切入，理解 RAG 系统为何会答偏、漏答、编造，以及如何用工程手段逐个修复。
+description: "RAG 为什么总答不准？从分块、向量、检索、Prompt 与权限五类高频翻车场景出发，给出可落地的排查与修复路径。"
 contentType: intermediate
 series: book
 contentId: intermediate-25-rag-failure-patterns
@@ -30,6 +30,7 @@ navigationLabel: RAG 为什么总是答不准？
 entryMode: bridge
 roleDescription: 理解 RAG 系统常见故障模式，掌握排查与修复方法。
 ---
+
 <ChapterLearningGuide />
 
 

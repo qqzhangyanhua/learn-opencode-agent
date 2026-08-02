@@ -1,6 +1,6 @@
 ---
 title: Claude Code 架构思维
-description: 以 Claude Code 为案例，从 Agent 定义到运行时主链路、多 Agent 协作、平台化演进，建立完整的 Agent 工程判断框架
+description: "Claude Code 架构思维专栏：从 Agent 定义、运行时主链路、工具与上下文，到多 Agent 与平台化，建立完整工程判断框架。"
 contentType: theory
 series: claude-code
 contentId: claude-code-index

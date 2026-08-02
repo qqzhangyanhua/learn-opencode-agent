@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+
+# Internal / agent workflow pages are noindex in HTML; keep them out of naive crawls too.
+Disallow: /superpowers/
+Disallow: /claude-code/_archive/
+Disallow: /project-map
+Disallow: /dangerous-areas
+Disallow: /debugging
+Disallow: /testing
+Disallow: /agent-plan-template
+
+Sitemap: https://book.zyh.lol/sitemap.xml

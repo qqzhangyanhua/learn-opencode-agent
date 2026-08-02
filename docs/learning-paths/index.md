@@ -1,6 +1,6 @@
 ---
 title: 学习路径
-description: 把全站内容整理成三条可执行路线，分别面向先看源码、先做项目和先补工程判断的读者。
+description: "三条可执行学习路径：先看源码、先做项目、先补工程判断。按角色与时间预算选路线，避免在目录里迷路。"
 contentType: support
 series: support
 contentId: support-learning-paths

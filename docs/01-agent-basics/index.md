@@ -1,6 +1,6 @@
 ---
 title: 第2章：AI Agent 的核心组件
-description: 深入理解 LLM、Tools、Memory、Planning、Execution Loop 五个核心模块的工作原理与实现
+description: "AI Agent 五大核心组件：LLM、Tools、Memory、Planning、Execution Loop。用可运行结构理解 Agent 如何决策、调用工具并闭环。"
 contentType: theory
 series: book
 contentId: book-01-agent-basics

@@ -1,3 +1,8 @@
+---
+title: "附录 C｜测试一个 Agent Runtime：Hermes 为什么不是只靠 Demo 验证"
+description: "Hermes 为什么不是只靠 Demo 验证。基于 Hermes Agent 拆解专栏，源码拆解「测试一个 Agent Runtime」。"
+---
+
 # 附录 C｜测试一个 Agent Runtime：Hermes 为什么不是只靠 Demo 验证
 
 ## 先别把测试理解成补作业

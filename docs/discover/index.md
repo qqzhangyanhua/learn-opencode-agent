@@ -1,6 +1,6 @@
 ---
 title: 发现中心
-description: 按目标、起点和主题快速找到最适合你的阅读入口，先决定从哪里开始，再进入OpenCode 拆解、实践篇和中级专题。
+description: "发现中心：按学习目标、起点水平和主题标签筛选内容，快速找到 OpenCode 拆解、实践项目或中级专题的最佳入口。"
 contentType: support
 series: support
 contentId: support-discover-center

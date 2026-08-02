@@ -1,6 +1,6 @@
 ---
 title: 从零拆解 Hermes Agent
-description: 以 Hermes Agent 源码为案例，从 Agent 概念校准到运行时全链路拆解，建立 Agent Runtime 工程直觉
+description: "从零拆解 Hermes Agent：核心循环、工具系统、记忆会话、CLI/Gateway、Skills 与安全约束，建立 Agent Runtime 工程直觉。"
 contentType: theory
 series: hermes-agent
 contentId: hermes-agent-index

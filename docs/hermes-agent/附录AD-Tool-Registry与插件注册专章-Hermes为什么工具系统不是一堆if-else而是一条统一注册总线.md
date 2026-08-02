@@ -1,3 +1,8 @@
+---
+title: "附录 AD｜Tool Registry 与插件注册专章：Hermes 为什么工具系统不是一堆 if-else，而是一条统一注册总线"
+description: "Hermes 为什么工具系统不是一堆 if-else，而是一条统一注册总线。基于 Hermes Agent 拆解专栏，源码拆解「Tool Registry 与插件注册专章」。"
+---
+
 # 附录 AD｜Tool Registry 与插件注册专章：Hermes 为什么工具系统不是一堆 if-else，而是一条统一注册总线
 
 ## 先把注册总线看成基础设施

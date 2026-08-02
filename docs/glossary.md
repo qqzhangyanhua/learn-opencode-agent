@@ -1,6 +1,6 @@
 ---
 title: 术语表
-description: 本书高频概念的统一口径
+description: "AI Agent 术语表：统一 Agent、Tool、MCP、ReAct、Context、RAG 等本书高频概念口径，读源码与面试时可对照。"
 ---
 
 # 术语表

@@ -1,3 +1,8 @@
+---
+title: "附录 H｜Skills 运行时专章：Hermes 为什么不把技能直接塞进 system prompt"
+description: "Hermes 为什么不把技能直接塞进 system prompt。基于 Hermes Agent 拆解专栏，源码拆解「Skills 运行时专章」。"
+---
+
 # 附录 H｜Skills 运行时专章：Hermes 为什么不把技能直接塞进 system prompt
 
 ## 先问为什么技能不直接塞进 system prompt

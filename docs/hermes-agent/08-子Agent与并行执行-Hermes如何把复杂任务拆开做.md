@@ -1,3 +1,8 @@
+---
+title: "08｜子 Agent 与并行执行：Hermes 如何把复杂任务拆开做"
+description: "子 Agent 与并行执行：Hermes 如何把复杂任务拆开做。基于 Hermes Agent 拆解专栏，结合源码讲清设计动机与边界。"
+---
+
 # 08｜子 Agent 与并行执行：Hermes 如何把复杂任务拆开做
 
 ## 先看复杂任务怎么拆

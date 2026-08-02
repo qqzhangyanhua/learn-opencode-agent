@@ -1,6 +1,6 @@
 ---
-title: 阅读指南
-description: Claude Code 拆解的阅读方式与三条学习路线
+title: "Claude Code 架构思维阅读指南"
+description: "Claude Code 架构思维阅读指南：三条学习路线与章节用法，按目标选读定义、主链路或平台化，而不是线性硬啃。"
 contentType: support
 series: claude-code
 contentId: claude-code-reading-guide

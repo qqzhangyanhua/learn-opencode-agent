@@ -1,3 +1,8 @@
+---
+title: "05｜SessionDB 与会话系统：Hermes 如何拥有跨会话连续性"
+description: "SessionDB 与会话系统：Hermes 如何拥有跨会话连续性。基于 Hermes Agent 拆解专栏，结合源码讲清设计动机与边界。"
+---
+
 # 05｜SessionDB 与会话系统：Hermes 如何拥有跨会话连续性
 
 ## 先把连续性这件事说透

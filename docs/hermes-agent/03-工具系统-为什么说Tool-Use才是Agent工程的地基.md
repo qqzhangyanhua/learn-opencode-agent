@@ -1,3 +1,8 @@
+---
+title: "03｜工具系统才是 Agent 工程的地基：拆开 model_tools.py 看 Hermes 怎么把能力变成可控运行时"
+description: "工具系统才是 Agent 工程的地基：拆开 model_tools.py 看 Hermes 怎么把能力变成可控运行时。基于 Hermes Agent 拆解专栏，结合源码讲清设计动机与边界。"
+---
+
 # 03｜工具系统才是 Agent 工程的地基：拆开 model_tools.py 看 Hermes 怎么把能力变成可控运行时
 
 ## 先把地基看清楚

@@ -1,3 +1,8 @@
+---
+title: "01 CLI 启动与入口分流"
+description: "CLI 启动与入口分流。基于 Claude Code 源码业务流专栏，梳理关键设计决策、运行时边界与可复用工程判断。"
+---
+
 # 01 CLI 启动与入口分流
 
 本章是 Part 1「主业务流」的第一章：我们从真正的 CLI 入口 `restored-src/src/entrypoints/cli.tsx` 出发，回答一个很现实的问题：

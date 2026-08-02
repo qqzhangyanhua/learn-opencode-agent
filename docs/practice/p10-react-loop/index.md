@@ -1,6 +1,6 @@
 ---
 title: P10：ReAct Loop 实现
-description: 实现 Reason-Act 循环，让 Agent 在每次行动前显式输出推理过程，使思考链可见、可调试
+description: "实现 ReAct Loop：让 Agent 在行动前显式输出推理，把思考—行动—观察做成可见、可调试的执行循环。"
 contentType: practice
 series: practice
 contentId: practice-p10-react-loop

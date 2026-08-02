@@ -2,6 +2,7 @@
   "extends": "../tsconfig.json",
   "include": [
     "./config.mts",
+    "./seo.ts",
     "./vue-shim.d.ts",
     "./theme/**/*.ts",
     "./theme/**/*.vue"

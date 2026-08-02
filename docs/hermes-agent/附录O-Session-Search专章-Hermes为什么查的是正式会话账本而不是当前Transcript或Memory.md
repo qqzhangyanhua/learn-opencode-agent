@@ -1,3 +1,8 @@
+---
+title: "附录 O｜Session Search 专章：Hermes 为什么查的是正式会话账本，而不是当前 Transcript 或 Memory"
+description: "Hermes 为什么查的是正式会话账本，而不是当前 Transcript 或 Memory。基于 Hermes Agent 拆解专栏，源码拆解「Session Search 专章」。"
+---
+
 # 附录 O｜Session Search 专章：Hermes 为什么查的是正式会话账本，而不是当前 Transcript 或 Memory
 
 ## 先问为什么不能直接查 transcript

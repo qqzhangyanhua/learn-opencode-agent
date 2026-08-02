@@ -1,3 +1,8 @@
+---
+title: "02｜Hermes Agent 是怎么跑起来的：拆开 run_agent.py 看执行闭环"
+description: "Hermes Agent 是怎么跑起来的：拆开 run_agent.py 看执行闭环。基于 Hermes Agent 拆解专栏，结合源码讲清设计动机与边界。"
+---
+
 # 02｜Hermes Agent 是怎么跑起来的：拆开 run_agent.py 看执行闭环
 
 ## 先盯住真正的执行闭环

@@ -1,3 +1,8 @@
+---
+title: "07 MCP：如何把外部能力接进来"
+description: "如何把外部能力接进来。基于 Claude Code 源码业务流专栏，源码拆解「MCP」。"
+---
+
 # 07 MCP：如何把外部能力接进来
 
 当你第一次看到 Claude Code 支持 MCP（Model Context Protocol）时，很容易把它理解成一句话：

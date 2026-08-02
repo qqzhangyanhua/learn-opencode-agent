@@ -1,3 +1,8 @@
+---
+title: "12 Remote Session：会话接管与连接管理"
+description: "Remote Session：会话接管与连接管理。基于 Claude Code 源码业务流专栏，结合源码讲清设计动机与边界。"
+---
+
 # 12 Remote Session：会话接管与连接管理
 
 第 11 章讲的是：

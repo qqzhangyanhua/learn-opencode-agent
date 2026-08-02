@@ -1,3 +1,8 @@
+---
+title: "附录 I｜Tool 与 Toolset 和 Skill 的边界：Hermes 为什么要把能力拆成三层"
+description: "Hermes 为什么要把能力拆成三层。基于 Hermes Agent 拆解专栏，源码拆解「Tool 与 Toolset 和 Skill 的边界」。"
+---
+
 # 附录 I｜Tool 与 Toolset 和 Skill 的边界：Hermes 为什么要把能力拆成三层
 
 ## 先把三层能力边界切开

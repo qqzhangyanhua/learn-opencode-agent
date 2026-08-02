@@ -1,3 +1,8 @@
+---
+title: "附录 G｜Gateway 会话注入专章：Hermes 怎么把消息来源变成运行时上下文"
+description: "Gateway 会话注入专章：Hermes 怎么把消息来源变成运行时上下文。基于 Hermes Agent 拆解专栏，结合源码讲清设计动机与边界。"
+---
+
 # 附录 G｜Gateway 会话注入专章：Hermes 怎么把消息来源变成运行时上下文
 
 ## 先看消息来源怎么变成上下文

@@ -1,6 +1,6 @@
 ---
 title: 第4章：工具系统
-description: 深入 OpenCode 工具系统——Tool.define 抽象、注册表过滤、权限控制、输出截断，以及核心工具的实现细节
+description: "OpenCode 工具系统详解：Tool.define、注册表过滤、权限门控、输出截断，以及核心工具如何把模型意图变成可执行动作。"
 contentType: theory
 series: book
 contentId: book-03-tool-system

@@ -1,3 +1,8 @@
+---
+title: "07｜Skills：Hermes 最像会成长的 Agent 的地方"
+description: "Skills：Hermes 最像会成长的 Agent 的地方。基于 Hermes Agent 拆解专栏，结合源码讲清设计动机与边界。"
+---
+
 # 07｜Skills：Hermes 最像会成长的 Agent 的地方
 
 ## 先看 Skills 到底解决什么

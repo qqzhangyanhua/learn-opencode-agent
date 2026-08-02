@@ -1,3 +1,8 @@
+---
+title: "11｜如果你也想做一个自己的 Agent：应该先抄 Hermes 的哪几层"
+description: "如果你也想做一个自己的 Agent：应该先抄 Hermes 的哪几层。基于 Hermes Agent 拆解专栏，结合源码讲清设计动机与边界。"
+---
+
 # 11｜如果你也想做一个自己的 Agent：应该先抄 Hermes 的哪几层
 
 ## 先回答一个最现实的问题

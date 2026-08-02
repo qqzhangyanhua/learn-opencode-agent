@@ -1,6 +1,6 @@
 ---
 title: 第1章：什么是 AI Agent
-description: 从 LLM 到 Agent 的演进，理解 AI Agent 的本质与核心能力
+description: "什么是 AI Agent？从 LLM 到 Agent 的演进，厘清 Agent、Chatbot 与工作流的边界，建立工具调用与执行循环的最小定义。"
 contentType: theory
 series: book
 contentId: book-00-agent-intro

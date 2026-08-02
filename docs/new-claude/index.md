@@ -1,6 +1,6 @@
 ---
 title: Claude Code 源码业务流
-description: 以业务流程+源码映射+复刻抽象的方式，拆解 Claude Code 从入口到工具编排再到远程协同的闭环
+description: "Claude Code 源码业务流：按入口启动、query 主循环、工具编排、MCP/Skills、权限与远程协同，做业务流程到源码的映射。"
 ---
 
 # Claude Code 源码业务流电子书

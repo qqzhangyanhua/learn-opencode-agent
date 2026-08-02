@@ -1,3 +1,8 @@
+---
+title: "附录 B｜Prompt Builder 专章：系统提示词为什么在 Hermes 里是一条装配流水线"
+description: "系统提示词为什么在 Hermes 里是一条装配流水线。基于 Hermes Agent 拆解专栏，源码拆解「Prompt Builder 专章」。"
+---
+
 # 附录 B｜Prompt Builder 专章：系统提示词为什么在 Hermes 里是一条装配流水线
 
 ## 先问 Prompt 到底是不是一段字符串

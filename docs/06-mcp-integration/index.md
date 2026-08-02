@@ -1,6 +1,6 @@
 ---
 title: 第7章：MCP 协议集成
-description: 深入 MCP 客户端实现——local/remote 两种连接方式、工具发现与转换、OAuth 认证、资源与提示词管理
+description: "MCP 协议在 OpenCode 中的集成：local/remote 连接、工具发现与转换、OAuth、资源与提示词，把外部能力安全接进 Agent。"
 contentType: theory
 series: book
 contentId: book-06-mcp-integration
@@ -28,6 +28,7 @@ navigationLabel: MCP 协议集成
 entryMode: read-first
 roleDescription: 深入 MCP 协议集成机制，理解工具扩展的标准化方案。
 ---
+
 <ChapterLearningGuide />
 
 <script setup>

@@ -1,3 +1,8 @@
+---
+title: "09 Plugins / Hooks：如何做能力扩展"
+description: "如何做能力扩展。基于 Claude Code 源码业务流专栏，源码拆解「Plugins / Hooks」。"
+---
+
 # 09 Plugins / Hooks：如何做能力扩展
 
 前两章讲的是两种不同方向的扩展：

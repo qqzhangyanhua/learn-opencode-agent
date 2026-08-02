@@ -1,3 +1,8 @@
+---
+title: "附录 N｜会话持久化边界专章：Hermes 为什么 SessionDB、Gateway Transcript、ACP Session 和 API Responses Store 不是一回事"
+description: "Hermes 为什么 SessionDB、Gateway Transcript、ACP Session 和 API Responses Store 不是一回事。基于 Hermes Agent 拆解专栏，源码拆解「会话持久化边界专章」。"
+---
+
 # 附录 N｜会话持久化边界专章：Hermes 为什么 SessionDB、Gateway Transcript、ACP Session 和 API Responses Store 不是一回事
 
 ## 先把几个会话账本分开

@@ -1,6 +1,6 @@
 ---
 title: P1：最小 Agent — 工具调用核心机制
-description: 用 80 行 TypeScript 构建你的第一个可运行 Agent，理解工具调用的完整生命周期
+description: "用约 80 行 TypeScript 实现最小可运行 Agent，亲手走通工具定义、模型决策、调用与结果回填的完整生命周期。"
 contentType: practice
 series: practice
 contentId: practice-p01-minimal-agent

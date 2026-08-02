@@ -1,3 +1,8 @@
+---
+title: "08 Skills：如何把方法论接进主流程"
+description: "如何把方法论接进主流程。基于 Claude Code 源码业务流专栏，源码拆解「Skills」。"
+---
+
 # 08 Skills：如何把方法论接进主流程
 
 如果说 MCP 解决的是“把外部能力接进来”，那 Skills 解决的就是另一个问题：

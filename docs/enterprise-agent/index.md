@@ -1,6 +1,6 @@
 ---
 title: 从零设计企业 Agent
-description: 以 IMS AI Copilot 为主线，拆解企业 Agent 从需求识别到生产化落地的完整设计过程
+description: "从零设计企业 Agent：以真实 Copilot 为主线，覆盖意图分层、权限引用、人机确认、可观测性与从项目到平台的演进。"
 contentType: theory
 series: support
 contentId: enterprise-agent-index

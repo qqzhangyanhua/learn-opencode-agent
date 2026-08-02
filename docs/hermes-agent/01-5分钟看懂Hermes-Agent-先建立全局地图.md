@@ -1,3 +1,8 @@
+---
+title: "5 分钟看懂 Hermes Agent：先建立全局地图"
+description: "5 分钟建立 Hermes Agent 全局地图：看清入口、运行时分层与主干模块，再带着坐标系进入源码细节。"
+---
+
 # 01｜5 分钟看懂 Hermes Agent：先建立全局地图
 
 ## 先建立一张全局地图

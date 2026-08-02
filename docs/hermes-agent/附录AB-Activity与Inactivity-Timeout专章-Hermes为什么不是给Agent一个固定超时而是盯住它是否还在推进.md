@@ -1,3 +1,8 @@
+---
+title: "附录 AB｜Activity 与 Inactivity Timeout 专章：Hermes 为什么不是给 Agent 一个固定超时，而是盯住它是否还在推进"
+description: "Hermes 为什么不是给 Agent 一个固定超时，而是盯住它是否还在推进。基于 Hermes Agent 拆解专栏，源码拆解「Activity 与 Inactivity Timeout 专章」。"
+---
+
 # 附录 AB｜Activity 与 Inactivity Timeout 专章：Hermes 为什么不是给 Agent 一个固定超时，而是盯住它是否还在推进
 
 ## 先把 timeout 的判断标准看清

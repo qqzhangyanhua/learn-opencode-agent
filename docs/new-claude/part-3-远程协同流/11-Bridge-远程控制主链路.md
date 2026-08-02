@@ -1,3 +1,8 @@
+---
+title: "11 Bridge：远程控制主链路"
+description: "Bridge：远程控制主链路。基于 Claude Code 源码业务流专栏，结合源码讲清设计动机与边界。"
+---
+
 # 11 Bridge：远程控制主链路
 
 Part 1 讲清了“本地一次请求怎么跑完”，Part 2 讲清了“能力怎么扩进来”。

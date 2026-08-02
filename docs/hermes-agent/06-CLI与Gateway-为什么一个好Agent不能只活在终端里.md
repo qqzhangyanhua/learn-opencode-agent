@@ -1,3 +1,8 @@
+---
+title: "06｜CLI 与 Gateway：为什么一个好 Agent 不能只活在终端里"
+description: "为什么一个好 Agent 不能只活在终端里。基于 Hermes Agent 拆解专栏，源码拆解「CLI 与 Gateway」。"
+---
+
 # 06｜CLI 与 Gateway：为什么一个好 Agent 不能只活在终端里
 
 ## 先把入口和运行面分开

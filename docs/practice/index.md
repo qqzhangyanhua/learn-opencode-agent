@@ -1,7 +1,7 @@
 ---
 layout: home
 title: AI Agent 实战手册
-description: 23 个主线项目加 5 个补充实践，按章节拆解 TypeScript Agent 实现，从工具调用到生产部署全覆盖
+description: "AI Agent 实战手册：28 个 TypeScript 项目，从最小工具调用、ReAct、RAG、MCP 到多 Agent、安全与生产部署，边做边学。"
 pageClass: practice-page
 ---
 

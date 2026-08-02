@@ -1,3 +1,8 @@
+---
+title: "第 15 章：交互承载层不是界面皮肤，而是 Agent 的协作表面"
+description: "讲清 TUI、Web、Desktop 这些交互承载层在 Agent 系统里真正负责什么，以及为什么 Agent 界面的核心从来不只是组件排版，而是任务状态、流式反馈和 human-in-the-loop 的承载。Claude Code 架构思维专栏。"
+---
+
 # 第 15 章：交互承载层不是界面皮肤，而是 Agent 的协作表面
 
 > 本章目标：讲清 TUI、Web、Desktop 这些交互承载层在 Agent 系统里真正负责什么，以及为什么 Agent 界面的核心从来不只是组件排版，而是任务状态、流式反馈和 human-in-the-loop 的承载。  

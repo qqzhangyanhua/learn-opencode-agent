@@ -1,3 +1,8 @@
+---
+title: "附录 F｜Code Execution 与 Terminal 的边界：Hermes 为什么同时保留两套执行能力"
+description: "Hermes 为什么同时保留两套执行能力。基于 Hermes Agent 拆解专栏，源码拆解「Code Execution 与 Terminal 的边界」。"
+---
+
 # 附录 F｜Code Execution 与 Terminal 的边界：Hermes 为什么同时保留两套执行能力
 
 ## 先把两套执行能力区分开

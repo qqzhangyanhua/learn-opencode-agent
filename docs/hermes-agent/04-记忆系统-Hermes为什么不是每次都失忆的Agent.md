@@ -1,3 +1,8 @@
+---
+title: "04｜记忆系统：Hermes 为什么不是每次都失忆的 Agent"
+description: "Hermes 为什么不是每次都失忆的 Agent。基于 Hermes Agent 拆解专栏，源码拆解「记忆系统」。"
+---
+
 # 04｜记忆系统：Hermes 为什么不是每次都失忆的 Agent
 
 ## 先问记忆为什么必要

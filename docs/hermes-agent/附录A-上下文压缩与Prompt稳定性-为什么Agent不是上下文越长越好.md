@@ -1,3 +1,8 @@
+---
+title: "附录 A｜上下文压缩与 Prompt 稳定性：为什么 Agent 不是上下文越长越好"
+description: "为什么 Agent 不是上下文越长越好。基于 Hermes Agent 拆解专栏，源码拆解「上下文压缩与 Prompt 稳定性」。"
+---
+
 # 附录 A｜上下文压缩与 Prompt 稳定性：为什么 Agent 不是上下文越长越好
 
 ## 先打掉一个常见直觉
