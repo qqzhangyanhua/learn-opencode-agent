@@ -35,7 +35,7 @@ const bannerSupportLinks = [
   <a href="/practice/setup" class="btn-secondary">实践环境准备</a>
 </div>
 
-> 这里不是项目目录，而是整套 AI Agent 跟练课程的入口。第一次进入实践篇，推荐先在下面选一条路线；如果你还没准备好环境，再先看 [实践环境准备](/practice/setup)。
+> 这里不是项目目录，而是整套 AI Agent 跟练课程的入口。第一次进入实践篇，推荐先在下面选一条路线；如果你还没准备好环境，再先看 [实践环境准备](/practice/setup)。概念不清可先回 [什么是 AI Agent](/00-what-is-ai-agent/)；基础跑通后可去 [中级篇](/intermediate/) 补工程判断。
 
 </div>
 

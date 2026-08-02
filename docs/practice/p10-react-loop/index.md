@@ -17,10 +17,12 @@ prerequisites:
   - P4：错误处理
 recommendedNext:
   - /intermediate/27-planning-mechanism/
-  - /04-session-management/
+  - /practice/p11-planning/
+  - /03-tool-system/
 practiceLinks:
+  - /practice/p01-minimal-agent/
   - /intermediate/27-planning-mechanism/
-  - /04-session-management/
+  - /03-tool-system/
 searchTags:
   - ReAct
   - Reasoning
@@ -39,6 +41,13 @@ roleDescription: 把最小 Agent 升级成显式推理链，让你能看见每�
 P1 实现的最小 Agent 循环能用，但有一个调试噩梦：**你不知道模型为什么调用某个工具**。
 
 模型直接跳到 `tool_calls`，没有中间过程。出问题时只能盲猜：是 prompt 不清楚？工具选错了？参数理解有偏差？
+
+**本练习不覆盖**：完整 Planning 子系统、企业权限与生产观测。先把「思考—行动—观察」做可见；规划专题见 [Planning 机制](/intermediate/27-planning-mechanism/) 与 [P11](/practice/p11-planning/)。
+
+**跨线入口**：
+
+- 还没跑通工具调用：先做 [P1 最小 Agent](/practice/p01-minimal-agent/)
+- 想对照源码里的工具协议：[工具系统](/03-tool-system/)
 
 2022 年，Google 发表了 ReAct 论文（*ReAct: Synergizing Reasoning and Acting in Language Models*），提出了一个简洁的解法：**在每次行动前，强制模型先写出推理过程**。
 

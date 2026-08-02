@@ -5,6 +5,18 @@ description: "Claude Code 源码业务流：按入口启动、query 主循环、
 
 # Claude Code 源码业务流电子书
 
+## 适合谁 / 不适合谁
+
+- **适合**：要按「入口 → query 主循环 → 工具 → 扩展 → 远程」追 Claude Code 源码业务流，并映射到自己的复刻设计。
+- **不适合**：只要架构判断框架、不追文件——请读 [Claude Code 架构思维](/claude-code/)；只要可运行 TS 练习——请去 [实践篇](/practice/)。
+
+## 跨线入口
+
+- 主书概念：[什么是 AI Agent](/00-what-is-ai-agent/)
+- OpenCode MCP 主着陆：[MCP 协议集成](/06-mcp-integration/)
+- 动手：[P1](/practice/p01-minimal-agent/) · [P14 MCP](/practice/p14-mcp/)
+- 判断力并行：[Claude Code 架构思维](/claude-code/)
+
 ## 这套书解决什么问题
 
 - 以 `claude-code-sourcemap-main` 仓库中基于 `@anthropic-ai/claude-code` 2.1.88 还原出的 `restored-src/src` 源码为分析基点，厘清 Claude Code 一次请求的从入口到工具编排再到远程协同的闭环。

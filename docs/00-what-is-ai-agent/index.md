@@ -48,6 +48,16 @@ import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshot
 
 AI Agent 这个词被滥用了。这一章帮你建立一个清晰的定义：Agent = LLM + Tools + Memory + Planning + Execution Loop。有了这个定义，你才能带着问题去读后面的源码。
 
+### 这一章不解决什么
+
+不讲某个具体产品的安装配置，也不展开企业权限、RAG 排障或多 Agent 编排。那些分别在工具章、中级篇与专栏里。
+
+### 跨线入口
+
+- 想立刻动手：做 [P1 最小 Agent](/practice/p01-minimal-agent/)，把工具调用闭环跑通。
+- 想用案例校准概念：读 [Claude Code 第 1 章](/claude-code/chapter01)（概念边界）或 [Hermes 第 0 章](/hermes-agent/00-先别急着看代码-你到底在学什么是Agent)（学习目标校准）。
+- 组件怎么拆：下一章 [Agent 核心组件](/01-agent-basics/)。
+
 ### 必看入口
 
 processor.ts（执行循环实体）、agent.ts（Agent 启动逻辑）

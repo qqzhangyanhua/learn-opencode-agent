@@ -51,6 +51,10 @@ roleDescription: 想把 Agent 从 Demo 推到企业内部真实系统的开发�
 - 企业内部开发者：重点看 IMS 案例，直接对照自己的 HR、OA、知识库、流程系统复用。
 - 通用 AI 工程师：重点看架构设计，把企业 Agent 的约束、拆解方法和生产化经验迁移到其他行业场景。
 
+**不覆盖**：通用「什么是 Agent」入门定义（见 [什么是 AI Agent](/00-what-is-ai-agent/)），以及从零写最小工具调用 Demo（见 [P1](/practice/p01-minimal-agent/)）。本专栏默认你已有 Agent 基础，要解决的是企业约束下的设计与生产化。
+
+**跨线入口**：RAG 排障 [第25章](/intermediate/25-rag-failure-patterns/) · 安全练习 [P19](/practice/p19-security/) · 选型对照 [智能体选型](/agent-selection/)
+
 ## 快速入口
 
 - [阅读指南](/enterprise-agent/reading-guide)：按企业开发者、AI 工程师、架构负责人三类角色选择阅读路径。

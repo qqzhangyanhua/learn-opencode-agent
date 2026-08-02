@@ -16,10 +16,12 @@ prerequisites:
   - 第3章“OpenCode 项目介绍”
 recommendedNext:
   - /04-session-management/
+  - /practice/p01-minimal-agent/
   - /practice/p10-react-loop/
 practiceLinks:
-  - /04-session-management/
+  - /practice/p01-minimal-agent/
   - /practice/p10-react-loop/
+  - /hermes-agent/03-工具系统-为什么说Tool-Use才是Agent工程的地基
 searchTags:
   - Tool.define
   - registry
@@ -49,6 +51,16 @@ import SourceSnapshotCard from '../../.vitepress/theme/components/SourceSnapshot
 ### 这一章解决什么问题
 
 工具是 Agent 能力的全部。理解工具系统，就是理解 Agent 能做什么（工具定义）、被允许做什么（权限控制）、做完后结果怎么传回 LLM（输出截断）。
+
+### 这一章不解决什么
+
+不展开 MCP 标准接入（见 [MCP 协议集成](/06-mcp-integration/)），也不替代 Hermes 里另一套工具运行时拆解（可对照 [Hermes 工具系统](/hermes-agent/03-工具系统-为什么说Tool-Use才是Agent工程的地基)）。
+
+### 跨线入口
+
+- 最小闭环：[P1 最小 Agent](/practice/p01-minimal-agent/)
+- 可见推理链：[P10 ReAct Loop](/practice/p10-react-loop/)
+- 外部协议扩展：[MCP 协议集成](/06-mcp-integration/)
 
 ### 必看入口
 

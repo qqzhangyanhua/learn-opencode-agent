@@ -37,6 +37,18 @@ roleDescription: 想系统建立 Agent 工程判断力的开发者
 
 > 以 Claude Code 为案例，用 20 章把 Agent 系统从概念到平台化讲透，建立一套可复用的工程判断框架。
 
+## 适合谁 / 不适合谁
+
+- **适合**：想建立 Agent 工程判断力（定义、主链路、工具/上下文、多 Agent、平台化），而不只是跟一个安装教程。
+- **不适合**：只想抄一段可运行脚本——请先去 [实践篇](/practice/)；若要按业务流追 Claude Code 源码文件，请用 [源码业务流专栏](/new-claude/)。
+
+## 跨线入口
+
+- 概念主着陆：[什么是 AI Agent](/00-what-is-ai-agent/)
+- 动手闭环：[P1 最小 Agent](/practice/p01-minimal-agent/)
+- 业务流对照：[Claude Code 源码业务流](/new-claude/)
+- Runtime 对照：[Hermes Agent 拆解](/hermes-agent/)
+
 ## 本书特点
 
 **不堆术语，只建判断力**：每一章围绕一个核心问题展开，读完能带走明确的工程判断标准。

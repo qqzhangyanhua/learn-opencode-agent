@@ -36,6 +36,10 @@ roleDescription: 用一个最短可运行项目先把工具调用和 Agent 循�
 
 ## 背景与目标
 
+**本练习解决什么**：用最少代码跑通「声明工具 → 模型决策 → 执行 → 回填 → 最终回复」。
+
+**不覆盖**：ReAct 显式推理链、MCP 外部服务器、生产级权限与观测。需要可见推理链请做 [P10 ReAct](/practice/p10-react-loop/)；概念回看 [什么是 AI Agent](/00-what-is-ai-agent/)。
+
 大多数人第一次用 LLM API，都是这样写的：
 
 ```ts
