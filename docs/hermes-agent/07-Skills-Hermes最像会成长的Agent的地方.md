@@ -1,6 +1,6 @@
 ---
-title: "07｜Skills：Hermes 最像会成长的 Agent 的地方"
-description: "Skills：Hermes 最像会成长的 Agent 的地方。基于 Hermes Agent 拆解专栏，结合源码讲清设计动机与边界。"
+title: "Hermes Skills：可成长能力如何按需装进主流程"
+description: "Skills 不是塞进 system prompt 的长文：看索引、按需加载与信任边界，理解 Hermes 如何让方法论可复用且可治理。"
 ---
 
 # 07｜Skills：Hermes 最像会成长的 Agent 的地方

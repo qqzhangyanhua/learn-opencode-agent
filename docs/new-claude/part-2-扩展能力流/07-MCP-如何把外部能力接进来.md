@@ -1,6 +1,6 @@
 ---
-title: "07 MCP：如何把外部能力接进来"
-description: "如何把外部能力接进来。基于 Claude Code 源码业务流专栏，源码拆解「MCP」。"
+title: "Claude Code 中的 MCP：外部能力如何接入主流程"
+description: "从业务流视角看 MCP 如何把外部工具接进 Claude Code：发现、挂载与调用边界，区别于「只演示连上服务器」。"
 ---
 
 # 07 MCP：如何把外部能力接进来

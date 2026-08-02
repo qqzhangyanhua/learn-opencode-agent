@@ -1,6 +1,6 @@
 ---
-title: "01 CLI 启动与入口分流"
-description: "CLI 启动与入口分流。基于 Claude Code 源码业务流专栏，梳理关键设计决策、运行时边界与可复用工程判断。"
+title: "Claude Code CLI 启动：入口如何分流到主业务流"
+description: "从 CLI 入口看请求如何被分流：启动参数、模式选择与进入主链路前的分叉点，帮你建立读 Claude Code 源码的第一张地图。"
 ---
 
 # 01 CLI 启动与入口分流

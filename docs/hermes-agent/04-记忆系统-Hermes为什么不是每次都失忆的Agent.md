@@ -1,6 +1,6 @@
 ---
-title: "04｜记忆系统：Hermes 为什么不是每次都失忆的 Agent"
-description: "Hermes 为什么不是每次都失忆的 Agent。基于 Hermes Agent 拆解专栏，源码拆解「记忆系统」。"
+title: "Hermes 记忆系统：为什么跨回合还能记得关键事实"
+description: "从记忆写入、召回与边界讲清 Hermes 如何避免每轮失忆，以及记忆与 transcript、session 搜索各自管什么。"
 ---
 
 # 04｜记忆系统：Hermes 为什么不是每次都失忆的 Agent

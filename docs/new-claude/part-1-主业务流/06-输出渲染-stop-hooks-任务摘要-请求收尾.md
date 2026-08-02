@@ -1,6 +1,6 @@
 ---
-title: "06 输出渲染、Stop Hooks、任务摘要、请求收尾"
-description: "输出渲染、Stop Hooks、任务摘要、请求收尾。基于 Claude Code 源码业务流专栏，梳理关键设计决策、运行时边界与可复用工程判断。"
+title: "Claude Code 请求收尾：渲染、Stop Hooks 与任务摘要"
+description: "模型停下来之后系统还要做什么：输出渲染、stop hooks、任务摘要与收尾钩子如何决定一轮请求真正完整结束。"
 ---
 
 # 06 输出渲染、Stop Hooks、任务摘要、请求收尾

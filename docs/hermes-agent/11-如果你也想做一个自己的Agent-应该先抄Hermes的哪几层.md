@@ -1,6 +1,6 @@
 ---
-title: "11｜如果你也想做一个自己的 Agent：应该先抄 Hermes 的哪几层"
-description: "如果你也想做一个自己的 Agent：应该先抄 Hermes 的哪几层。基于 Hermes Agent 拆解专栏，结合源码讲清设计动机与边界。"
+title: "自研 Agent：应该先抄 Hermes 的哪几层"
+description: "收束全书：从循环、工具、记忆会话到多入口与 Skills，给出可抄的分层清单，避免一上来就堆插件和多 Agent。"
 ---
 
 # 11｜如果你也想做一个自己的 Agent：应该先抄 Hermes 的哪几层

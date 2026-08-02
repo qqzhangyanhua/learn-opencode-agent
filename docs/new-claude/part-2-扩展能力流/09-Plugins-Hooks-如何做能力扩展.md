@@ -1,6 +1,6 @@
 ---
-title: "09 Plugins / Hooks：如何做能力扩展"
-description: "如何做能力扩展。基于 Claude Code 源码业务流专栏，源码拆解「Plugins / Hooks」。"
+title: "Claude Code Plugins 与 Hooks：扩展点如何不变成鸡肋"
+description: "插件与 hooks 开放哪些切面、拦截哪些时刻：理解扩展如何真正进入主流程，而不是只挂一个永远用不上的钩子，这是读懂主链路的关键一环。"
 ---
 
 # 09 Plugins / Hooks：如何做能力扩展
