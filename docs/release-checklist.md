@@ -43,6 +43,19 @@ description: 当前电子书版本的发布前检查项、阻塞条件与验证�
 - [ ] 主题层动画与大 chunk 警告进入专项优化
 - [ ] 术语表与正文做一次全站口径回收
 - [ ] 增加自动化检查脚本，减少人工抽查负担
+- [ ] SEO P1 之后：用 Search Console 看「展示多、点击低」的页，继续改 title/description；债务白名单 `scripts/seo-copy-debt.txt` 继续消化
+
+## SEO / 发布后观测（P1 handoff）
+
+技术 SEO 与内容 CTR（Wave A–C）落地后，部署到 `https://book.zyh.lol/` 请确认：
+
+1. `/robots.txt`、`/sitemap.xml`、`/og-default.png` 可访问
+2. Google Search Console 验证域名并提交 `https://book.zyh.lol/sitemap.xml`
+3. 抽查 1–2 章：canonical、description、面包屑 JSON-LD / 可见面包屑
+4. **观测口径（2–4 周）**：
+   - 展示多、点击低 → 优先改该页 `title` / `description`
+   - 点击高、停留差 → 优先改首屏与跨线内链
+5. 本地/CI 发布门禁：`bun run check:seo-copy` 已纳入 `build:strict`
 
 ## 发布前验证流程
 

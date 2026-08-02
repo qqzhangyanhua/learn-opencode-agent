@@ -23,6 +23,9 @@ recommendedNext:
   - /agent-selection/16-retrieval-patterns
   - /agent-selection/17-reranker-models
   - /agent-selection/21-observability-trace-replay-eval
+practiceLinks:
+  - /agent-selection/
+  - /agent-selection/01-agent-frameworks
 searchTags:
   - 官方资源
   - LangChain
@@ -34,6 +37,9 @@ searchTags:
   - pgvector
   - Reranker
   - RAG 评估
+navigationLabel: 官方资源速查
+entryMode: bridge
+roleDescription: 在进入官网前按工程链路快速定位框架、RAG、向量库与评估工具的官方入口。
 ---
 
 这些链接只作为官方入口速查，不替代工程选型判断。先按问题类型阅读对应文章，再进入官网确认版本、价格、部署、API 细节和商业条款。
